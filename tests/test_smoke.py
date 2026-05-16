@@ -1821,3 +1821,175 @@ def test_run_pipeline_with_xg_raw(tmp_path):
     assert out.exists()
     assert (tmp_path / "xg_clean.csv").exists()
     assert (tmp_path / "history_with_xg.csv").exists()
+
+
+# ---------------------------------------------------------------------------
+# training / compare_models tests
+# ---------------------------------------------------------------------------
+
+def test_compare_models_creates_output_files(tmp_path):
+    from football_prediction_v19.training import compare_models
+    root = Path(__file__).resolve().parents[1]
+    out_dir = tmp_path / "cmp"
+    compare_models(
+        input_path=str(root / "data" / "sample_matches.csv"),
+        output_dir=str(out_dir),
+        test_season=2023,
+    )
+    assert (out_dir / "model_comparison.csv").exists()
+    assert (out_dir / "model_comparison_report.md").exists()
+    assert (out_dir / "best_model.joblib").exists()
+    assert (out_dir / "feature_columns.json").exists()
+    assert (out_dir / "best_model_metadata.json").exists()
+
+
+def test_compare_models_csv_has_required_columns(tmp_path):
+    from football_prediction_v19.training import compare_models
+    root = Path(__file__).resolve().parents[1]
+    out_dir = tmp_path / "cmp"
+    compare_models(
+        input_path=str(root / "data" / "sample_matches.csv"),
+        output_dir=str(out_dir),
+        test_season=2023,
+    )
+    df = pd.read_csv(out_dir / "model_comparison.csv")
+    required = [
+        "model_name", "calibrated", "accuracy", "balanced_accuracy",
+        "log_loss", "brier_score", "avg_confidence", "avg_correct_confidence",
+        "train_rows", "test_rows", "feature_count", "selected_as_best", "warnings",
+    ]
+    for col in required:
+        assert col in df.columns, f"Missing column: {col}"
+    # exactly one row should be selected as best
+    assert df["selected_as_best"].sum() == 1
+
+
+def test_compare_models_best_model_loadable(tmp_path):
+    from football_prediction_v19.training import compare_models
+    from football_prediction_v19.model import load_model
+    root = Path(__file__).resolve().parents[1]
+    out_dir = tmp_path / "cmp"
+    compare_models(
+        input_path=str(root / "data" / "sample_matches.csv"),
+        output_dir=str(out_dir),
+        test_season=2023,
+    )
+    bundle = load_model(out_dir / "best_model.joblib")
+    assert "model" in bundle
+    assert "feature_cols" in bundle
+    assert len(bundle["feature_cols"]) > 0
+
+
+def test_compare_models_metadata_has_expected_fields(tmp_path):
+    import json
+    from football_prediction_v19.training import compare_models
+    root = Path(__file__).resolve().parents[1]
+    out_dir = tmp_path / "cmp"
+    compare_models(
+        input_path=str(root / "data" / "sample_matches.csv"),
+        output_dir=str(out_dir),
+        test_season=2023,
+    )
+    meta = json.loads((out_dir / "best_model_metadata.json").read_text())
+    for field in ["model_name", "calibrated", "test_season", "selected_metric",
+                  "accuracy", "log_loss", "brier_score", "feature_columns",
+                  "training_rows", "test_rows", "created_at"]:
+        assert field in meta, f"Missing metadata field: {field}"
+    assert meta["test_season"] == 2023
+    assert meta["selected_metric"] == "log_loss"
+
+
+def test_compare_models_missing_test_season_raises(tmp_path):
+    from football_prediction_v19.training import compare_models
+    root = Path(__file__).resolve().parents[1]
+    with pytest.raises(ValueError, match="not found in the data"):
+        compare_models(
+            input_path=str(root / "data" / "sample_matches.csv"),
+            output_dir=str(tmp_path / "cmp"),
+            test_season=1900,
+        )
+
+
+def test_compare_models_missing_file_raises(tmp_path):
+    from football_prediction_v19.training import compare_models
+    with pytest.raises(ValueError, match="not found"):
+        compare_models(
+            input_path=str(tmp_path / "nonexistent.csv"),
+            output_dir=str(tmp_path / "cmp"),
+            test_season=2023,
+        )
+
+
+def test_compare_models_small_data_calibration_does_not_crash(tmp_path):
+    """Calibration should gracefully skip on tiny datasets."""
+    from football_prediction_v19.training import compare_models
+    root = Path(__file__).resolve().parents[1]
+    # Use the real sample_matches.csv — calibration may warn but must not crash
+    out_dir = tmp_path / "cmp_small"
+    # This must complete without exception
+    compare_models(
+        input_path=str(root / "data" / "sample_matches.csv"),
+        output_dir=str(out_dir),
+        test_season=2023,
+    )
+    assert (out_dir / "best_model.joblib").exists()
+
+
+def test_cli_compare_models_command(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    out_dir = tmp_path / "cmp"
+    main([
+        "compare-models",
+        "--input", str(root / "data" / "sample_matches.csv"),
+        "--output-dir", str(out_dir),
+        "--test-season", "2023",
+    ])
+    assert (out_dir / "model_comparison.csv").exists()
+    assert (out_dir / "best_model.joblib").exists()
+
+
+def test_existing_train_command_still_works(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    main([
+        "train",
+        "--input", str(root / "data" / "sample_matches.csv"),
+        "--model", str(tmp_path / "model.joblib"),
+        "--test-season", "2023",
+    ])
+    assert (tmp_path / "model.joblib").exists()
+
+
+def test_run_pipeline_with_compare_models(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    out = tmp_path / "predictions.csv"
+    main([
+        "run-pipeline",
+        "--skip-download",
+        "--combine-output", str(root / "data" / "sample_matches.csv"),
+        "--fixtures-raw", str(root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"),
+        "--fixtures-output", str(tmp_path / "fx.csv"),
+        "--model", str(tmp_path / "model.joblib"),
+        "--predictions", str(out),
+        "--excel", str(tmp_path / "report.xlsx"),
+        "--compare-models",
+        "--compare-models-dir", str(tmp_path / "cmp"),
+        "--test-season", "2023",
+    ])
+    assert out.exists()
+    assert (tmp_path / "cmp" / "best_model.joblib").exists()
+
+
+def test_run_pipeline_without_compare_models_unchanged(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    out = tmp_path / "predictions.csv"
+    main([
+        "run-pipeline",
+        "--skip-download",
+        "--combine-output", str(root / "data" / "sample_matches.csv"),
+        "--fixtures-raw", str(root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"),
+        "--fixtures-output", str(tmp_path / "fx.csv"),
+        "--model", str(tmp_path / "model.joblib"),
+        "--predictions", str(out),
+        "--excel", str(tmp_path / "report.xlsx"),
+    ])
+    assert out.exists()

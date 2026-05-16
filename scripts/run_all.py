@@ -126,8 +126,19 @@ def run_xg_smoke() -> None:
     ])
 
 
+def run_compare_models_smoke() -> None:
+    """Model comparison smoke test using local sample data — no internet required."""
+    main([
+        "compare-models",
+        "--input", "data/sample_matches.csv",
+        "--output-dir", "outputs/model_comparison",
+        "--test-season", "2023",
+    ])
+
+
 if __name__ == "__main__":
     run_all()
     run_pipeline_smoke()
     run_odds_smoke()
     run_xg_smoke()
+    run_compare_models_smoke()

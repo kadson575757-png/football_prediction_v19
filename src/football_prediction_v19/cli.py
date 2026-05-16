@@ -14,6 +14,7 @@ from .features import build_fixture_features
 from .fixtures import prepare_fixtures_file
 from .odds_import import merge_odds_file, prepare_odds_file
 from .xg_import import merge_xg_file, prepare_xg_file
+from .training import compare_models
 from .importers.fbref import normalize_fbref_csv
 from .importers.football_data import (
     LEAGUE_CODES,
@@ -440,6 +441,25 @@ def cmd_merge_xg_history(args) -> None:
     print(f"Still missing xG  : {summary['still_missing_xg']}")
 
 
+def cmd_compare_models(args) -> None:
+    try:
+        summary = compare_models(
+            input_path=args.input,
+            output_dir=args.output_dir,
+            test_season=args.test_season,
+            target=args.target,
+            random_state=args.random_state,
+        )
+    except ValueError as exc:
+        raise SystemExit(f"Error: {exc}") from exc
+    print("\nModel comparison complete")
+    print(f"Output dir      : {summary['output_dir']}")
+    print(f"Best model      : {summary['best_model']} (calibrated={summary['best_calibrated']})")
+    print(f"Models evaluated: {summary['models_evaluated']}")
+    print(f"Comparison CSV  : {summary['comparison_csv']}")
+    print(f"Best model file : {summary['best_model_path']}")
+
+
 def _pipeline_step(label: str) -> None:
     print(f"\n{'='*60}")
     print(f"  {label}")
@@ -586,15 +606,37 @@ def cmd_run_pipeline(args) -> None:
         training_history_path = hist_with_xg
 
     # ---- Step D: Train model -----------------------------------------------
-    _pipeline_step("Step D: Training the model")
-    train_args = [
-        "train",
-        "--input", str(training_history_path),
-        "--model", model_path,
-    ]
-    if args.test_season:
-        train_args += ["--test-season", str(args.test_season)]
-    main(train_args)
+    if getattr(args, "compare_models_flag", False):
+        _pipeline_step("Step D: Comparing models and selecting best (--compare-models)")
+        if not args.test_season:
+            raise SystemExit(
+                "Error: --test-season is required when using --compare-models.\n"
+                "Provide a season year to use as the held-out test set."
+            )
+        cmp_dir = Path(getattr(args, "compare_models_dir", "outputs/model_comparison"))
+        cmp_dir.mkdir(parents=True, exist_ok=True)
+        try:
+            cmp_summary = compare_models(
+                input_path=str(training_history_path),
+                output_dir=str(cmp_dir),
+                test_season=args.test_season,
+            )
+        except ValueError as exc:
+            raise SystemExit(f"Error during model comparison: {exc}") from exc
+        # Copy best model to the requested model path
+        import shutil
+        shutil.copy2(cmp_summary["best_model_path"], model_path)
+        print(f"  Best model saved to: {model_path}")
+    else:
+        _pipeline_step("Step D: Training the model")
+        train_args = [
+            "train",
+            "--input", str(training_history_path),
+            "--model", model_path,
+        ]
+        if args.test_season:
+            train_args += ["--test-season", str(args.test_season)]
+        main(train_args)
 
     # ---- Step E: Predict upcoming fixtures ----------------------------------
     _pipeline_step("Step E: Predicting upcoming fixtures")
@@ -821,6 +863,22 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Prefer xG rows where source equals this value.")
     p.set_defaults(func=cmd_merge_xg_history)
 
+    p = sub.add_parser(
+        "compare-models",
+        help="Train and compare multiple model types; save the best model automatically",
+    )
+    p.add_argument("--input", required=True, metavar="FILE",
+                   help="Path to the processed historical matches CSV.")
+    p.add_argument("--output-dir", required=True, metavar="DIR",
+                   help="Directory where comparison results and best model are saved.")
+    p.add_argument("--test-season", required=True, type=int, metavar="YEAR",
+                   help="Season year to hold out for evaluation (e.g. 2023).")
+    p.add_argument("--target", default="result", metavar="COLUMN",
+                   help="Target column name (default: result).")
+    p.add_argument("--random-state", type=int, default=42, metavar="N",
+                   help="Random seed for reproducibility (default: 42).")
+    p.set_defaults(func=cmd_compare_models)
+
     p = sub.add_parser("export-excel", help="Create an Excel report from prediction CSV output")
     p.add_argument("--predictions", required=True)
     p.add_argument("--output", required=True)
@@ -959,6 +1017,11 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Path where the cleaned xG CSV is saved (default: data/processed/xg_clean.csv).")
     p.add_argument("--history-with-xg", default="data/processed/combined_football_data_with_xg.csv", metavar="FILE",
                    help="Path where history enriched with xG is saved.")
+    p.add_argument("--compare-models", dest="compare_models_flag", action="store_true",
+                   help="Run model comparison instead of single-model training. Requires --test-season.")
+    p.add_argument("--compare-models-dir", dest="compare_models_dir",
+                   default="outputs/model_comparison", metavar="DIR",
+                   help="Directory where model comparison outputs are saved (default: outputs/model_comparison).")
     p.set_defaults(func=cmd_run_pipeline)
 
     p = sub.add_parser("gather-fbref", help="Fetch FBref schedules with pandas.read_html")

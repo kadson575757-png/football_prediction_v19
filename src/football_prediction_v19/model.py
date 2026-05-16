@@ -45,7 +45,10 @@ def build_pipeline(model_name: str = "random_forest", random_state: int = 42) ->
     ], remainder="drop")
 
     if model_name == "logistic_regression":
-        clf = LogisticRegression(max_iter=2000, multi_class="auto", random_state=random_state)
+        try:
+            clf = LogisticRegression(max_iter=2000, multi_class="auto", random_state=random_state)
+        except TypeError:
+            clf = LogisticRegression(max_iter=2000, random_state=random_state)
     elif model_name == "gradient_boosting":
         clf = GradientBoostingClassifier(random_state=random_state)
     else:
@@ -80,8 +83,12 @@ def _log_loss_multiclass(y_true: pd.Series, proba: np.ndarray, classes: list[str
     return float(np.mean(losses)) if losses else float("nan")
 
 
-def _align_proba(model: Pipeline, proba: np.ndarray) -> pd.DataFrame:
-    classes = list(model.named_steps["classifier"].classes_)
+def _align_proba(model: Any, proba: np.ndarray) -> pd.DataFrame:
+    try:
+        classes = list(model.named_steps["classifier"].classes_)
+    except (AttributeError, KeyError):
+        # CalibratedClassifierCV or other wrapper exposes classes_ directly
+        classes = list(model.classes_)
     out = pd.DataFrame(proba, columns=classes)
     for c in CLASS_ORDER:
         if c not in out.columns:
