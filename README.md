@@ -493,7 +493,47 @@ ROI und Yield werden hier als Profit geteilt durch eingesetzte Units gelesen. Be
 
 Ein profitabler Backtest garantiert keinen zukuenftigen Profit. Er zeigt nur, wie diese Modellversion mit diesen Daten und diesen Regeln historisch abgeschnitten haette.
 
-## 14. Alles in Einem Schritt
+## 14. Quoten Importieren Und Zusammenfuehren
+
+Quoten aus externen CSV-Dateien koennen vorbereitet und mit Fixture-Daten zusammengefuehrt werden.
+
+**Quoten vorbereiten** (native Format oder football-data.co.uk Spalten wie B365H/PSH/MaxH):
+
+```bash
+football-prediction-v19 prepare-odds \
+  --input data/raw/odds_raw_template.csv \
+  --output data/processed/odds_clean.csv
+```
+
+**Quoten mit Fixtures zusammenfuehren** (Matching nach Team-Namen und Datum):
+
+```bash
+football-prediction-v19 merge-odds-fixtures \
+  --fixtures data/upcoming_fixtures.csv \
+  --odds data/processed/odds_clean.csv \
+  --output data/upcoming_fixtures_with_odds.csv \
+  --date-window 1
+```
+
+`--date-window N` erlaubt eine Toleranz von ±N Tagen beim Datum-Abgleich. Mit `--bookmaker Bet365` wird der angegebene Buchmacher bevorzugt, wenn mehrere Quoten fuer dasselbe Spiel vorhanden sind.
+
+**Pipeline mit Quoten in einem Schritt** (Quoten werden nach der Fixtures-Vorbereitung automatisch eingebunden):
+
+```bash
+football-prediction-v19 run-pipeline \
+  --skip-download \
+  --combine-output data/sample_matches.csv \
+  --fixtures-raw data/raw/upcoming_fixtures_raw_template.csv \
+  --fixtures-output data/upcoming_fixtures.csv \
+  --model models/model.joblib \
+  --predictions outputs/predictions.csv \
+  --excel outputs/report.xlsx \
+  --odds-raw data/raw/odds_raw_template.csv \
+  --odds-clean data/processed/odds_clean.csv \
+  --fixtures-with-odds data/upcoming_fixtures_with_odds.csv
+```
+
+## 14b. Alles in Einem Schritt
 
 Das Projekt enthaelt auch ein Hilfsskript:
 
@@ -503,7 +543,7 @@ python scripts/run_all.py
 
 Dieses Skript trainiert das Beispielmodell, fuehrt eine Einzel-Prediction aus, schreibt eine Fixture-List-Prediction nach `outputs/predictions.csv` und exportiert `outputs/predictions_report.xlsx`.
 
-## 15. Projektstruktur
+## 16. Projektstruktur
 
 ```text
 football_prediction_v19/
@@ -527,7 +567,7 @@ Wichtige Module, die bewusst erhalten bleiben:
 - `backtest.py`
 - `cli.py`
 
-## 16. Wie Das Modell Arbeitet
+## 17. Wie Das Modell Arbeitet
 
 1. Historische Spiele werden bereinigt.
 2. Pro Match werden nur vorherige Spiele genutzt, damit kein Data Leakage entsteht.

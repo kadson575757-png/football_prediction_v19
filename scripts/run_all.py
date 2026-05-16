@@ -102,6 +102,19 @@ def run_pipeline_smoke() -> None:
     ])
 
 
+def run_odds_smoke() -> None:
+    """Odds import smoke test using local template data — no internet required."""
+    main(["prepare-odds", "--input", "data/raw/odds_raw_template.csv",
+          "--output", "data/processed/odds_clean.csv"])
+    main([
+        "merge-odds-fixtures",
+        "--fixtures", "data/upcoming_fixtures.csv",
+        "--odds", "data/processed/odds_clean.csv",
+        "--output", "data/upcoming_fixtures_with_odds.csv",
+    ])
+
+
 if __name__ == "__main__":
     run_all()
     run_pipeline_smoke()
+    run_odds_smoke()
