@@ -2247,6 +2247,140 @@ def test_data_requirements_mentions_key_sections():
         assert section in doc, f"DATA_REQUIREMENTS.md missing: {section}"
 
 
+def test_football_data_import_preserves_league():
+    """football-data.co.uk import must map Div codes to human-readable league names."""
+    import io
+    from football_prediction_v19.data import prepare_real_matches
+
+    csv = (
+        "Div,Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,B365H,B365D,B365A\n"
+        "D1,01/08/2023,Bayern Munich,Dortmund,2,1,H,1.50,4.00,6.00\n"
+        "E0,12/08/2023,Arsenal,Chelsea,1,1,D,2.50,3.30,2.80\n"
+        "SP1,18/08/2023,Barcelona,Real Madrid,3,2,H,2.10,3.40,3.20\n"
+    )
+    df = pd.read_csv(io.StringIO(csv))
+    clean = prepare_real_matches(df, input_format="football-data")
+
+    assert "league" in clean.columns, "league column missing after football-data import"
+    leagues = clean["league"].unique().tolist()
+    assert "Bundesliga" in leagues, f"Expected 'Bundesliga' from D1, got: {leagues}"
+    assert "Premier League" in leagues, f"Expected 'Premier League' from E0, got: {leagues}"
+    assert "La Liga" in leagues, f"Expected 'La Liga' from SP1, got: {leagues}"
+    assert "Unknown" not in leagues, f"Some leagues were not mapped: {leagues}"
+
+
+def test_football_data_import_preserves_odds():
+    """football-data.co.uk import must map B365H/D/A to odds_home/draw/away."""
+    import io
+    from football_prediction_v19.data import prepare_real_matches
+
+    csv = (
+        "Div,Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,B365H,B365D,B365A\n"
+        "D1,01/08/2023,Bayern Munich,Dortmund,2,1,H,1.50,4.00,6.00\n"
+    )
+    df = pd.read_csv(io.StringIO(csv))
+    clean = prepare_real_matches(df, input_format="football-data")
+
+    assert clean["odds_home"].notna().all(), "odds_home is NaN after football-data import"
+    assert clean["odds_draw"].notna().all(), "odds_draw is NaN after football-data import"
+    assert clean["odds_away"].notna().all(), "odds_away is NaN after football-data import"
+    assert float(clean["odds_home"].iloc[0]) == pytest.approx(1.50)
+    assert float(clean["odds_draw"].iloc[0]) == pytest.approx(4.00)
+    assert float(clean["odds_away"].iloc[0]) == pytest.approx(6.00)
+
+
+def test_combined_output_preserves_league_and_odds(tmp_path):
+    """Combined processed CSV must carry league names and odds through prepare + concat."""
+    import io
+    from football_prediction_v19.data import prepare_real_matches
+
+    csv = (
+        "Div,Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,B365H,B365D,B365A\n"
+        "I1,15/08/2023,Juventus,AC Milan,1,0,H,2.20,3.10,3.50\n"
+        "F1,20/08/2023,PSG,Lyon,2,0,H,1.30,5.00,8.00\n"
+    )
+    df = pd.read_csv(io.StringIO(csv))
+    clean = prepare_real_matches(df, input_format="football-data")
+    out_path = tmp_path / "combined.csv"
+    clean.to_csv(out_path, index=False)
+
+    reloaded = pd.read_csv(out_path)
+    assert "Serie A" in reloaded["league"].values, "Serie A not preserved through save/load cycle"
+    assert "Ligue 1" in reloaded["league"].values, "Ligue 1 not preserved through save/load cycle"
+    assert reloaded["odds_home"].notna().all(), "odds_home lost through save/load cycle"
+
+
+def test_backtest_output_includes_league(tmp_path):
+    """Backtest rows must carry league from historical data, not default to Unknown."""
+    import io
+    from football_prediction_v19.data import prepare_real_matches
+    from football_prediction_v19.features import build_features
+    from football_prediction_v19.model import train_from_matches
+
+    csv_rows = ["Div,Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,B365H,B365D,B365A"]
+    # 2022 season — training data
+    for i in range(20):
+        csv_rows.append(f"D1,{15 + i:02d}/08/2022,TeamA,TeamB,1,0,H,2.0,3.5,4.0")
+        csv_rows.append(f"D1,{15 + i:02d}/08/2022,TeamC,TeamD,0,1,A,3.0,3.5,2.2")
+    # 2023 season — test data
+    for i in range(10):
+        csv_rows.append(f"D1,{15 + i:02d}/08/2023,TeamA,TeamB,2,1,H,1.8,3.5,4.5")
+        csv_rows.append(f"D1,{15 + i:02d}/08/2023,TeamC,TeamD,0,0,D,2.5,3.2,3.0")
+
+    df = pd.read_csv(io.StringIO("\n".join(csv_rows)))
+    clean = prepare_real_matches(df, input_format="football-data")
+    model, _, metrics, cols = train_from_matches(clean, test_season=2023)
+    bundle = {"model": model, "feature_cols": cols, "metrics": metrics}
+    results = run_bet_backtest(clean, bundle, test_season=2023)
+
+    assert "league" in results.columns, "backtest output missing league column"
+    assert (results["league"] == "Bundesliga").all(), (
+        f"Expected all rows to be 'Bundesliga', got: {results['league'].unique()}"
+    )
+
+
+def test_xg_gates_skipped_when_xg_unavailable():
+    """DNB gate 'xg_edge_positive' must not appear as a lock reason when xG data is absent."""
+    from football_prediction_v19.rules_v19 import assess_prediction
+
+    row_no_xg = pd.Series({
+        "home_team": "TeamA", "away_team": "TeamB",
+        "odds_home": 2.0, "odds_draw": 3.5, "odds_away": 3.5,
+        "home_w5_ppg": 1.8, "away_w5_ppg": 1.2,
+        # edge_w5_xgdiff intentionally absent (NaN)
+    })
+    probs = {"H": 0.50, "D": 0.28, "A": 0.22}
+    result = assess_prediction(row_no_xg, probs)
+
+    no_bet_text = " ".join(result["no_bets"])
+    assert "xg_edge_positive" not in no_bet_text, (
+        f"xg_edge_positive appeared as a lock reason despite xG being unavailable: {result['no_bets']}"
+    )
+    assert "xG unavailable" in no_bet_text, (
+        f"Expected 'xG unavailable' notice in no_bets: {result['no_bets']}"
+    )
+
+
+def test_xg_gates_fire_when_xg_present():
+    """DNB gate 'xg_edge_positive' must still apply when xG data IS available."""
+    from football_prediction_v19.rules_v19 import assess_prediction
+
+    row_with_xg = pd.Series({
+        "home_team": "TeamA", "away_team": "TeamB",
+        "odds_home": 2.0, "odds_draw": 3.5, "odds_away": 3.5,
+        "home_w5_ppg": 1.8, "away_w5_ppg": 1.2,
+        "edge_w5_xgdiff": -0.05,  # negative — xg_edge_positive should be False
+        "edge_w5_ppg": 0.6,
+    })
+    probs = {"H": 0.50, "D": 0.28, "A": 0.22}
+    result = assess_prediction(row_with_xg, probs)
+
+    no_bet_text = " ".join(result["no_bets"])
+    assert "xG unavailable" not in no_bet_text, (
+        f"'xG unavailable' appeared despite xG being present: {result['no_bets']}"
+    )
+
+
 def test_backtest_test_season_excludes_training_rows():
     """Backtest with test_season must not evaluate on training-season rows (leakage guard)."""
     path = Path(__file__).resolve().parents[1] / "data" / "sample_matches.csv"

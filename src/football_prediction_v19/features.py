@@ -215,6 +215,7 @@ def build_features(df: pd.DataFrame, windows: Iterable[int] = WINDOWS, min_histo
     for _, row in matches.iterrows():
         feats = _feature_row(row, histories, windows)
         feats["date"] = row["date"]
+        feats["league"] = row.get("league", "Unknown")
         feats["score"] = row["score"]
         feats["home_goals"] = row["home_goals"]
         feats["away_goals"] = row["away_goals"]
