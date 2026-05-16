@@ -365,6 +365,22 @@ la-liga, segunda-division, ligue-1, ligue-2, eredivisie,
 pro-league, primeira-liga, super-lig, super-league-greece
 ```
 
+### MLS
+
+MLS is supported as a first-class league. Because football-data.co.uk does not carry MLS data,
+the `download-prepare-football-data` command cannot download MLS automatically.
+Provide historical MLS data manually and use:
+
+```bash
+fpv19 prepare-data \
+  --input data/raw/mls_matches.csv \
+  --output data/processed/mls_matches_clean.csv \
+  --format native
+```
+
+Use the template at `data/raw/mls_matches_template.csv` as a column reference.
+See `docs/DATA_REQUIREMENTS.md` for the full MLS validation workflow.
+
 ## 8. Modell Trainieren
 
 Mit Sample-Daten:

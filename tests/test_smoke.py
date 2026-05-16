@@ -2404,3 +2404,119 @@ def test_backtest_test_season_excludes_training_rows():
     assert set(bt_seasons.unique()).issubset(set(oos_seasons)), (
         "Backtest contains rows from before test_season — training data leaked into evaluation"
     )
+
+
+# ---------------------------------------------------------------------------
+# MLS tests
+# ---------------------------------------------------------------------------
+
+def _make_mls_sample() -> pd.DataFrame:
+    """Build a minimal in-memory MLS dataset (30 rows, two seasons)."""
+    import random
+    random.seed(42)
+    rows = []
+    teams = [
+        ("LA Galaxy", "Inter Miami"),
+        ("Seattle Sounders", "Portland Timbers"),
+        ("Atlanta United", "Orlando City"),
+        ("New York City FC", "New York Red Bulls"),
+        ("Sporting Kansas City", "Columbus Crew"),
+    ]
+    for season in [2023, 2024]:
+        for home, away in teams:
+            for _ in range(3):
+                hg = random.randint(0, 3)
+                ag = random.randint(0, 3)
+                rows.append({
+                    "date": f"{season}-05-{random.randint(1, 28):02d}",
+                    "season": str(season),
+                    "league": "MLS",
+                    "home_team": home,
+                    "away_team": away,
+                    "score": f"{hg}-{ag}",
+                    "home_xg": round(random.uniform(0.5, 2.5), 2),
+                    "away_xg": round(random.uniform(0.5, 2.5), 2),
+                    "odds_home": round(random.uniform(1.5, 4.0), 2),
+                    "odds_draw": round(random.uniform(2.8, 4.5), 2),
+                    "odds_away": round(random.uniform(1.5, 4.0), 2),
+                    "venue": "Example Stadium",
+                    "referee": "",
+                })
+    return pd.DataFrame(rows)
+
+
+def test_mls_templates_exist():
+    root = Path(__file__).resolve().parents[1]
+    assert (root / "data" / "raw" / "mls_matches_template.csv").exists()
+    assert (root / "data" / "raw" / "mls_upcoming_fixtures_template.csv").exists()
+    assert (root / "data" / "raw" / "mls_odds_template.csv").exists()
+
+
+def test_mls_team_aliases_present():
+    import json
+    root = Path(__file__).resolve().parents[1]
+    aliases = json.loads((root / "config" / "team_aliases.json").read_text(encoding="utf-8"))
+    assert "Inter Miami" in aliases
+    assert "LA Galaxy" in aliases
+    assert "Seattle Sounders" in aliases
+
+
+def test_mls_team_alias_normalization():
+    assert normalize_team_name("LAFC") == "Los Angeles FC"
+    assert normalize_team_name("Sporting KC") == "Sporting Kansas City"
+    assert normalize_team_name("NY Red Bulls") == "New York Red Bulls"
+
+
+def test_mls_fixture_features():
+    df = _make_mls_sample()
+    fix = build_fixture_features(
+        history_df=df,
+        home_team="LA Galaxy",
+        away_team="Inter Miami",
+        match_date="2025-01-15",
+        venue="Dignity Health Sports Park",
+    )
+    assert isinstance(fix, pd.DataFrame)
+    assert len(fix) == 1
+
+
+def test_mls_excel_export_preserves_league(tmp_path):
+    df = _make_mls_sample()
+    features = build_features(df)
+    if "league" not in features.columns:
+        features["league"] = "MLS"
+    out = tmp_path / "mls_features.xlsx"
+    features.to_excel(out, index=False)
+    wb = load_workbook(out)
+    ws = wb.active
+    headers = [cell.value for cell in ws[1]]
+    league_col = headers.index("league") + 1
+    leagues = {ws.cell(row=r, column=league_col).value for r in range(2, ws.max_row + 1)}
+    assert "MLS" in leagues
+
+
+def test_mls_smoke_script_exists():
+    root = Path(__file__).resolve().parents[1]
+    assert (root / "scripts" / "run_mls_smoke.py").exists()
+
+
+def test_mls_strategy_sweep_no_backtest_file(tmp_path):
+    import subprocess
+    root = Path(__file__).resolve().parents[1]
+    script = root / "scripts" / "run_mls_strategy_sweep.py"
+    result = subprocess.run(
+        ["python", str(script)],
+        capture_output=True,
+        text=True,
+        cwd=str(tmp_path),
+    )
+    assert result.returncode == 0
+    assert "No MLS backtest file" in result.stdout
+
+
+def test_mls_build_features():
+    df = _make_mls_sample()
+    features = build_features(df)
+    assert len(features) > 0
+    if "league" in features.columns:
+        assert (features["league"] == "MLS").all()
