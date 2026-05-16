@@ -83,6 +83,7 @@ FBREF_RENAMES = {
 
 FOOTBALL_DATA_RENAMES = {
     "Date": "date",
+    "Div": "league",
     "HomeTeam": "home_team",
     "AwayTeam": "away_team",
     "FTHG": "home_goals",
@@ -91,6 +92,27 @@ FOOTBALL_DATA_RENAMES = {
     "B365H": "odds_home",
     "B365D": "odds_draw",
     "B365A": "odds_away",
+}
+
+_DIV_TO_LEAGUE: dict[str, str] = {
+    "E0": "Premier League",
+    "E1": "Championship",
+    "E2": "League One",
+    "E3": "League Two",
+    "D1": "Bundesliga",
+    "D2": "Bundesliga 2",
+    "SP1": "La Liga",
+    "SP2": "Segunda Division",
+    "I1": "Serie A",
+    "I2": "Serie B",
+    "F1": "Ligue 1",
+    "F2": "Ligue 2",
+    "N1": "Eredivisie",
+    "B1": "Pro League",
+    "P1": "Primeira Liga",
+    "T1": "Super Lig",
+    "G1": "Super League Greece",
+    "SC0": "Scottish Premiership",
 }
 
 
@@ -178,7 +200,9 @@ def _coerce_real_match_format(df: pd.DataFrame, input_format: str) -> pd.DataFra
             out["season"] = parsed_dates.apply(
                 lambda d: f"{d.year - 1}-{d.year}" if pd.notna(d) and d.month < 8 else (f"{d.year}-{d.year + 1}" if pd.notna(d) else "Unknown")
             )
-        if "league" not in out.columns:
+        if "league" in out.columns:
+            out["league"] = out["league"].map(lambda v: _DIV_TO_LEAGUE.get(str(v).strip(), str(v).strip()) if pd.notna(v) and str(v).strip() not in ("", "nan") else "Unknown")
+        else:
             out["league"] = "Unknown"
         if "venue" not in out.columns:
             out["venue"] = "Unknown"

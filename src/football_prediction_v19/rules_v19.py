@@ -66,20 +66,27 @@ def control_model_score(row: pd.Series, probs: dict[str, float], top_label: str,
     ordered = sorted(probs.values(), reverse=True)
     top_prob = ordered[0]
     edge = ordered[0] - ordered[1] if len(ordered) >= 2 else 0.0
-    xg_edge = _n(row, "edge_w5_xgdiff", 0.0)
+    xg_edge_raw = _n(row, "edge_w5_xgdiff", np.nan)
     ppg_edge = _n(row, "edge_w5_ppg", 0.0)
 
+    xg_contribution = 0.0
+    if pd.notna(xg_edge_raw):
+        xg_edge = float(xg_edge_raw)
+        if top_label == "A":
+            xg_edge = -xg_edge
+        elif top_label == "D":
+            xg_edge = -abs(xg_edge)
+        xg_contribution = _clip(xg_edge / 0.60, -1, 1) * 1.2
+
     if top_label == "A":
-        xg_edge = -xg_edge
         ppg_edge = -ppg_edge
     elif top_label == "D":
-        xg_edge = -abs(xg_edge)
         ppg_edge = -abs(ppg_edge)
 
     score = 3.0
     score += _clip((top_prob - 0.34) / 0.20, 0, 1) * 2.0
     score += _clip(edge / 0.15, 0, 1) * 2.0
-    score += _clip(xg_edge / 0.60, -1, 1) * 1.2
+    score += xg_contribution
     score += _clip(ppg_edge / 1.20, -1, 1) * 0.8
     score += (1.0 - chaos / 10.0) * 1.0
     return round(_clip(score, 0, 10), 2)
@@ -172,19 +179,24 @@ def assess_prediction(row: pd.Series | dict[str, Any], probs: dict[str, float]) 
     side_label = "H" if probs.get("H", 0) >= probs.get("A", 0) else "A"
     side = "home" if side_label == "H" else "away"
     opp = "away" if side == "home" else "home"
-    xg_edge = _n(row, "edge_w5_xgdiff", 0.0)
+    xg_available = pd.notna(row.get("edge_w5_xgdiff"))
+    xg_edge_raw = _n(row, "edge_w5_xgdiff", np.nan)
+    xg_edge = float(xg_edge_raw) if pd.notna(xg_edge_raw) else 0.0
     if side_label == "A":
         xg_edge = -xg_edge
     side_tdi = home_tdi if side == "home" else away_tdi
     opp_tdi = away_tdi if side == "home" else home_tdi
-    dnb_conditions = {
+    dnb_conditions: dict[str, bool] = {
         "prob_edge_vs_opponent": probs[side_label] - probs["A" if side_label == "H" else "H"] >= 0.07,
-        "xg_edge_positive": xg_edge >= 0.10,
         "side_tdi_ok": side_tdi <= 1 or side_tdi <= opp_tdi,
         "chaos_ok": chaos <= 5.8,
         "control_ok": control >= 6.5,
         "not_away_degradation": "away_favorite_degradation" not in locks,
     }
+    if xg_available:
+        dnb_conditions["xg_edge_positive"] = xg_edge >= 0.10
+    else:
+        no_bets.append("xG unavailable; xG gates skipped")
     if all(dnb_conditions.values()):
         recommendations.append({
             "market": "DNB",
