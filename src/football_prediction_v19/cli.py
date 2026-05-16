@@ -11,6 +11,7 @@ from .data import load_matches, prepare_real_matches_file
 from .fbref_scraper import fetch_and_save
 from .features import build_fixture_features
 from .model import load_model, predict_feature_rows, save_model, train_from_matches
+from .odds import LABEL_BY_SIDE, best_value_side, odds_snapshot
 from .rules_v19 import assess_prediction
 
 
@@ -40,6 +41,68 @@ def _serialize_reasons(values: list[str]) -> str:
     return " | ".join(values)
 
 
+def _r(value: object, digits: int = 4) -> float | None:
+    if value is None or pd.isna(value):
+        return None
+    return round(float(value), digits)
+
+
+def _value_recommendation(
+    pred: pd.Series,
+    probs: dict[str, float],
+    assessment: dict,
+    min_edge: float,
+    max_chaos: float,
+    min_control: float,
+) -> dict[str, object]:
+    market = odds_snapshot(pred.get("odds_home"), pred.get("odds_draw"), pred.get("odds_away"), probs)
+    value_side, value_edge = best_value_side(market["edges"], min_edge)
+    no_bets = list(assessment["no_bets"])
+    locks = set(assessment["locks"])
+
+    if assessment["control_model_score"] < min_control:
+        no_bets.append(f"No value bet: control score below {min_control:g}")
+    if assessment["chaos_score"] > max_chaos:
+        no_bets.append(f"No value bet: chaos score above {max_chaos:g}")
+    if value_side is None:
+        no_bets.append(f"No value bet: best model edge below {min_edge:.2%}")
+    if value_side == "away" and "away_favorite_degradation" in locks:
+        no_bets.append("No away value bet: away-favorite degradation triggered")
+
+    can_recommend = (
+        value_side is not None
+        and assessment["control_model_score"] >= min_control
+        and assessment["chaos_score"] <= max_chaos
+        and not (value_side == "away" and "away_favorite_degradation" in locks)
+    )
+
+    if can_recommend:
+        recommendation = f"Value bet: {LABEL_BY_SIDE[value_side]} 1X2"
+        value_pick = LABEL_BY_SIDE[value_side]
+    else:
+        recommendation = "No bet"
+        value_pick = "No Bet"
+
+    return {
+        "odds_home": _r(market["odds"]["home"]),
+        "odds_draw": _r(market["odds"]["draw"]),
+        "odds_away": _r(market["odds"]["away"]),
+        "implied_home": _r(market["implied"]["home"]),
+        "implied_draw": _r(market["implied"]["draw"]),
+        "implied_away": _r(market["implied"]["away"]),
+        "fair_home": _r(market["fair"]["home"]),
+        "fair_draw": _r(market["fair"]["draw"]),
+        "fair_away": _r(market["fair"]["away"]),
+        "edge_home": _r(market["edges"]["home"]),
+        "edge_draw": _r(market["edges"]["draw"]),
+        "edge_away": _r(market["edges"]["away"]),
+        "value_pick": value_pick,
+        "value_edge": _r(value_edge),
+        "bet_recommendation": recommendation,
+        "no_bet_reasons": list(dict.fromkeys(no_bets)),
+    }
+
+
 def _fixture_extra(row: pd.Series) -> dict[str, float]:
     extra: dict[str, float] = {}
     for key in ["formation_home_xg90", "formation_away_xg90", "fatigue_home", "fatigue_away"]:
@@ -49,7 +112,14 @@ def _fixture_extra(row: pd.Series) -> dict[str, float]:
     return extra
 
 
-def _predict_assessment_row(history: pd.DataFrame, bundle: dict, row: pd.Series) -> dict[str, object]:
+def _predict_assessment_row(
+    history: pd.DataFrame,
+    bundle: dict,
+    row: pd.Series,
+    min_edge: float,
+    max_chaos: float,
+    min_control: float,
+) -> dict[str, object]:
     fixture = build_fixture_features(
         history,
         home_team=row["home_team"],
@@ -65,6 +135,7 @@ def _predict_assessment_row(history: pd.DataFrame, bundle: dict, row: pd.Series)
     pred = predict_feature_rows(bundle, fixture).iloc[0]
     probs = {"H": pred["prob_home"], "D": pred["prob_draw"], "A": pred["prob_away"]}
     assessment = assess_prediction(pred, probs)
+    value = _value_recommendation(pred, probs, assessment, min_edge, max_chaos, min_control)
     top_pick = assessment["top_model_side"]
     confidence = max(assessment["probabilities"].values())
     return {
@@ -81,7 +152,22 @@ def _predict_assessment_row(history: pd.DataFrame, bundle: dict, row: pd.Series)
         "chaos_score": assessment["chaos_score"],
         "tdi_home": assessment["tdi"]["home"],
         "tdi_away": assessment["tdi"]["away"],
-        "no_bet_reasons": _serialize_reasons(assessment["no_bets"]),
+        "odds_home": value["odds_home"],
+        "odds_draw": value["odds_draw"],
+        "odds_away": value["odds_away"],
+        "implied_home": value["implied_home"],
+        "implied_draw": value["implied_draw"],
+        "implied_away": value["implied_away"],
+        "fair_home": value["fair_home"],
+        "fair_draw": value["fair_draw"],
+        "fair_away": value["fair_away"],
+        "edge_home": value["edge_home"],
+        "edge_draw": value["edge_draw"],
+        "edge_away": value["edge_away"],
+        "value_pick": value["value_pick"],
+        "value_edge": value["value_edge"],
+        "bet_recommendation": value["bet_recommendation"],
+        "no_bet_reasons": _serialize_reasons(value["no_bet_reasons"]),
         "v19_flags": _serialize_reasons(assessment["locks"]),
     }
 
@@ -159,6 +245,8 @@ def cmd_predict(args) -> None:
         "venue": args.venue,
         "referee": args.referee,
     }
+    value = _value_recommendation(pred, probs, assessment, args.min_edge, args.max_chaos, args.min_control)
+    assessment["odds_value"] = value
     _print_json(assessment)
 
 
@@ -166,7 +254,10 @@ def cmd_predict_fixtures(args) -> None:
     history = load_matches(args.history)
     bundle = load_model(args.model)
     fixtures = _load_fixtures(args.fixtures)
-    rows = [_predict_assessment_row(history, bundle, row) for _, row in fixtures.iterrows()]
+    rows = [
+        _predict_assessment_row(history, bundle, row, args.min_edge, args.max_chaos, args.min_control)
+        for _, row in fixtures.iterrows()
+    ]
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(rows).to_csv(output, index=False)
@@ -226,6 +317,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--formation-away-xg90", type=float, default=None)
     p.add_argument("--fatigue-home", type=float, default=None)
     p.add_argument("--fatigue-away", type=float, default=None)
+    p.add_argument("--min-edge", type=float, default=0.03)
+    p.add_argument("--max-chaos", type=float, default=7.0)
+    p.add_argument("--min-control", type=float, default=7.0)
     p.set_defaults(func=cmd_predict)
 
     p = sub.add_parser("predict-fixtures", help="Predict a list of upcoming fixtures from CSV")
@@ -233,6 +327,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--fixtures", required=True)
     p.add_argument("--model", required=True)
     p.add_argument("--output", required=True)
+    p.add_argument("--min-edge", type=float, default=0.03)
+    p.add_argument("--max-chaos", type=float, default=7.0)
+    p.add_argument("--min-control", type=float, default=7.0)
     p.set_defaults(func=cmd_predict_fixtures)
 
     p = sub.add_parser("prepare-data", help="Clean real historical match data for training")

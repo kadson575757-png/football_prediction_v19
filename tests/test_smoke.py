@@ -6,6 +6,13 @@ from football_prediction_v19.cli import main
 from football_prediction_v19.data import REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS, prepare_real_matches
 from football_prediction_v19.features import build_features, build_fixture_features
 from football_prediction_v19.model import predict_feature_rows, train_from_matches
+from football_prediction_v19.odds import (
+    best_value_side,
+    bookmaker_overround,
+    fair_probabilities,
+    implied_probability,
+    model_edges,
+)
 from football_prediction_v19.rules_v19 import assess_prediction
 
 
@@ -79,11 +86,64 @@ def test_predict_fixtures_command(tmp_path):
         "chaos_score",
         "tdi_home",
         "tdi_away",
+        "odds_home",
+        "odds_draw",
+        "odds_away",
+        "implied_home",
+        "implied_draw",
+        "implied_away",
+        "fair_home",
+        "fair_draw",
+        "fair_away",
+        "edge_home",
+        "edge_draw",
+        "edge_away",
+        "value_pick",
+        "value_edge",
+        "bet_recommendation",
         "no_bet_reasons",
         "v19_flags",
     ]
     assert list(result.columns) == expected_columns
     assert len(result) >= 1
+    assert "value_pick" in result.columns
+
+
+def test_odds_conversion_and_overround_removal():
+    odds = {"home": 2.0, "draw": 4.0, "away": 4.0}
+
+    assert implied_probability(2.0) == 0.5
+    assert round(bookmaker_overround(odds), 4) == 0.0
+    assert fair_probabilities(odds) == {"home": 0.5, "draw": 0.25, "away": 0.25}
+
+
+def test_positive_value_detection():
+    odds = {"home": 2.20, "draw": 3.50, "away": 3.40}
+    fair = fair_probabilities(odds)
+    edges = model_edges({"H": 0.50, "D": 0.25, "A": 0.25}, fair)
+    side, edge = best_value_side(edges, min_edge=0.03)
+
+    assert side == "home"
+    assert edge > 0.03
+
+
+def test_no_bet_when_control_score_too_low():
+    from football_prediction_v19.cli import _value_recommendation
+
+    pred = pd.Series({"odds_home": 2.20, "odds_draw": 3.50, "odds_away": 3.40})
+    probs = {"H": 0.50, "D": 0.25, "A": 0.25}
+    assessment = {
+        "control_model_score": 6.5,
+        "chaos_score": 4.0,
+        "locks": [],
+        "no_bets": [],
+    }
+
+    value = _value_recommendation(pred, probs, assessment, min_edge=0.03, max_chaos=7.0, min_control=7.0)
+
+    assert value["value_pick"] == "No Bet"
+    assert value["bet_recommendation"] == "No bet"
+    assert any("control score below 7" in reason for reason in value["no_bet_reasons"])
 
 
 def test_prepare_real_matches_cleans_training_rows():
