@@ -306,6 +306,73 @@ def cmd_backtest_bets(args) -> None:
     print(f"Saved betting report: {report}")
 
 
+def cmd_doctor(args) -> None:
+    """Check environment health: Python, packages, folders, config."""
+    import sys
+    from pathlib import Path
+
+    ok = True
+    issues: list[str] = []
+
+    # Python version
+    py = sys.version_info
+    py_str = f"{py.major}.{py.minor}.{py.micro}"
+    if py.major < 3 or (py.major == 3 and py.minor < 10):
+        issues.append(f"Python {py_str} found — requires Python >= 3.10")
+        ok = False
+    else:
+        print(f"  [OK] Python {py_str}")
+
+    # Required packages
+    _PACKAGES = [
+        ("pandas", "pandas"),
+        ("numpy", "numpy"),
+        ("sklearn", "scikit-learn"),
+        ("joblib", "joblib"),
+        ("openpyxl", "openpyxl"),
+    ]
+    for mod, display in _PACKAGES:
+        try:
+            __import__(mod)
+            print(f"  [OK] {display}")
+        except ImportError:
+            issues.append(f"Package '{display}' not found — run: pip install {display}")
+            ok = False
+
+    # Project folders
+    _FOLDERS = ["data/raw", "data/processed", "outputs", "models"]
+    project_root = Path(__file__).resolve().parents[2]
+    for folder in _FOLDERS:
+        fpath = project_root / folder
+        if fpath.exists():
+            print(f"  [OK] {folder}/")
+        else:
+            try:
+                fpath.mkdir(parents=True, exist_ok=True)
+                print(f"  [created] {folder}/")
+            except Exception as exc:
+                issues.append(f"Cannot create '{folder}/': {exc}")
+                ok = False
+
+    # config/team_aliases.json
+    aliases_path = project_root / "config" / "team_aliases.json"
+    if aliases_path.exists():
+        print(f"  [OK] config/team_aliases.json")
+    else:
+        issues.append("config/team_aliases.json not found — team normalization will be limited")
+
+    # Summary
+    print()
+    if ok and not issues:
+        print("  Environment looks good. You are ready to use fpv19.")
+    else:
+        print("  Issues found:")
+        for issue in issues:
+            print(f"    - {issue}")
+        if not ok:
+            raise SystemExit(1)
+
+
 def cmd_export_excel(args) -> None:
     output = create_predictions_excel_report(
         args.predictions,
@@ -745,6 +812,9 @@ def cmd_gather_fbref(args) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Football Prediction v1.9")
     sub = parser.add_subparsers(dest="command", required=True)
+
+    p = sub.add_parser("doctor", help="Check environment health: Python, packages, folders, config")
+    p.set_defaults(func=cmd_doctor)
 
     p = sub.add_parser("train", help="Train a match prediction model")
     p.add_argument("--input", required=True)

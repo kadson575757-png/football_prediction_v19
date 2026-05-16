@@ -2190,3 +2190,58 @@ def test_run_pipeline_compare_models_includes_excel_dashboard(tmp_path):
     sheets = _sheet_names(excel_out)
     assert "Model Comparison" in sheets
     assert "Best Model" in sheets
+
+
+# ---------------------------------------------------------------------------
+# Release-readiness tests
+# ---------------------------------------------------------------------------
+
+_PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_doctor_command_runs():
+    main(["doctor"])
+
+
+def test_docs_files_exist():
+    for doc in [
+        "CHANGELOG.md",
+        "docs/QUICKSTART.md",
+        "docs/COMMANDS.md",
+        "docs/DATA_REQUIREMENTS.md",
+    ]:
+        assert (_PROJECT_ROOT / doc).exists(), f"Missing: {doc}"
+
+
+def test_changelog_exists():
+    assert (_PROJECT_ROOT / "CHANGELOG.md").exists()
+
+
+def test_readme_contains_main_commands():
+    readme = _PROJECT_ROOT / "README.md"
+    if not readme.exists():
+        pytest.skip("README.md not present")
+    text = readme.read_text(encoding="utf-8")
+    for cmd in ["train", "predict", "prepare-data", "run-pipeline"]:
+        assert cmd in text, f"README missing command: {cmd}"
+
+
+def test_commands_doc_mentions_all_cli_commands():
+    doc = (_PROJECT_ROOT / "docs" / "COMMANDS.md").read_text(encoding="utf-8")
+    for cmd in [
+        "doctor", "train", "predict", "predict-fixtures", "prepare-data",
+        "compare-models", "export-excel", "run-pipeline", "backtest-bets",
+    ]:
+        assert cmd in doc, f"COMMANDS.md missing: {cmd}"
+
+
+def test_quickstart_mentions_sample_pipeline():
+    doc = (_PROJECT_ROOT / "docs" / "QUICKSTART.md").read_text(encoding="utf-8")
+    assert "run-pipeline" in doc
+    assert "sample_matches" in doc or "sample" in doc
+
+
+def test_data_requirements_mentions_key_sections():
+    doc = (_PROJECT_ROOT / "docs" / "DATA_REQUIREMENTS.md").read_text(encoding="utf-8")
+    for section in ["home_xg", "odds_home", "football-data", "FBref", "team_aliases"]:
+        assert section in doc, f"DATA_REQUIREMENTS.md missing: {section}"
