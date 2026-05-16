@@ -18,6 +18,99 @@ def _print_json(obj) -> None:
     print(json.dumps(obj, indent=2, default=str, ensure_ascii=False))
 
 
+REQUIRED_FIXTURE_COLUMNS = [
+    "date",
+    "season",
+    "league",
+    "home_team",
+    "away_team",
+    "venue",
+    "referee",
+    "odds_home",
+    "odds_draw",
+    "odds_away",
+    "formation_home_xg90",
+    "formation_away_xg90",
+    "fatigue_home",
+    "fatigue_away",
+]
+
+
+def _serialize_reasons(values: list[str]) -> str:
+    return " | ".join(values)
+
+
+def _fixture_extra(row: pd.Series) -> dict[str, float]:
+    extra: dict[str, float] = {}
+    for key in ["formation_home_xg90", "formation_away_xg90", "fatigue_home", "fatigue_away"]:
+        value = row.get(key)
+        if pd.notna(value):
+            extra[key] = float(value)
+    return extra
+
+
+def _predict_assessment_row(history: pd.DataFrame, bundle: dict, row: pd.Series) -> dict[str, object]:
+    fixture = build_fixture_features(
+        history,
+        home_team=row["home_team"],
+        away_team=row["away_team"],
+        match_date=row["date"],
+        venue=row.get("venue", "Unknown"),
+        referee=row.get("referee", "Unknown"),
+        odds_home=row.get("odds_home"),
+        odds_draw=row.get("odds_draw"),
+        odds_away=row.get("odds_away"),
+        extra=_fixture_extra(row),
+    )
+    pred = predict_feature_rows(bundle, fixture).iloc[0]
+    probs = {"H": pred["prob_home"], "D": pred["prob_draw"], "A": pred["prob_away"]}
+    assessment = assess_prediction(pred, probs)
+    top_pick = assessment["top_model_side"]
+    confidence = max(assessment["probabilities"].values())
+    return {
+        "date": pd.to_datetime(row["date"]).date().isoformat(),
+        "league": row["league"],
+        "home_team": row["home_team"],
+        "away_team": row["away_team"],
+        "prob_home": round(float(pred["prob_home"]), 4),
+        "prob_draw": round(float(pred["prob_draw"]), 4),
+        "prob_away": round(float(pred["prob_away"]), 4),
+        "top_pick": top_pick,
+        "confidence": round(float(confidence), 4),
+        "control_score": assessment["control_model_score"],
+        "chaos_score": assessment["chaos_score"],
+        "tdi_home": assessment["tdi"]["home"],
+        "tdi_away": assessment["tdi"]["away"],
+        "no_bet_reasons": _serialize_reasons(assessment["no_bets"]),
+        "v19_flags": _serialize_reasons(assessment["locks"]),
+    }
+
+
+def _load_fixtures(path: str | Path) -> pd.DataFrame:
+    fixtures = load_matches(path)
+    missing = [col for col in REQUIRED_FIXTURE_COLUMNS if col not in fixtures.columns]
+    if missing:
+        raise ValueError(f"Missing required fixture columns: {missing}")
+    fixtures = fixtures.copy()
+    fixtures["date"] = pd.to_datetime(fixtures["date"], errors="coerce")
+    if fixtures["date"].isna().any():
+        raise ValueError("Fixture file contains invalid dates.")
+    numeric_cols = [
+        "odds_home",
+        "odds_draw",
+        "odds_away",
+        "formation_home_xg90",
+        "formation_away_xg90",
+        "fatigue_home",
+        "fatigue_away",
+    ]
+    for col in numeric_cols:
+        fixtures[col] = pd.to_numeric(fixtures[col], errors="coerce")
+    for col in ["league", "home_team", "away_team", "venue", "referee", "season"]:
+        fixtures[col] = fixtures[col].fillna("Unknown").astype(str).str.strip()
+    return fixtures
+
+
 def cmd_train(args) -> None:
     matches = load_matches(args.input)
     model, table, metrics, cols = train_from_matches(
@@ -69,6 +162,17 @@ def cmd_predict(args) -> None:
     _print_json(assessment)
 
 
+def cmd_predict_fixtures(args) -> None:
+    history = load_matches(args.history)
+    bundle = load_model(args.model)
+    fixtures = _load_fixtures(args.fixtures)
+    rows = [_predict_assessment_row(history, bundle, row) for _, row in fixtures.iterrows()]
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame(rows).to_csv(output, index=False)
+    print(f"Saved predictions: {output}")
+
+
 def cmd_backtest(args) -> None:
     matches = load_matches(args.input)
     metrics = run_backtest(matches, test_season=args.test_season, tune=args.tune)
@@ -111,6 +215,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--fatigue-home", type=float, default=None)
     p.add_argument("--fatigue-away", type=float, default=None)
     p.set_defaults(func=cmd_predict)
+
+    p = sub.add_parser("predict-fixtures", help="Predict a list of upcoming fixtures from CSV")
+    p.add_argument("--history", required=True)
+    p.add_argument("--fixtures", required=True)
+    p.add_argument("--model", required=True)
+    p.add_argument("--output", required=True)
+    p.set_defaults(func=cmd_predict_fixtures)
 
     p = sub.add_parser("backtest", help="Run a season split backtest")
     p.add_argument("--input", required=True)
