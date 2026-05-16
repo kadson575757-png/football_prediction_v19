@@ -6,6 +6,17 @@ from football_prediction_v19.cli import main
 def run_all() -> None:
     main(
         [
+            "prepare-fixtures",
+            "--input",
+            "data/raw/upcoming_fixtures_raw_template.csv",
+            "--output",
+            "data/upcoming_fixtures.csv",
+            "--format",
+            "native",
+        ]
+    )
+    main(
+        [
             "import-football-data",
             "--input",
             "data/raw/football_data_template.csv",
