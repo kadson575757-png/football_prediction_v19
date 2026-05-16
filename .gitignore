@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 .venv/
 outputs/*.csv
+data/raw/real_matches.csv
+data/processed/*.csv

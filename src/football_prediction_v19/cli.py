@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 
 from .backtest import run_backtest
-from .data import load_matches
+from .data import load_matches, prepare_real_matches_file
 from .fbref_scraper import fetch_and_save
 from .features import build_fixture_features
 from .model import load_model, predict_feature_rows, save_model, train_from_matches
@@ -173,6 +173,16 @@ def cmd_predict_fixtures(args) -> None:
     print(f"Saved predictions: {output}")
 
 
+def cmd_prepare_data(args) -> None:
+    summary = prepare_real_matches_file(args.input, args.output)
+    print("Prepared real match data")
+    print(f"Input: {summary['input']}")
+    print(f"Output: {summary['output']}")
+    print(f"Rows read: {summary['rows_read']}")
+    print(f"Rows written: {summary['rows_written']}")
+    print(f"Rows dropped because they were incomplete historical matches: {summary['rows_dropped']}")
+
+
 def cmd_backtest(args) -> None:
     matches = load_matches(args.input)
     metrics = run_backtest(matches, test_season=args.test_season, tune=args.tune)
@@ -222,6 +232,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--model", required=True)
     p.add_argument("--output", required=True)
     p.set_defaults(func=cmd_predict_fixtures)
+
+    p = sub.add_parser("prepare-data", help="Clean real historical match data for training")
+    p.add_argument("--input", required=True)
+    p.add_argument("--output", required=True)
+    p.set_defaults(func=cmd_prepare_data)
 
     p = sub.add_parser("backtest", help="Run a season split backtest")
     p.add_argument("--input", required=True)
