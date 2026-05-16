@@ -648,7 +648,70 @@ football-prediction-v19 run-pipeline \
   --fixtures-with-odds data/upcoming_fixtures_with_odds.csv
 ```
 
-## 14b. Alles in Einem Schritt
+## 14e. Excel Quality Dashboard
+
+### Einfacher Excel-Export (nur Vorhersagen)
+
+```bash
+fpv19 export-excel \
+  --predictions outputs/predictions.csv \
+  --output outputs/predictions_report.xlsx
+```
+
+Dieser Befehl erstellt immer folgende Sheets:
+
+| Sheet | Inhalt |
+|---|---|
+| Summary | Zusammenfassung: Fixtures, Bets, No-Bets, Top-Value-Picks, No-Bet-Gruende |
+| Predictions | Alle Vorhersagen mit Wahrscheinlichkeiten, Quoten, Edges |
+| Value Bets | Nur Spiele mit Bet-Empfehlung, sortiert nach Value Edge |
+| No Bets | Alle No-Bet-Spiele mit Gruenden |
+| High Chaos | Spiele sortiert nach Chaos-Score |
+| v19 Flags | Spiele mit aktiven v1.9-Regelwerk-Flags |
+
+### Vollstaendiges Dashboard (mit Modellvergleich und Backtest)
+
+```bash
+fpv19 export-excel \
+  --predictions outputs/predictions.csv \
+  --output outputs/predictions_report.xlsx \
+  --model-comparison outputs/model_comparison/model_comparison.csv \
+  --model-metadata outputs/model_comparison/best_model_metadata.json \
+  --backtest-csv outputs/backtest_bets.csv
+```
+
+Wenn die optionalen Dateien vorhanden sind, werden diese Sheets ergaenzt:
+
+| Sheet | Inhalt |
+|---|---|
+| Model Comparison | Alle Modelle mit allen Metriken; bestes Modell gruen hervorgehoben |
+| Calibration | Log Loss, Brier Score, Konfidenzvergleich, Kalibrierungswarnung |
+| Best Model | Metadaten des besten Modells aus best_model_metadata.json |
+| Feature Metadata | Feature-Spaltenliste und Modell-Metadaten |
+| Backtest | Alle Backtest-Bets mit Formatierung |
+| Backtest Summary | Trefferquote, Gesamtprofit, ROI, No-Bet-Gruende |
+
+Wenn eine optionale Datei nicht existiert, wird das Sheet einfach weggelassen — kein Absturz.
+
+### Nach run-pipeline mit --compare-models
+
+```bash
+fpv19 run-pipeline \
+  --skip-download \
+  --combine-output data/processed/combined_football_data.csv \
+  --fixtures-raw data/raw/upcoming_fixtures_raw.csv \
+  --fixtures-output data/upcoming_fixtures.csv \
+  --model models/best_model.joblib \
+  --predictions outputs/predictions.csv \
+  --excel outputs/predictions_report.xlsx \
+  --compare-models \
+  --compare-models-dir outputs/model_comparison \
+  --test-season 2023
+```
+
+Wenn `--compare-models` aktiv ist, werden Modellvergleich und Metadaten automatisch in den Excel-Report eingefuegt. Backtest-Ergebnisse werden ebenfalls automatisch eingebunden, wenn der Backtest nicht uebersprungen wurde.
+
+## 14f. Alles in Einem Schritt
 
 Das Projekt enthaelt auch ein Hilfsskript:
 

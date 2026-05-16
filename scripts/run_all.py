@@ -136,6 +136,12 @@ def run_compare_models_smoke() -> None:
     ])
 
 
+def run_excel_dashboard_smoke() -> None:
+    """Excel dashboard smoke test using sample data — no internet required."""
+    from scripts.run_excel_dashboard import run_excel_dashboard
+    run_excel_dashboard()
+
+
 if __name__ == "__main__":
     run_all()
     run_pipeline_smoke()
