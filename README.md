@@ -182,7 +182,106 @@ config/team_aliases.json
 
 Du kannst dort eigene Aliaslisten ergaenzen, damit historische Daten und kommende Fixtures dieselben Teamnamen verwenden.
 
-## 5. Prepare upcoming fixtures
+## 5. One-command pipeline
+
+Mit einem einzigen Befehl kannst du den gesamten Workflow ausfuehren: historische Daten laden, Fixtures vorbereiten, Modell trainieren, Vorhersagen erstellen, Excel-Report exportieren und Backtest durchfuehren.
+
+### Benoetigte Dateien
+
+- Upcoming Fixtures CSV (roh): `data/raw/upcoming_fixtures_raw.csv` (oder nutze die Vorlage)
+- Die historischen Daten werden automatisch heruntergeladen und kombiniert
+
+### Vollstaendiger Befehl
+
+```bash
+fpv19 run-pipeline \
+  --leagues E0 D1 I1 \
+  --seasons 2023 \
+  --raw-dir data/raw \
+  --processed-dir data/processed \
+  --combine-output data/processed/combined_football_data.csv \
+  --fixtures-raw data/raw/upcoming_fixtures_raw.csv \
+  --fixtures-output data/upcoming_fixtures.csv \
+  --fixtures-format auto \
+  --model models/real_model.joblib \
+  --predictions outputs/predictions.csv \
+  --excel outputs/predictions_report.xlsx \
+  --backtest-csv outputs/backtest_bets.csv \
+  --backtest-report outputs/backtest_report.md \
+  --test-season 2023
+```
+
+### Ohne Download (bestehende Daten nutzen)
+
+```bash
+fpv19 run-pipeline \
+  --skip-download \
+  --combine-output data/processed/combined_football_data.csv \
+  --fixtures-raw data/raw/upcoming_fixtures_raw.csv \
+  --fixtures-output data/upcoming_fixtures.csv \
+  --model models/real_model.joblib \
+  --predictions outputs/predictions.csv \
+  --excel outputs/predictions_report.xlsx
+```
+
+### Ohne Backtest
+
+```bash
+fpv19 run-pipeline \
+  --skip-download \
+  --skip-backtest \
+  --combine-output data/processed/combined_football_data.csv \
+  --fixtures-raw data/raw/upcoming_fixtures_raw.csv \
+  --fixtures-output data/upcoming_fixtures.csv \
+  --model models/real_model.joblib \
+  --predictions outputs/predictions.csv \
+  --excel outputs/predictions_report.xlsx
+```
+
+### Mit bereits vorbereiteten Fixtures
+
+```bash
+fpv19 run-pipeline \
+  --skip-download \
+  --use-existing-fixtures \
+  --combine-output data/processed/combined_football_data.csv \
+  --fixtures-output data/upcoming_fixtures.csv \
+  --model models/real_model.joblib \
+  --predictions outputs/predictions.csv \
+  --excel outputs/predictions_report.xlsx
+```
+
+### Pipeline-Schritte
+
+| Schritt | Was passiert |
+|---|---|
+| A | Download und Vorbereitung historischer football-data.co.uk CSVs (ueberspringbar mit `--skip-download`) |
+| B | Kombination aller Saison-CSVs in eine gemeinsame Trainingsdatei |
+| C | Vorbereitung der kommenden Fixtures (ueberspringbar mit `--use-existing-fixtures`) |
+| D | Training des Modells auf den historischen Daten |
+| E | Vorhersage aller kommenden Fixtures |
+| F | Export der Vorhersagen als Excel-Report |
+| G | Backtest der Betting-Empfehlungen (ueberspringbar mit `--skip-backtest`) |
+
+### Ausgabedateien
+
+| Datei | Inhalt |
+|---|---|
+| `--combine-output` | Kombinierte historische Trainingsdaten |
+| `--fixtures-output` | Vorbereitete Fixtures fuer die Vorhersage |
+| `--model` | Trainiertes Modell (joblib) |
+| `--predictions` | Vorhersagen als CSV mit Wahrscheinlichkeiten und Wettempfehlungen |
+| `--excel` | Excel-Report mit Summary, Value Bets und No-Bets |
+| `--backtest-csv` | Backtest-Ergebnisse als CSV |
+| `--backtest-report` | Backtest-Zusammenfassung mit ROI und Statistiken |
+
+Das Hilfsskript `scripts/run_pipeline.py` fuehrt einen lokalen Smoke-Test ohne Internet aus:
+
+```bash
+python scripts/run_pipeline.py
+```
+
+## 6. Prepare upcoming fixtures
 
 Mit diesem Befehl kannst du eine einfache Roh-CSV mit kommenden Spielen in das Vorhersageformat umwandeln.
 
@@ -226,7 +325,7 @@ Danach Excel-Report:
 fpv19 export-excel --predictions outputs/predictions.csv --output outputs/predictions_report.xlsx
 ```
 
-## 6. Download and prepare football-data.co.uk data
+## 7. Download and prepare football-data.co.uk data
 
 Mit einem einzigen Befehl kannst du CSVs von football-data.co.uk herunterladen und automatisch in trainingsfertige Dateien umwandeln.
 
@@ -266,7 +365,7 @@ la-liga, segunda-division, ligue-1, ligue-2, eredivisie,
 pro-league, primeira-liga, super-lig, super-league-greece
 ```
 
-## 7. Modell Trainieren
+## 8. Modell Trainieren
 
 Mit Sample-Daten:
 
@@ -280,13 +379,13 @@ Mit echten vorbereiteten Daten:
 python -m football_prediction_v19.cli train --input data/processed/real_matches_clean.csv --model models/real_model.joblib --test-season 2023
 ```
 
-## 8. Ein Match Vorhersagen
+## 9. Ein Match Vorhersagen
 
 ```bash
 python -m football_prediction_v19.cli predict --history data/sample_matches.csv --model models/sample_model.joblib --home Chelsea --away Arsenal --date 2024-05-01 --venue "Stamford Bridge" --referee "Anthony Taylor" --odds-home 2.40 --odds-draw 3.40 --odds-away 2.90
 ```
 
-## 9. Eine Fixture-Liste Vorhersagen
+## 10. Eine Fixture-Liste Vorhersagen
 
 Nutze die Vorlage in `data/upcoming_fixtures_template.csv` und fuehre dann aus:
 
@@ -314,7 +413,7 @@ outputs/predictions.csv
 
 Die Ausgabe enthaelt Modellwahrscheinlichkeiten, Marktquoten, faire Markt-Wahrscheinlichkeiten, Edge-Werte, `value_pick`, `value_edge`, `bet_recommendation` und klare `no_bet_reasons`.
 
-## 10. Excel Report Exportieren
+## 11. Excel Report Exportieren
 
 Aus der Prediction-CSV kannst du eine Excel-Datei fuer die Analyse erstellen:
 
@@ -337,7 +436,7 @@ Sheets im Report:
 - `High Chaos`: Alle Spiele nach `chaos_score` absteigend sortiert.
 - `v19 Flags`: Spiele mit aktiven v1.9 Flags.
 
-## 11. Value Betting Und No-Bet Logik
+## 12. Value Betting Und No-Bet Logik
 
 Decimal Odds werden in implied probability umgerechnet:
 
@@ -370,7 +469,7 @@ value_pick=Home, value_edge=0.052, bet_recommendation="Value bet: Home 1X2"
 
 Das bedeutet: Das Modell sieht Home um 5.2 Prozentpunkte staerker als der margengefilterte Markt, und die v1.9 Schutzregeln blockieren den Tipp nicht.
 
-## 12. Betting Backtest Und Calibration Report
+## 13. Betting Backtest Und Calibration Report
 
 Wenn du ein trainiertes Modell und historische Daten mit Ergebnissen und Quoten hast, kannst du die Value-Bet-Regeln historisch testen:
 
@@ -394,7 +493,7 @@ ROI und Yield werden hier als Profit geteilt durch eingesetzte Units gelesen. Be
 
 Ein profitabler Backtest garantiert keinen zukuenftigen Profit. Er zeigt nur, wie diese Modellversion mit diesen Daten und diesen Regeln historisch abgeschnitten haette.
 
-## 13. Alles in Einem Schritt
+## 14. Alles in Einem Schritt
 
 Das Projekt enthaelt auch ein Hilfsskript:
 
@@ -404,7 +503,7 @@ python scripts/run_all.py
 
 Dieses Skript trainiert das Beispielmodell, fuehrt eine Einzel-Prediction aus, schreibt eine Fixture-List-Prediction nach `outputs/predictions.csv` und exportiert `outputs/predictions_report.xlsx`.
 
-## 14. Projektstruktur
+## 15. Projektstruktur
 
 ```text
 football_prediction_v19/
@@ -428,7 +527,7 @@ Wichtige Module, die bewusst erhalten bleiben:
 - `backtest.py`
 - `cli.py`
 
-## 15. Wie Das Modell Arbeitet
+## 16. Wie Das Modell Arbeitet
 
 1. Historische Spiele werden bereinigt.
 2. Pro Match werden nur vorherige Spiele genutzt, damit kein Data Leakage entsteht.
@@ -436,5 +535,6 @@ Wichtige Module, die bewusst erhalten bleiben:
 4. Das Modell lernt die Klassen `H`, `D`, `A`.
 5. Die Modellwahrscheinlichkeiten werden durch das v1.9-Regelwerk gefiltert.
 6. Das Ergebnis enthaelt Wahrscheinlichkeiten, Empfehlungen, Sperren und No-Bet-Signale.
+
 
 
