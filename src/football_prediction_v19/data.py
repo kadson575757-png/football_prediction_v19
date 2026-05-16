@@ -259,7 +259,18 @@ def clean_matches(df: pd.DataFrame, completed_only: bool = True) -> pd.DataFrame
     out["home_team"] = out["home_team"].astype(str).str.strip()
     out["away_team"] = out["away_team"].astype(str).str.strip()
     out["day_name"] = out["date"].dt.day_name().fillna("Unknown")
-    out["season_start"] = out["date"].apply(lambda d: int(d.year - 1 if pd.notna(d) and d.month < 8 else d.year) if pd.notna(d) else np.nan)
+    # Compute European season_start (Aug-Jul seasons: Jan-Jul map to year-1)
+    euro_season_start = out["date"].apply(
+        lambda d: int(d.year - 1 if pd.notna(d) and d.month < 8 else d.year) if pd.notna(d) else np.nan
+    )
+    # MLS uses calendar-year seasons (Feb-Nov): season_start always equals the calendar year
+    if "league" in out.columns:
+        is_mls = out["league"].astype(str).str.strip() == "MLS"
+        out["season_start"] = euro_season_start.where(~is_mls, out["date"].dt.year)
+        # Preserve NaN for rows where date is NaT
+        out.loc[out["date"].isna(), "season_start"] = np.nan
+    else:
+        out["season_start"] = euro_season_start
 
     out["actual_total_goals"] = out["home_goals"] + out["away_goals"]
     out["actual_goal_diff"] = out["home_goals"] - out["away_goals"]

@@ -266,7 +266,8 @@ def build_fixture_features(
         "venue": venue,
         "referee": referee,
         "day_name": match_date.day_name(),
-        "season_start": int(match_date.year - 1 if match_date.month < 8 else match_date.year),
+        "season_start": int(match_date.year) if (extra or {}).get("league") == "MLS"
+        else int(match_date.year - 1 if match_date.month < 8 else match_date.year),
     }
     if odds_home is not None:
         row_data["odds_home"] = odds_home

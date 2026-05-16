@@ -2289,6 +2289,116 @@ def test_football_data_import_preserves_odds():
     assert float(clean["odds_away"].iloc[0]) == pytest.approx(6.00)
 
 
+# --- MLS calendar-year season_start tests ---
+
+def test_mls_season_start_february():
+    """MLS Feb match must have season_start = same year, not year-1."""
+    import numpy as np
+    from football_prediction_v19.data import clean_matches
+    df = pd.DataFrame({
+        "date": ["2025-02-22"],
+        "home_team": ["LA Galaxy"],
+        "away_team": ["Inter Miami"],
+        "score": ["2-1"],
+        "home_xg": [np.nan],
+        "away_xg": [np.nan],
+        "league": ["MLS"],
+    })
+    out = clean_matches(df, completed_only=False)
+    assert out["season_start"].iloc[0] == 2025, f"Expected 2025, got {out['season_start'].iloc[0]}"
+
+
+def test_mls_season_start_july():
+    """MLS July match must have season_start = same year."""
+    import numpy as np
+    from football_prediction_v19.data import clean_matches
+    df = pd.DataFrame({
+        "date": ["2025-07-15"],
+        "home_team": ["LA Galaxy"],
+        "away_team": ["Inter Miami"],
+        "score": ["2-1"],
+        "home_xg": [np.nan],
+        "away_xg": [np.nan],
+        "league": ["MLS"],
+    })
+    out = clean_matches(df, completed_only=False)
+    assert out["season_start"].iloc[0] == 2025
+
+
+def test_mls_season_start_october():
+    """MLS October match must have season_start = same year."""
+    import numpy as np
+    from football_prediction_v19.data import clean_matches
+    df = pd.DataFrame({
+        "date": ["2025-10-18"],
+        "home_team": ["Seattle Sounders"],
+        "away_team": ["Portland Timbers"],
+        "score": ["1-0"],
+        "home_xg": [np.nan],
+        "away_xg": [np.nan],
+        "league": ["MLS"],
+    })
+    out = clean_matches(df, completed_only=False)
+    assert out["season_start"].iloc[0] == 2025
+
+
+def test_european_season_start_february_unchanged():
+    """European Feb match must still map to season_start = year-1 (no change)."""
+    import numpy as np
+    from football_prediction_v19.data import clean_matches
+    df = pd.DataFrame({
+        "date": ["2025-02-22"],
+        "home_team": ["Bayern Munich"],
+        "away_team": ["Bayer Leverkusen"],
+        "score": ["2-1"],
+        "home_xg": [1.5],
+        "away_xg": [0.8],
+        "league": ["Bundesliga"],
+    })
+    out = clean_matches(df, completed_only=False)
+    assert out["season_start"].iloc[0] == 2024, f"Expected 2024, got {out['season_start'].iloc[0]}"
+
+
+def test_european_season_start_august_unchanged():
+    """European Aug match must still map to season_start = same year."""
+    import numpy as np
+    from football_prediction_v19.data import clean_matches
+    df = pd.DataFrame({
+        "date": ["2025-08-15"],
+        "home_team": ["Bayern Munich"],
+        "away_team": ["Bayer Leverkusen"],
+        "score": ["2-1"],
+        "home_xg": [1.5],
+        "away_xg": [0.8],
+        "league": ["Bundesliga"],
+    })
+    out = clean_matches(df, completed_only=False)
+    assert out["season_start"].iloc[0] == 2025
+
+
+def test_mls_build_features_season_start():
+    """build_features on MLS data assigns season_start=year for all months."""
+    import numpy as np
+    from football_prediction_v19.features import build_features
+    rows = []
+    for month in [2, 5, 7, 9, 11]:
+        rows.append({
+            "date": f"2024-{month:02d}-15",
+            "home_team": "LA Galaxy",
+            "away_team": "Inter Miami",
+            "score": "1-0",
+            "home_xg": np.nan,
+            "away_xg": np.nan,
+            "league": "MLS",
+            "season": "2024",
+        })
+    df = pd.DataFrame(rows)
+    feat = build_features(df)
+    if len(feat) > 0:
+        wrong = feat[feat["season_start"] != 2024]
+        assert len(wrong) == 0, f"MLS rows with wrong season_start: {wrong[['date','season_start']].to_string()}"
+
+
 def test_combined_output_preserves_league_and_odds(tmp_path):
     """Combined processed CSV must carry league names and odds through prepare + concat."""
     import io
