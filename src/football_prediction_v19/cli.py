@@ -11,6 +11,8 @@ from .data import load_matches, prepare_real_matches_file
 from .excel_report import create_predictions_excel_report
 from .fbref_scraper import fetch_and_save
 from .features import build_fixture_features
+from .importers.fbref import normalize_fbref_csv
+from .importers.football_data import normalize_football_data_csv
 from .model import load_model, predict_feature_rows, save_model, train_from_matches
 from .odds import value_recommendation
 from .rules_v19 import assess_prediction
@@ -225,6 +227,10 @@ def cmd_predict_fixtures(args) -> None:
 
 def cmd_prepare_data(args) -> None:
     summary = prepare_real_matches_file(args.input, args.output, input_format=args.format)
+    _print_prepare_summary(summary)
+
+
+def _print_prepare_summary(summary: dict[str, object]) -> None:
     print("Prepared real match data")
     print(f"Input: {summary['input']}")
     print(f"Output: {summary['output']}")
@@ -234,6 +240,16 @@ def cmd_prepare_data(args) -> None:
     print(f"Rows dropped because they were incomplete historical matches: {summary['rows_dropped']}")
     print(f"Optional advanced columns found: {summary['optional_found']}")
     print(f"Optional advanced columns missing: {summary['optional_missing']}")
+
+
+def cmd_import_football_data(args) -> None:
+    summary = normalize_football_data_csv(args.input, args.output)
+    _print_prepare_summary(summary)
+
+
+def cmd_import_fbref(args) -> None:
+    summary = normalize_fbref_csv(args.input, args.output)
+    _print_prepare_summary(summary)
 
 
 def cmd_backtest(args) -> None:
@@ -318,6 +334,22 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_predict_fixtures)
 
     p = sub.add_parser("prepare-data", help="Clean real historical match data for training")
+    p.add_argument("--input", required=True)
+    p.add_argument("--output", required=True)
+    p.add_argument("--format", default="auto", choices=["auto", "native", "fbref", "football-data"])
+    p.set_defaults(func=cmd_prepare_data)
+
+    p = sub.add_parser("import-football-data", help="Normalize a football-data.co.uk CSV into project format")
+    p.add_argument("--input", required=True)
+    p.add_argument("--output", required=True)
+    p.set_defaults(func=cmd_import_football_data)
+
+    p = sub.add_parser("import-fbref", help="Normalize a FBref-style CSV into project format")
+    p.add_argument("--input", required=True)
+    p.add_argument("--output", required=True)
+    p.set_defaults(func=cmd_import_fbref)
+
+    p = sub.add_parser("import-and-prepare", help="Auto-detect and prepare a real match CSV")
     p.add_argument("--input", required=True)
     p.add_argument("--output", required=True)
     p.add_argument("--format", default="auto", choices=["auto", "native", "fbref", "football-data"])

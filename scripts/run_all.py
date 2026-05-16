@@ -6,6 +6,15 @@ from football_prediction_v19.cli import main
 def run_all() -> None:
     main(
         [
+            "import-football-data",
+            "--input",
+            "data/raw/football_data_template.csv",
+            "--output",
+            "data/processed/football_data_clean.csv",
+        ]
+    )
+    main(
+        [
             "train",
             "--input",
             "data/sample_matches.csv",

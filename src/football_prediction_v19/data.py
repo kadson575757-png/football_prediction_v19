@@ -166,6 +166,9 @@ def _coerce_real_match_format(df: pd.DataFrame, input_format: str) -> pd.DataFra
         out = _normalize_native_columns(df)
     elif selected == "fbref":
         out = _normalize_native_columns(df.rename(columns=FBREF_RENAMES))
+        for col in ["odds_home", "odds_draw", "odds_away"]:
+            if col not in out.columns:
+                out[col] = np.nan
     else:
         out = _normalize_native_columns(df.rename(columns=FOOTBALL_DATA_RENAMES))
         if "score" not in out.columns and {"home_goals", "away_goals"}.issubset(out.columns):
@@ -201,7 +204,11 @@ def clean_matches(df: pd.DataFrame, completed_only: bool = True) -> pd.DataFrame
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
 
-    out["date"] = pd.to_datetime(out["date"], errors="coerce")
+    raw_dates = out["date"].copy()
+    out["date"] = pd.to_datetime(raw_dates, errors="coerce")
+    if out["date"].isna().any():
+        reparsed = pd.to_datetime(raw_dates, errors="coerce", dayfirst=True)
+        out["date"] = out["date"].fillna(reparsed)
     if "matchweek" in out.columns:
         out["matchweek"] = pd.to_numeric(out["matchweek"], errors="coerce")
     else:
@@ -274,7 +281,11 @@ def prepare_real_matches(df: pd.DataFrame, input_format: str = "auto") -> pd.Dat
     optional_missing = [col for col in REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS if col not in out.columns]
     out = out[REAL_MATCH_REQUIRED_COLUMNS + optional_found].copy()
     rows_before = len(out)
-    out["date"] = pd.to_datetime(out["date"], errors="coerce")
+    raw_dates = out["date"].copy()
+    out["date"] = pd.to_datetime(raw_dates, errors="coerce", dayfirst=detected_format == "football-data")
+    if out["date"].isna().any():
+        reparsed = pd.to_datetime(raw_dates, errors="coerce", dayfirst=True)
+        out["date"] = out["date"].fillna(reparsed)
     scores = out["score"].apply(parse_score)
     out["home_goals"] = [score[0] for score in scores]
     out["away_goals"] = [score[1] for score in scores]
