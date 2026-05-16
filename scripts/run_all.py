@@ -40,6 +40,19 @@ def run_all() -> None:
             "2.90",
         ]
     )
+    main(
+        [
+            "predict-fixtures",
+            "--history",
+            "data/sample_matches.csv",
+            "--fixtures",
+            "data/upcoming_fixtures_template.csv",
+            "--model",
+            "models/sample_model.joblib",
+            "--output",
+            "outputs/predictions.csv",
+        ]
+    )
 
 
 if __name__ == "__main__":

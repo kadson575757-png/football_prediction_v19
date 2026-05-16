@@ -1,0 +1,3 @@
+date,season,league,home_team,away_team,venue,referee,odds_home,odds_draw,odds_away,formation_home_xg90,formation_away_xg90,fatigue_home,fatigue_away
+2024-05-01,2023-2024,Premier League,Chelsea,Arsenal,Stamford Bridge,Anthony Taylor,2.40,3.40,2.90,1.18,1.44,0.15,0.10
+2024-05-04,2023-2024,Premier League,Liverpool,Tottenham,Anfield,Michael Oliver,1.95,3.70,3.85,1.62,1.27,0.09,0.14

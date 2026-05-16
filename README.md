@@ -12,7 +12,7 @@ Ein lauffaehiges Python-Projekt fuer Football Match Prediction mit Rolling-xG-Fe
 
 ## 1. Beginner Installation
 
-Die Core-Installation reicht fuer Tests, Training und eine Beispiel-Prediction.
+Die Core-Installation reicht fuer Tests, Training, eine Einzel-Prediction und eine Fixture-List-Prediction.
 
 ```bash
 cd football_prediction_v19
@@ -40,19 +40,39 @@ python -m pip install -e .
 pytest
 ```
 
-## 4. Sample Model Trainieren
+## 4. Modell Trainieren
 
 ```bash
 python -m football_prediction_v19.cli train --input data/sample_matches.csv --model models/sample_model.joblib --test-season 2023
 ```
 
-## 5. Sample Prediction
+Das trainierte Modell wird hier gespeichert:
+
+```text
+models/sample_model.joblib
+```
+
+## 5. Ein Match Vorhersagen
 
 ```bash
 python -m football_prediction_v19.cli predict --history data/sample_matches.csv --model models/sample_model.joblib --home Chelsea --away Arsenal --date 2024-05-01 --venue "Stamford Bridge" --referee "Anthony Taylor" --odds-home 2.40 --odds-draw 3.40 --odds-away 2.90
 ```
 
-## 6. Alles in Einem Schritt
+## 6. Eine Fixture-Liste Vorhersagen
+
+Nutze die Vorlage in [data/upcoming_fixtures_template.csv](/C:/Users/Kadir/Documents/New%20project/football_prediction_v19/data/upcoming_fixtures_template.csv) und fuehre dann aus:
+
+```bash
+python -m football_prediction_v19.cli predict-fixtures --history data/sample_matches.csv --fixtures data/upcoming_fixtures_template.csv --model models/sample_model.joblib --output outputs/predictions.csv
+```
+
+Die CSV-Ausgabe wird automatisch in diesem Ordner angelegt:
+
+```text
+outputs/predictions.csv
+```
+
+## 7. Alles in Einem Schritt
 
 Das Projekt enthaelt auch ein Hilfsskript:
 
@@ -60,9 +80,9 @@ Das Projekt enthaelt auch ein Hilfsskript:
 python scripts/run_all.py
 ```
 
-Dieses Skript trainiert das Beispielmodell und fuehrt danach direkt eine Beispiel-Prediction aus.
+Dieses Skript trainiert das Beispielmodell, fuehrt eine Einzel-Prediction aus und schreibt danach eine Fixture-List-Prediction nach `outputs/predictions.csv`.
 
-## 7. Eigene Daten
+## 8. Eigene Daten
 
 Mindestens diese Spalten werden erwartet:
 
@@ -78,7 +98,7 @@ odds_home,odds_draw,odds_away,attendance
 
 `Score` darf zum Beispiel `2-1`, `2–1` oder `2- 1` sein. `xG` ist Home-xG, `xG.1` ist Away-xG.
 
-## 8. Projektstruktur
+## 9. Projektstruktur
 
 ```text
 football_prediction_v19/
@@ -100,7 +120,7 @@ Wichtige Module, die bewusst erhalten bleiben:
 - `backtest.py`
 - `cli.py`
 
-## 9. Wie das Modell arbeitet
+## 10. Wie das Modell arbeitet
 
 1. Historische Spiele werden bereinigt.
 2. Pro Match werden nur vorherige Spiele genutzt, damit kein Data Leakage entsteht.
