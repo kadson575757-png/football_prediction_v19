@@ -73,7 +73,7 @@ Wenn diese Spalten vorhanden sind, werden sie in `data/processed/real_matches_cl
 Bereite die Daten dann so vor:
 
 ```bash
-python -m football_prediction_v19.cli prepare-data --input data/raw/real_matches.csv --output data/processed/real_matches_clean.csv
+python -m football_prediction_v19.cli prepare-data --input data/raw/real_matches.csv --output data/processed/real_matches_clean.csv --format auto
 ```
 
 Oder mit dem Hilfsskript:
@@ -89,6 +89,58 @@ data/processed/real_matches_clean.csv
 ```
 
 `score` darf zum Beispiel `2-1`, `2- 1` oder ein Ergebnis mit Gedankenstrich sein. Spiele ohne Ergebnis werden fuer historische Trainingsdaten entfernt.
+
+### Native Template
+
+Die native Vorlage nutzt direkt die Projektnamen:
+
+```text
+data/raw/real_matches_template.csv
+```
+
+Import:
+
+```bash
+python -m football_prediction_v19.cli prepare-data --input data/raw/real_matches.csv --output data/processed/real_matches_clean.csv --format native
+```
+
+### FBref Export
+
+FBref-Style CSVs koennen diese Spalten enthalten:
+
+```text
+Date,Season,Comp,Home,Away,Score,xG,xG.1,Venue,Referee
+```
+
+Import:
+
+```bash
+python -m football_prediction_v19.cli prepare-data --input data/raw/real_matches.csv --output data/processed/real_matches_clean.csv --format fbref
+```
+
+### football-data.co.uk CSV
+
+football-data CSVs koennen diese Spalten enthalten:
+
+```text
+Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,B365H,B365D,B365A
+```
+
+Import:
+
+```bash
+python -m football_prediction_v19.cli prepare-data --input data/raw/real_matches.csv --output data/processed/real_matches_clean.csv --format football-data
+```
+
+### Team Alias Config
+
+Teamnamen werden beim Import normalisiert. Varianten wie `Man Utd`, `Man United`, `Spurs`, `Wolves` oder `Newcastle` werden ueber diese Datei auf einen Standardnamen gemappt:
+
+```text
+config/team_aliases.json
+```
+
+Du kannst dort eigene Aliaslisten ergaenzen, damit historische Daten und kommende Fixtures dieselben Teamnamen verwenden.
 
 ## 5. Modell Trainieren
 

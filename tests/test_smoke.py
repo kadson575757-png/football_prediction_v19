@@ -16,6 +16,7 @@ from football_prediction_v19.odds import (
     model_edges,
 )
 from football_prediction_v19.rules_v19 import assess_prediction
+from football_prediction_v19.team_names import normalize_team_name
 
 
 def test_pipeline_smoke():
@@ -304,6 +305,95 @@ def test_prepare_real_matches_cleans_training_rows():
     assert clean.loc[0, "home_xg"] == 1.9
     assert clean.attrs["rows_dropped"] == 1
     assert "home_xga" in clean.attrs["optional_missing"]
+
+
+def test_team_alias_normalization():
+    assert normalize_team_name(" Man Utd ") == "Manchester United"
+    assert normalize_team_name("Spurs") == "Tottenham Hotspur"
+    assert normalize_team_name("Unknown FC") == "Unknown FC"
+
+
+def test_prepare_real_matches_native_format_auto_detects():
+    raw = pd.DataFrame(
+        [
+            {
+                "date": "2023-08-12",
+                "season": "2023-2024",
+                "league": "Premier League",
+                "home_team": "Man Utd",
+                "away_team": "Wolves",
+                "score": "1-0",
+                "home_xg": 1.2,
+                "away_xg": 0.7,
+                "odds_home": 1.8,
+                "odds_draw": 3.5,
+                "odds_away": 4.8,
+                "venue": "Old Trafford",
+                "referee": "Unknown",
+            }
+        ]
+    )
+
+    clean = prepare_real_matches(raw, input_format="auto")
+
+    assert clean.attrs["detected_format"] == "native"
+    assert clean.loc[0, "home_team"] == "Manchester United"
+    assert clean.loc[0, "away_team"] == "Wolverhampton Wanderers"
+
+
+def test_prepare_real_matches_fbref_format():
+    raw = pd.DataFrame(
+        [
+            {
+                "Date": "2023-08-12",
+                "Season": "2023-2024",
+                "Comp": "Premier League",
+                "Home": "Brighton",
+                "Away": "Newcastle",
+                "Score": "2-1",
+                "xG": 1.7,
+                "xG.1": 1.0,
+                "odds_home": 2.1,
+                "odds_draw": 3.4,
+                "odds_away": 3.5,
+                "Venue": "Amex Stadium",
+                "Referee": "Unknown",
+            }
+        ]
+    )
+
+    clean = prepare_real_matches(raw, input_format="fbref")
+
+    assert clean.attrs["detected_format"] == "fbref"
+    assert clean.loc[0, "home_team"] == "Brighton & Hove Albion"
+    assert clean.loc[0, "away_team"] == "Newcastle United"
+    assert clean.loc[0, "home_xg"] == 1.7
+
+
+def test_prepare_real_matches_football_data_format_auto_detects():
+    raw = pd.DataFrame(
+        [
+            {
+                "Date": "12/08/2023",
+                "HomeTeam": "Tottenham",
+                "AwayTeam": "Man United",
+                "FTHG": 2,
+                "FTAG": 0,
+                "FTR": "H",
+                "B365H": 2.4,
+                "B365D": 3.3,
+                "B365A": 2.9,
+            }
+        ]
+    )
+
+    clean = prepare_real_matches(raw, input_format="auto")
+
+    assert clean.attrs["detected_format"] == "football-data"
+    assert clean.loc[0, "home_team"] == "Tottenham Hotspur"
+    assert clean.loc[0, "away_team"] == "Manchester United"
+    assert clean.loc[0, "score"] == "2-0"
+    assert clean.loc[0, "league"] == "Unknown"
 
 
 def test_prepare_real_matches_keeps_optional_columns():
