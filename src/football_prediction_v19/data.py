@@ -247,7 +247,7 @@ def clean_matches(df: pd.DataFrame, completed_only: bool = True) -> pd.DataFrame
     out.loc[out["home_goals"].isna() | out["away_goals"].isna(), "result"] = np.nan
 
     if completed_only:
-        subset = ["date", "home_team", "away_team", "home_goals", "away_goals", "home_xg", "away_xg"]
+        subset = ["date", "home_team", "away_team", "home_goals", "away_goals"]
         existing = [c for c in subset if c in out.columns]
         out = out.dropna(subset=existing)
 
