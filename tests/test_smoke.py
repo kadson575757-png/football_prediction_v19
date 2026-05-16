@@ -9,6 +9,8 @@ from football_prediction_v19.data import REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS, pr
 from football_prediction_v19.features import build_features, build_fixture_features
 from football_prediction_v19.excel_report import create_predictions_excel_report
 from football_prediction_v19.model import predict_feature_rows, train_from_matches
+from football_prediction_v19.importers.fbref import normalize_fbref_csv
+from football_prediction_v19.importers.football_data import normalize_football_data_csv
 from football_prediction_v19.odds import (
     best_value_side,
     bookmaker_overround,
@@ -496,6 +498,72 @@ def test_prepare_real_matches_football_data_format_auto_detects():
     assert clean.loc[0, "away_team"] == "Manchester United"
     assert clean.loc[0, "score"] == "2-0"
     assert clean.loc[0, "league"] == "Unknown"
+
+
+def test_football_data_importer_normalizes_schema_and_aliases(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    output_path = tmp_path / "football_data_clean.csv"
+
+    normalize_football_data_csv(str(root / "data" / "raw" / "football_data_template.csv"), str(output_path))
+
+    clean = pd.read_csv(output_path)
+    assert {"date", "season", "league", "home_team", "away_team", "score", "odds_home", "odds_draw", "odds_away"}.issubset(clean.columns)
+    assert clean.loc[0, "home_team"] == "Tottenham Hotspur"
+    assert clean.loc[0, "away_team"] == "Manchester United"
+
+
+def test_fbref_importer_normalizes_schema_and_aliases(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    output_path = tmp_path / "fbref_clean.csv"
+
+    normalize_fbref_csv(str(root / "data" / "raw" / "fbref_template.csv"), str(output_path))
+
+    clean = pd.read_csv(output_path)
+    assert {"date", "season", "league", "home_team", "away_team", "score", "home_xg", "away_xg", "venue", "referee"}.issubset(clean.columns)
+    assert clean.loc[0, "home_team"] == "Brighton & Hove Albion"
+    assert clean.loc[0, "away_team"] == "Newcastle United"
+
+
+def test_import_and_prepare_command_auto_detects(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    output_path = tmp_path / "auto_clean.csv"
+
+    main(
+        [
+            "import-and-prepare",
+            "--input",
+            str(root / "data" / "raw" / "fbref_template.csv"),
+            "--output",
+            str(output_path),
+            "--format",
+            "auto",
+        ]
+    )
+
+    clean = pd.read_csv(output_path)
+    assert clean.loc[1, "home_team"] == "Manchester United"
+    assert clean.loc[1, "away_team"] == "Wolverhampton Wanderers"
+
+
+def test_imported_fbref_output_is_training_compatible(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    source = pd.read_csv(root / "data" / "raw" / "fbref_template.csv")
+    extra = source.copy()
+    extra["Date"] = ["2023-08-19", "2023-08-20"]
+    extra["Home"] = ["Newcastle", "Wolves"]
+    extra["Away"] = ["Brighton", "Man Utd"]
+    extra["Score"] = ["0-2", "1-2"]
+    raw = pd.concat([source, extra], ignore_index=True)
+    input_path = tmp_path / "fbref_more.csv"
+    output_path = tmp_path / "fbref_clean.csv"
+    raw.to_csv(input_path, index=False)
+
+    normalize_fbref_csv(str(input_path), str(output_path))
+    clean = pd.read_csv(output_path)
+    model, table, metrics, cols = train_from_matches(clean, test_season=2023)
+
+    assert len(table) >= 1
+    assert metrics["feature_count"] == len(cols)
 
 
 def test_prepare_real_matches_keeps_optional_columns():

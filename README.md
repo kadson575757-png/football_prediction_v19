@@ -118,6 +118,18 @@ Import:
 python -m football_prediction_v19.cli prepare-data --input data/raw/real_matches.csv --output data/processed/real_matches_clean.csv --format fbref
 ```
 
+Oder mit dem FBref-spezifischen Importer:
+
+```bash
+python -m football_prediction_v19.cli import-fbref --input data/raw/fbref_matches.csv --output data/processed/fbref_matches_clean.csv
+```
+
+Eine kleine Beispielvorlage liegt hier:
+
+```text
+data/raw/fbref_template.csv
+```
+
 ### football-data.co.uk CSV
 
 football-data CSVs koennen diese Spalten enthalten:
@@ -130,6 +142,34 @@ Import:
 
 ```bash
 python -m football_prediction_v19.cli prepare-data --input data/raw/real_matches.csv --output data/processed/real_matches_clean.csv --format football-data
+```
+
+Oder mit dem football-data-spezifischen Importer:
+
+```bash
+python -m football_prediction_v19.cli import-football-data --input data/raw/football_data.csv --output data/processed/football_data_clean.csv
+```
+
+Eine kleine Beispielvorlage liegt hier:
+
+```text
+data/raw/football_data_template.csv
+```
+
+### Auto Import And Prepare
+
+Wenn du nicht sicher bist, welches Format deine CSV hat:
+
+```bash
+python -m football_prediction_v19.cli import-and-prepare --input data/raw/real_matches.csv --output data/processed/real_matches_clean.csv --format auto
+```
+
+Danach kannst du wie gewohnt trainieren, kommende Fixtures vorhersagen und den Excel Report exportieren:
+
+```bash
+python -m football_prediction_v19.cli train --input data/processed/real_matches_clean.csv --model models/real_model.joblib --test-season 2023
+python -m football_prediction_v19.cli predict-fixtures --history data/processed/real_matches_clean.csv --fixtures data/upcoming_fixtures_template.csv --model models/real_model.joblib --output outputs/predictions.csv
+python -m football_prediction_v19.cli export-excel --predictions outputs/predictions.csv --output outputs/predictions_report.xlsx
 ```
 
 ### Team Alias Config
