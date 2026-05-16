@@ -171,7 +171,31 @@ value_pick=Home, value_edge=0.052, bet_recommendation="Value bet: Home 1X2"
 
 Das bedeutet: Das Modell sieht Home um 5.2 Prozentpunkte staerker als der margengefilterte Markt, und die v1.9 Schutzregeln blockieren den Tipp nicht.
 
-## 9. Alles in Einem Schritt
+## 9. Betting Backtest Und Calibration Report
+
+Wenn du ein trainiertes Modell und historische Daten mit Ergebnissen und Quoten hast, kannst du die Value-Bet-Regeln historisch testen:
+
+```bash
+python -m football_prediction_v19.cli backtest-bets --history data/processed/real_matches_clean.csv --model models/real_model.joblib --output outputs/backtest_bets.csv --report outputs/backtest_report.md --min-edge 0.03 --max-chaos 7.0 --min-control 7.0
+```
+
+Die CSV `outputs/backtest_bets.csv` enthaelt jede historische Partie, Modellwahrscheinlichkeiten, faire Markt-Wahrscheinlichkeiten, Edge, Bet-Entscheidung, Stake, Profit und kumulierten Profit.
+
+Der Report `outputs/backtest_report.md` fasst zusammen:
+
+- total matches, total bets und no-bet count
+- hit rate, total profit, ROI und yield
+- average edge
+- Performance nach Pick-Typ und Liga
+- groesste Gewinner und Verlierer
+- haeufigste No-Bet-Gruende
+- Brier score, Log Loss und Overconfidence-Warnung
+
+ROI und Yield werden hier als Profit geteilt durch eingesetzte Units gelesen. Beispiel: `+8.0%` bedeutet, dass pro 100 eingesetzten Units historisch 8 Units Profit entstanden waeren.
+
+Ein profitabler Backtest garantiert keinen zukuenftigen Profit. Er zeigt nur, wie diese Modellversion mit diesen Daten und diesen Regeln historisch abgeschnitten haette.
+
+## 10. Alles in Einem Schritt
 
 Das Projekt enthaelt auch ein Hilfsskript:
 
@@ -181,7 +205,7 @@ python scripts/run_all.py
 
 Dieses Skript trainiert das Beispielmodell, fuehrt eine Einzel-Prediction aus und schreibt danach eine Fixture-List-Prediction nach `outputs/predictions.csv`.
 
-## 10. Projektstruktur
+## 11. Projektstruktur
 
 ```text
 football_prediction_v19/
@@ -205,7 +229,7 @@ Wichtige Module, die bewusst erhalten bleiben:
 - `backtest.py`
 - `cli.py`
 
-## 11. Wie Das Modell Arbeitet
+## 12. Wie Das Modell Arbeitet
 
 1. Historische Spiele werden bereinigt.
 2. Pro Match werden nur vorherige Spiele genutzt, damit kein Data Leakage entsteht.

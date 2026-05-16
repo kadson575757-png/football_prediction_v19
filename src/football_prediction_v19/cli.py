@@ -6,12 +6,12 @@ from pathlib import Path
 
 import pandas as pd
 
-from .backtest import run_backtest
+from .backtest import build_betting_report, run_bet_backtest, run_backtest
 from .data import load_matches, prepare_real_matches_file
 from .fbref_scraper import fetch_and_save
 from .features import build_fixture_features
 from .model import load_model, predict_feature_rows, save_model, train_from_matches
-from .odds import LABEL_BY_SIDE, best_value_side, odds_snapshot
+from .odds import value_recommendation
 from .rules_v19 import assess_prediction
 
 
@@ -41,12 +41,6 @@ def _serialize_reasons(values: list[str]) -> str:
     return " | ".join(values)
 
 
-def _r(value: object, digits: int = 4) -> float | None:
-    if value is None or pd.isna(value):
-        return None
-    return round(float(value), digits)
-
-
 def _value_recommendation(
     pred: pd.Series,
     probs: dict[str, float],
@@ -55,52 +49,16 @@ def _value_recommendation(
     max_chaos: float,
     min_control: float,
 ) -> dict[str, object]:
-    market = odds_snapshot(pred.get("odds_home"), pred.get("odds_draw"), pred.get("odds_away"), probs)
-    value_side, value_edge = best_value_side(market["edges"], min_edge)
-    no_bets = list(assessment["no_bets"])
-    locks = set(assessment["locks"])
-
-    if assessment["control_model_score"] < min_control:
-        no_bets.append(f"No value bet: control score below {min_control:g}")
-    if assessment["chaos_score"] > max_chaos:
-        no_bets.append(f"No value bet: chaos score above {max_chaos:g}")
-    if value_side is None:
-        no_bets.append(f"No value bet: best model edge below {min_edge:.2%}")
-    if value_side == "away" and "away_favorite_degradation" in locks:
-        no_bets.append("No away value bet: away-favorite degradation triggered")
-
-    can_recommend = (
-        value_side is not None
-        and assessment["control_model_score"] >= min_control
-        and assessment["chaos_score"] <= max_chaos
-        and not (value_side == "away" and "away_favorite_degradation" in locks)
+    return value_recommendation(
+        pred.get("odds_home"),
+        pred.get("odds_draw"),
+        pred.get("odds_away"),
+        probs,
+        assessment,
+        min_edge,
+        max_chaos,
+        min_control,
     )
-
-    if can_recommend:
-        recommendation = f"Value bet: {LABEL_BY_SIDE[value_side]} 1X2"
-        value_pick = LABEL_BY_SIDE[value_side]
-    else:
-        recommendation = "No bet"
-        value_pick = "No Bet"
-
-    return {
-        "odds_home": _r(market["odds"]["home"]),
-        "odds_draw": _r(market["odds"]["draw"]),
-        "odds_away": _r(market["odds"]["away"]),
-        "implied_home": _r(market["implied"]["home"]),
-        "implied_draw": _r(market["implied"]["draw"]),
-        "implied_away": _r(market["implied"]["away"]),
-        "fair_home": _r(market["fair"]["home"]),
-        "fair_draw": _r(market["fair"]["draw"]),
-        "fair_away": _r(market["fair"]["away"]),
-        "edge_home": _r(market["edges"]["home"]),
-        "edge_draw": _r(market["edges"]["draw"]),
-        "edge_away": _r(market["edges"]["away"]),
-        "value_pick": value_pick,
-        "value_edge": _r(value_edge),
-        "bet_recommendation": recommendation,
-        "no_bet_reasons": list(dict.fromkeys(no_bets)),
-    }
 
 
 def _fixture_extra(row: pd.Series) -> dict[str, float]:
@@ -282,6 +240,26 @@ def cmd_backtest(args) -> None:
     _print_json(metrics)
 
 
+def cmd_backtest_bets(args) -> None:
+    matches = load_matches(args.history)
+    bundle = load_model(args.model)
+    results = run_bet_backtest(
+        matches,
+        bundle,
+        min_edge=args.min_edge,
+        max_chaos=args.max_chaos,
+        min_control=args.min_control,
+    )
+    output = Path(args.output)
+    report = Path(args.report)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    report.parent.mkdir(parents=True, exist_ok=True)
+    results.to_csv(output, index=False)
+    report.write_text(build_betting_report(results), encoding="utf-8")
+    print(f"Saved betting backtest: {output}")
+    print(f"Saved betting report: {report}")
+
+
 def cmd_gather_fbref(args) -> None:
     output = fetch_and_save(args.output, args.start_year, args.end_year, args.comp_ids)
     print(f"Saved: {output}")
@@ -342,6 +320,16 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--test-season", type=int, required=True)
     p.add_argument("--tune", action="store_true")
     p.set_defaults(func=cmd_backtest)
+
+    p = sub.add_parser("backtest-bets", help="Backtest value betting recommendations on historical matches")
+    p.add_argument("--history", required=True)
+    p.add_argument("--model", required=True)
+    p.add_argument("--output", required=True)
+    p.add_argument("--report", required=True)
+    p.add_argument("--min-edge", type=float, default=0.03)
+    p.add_argument("--max-chaos", type=float, default=7.0)
+    p.add_argument("--min-control", type=float, default=7.0)
+    p.set_defaults(func=cmd_backtest_bets)
 
     p = sub.add_parser("gather-fbref", help="Fetch FBref schedules with pandas.read_html")
     p.add_argument("--output", required=True)

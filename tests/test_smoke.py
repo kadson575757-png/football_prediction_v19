@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from football_prediction_v19.cli import main
+from football_prediction_v19.backtest import build_betting_report
 from football_prediction_v19.data import REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS, prepare_real_matches
 from football_prediction_v19.features import build_features, build_fixture_features
 from football_prediction_v19.model import predict_feature_rows, train_from_matches
@@ -10,6 +11,7 @@ from football_prediction_v19.odds import (
     best_value_side,
     bookmaker_overround,
     fair_probabilities,
+    grade_flat_stake_bet,
     implied_probability,
     model_edges,
 )
@@ -144,6 +146,117 @@ def test_no_bet_when_control_score_too_low():
     assert value["value_pick"] == "No Bet"
     assert value["bet_recommendation"] == "No bet"
     assert any("control score below 7" in reason for reason in value["no_bet_reasons"])
+
+
+def test_bet_grading_and_profit_calculation():
+    stake, profit = grade_flat_stake_bet("Home", "H", 2.40)
+    assert stake == 1.0
+    assert profit == 1.4
+
+    stake, profit = grade_flat_stake_bet("Away", "H", 2.90)
+    assert stake == 1.0
+    assert profit == -1.0
+
+    stake, profit = grade_flat_stake_bet("No Bet", "H", 2.40)
+    assert stake == 0.0
+    assert profit == 0.0
+
+
+def test_betting_report_creation():
+    rows = pd.DataFrame(
+        [
+            {
+                "date": "2024-01-01",
+                "league": "Premier League",
+                "home_team": "Chelsea",
+                "away_team": "Arsenal",
+                "result": "H",
+                "prob_home": 0.55,
+                "prob_draw": 0.25,
+                "prob_away": 0.20,
+                "odds_home": 2.20,
+                "odds_draw": 3.40,
+                "odds_away": 3.30,
+                "value_pick": "Home",
+                "value_edge": 0.05,
+                "stake": 1.0,
+                "profit": 1.2,
+                "no_bet_reasons": "",
+            },
+            {
+                "date": "2024-01-02",
+                "league": "Premier League",
+                "home_team": "Liverpool",
+                "away_team": "Spurs",
+                "result": "D",
+                "prob_home": 0.40,
+                "prob_draw": 0.35,
+                "prob_away": 0.25,
+                "odds_home": 1.90,
+                "odds_draw": 3.60,
+                "odds_away": 4.20,
+                "value_pick": "No Bet",
+                "value_edge": 0.01,
+                "stake": 0.0,
+                "profit": 0.0,
+                "no_bet_reasons": "No value bet: control score below 7",
+            },
+        ]
+    )
+
+    report = build_betting_report(rows)
+
+    assert "# Betting Backtest Report" in report
+    assert "Total matches: 2" in report
+    assert "Total bets: 1" in report
+    assert "No value bet: control score below 7" in report
+
+
+def test_backtest_bets_command_runs_on_sample_data(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    history_path = root / "data" / "sample_matches.csv"
+    model_path = tmp_path / "sample_model.joblib"
+    output_path = tmp_path / "outputs" / "backtest_bets.csv"
+    report_path = tmp_path / "outputs" / "backtest_report.md"
+
+    main(
+        [
+            "train",
+            "--input",
+            str(history_path),
+            "--model",
+            str(model_path),
+            "--test-season",
+            "2023",
+        ]
+    )
+    main(
+        [
+            "backtest-bets",
+            "--history",
+            str(history_path),
+            "--model",
+            str(model_path),
+            "--output",
+            str(output_path),
+            "--report",
+            str(report_path),
+            "--min-edge",
+            "0.03",
+            "--max-chaos",
+            "7.0",
+            "--min-control",
+            "7.0",
+        ]
+    )
+
+    assert output_path.exists()
+    assert report_path.exists()
+    results = pd.read_csv(output_path)
+    assert "profit" in results.columns
+    assert "cumulative_profit" in results.columns
+    assert (results["stake"] == 0).any()
+    assert "ROI" in report_path.read_text(encoding="utf-8")
 
 
 def test_prepare_real_matches_cleans_training_rows():

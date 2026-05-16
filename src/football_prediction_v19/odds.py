@@ -75,3 +75,78 @@ def best_value_side(edges: dict[str, float | None], min_edge: float) -> tuple[st
     if edge < min_edge:
         return None, edge
     return side, edge
+
+
+def round_optional(value: object, digits: int = 4) -> float | None:
+    if value is None or pd.isna(value):
+        return None
+    return round(float(value), digits)
+
+
+def value_recommendation(
+    odds_home: float | None,
+    odds_draw: float | None,
+    odds_away: float | None,
+    model_probs: dict[str, float],
+    assessment: dict[str, Any],
+    min_edge: float,
+    max_chaos: float,
+    min_control: float,
+) -> dict[str, object]:
+    market = odds_snapshot(odds_home, odds_draw, odds_away, model_probs)
+    value_side, value_edge = best_value_side(market["edges"], min_edge)
+    no_bets = list(assessment["no_bets"])
+    locks = set(assessment["locks"])
+
+    if assessment["control_model_score"] < min_control:
+        no_bets.append(f"No value bet: control score below {min_control:g}")
+    if assessment["chaos_score"] > max_chaos:
+        no_bets.append(f"No value bet: chaos score above {max_chaos:g}")
+    if value_side is None:
+        no_bets.append(f"No value bet: best model edge below {min_edge:.2%}")
+    if value_side == "away" and "away_favorite_degradation" in locks:
+        no_bets.append("No away value bet: away-favorite degradation triggered")
+
+    can_recommend = (
+        value_side is not None
+        and assessment["control_model_score"] >= min_control
+        and assessment["chaos_score"] <= max_chaos
+        and not (value_side == "away" and "away_favorite_degradation" in locks)
+    )
+
+    if can_recommend:
+        recommendation = f"Value bet: {LABEL_BY_SIDE[value_side]} 1X2"
+        value_pick = LABEL_BY_SIDE[value_side]
+    else:
+        recommendation = "No bet"
+        value_pick = "No Bet"
+
+    return {
+        "odds_home": round_optional(market["odds"]["home"]),
+        "odds_draw": round_optional(market["odds"]["draw"]),
+        "odds_away": round_optional(market["odds"]["away"]),
+        "implied_home": round_optional(market["implied"]["home"]),
+        "implied_draw": round_optional(market["implied"]["draw"]),
+        "implied_away": round_optional(market["implied"]["away"]),
+        "fair_home": round_optional(market["fair"]["home"]),
+        "fair_draw": round_optional(market["fair"]["draw"]),
+        "fair_away": round_optional(market["fair"]["away"]),
+        "edge_home": round_optional(market["edges"]["home"]),
+        "edge_draw": round_optional(market["edges"]["draw"]),
+        "edge_away": round_optional(market["edges"]["away"]),
+        "value_pick": value_pick,
+        "value_edge": round_optional(value_edge),
+        "bet_recommendation": recommendation,
+        "no_bet_reasons": list(dict.fromkeys(no_bets)),
+    }
+
+
+def grade_flat_stake_bet(value_pick: str, result: str, odds: float | None, stake: float = 1.0) -> tuple[float, float]:
+    if value_pick == "No Bet":
+        return 0.0, 0.0
+    pick_label = {"Home": "H", "Draw": "D", "Away": "A"}.get(value_pick)
+    if pick_label is None or odds is None or pd.isna(odds) or float(odds) <= 1:
+        return 0.0, 0.0
+    if pick_label == result:
+        return float(stake), round(float(odds) - float(stake), 4)
+    return float(stake), -float(stake)
