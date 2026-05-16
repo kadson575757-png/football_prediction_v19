@@ -493,7 +493,64 @@ ROI und Yield werden hier als Profit geteilt durch eingesetzte Units gelesen. Be
 
 Ein profitabler Backtest garantiert keinen zukuenftigen Profit. Er zeigt nur, wie diese Modellversion mit diesen Daten und diesen Regeln historisch abgeschnitten haette.
 
-## 14. xG-Daten Importieren Und Zusammenfuehren
+## 14. Modelle Vergleichen Und Kalibrieren
+
+### Warum Wahrscheinlichkeitskalibrierung wichtig ist
+
+Ein Modell kann eine gute Trefferquote (Accuracy) haben, aber trotzdem schlechte Wahrscheinlichkeitsschaetzungen liefern. Ein "ueberzeugtes" Modell, das immer 85%+ Konfidenz berichtet, ist wenig nuetzlich fuer Value-Betting — dort kommt es auf die genauen Wahrscheinlichkeiten an. Kalibrierung bringt die Modellkonfidenz naeher an die echten Haeufigkeiten heran.
+
+### Modelle vergleichen
+
+```bash
+fpv19 compare-models \
+  --input data/processed/combined_football_data.csv \
+  --output-dir outputs/model_comparison \
+  --test-season 2023
+```
+
+Das Modell vergleicht Logistic Regression, Random Forest und Gradient Boosting — jeweils mit und ohne isotonische Kalibrierung. Auswahlkriterium: niedrigster Log Loss, bei Gleichstand niedrigster Brier Score.
+
+### Was jede Output-Datei bedeutet
+
+| Datei | Inhalt |
+|---|---|
+| `model_comparison.csv` | Alle Modelle mit allen Metriken, inkl. ob kalibriert und ob als best markiert |
+| `model_comparison_report.md` | Lesbare Tabelle als Markdown-Report |
+| `best_model.joblib` | Das beste Modell im Standardformat, direkt fuer Prediction nutzbar |
+| `feature_columns.json` | Liste der verwendeten Feature-Spalten |
+| `best_model_metadata.json` | Metadaten: Modellname, Metriken, Zeitstempel, Feature-Liste |
+
+### Das beste Modell verwenden
+
+```bash
+fpv19 predict-fixtures \
+  --history data/processed/combined_football_data.csv \
+  --fixtures data/upcoming_fixtures.csv \
+  --model outputs/model_comparison/best_model.joblib \
+  --output outputs/predictions.csv
+```
+
+### Pipeline mit automatischer Modellauswahl
+
+```bash
+fpv19 run-pipeline \
+  --skip-download \
+  --combine-output data/processed/combined_football_data.csv \
+  --fixtures-raw data/raw/upcoming_fixtures_raw.csv \
+  --fixtures-output data/upcoming_fixtures.csv \
+  --model models/best_model.joblib \
+  --predictions outputs/predictions.csv \
+  --excel outputs/predictions_report.xlsx \
+  --compare-models \
+  --compare-models-dir outputs/model_comparison \
+  --test-season 2023
+```
+
+Mit `--compare-models` wird Schritt D der Pipeline durch eine vollstaendige Modellvergleichsrunde ersetzt. Das beste Modell wird automatisch als Trainingsmodell verwendet.
+
+> **Wichtig:** Bessere Backtest-Metriken garantieren keinen zukuenftigen Gewinn. Dieser Bericht zeigt historische Modellleistung — echtes Value-Betting haengt von vielen weiteren Faktoren ab.
+
+## 14c. xG-Daten Importieren Und Zusammenfuehren
 
 football-data.co.uk liefert keine xG-Werte. Das Projekt unterstuetzt den Import von xG-Daten aus separaten CSV-Exporten (FBref-Stil oder Understat-Stil) und die Anreicherung der historischen Trainingsdaten damit.
 
