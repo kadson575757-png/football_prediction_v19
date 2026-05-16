@@ -60,6 +60,16 @@ Die Rohdatei braucht diese Spalten:
 date,season,league,home_team,away_team,score,home_xg,away_xg,odds_home,odds_draw,odds_away,venue,referee
 ```
 
+Diese Basis-Spalten reichen aus, damit Vorbereitung, Training und Prediction laufen.
+
+Du kannst das Modell mit optionalen Advanced-Spalten verbessern:
+
+```text
+home_xga,away_xga,home_shots,away_shots,home_shots_on_target,away_shots_on_target,home_big_chances,away_big_chances,home_possession,away_possession,home_ppda,away_ppda,home_rest_days,away_rest_days,home_injuries_count,away_injuries_count,home_market_value,away_market_value
+```
+
+Wenn diese Spalten vorhanden sind, werden sie in `data/processed/real_matches_clean.csv` behalten und als Rolling Features genutzt. Wenn sie fehlen, laeuft das Projekt weiter mit den Basis-Spalten.
+
 Bereite die Daten dann so vor:
 
 ```bash

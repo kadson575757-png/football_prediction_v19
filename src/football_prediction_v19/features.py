@@ -11,6 +11,17 @@ from .data import clean_matches
 
 WINDOWS = (5, 10)
 
+ROLLING_OPTIONAL_METRICS = [
+    "shots",
+    "shots_on_target",
+    "big_chances",
+    "possession",
+    "ppda",
+    "rest_days",
+    "injuries_count",
+    "market_value",
+]
+
 
 def _safe_mean(values: list[float]) -> float:
     values = [v for v in values if pd.notna(v)]
@@ -34,14 +45,21 @@ def _points(gf: float, ga: float) -> int:
     return 0
 
 
+def _side_value(row: pd.Series, side: str, metric: str, fallback: float = np.nan) -> float:
+    value = row.get(f"{side}_{metric}", fallback)
+    return float(value) if pd.notna(value) else fallback
+
+
 def _entry(team: str, opponent: str, venue_side: str, row: pd.Series) -> dict[str, Any]:
     is_home = venue_side == "home"
+    side = "home" if is_home else "away"
+    opp_side = "away" if is_home else "home"
     gf = float(row["home_goals"] if is_home else row["away_goals"])
     ga = float(row["away_goals"] if is_home else row["home_goals"])
     xgf = float(row["home_xg"] if is_home else row["away_xg"])
-    xga = float(row["away_xg"] if is_home else row["home_xg"])
+    xga = _side_value(row, side, "xga", float(row["away_xg"] if is_home else row["home_xg"]))
     pts = _points(gf, ga)
-    return {
+    entry = {
         "date": row["date"],
         "team": team,
         "opponent": opponent,
@@ -55,6 +73,10 @@ def _entry(team: str, opponent: str, venue_side: str, row: pd.Series) -> dict[st
         "draw": 1 if pts == 1 else 0,
         "loss": 1 if pts == 0 else 0,
     }
+    for metric in ROLLING_OPTIONAL_METRICS:
+        entry[metric] = _side_value(row, side, metric)
+        entry[f"opp_{metric}"] = _side_value(row, opp_side, metric)
+    return entry
 
 
 def _history_features(history: list[dict[str, Any]], prefix: str, windows: Iterable[int] = WINDOWS, venue_filter: str | None = None) -> dict[str, float]:
@@ -86,6 +108,9 @@ def _history_features(history: list[dict[str, Any]], prefix: str, windows: Itera
         feats[f"{base}_win_rate"] = _safe_mean([h["win"] for h in recent])
         feats[f"{base}_draw_rate"] = _safe_mean([h["draw"] for h in recent])
         feats[f"{base}_loss_rate"] = _safe_mean([h["loss"] for h in recent])
+        for metric in ROLLING_OPTIONAL_METRICS:
+            feats[f"{base}_{metric}"] = _safe_mean([h.get(metric, np.nan) for h in recent])
+            feats[f"{base}_opp_{metric}"] = _safe_mean([h.get(f"opp_{metric}", np.nan) for h in recent])
     return feats
 
 
@@ -114,6 +139,9 @@ def _add_match_context(row: pd.Series) -> dict[str, Any]:
         "formation_home_xg90", "formation_away_xg90",
         "set_piece_xg_ratio_home", "set_piece_xg_ratio_away",
         "fatigue_home", "fatigue_away",
+        "home_rest_days", "away_rest_days",
+        "home_injuries_count", "away_injuries_count",
+        "home_market_value", "away_market_value",
     ]:
         if c in row.index:
             feats[c] = row.get(c, np.nan)
@@ -164,6 +192,11 @@ def _feature_row(row: pd.Series, histories: dict[str, list[dict[str, Any]]], win
         feats[f"edge_w{w}_away_xgf_vs_home_xga"] = feats.get(f"away_w{w}_xgf", np.nan) - feats.get(f"home_w{w}_xga", np.nan)
         feats[f"edge_w{w}_xgdiff"] = feats.get(f"home_w{w}_xgdiff", np.nan) - feats.get(f"away_w{w}_xgdiff", np.nan)
         feats[f"edge_w{w}_ppg"] = feats.get(f"home_w{w}_ppg", np.nan) - feats.get(f"away_w{w}_ppg", np.nan)
+        feats[f"edge_w{w}_shots"] = feats.get(f"home_w{w}_shots", np.nan) - feats.get(f"away_w{w}_shots", np.nan)
+        feats[f"edge_w{w}_shots_on_target"] = feats.get(f"home_w{w}_shots_on_target", np.nan) - feats.get(f"away_w{w}_shots_on_target", np.nan)
+        feats[f"edge_w{w}_big_chances"] = feats.get(f"home_w{w}_big_chances", np.nan) - feats.get(f"away_w{w}_big_chances", np.nan)
+        feats[f"edge_w{w}_rest_days"] = feats.get(f"home_w{w}_rest_days", np.nan) - feats.get(f"away_w{w}_rest_days", np.nan)
+        feats[f"edge_w{w}_injuries_count"] = feats.get(f"away_w{w}_injuries_count", np.nan) - feats.get(f"home_w{w}_injuries_count", np.nan)
         feats[f"expected_total_xg_w{w}"] = feats.get(f"home_w{w}_xgf", np.nan) + feats.get(f"away_w{w}_xgf", np.nan)
 
     _market_features(feats)
