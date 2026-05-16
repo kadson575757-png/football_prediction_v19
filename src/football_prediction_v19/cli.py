@@ -11,6 +11,7 @@ from .data import load_matches, prepare_real_matches_file
 from .excel_report import create_predictions_excel_report
 from .fbref_scraper import fetch_and_save
 from .features import build_fixture_features
+from .fixtures import prepare_fixtures_file
 from .importers.fbref import normalize_fbref_csv
 from .importers.football_data import (
     LEAGUE_CODES,
@@ -231,6 +232,24 @@ def cmd_predict_fixtures(args) -> None:
     print(f"Saved predictions: {output}")
 
 
+def cmd_prepare_fixtures(args) -> None:
+    try:
+        summary = prepare_fixtures_file(
+            args.input,
+            args.output,
+            input_format=args.format,
+            default_season=args.default_season,
+            default_league=args.default_league,
+        )
+    except ValueError as exc:
+        raise SystemExit(f"Error: {exc}") from exc
+    print("Prepared upcoming fixtures")
+    print(f"Input : {summary['input']}")
+    print(f"Output: {summary['output']}")
+    print(f"Rows in : {summary['rows_in']}")
+    print(f"Rows out: {summary['rows_out']}")
+
+
 def cmd_prepare_data(args) -> None:
     summary = prepare_real_matches_file(args.input, args.output, input_format=args.format)
     _print_prepare_summary(summary)
@@ -408,6 +427,32 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-chaos", type=float, default=7.0)
     p.add_argument("--min-control", type=float, default=7.0)
     p.set_defaults(func=cmd_predict_fixtures)
+
+    p = sub.add_parser(
+        "prepare-fixtures",
+        help="Prepare a raw upcoming fixtures CSV into prediction-ready format",
+    )
+    p.add_argument("--input", required=True, help="Path to the raw fixtures CSV file.")
+    p.add_argument("--output", required=True, help="Path where the prepared fixtures CSV is saved.")
+    p.add_argument(
+        "--format",
+        default="auto",
+        choices=["auto", "native", "football-data"],
+        help="Input format: auto (default), native, or football-data.",
+    )
+    p.add_argument(
+        "--default-season",
+        default=None,
+        metavar="SEASON",
+        help="Season value used when the season column is missing or empty (e.g. 2024).",
+    )
+    p.add_argument(
+        "--default-league",
+        default=None,
+        metavar="LEAGUE",
+        help="League value used when the league column is missing or empty (e.g. Bundesliga).",
+    )
+    p.set_defaults(func=cmd_prepare_fixtures)
 
     p = sub.add_parser("prepare-data", help="Clean real historical match data for training")
     p.add_argument("--input", required=True)

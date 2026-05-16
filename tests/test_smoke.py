@@ -9,6 +9,7 @@ from football_prediction_v19.data import REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS, pr
 from football_prediction_v19.features import build_features, build_fixture_features
 from football_prediction_v19.excel_report import create_predictions_excel_report
 from football_prediction_v19.model import predict_feature_rows, train_from_matches
+from football_prediction_v19.fixtures import prepare_fixtures
 from football_prediction_v19.importers.fbref import normalize_fbref_csv
 from football_prediction_v19.importers.football_data import (
     LEAGUE_CODES,
@@ -897,3 +898,196 @@ def test_prepare_data_command_writes_clean_csv(tmp_path):
     clean = pd.read_csv(output_path)
     assert list(clean["home_team"]) == ["Chelsea"]
     assert clean.loc[0, "home_goals"] == 1
+
+
+# ---------------------------------------------------------------------------
+# prepare-fixtures tests
+# ---------------------------------------------------------------------------
+
+_FIXTURE_OUTPUT_COLUMNS = [
+    "date", "season", "league", "home_team", "away_team", "venue", "referee",
+    "odds_home", "odds_draw", "odds_away",
+    "formation_home_xg90", "formation_away_xg90",
+    "fatigue_home", "fatigue_away",
+]
+
+
+def test_prepare_fixtures_native_format():
+    df = pd.DataFrame([
+        {
+            "date": "2024-08-17",
+            "season": "2024-2025",
+            "league": "Premier League",
+            "home_team": "Man Utd",
+            "away_team": "Wolves",
+            "venue": "Old Trafford",
+            "referee": "Michael Oliver",
+            "odds_home": 2.10,
+            "odds_draw": 3.50,
+            "odds_away": 3.40,
+            "formation_home_xg90": 1.20,
+            "formation_away_xg90": 1.05,
+            "fatigue_home": 0.10,
+            "fatigue_away": 0.08,
+        }
+    ])
+    out = prepare_fixtures(df, input_format="native")
+    assert list(out.columns) == _FIXTURE_OUTPUT_COLUMNS
+    assert out.loc[0, "home_team"] == "Manchester United"
+    assert out.loc[0, "away_team"] == "Wolverhampton Wanderers"
+    assert out.loc[0, "date"] == "2024-08-17"
+
+
+def test_prepare_fixtures_football_data_format():
+    df = pd.DataFrame([
+        {"Date": "17/08/2024", "HomeTeam": "Tottenham", "AwayTeam": "Leicester",
+         "B365H": 1.75, "B365D": 3.60, "B365A": 4.80},
+    ])
+    out = prepare_fixtures(df, input_format="football-data", default_season="2024", default_league="Premier League")
+    assert list(out.columns) == _FIXTURE_OUTPUT_COLUMNS
+    assert out.loc[0, "home_team"] == "Tottenham Hotspur"
+    assert out.loc[0, "away_team"] == "Leicester"
+    assert out.loc[0, "season"] == "2024"
+    assert out.loc[0, "league"] == "Premier League"
+    assert out.loc[0, "odds_home"] == 1.75
+
+
+def test_prepare_fixtures_missing_optional_columns_get_defaults():
+    df = pd.DataFrame([
+        {"date": "2024-08-17", "home_team": "Arsenal", "away_team": "Chelsea"},
+    ])
+    out = prepare_fixtures(df, input_format="native", default_season="2024", default_league="Bundesliga")
+    assert out.loc[0, "venue"] == ""
+    assert out.loc[0, "referee"] == ""
+    assert out.loc[0, "season"] == "2024"
+    assert out.loc[0, "league"] == "Bundesliga"
+    assert out.loc[0, "formation_home_xg90"] == 0.0
+    assert out.loc[0, "formation_away_xg90"] == 0.0
+    assert out.loc[0, "fatigue_home"] == 0.0
+    assert out.loc[0, "fatigue_away"] == 0.0
+    import math
+    assert math.isnan(out.loc[0, "odds_home"])
+
+
+def test_prepare_fixtures_team_alias_normalization():
+    df = pd.DataFrame([
+        {"date": "2024-08-17", "home_team": "Spurs", "away_team": "Man United"},
+    ])
+    out = prepare_fixtures(df, input_format="native")
+    assert out.loc[0, "home_team"] == "Tottenham Hotspur"
+    assert out.loc[0, "away_team"] == "Manchester United"
+
+
+def test_prepare_fixtures_missing_required_column_raises():
+    import pytest
+    df = pd.DataFrame([{"date": "2024-08-17", "home_team": "Arsenal"}])
+    with pytest.raises(ValueError, match="away_team"):
+        prepare_fixtures(df, input_format="native")
+
+
+def test_prepare_fixtures_empty_input_raises():
+    import pytest
+    df = pd.DataFrame(columns=["date", "home_team", "away_team"])
+    with pytest.raises(ValueError, match="empty"):
+        prepare_fixtures(df, input_format="native")
+
+
+def test_prepare_fixtures_unknown_format_raises():
+    import pytest
+    df = pd.DataFrame([{"date": "2024-08-17", "home_team": "Arsenal", "away_team": "Chelsea"}])
+    with pytest.raises(ValueError, match="Unsupported"):
+        prepare_fixtures(df, input_format="xls")
+
+
+def test_prepare_fixtures_auto_detects_native():
+    df = pd.DataFrame([
+        {"date": "2024-08-17", "home_team": "Arsenal", "away_team": "Chelsea"},
+    ])
+    out = prepare_fixtures(df, input_format="auto")
+    assert out.loc[0, "home_team"] == "Arsenal"
+
+
+def test_prepare_fixtures_auto_detects_football_data():
+    df = pd.DataFrame([
+        {"Date": "17/08/2024", "HomeTeam": "Arsenal", "AwayTeam": "Chelsea", "B365H": 2.0, "B365D": 3.5, "B365A": 3.5},
+    ])
+    out = prepare_fixtures(df, input_format="auto")
+    assert out.loc[0, "home_team"] == "Arsenal"
+    assert out.loc[0, "odds_home"] == 2.0
+
+
+def test_prepare_fixtures_sorts_by_date():
+    df = pd.DataFrame([
+        {"date": "2024-08-20", "home_team": "Arsenal", "away_team": "Chelsea"},
+        {"date": "2024-08-17", "home_team": "Liverpool", "away_team": "Spurs"},
+    ])
+    out = prepare_fixtures(df, input_format="native")
+    assert out.loc[0, "home_team"] == "Liverpool"
+    assert out.loc[1, "home_team"] == "Arsenal"
+
+
+def test_prepare_fixtures_cli_command(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    input_path = root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"
+    output_path = tmp_path / "fixtures_ready.csv"
+
+    main([
+        "prepare-fixtures",
+        "--input", str(input_path),
+        "--output", str(output_path),
+        "--format", "native",
+    ])
+
+    assert output_path.exists()
+    out = pd.read_csv(output_path)
+    assert list(out.columns) == _FIXTURE_OUTPUT_COLUMNS
+    assert out.loc[0, "home_team"] == "Manchester United"
+
+
+def test_prepare_fixtures_football_data_template(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    input_path = root / "data" / "raw" / "football_data_fixtures_template.csv"
+    output_path = tmp_path / "fixtures_ready.csv"
+
+    main([
+        "prepare-fixtures",
+        "--input", str(input_path),
+        "--output", str(output_path),
+        "--format", "football-data",
+        "--default-season", "2024",
+        "--default-league", "Premier League",
+    ])
+
+    out = pd.read_csv(output_path)
+    assert list(out.columns) == _FIXTURE_OUTPUT_COLUMNS
+    assert out.loc[0, "home_team"] == "Manchester United"
+    assert str(out.loc[0, "season"]) == "2024"
+
+
+def test_prepare_fixtures_then_predict_fixtures(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    raw_fixtures = root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"
+    history_path = root / "data" / "sample_matches.csv"
+    prepared_path = tmp_path / "fixtures_ready.csv"
+    model_path = tmp_path / "model.joblib"
+    predictions_path = tmp_path / "predictions.csv"
+
+    main([
+        "prepare-fixtures",
+        "--input", str(raw_fixtures),
+        "--output", str(prepared_path),
+        "--format", "native",
+    ])
+    main(["train", "--input", str(history_path), "--model", str(model_path), "--test-season", "2023"])
+    main([
+        "predict-fixtures",
+        "--history", str(history_path),
+        "--fixtures", str(prepared_path),
+        "--model", str(model_path),
+        "--output", str(predictions_path),
+    ])
+
+    assert predictions_path.exists()
+    preds = pd.read_csv(predictions_path)
+    assert "prob_home" in preds.columns
+    assert len(preds) >= 1
