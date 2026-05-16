@@ -376,3 +376,63 @@ Key optional flags:
 | `--odds-raw` | Raw odds CSV; triggers prepare-odds + merge |
 | `--xg-raw` | Raw xG CSV; triggers prepare-xg + merge into history |
 | `--test-season` | Season year to hold out for evaluation / backtest |
+
+---
+
+## import-mls-fbref
+
+Import a FBref-style MLS CSV export and normalize it to the project schema.
+
+```bash
+fpv19 import-mls-fbref \
+  --input data/raw/mls_fbref_raw.csv \
+  --output data/raw/mls_matches.csv
+```
+
+| Flag | Required | Description |
+|---|---|---|
+| `--input` | yes | Path to FBref-style MLS CSV (columns: Date, Home, Away, Score, xG, xG.1, Venue, Referee, Comp, Season) |
+| `--output` | yes | Path where the normalized matches CSV is saved |
+
+Use `data/raw/mls_fbref_raw_template.csv` as a column reference template.
+
+---
+
+## download-mls-odds
+
+Fetch upcoming MLS odds from The Odds API (sport key: `soccer_usa_mls`).
+Requires a free API key from https://the-odds-api.com.
+
+```bash
+export THE_ODDS_API_KEY=your_key_here
+fpv19 download-mls-odds \
+  --output data/raw/mls_odds.csv
+```
+
+| Flag | Required | Description |
+|---|---|---|
+| `--output` | yes | Path where the odds CSV is saved |
+| `--api-key` | no | API key (overrides THE_ODDS_API_KEY env var) |
+| `--regions` | no | Regions for odds, e.g. `us` (default: us) |
+| `--markets` | no | Markets to fetch, e.g. `h2h` (default: h2h) |
+| `--odds-format` | no | `decimal` or `american` (default: decimal) |
+| `--bookmaker` | no | Preferred bookmaker key, e.g. `bet365` |
+
+---
+
+## prepare-mls-data
+
+Import a FBref-style MLS CSV and prepare it for model training in one step.
+
+```bash
+fpv19 prepare-mls-data \
+  --fbref data/raw/mls_fbref_raw.csv \
+  --matches-output data/raw/mls_matches.csv \
+  --processed-output data/processed/mls_matches_clean.csv
+```
+
+| Flag | Required | Description |
+|---|---|---|
+| `--fbref` | yes | Path to FBref-style MLS CSV export |
+| `--matches-output` | yes | Path where the normalized matches CSV is saved |
+| `--processed-output` | yes | Path where the cleaned/processed CSV is saved |

@@ -189,6 +189,34 @@ fpv19 export-excel \
 
 ---
 
+## MLS data workflow
+
+To use MLS historical data from FBref:
+
+```bash
+# Import FBref-style MLS CSV (see data/raw/mls_fbref_raw_template.csv for format)
+fpv19 import-mls-fbref \
+  --input data/raw/mls_fbref_raw.csv \
+  --output data/raw/mls_matches.csv
+
+# Or: import + prepare in one step
+fpv19 prepare-mls-data \
+  --fbref data/raw/mls_fbref_raw.csv \
+  --matches-output data/raw/mls_matches.csv \
+  --processed-output data/processed/mls_matches_clean.csv
+```
+
+To download upcoming MLS odds from The Odds API:
+
+```bash
+export THE_ODDS_API_KEY=your_key_here
+fpv19 download-mls-odds --output data/raw/mls_odds.csv
+```
+
+See `docs/DATA_REQUIREMENTS.md` (MLS Support section) for the full MLS validation workflow.
+
+---
+
 ## Output file locations
 
 | File | Description |

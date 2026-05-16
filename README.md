@@ -367,18 +367,36 @@ pro-league, primeira-liga, super-lig, super-league-greece
 
 ### MLS
 
-MLS is supported as a first-class league. Because football-data.co.uk does not carry MLS data,
-the `download-prepare-football-data` command cannot download MLS automatically.
-Provide historical MLS data manually and use:
+MLS is supported as a first-class league with dedicated FBref import and Odds API integration.
+
+**Historical data (FBref CSV):**
 
 ```bash
-fpv19 prepare-data \
-  --input data/raw/mls_matches.csv \
-  --output data/processed/mls_matches_clean.csv \
-  --format native
+fpv19 import-mls-fbref \
+  --input data/raw/mls_fbref_raw.csv \
+  --output data/raw/mls_matches.csv
 ```
 
-Use the template at `data/raw/mls_matches_template.csv` as a column reference.
+Or import and prepare in one step:
+
+```bash
+fpv19 prepare-mls-data \
+  --fbref data/raw/mls_fbref_raw.csv \
+  --matches-output data/raw/mls_matches.csv \
+  --processed-output data/processed/mls_matches_clean.csv
+```
+
+Use `data/raw/mls_fbref_raw_template.csv` as a column reference (FBref format: Date, Home, Away, Score, xG, xG.1, Comp, Season).
+
+**Upcoming odds (The Odds API):**
+
+```bash
+export THE_ODDS_API_KEY=your_key_here
+fpv19 download-mls-odds --output data/raw/mls_odds.csv
+```
+
+Sport key: `soccer_usa_mls`. API keys available free at https://the-odds-api.com
+
 See `docs/DATA_REQUIREMENTS.md` for the full MLS validation workflow.
 
 ## 8. Modell Trainieren

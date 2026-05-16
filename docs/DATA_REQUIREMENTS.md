@@ -162,27 +162,40 @@ MLS is supported as a first-class league across the entire pipeline.
 
 ### Key differences from Top-5 European leagues
 
-- **No automatic downloader**: MLS data is not available via the `download-prepare-football-data` command. You must provide historical match data manually.
+- **FBref CSV importer**: Use `import-mls-fbref` to import FBref-style MLS CSV exports.
+- **Odds source**: Use `download-mls-odds` to fetch upcoming odds from The Odds API (sport key: `soccer_usa_mls`). Requires a free API key from https://the-odds-api.com — set `THE_ODDS_API_KEY` environment variable.
 - **Not yet validated**: MLS strategies have not been backtested out-of-sample. Do not mix MLS signals with validated Top-5 strategies.
 
-### Required data file
+### Historical source: FBref-style CSV
 
-Provide your MLS historical data as:
+Export MLS match data from FBref and import with:
 
 ```
-data/raw/mls_matches.csv
+fpv19 import-mls-fbref \
+  --input data/raw/mls_fbref_raw.csv \
+  --output data/raw/mls_matches.csv
 ```
 
-Use the template at `data/raw/mls_matches_template.csv` as a column reference.
+Use the template at `data/raw/mls_fbref_raw_template.csv` as a column reference (columns: Date, Home, Away, Score, xG, xG.1, Venue, Referee, Comp, Season).
+
+### Odds source: The Odds API
+
+```
+export THE_ODDS_API_KEY=your_key_here
+fpv19 download-mls-odds \
+  --output data/raw/mls_odds.csv
+```
+
+Sport key: `soccer_usa_mls`. Use `--bookmaker` to prefer a specific bookmaker (e.g. `bet365`).
 
 ### MLS validation workflow
 
 **A. Prepare data:**
 ```
-fpv19 prepare-data \
-  --input data/raw/mls_matches.csv \
-  --output data/processed/mls_matches_clean.csv \
-  --format native
+fpv19 prepare-mls-data \
+  --fbref data/raw/mls_fbref_raw.csv \
+  --matches-output data/raw/mls_matches.csv \
+  --processed-output data/processed/mls_matches_clean.csv
 ```
 
 **B. Compare models:**
