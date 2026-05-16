@@ -14,6 +14,7 @@ from football_prediction_v19.importers.football_data import (
     LEAGUE_CODES,
     build_football_data_url,
     bulk_download,
+    download_and_prepare,
     download_season,
     normalize_football_data_csv,
 )
@@ -735,6 +736,144 @@ def test_download_football_data_cli_bulk(tmp_path):
 
     assert (tmp_path / "E0_2022_2023.csv").exists()
     assert (tmp_path / "E0_2023_2024.csv").exists()
+
+
+_FAKE_FD_CSV = (
+    b"Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,B365H,B365D,B365A\n"
+    b"12/08/2023,Tottenham,Man United,2,0,H,2.40,3.30,2.90\n"
+    b"13/08/2023,Wolves,Newcastle,1,1,D,3.10,3.20,2.35\n"
+)
+
+_REQUIRED_TRAINING_COLUMNS = {
+    "date", "season", "league", "home_team", "away_team", "score",
+    "odds_home", "odds_draw", "odds_away",
+}
+
+
+def _mock_get(fake_csv: bytes):
+    import unittest.mock as mock
+    m = mock.Mock(status_code=200, content=fake_csv)
+    m.raise_for_status = lambda: None
+    return m
+
+
+def test_download_and_prepare_single(tmp_path):
+    import unittest.mock as mock
+
+    raw_dir = tmp_path / "raw"
+    proc_dir = tmp_path / "processed"
+
+    with mock.patch(
+        "football_prediction_v19.importers.football_data.requests.get",
+        return_value=_mock_get(_FAKE_FD_CSV),
+    ):
+        result = download_and_prepare("E0", 2023, raw_dir, proc_dir)
+
+    assert Path(result["raw_path"]).name == "football_data_E0_2023.csv"
+    assert Path(result["processed_path"]).name == "football_data_E0_2023_clean.csv"
+    assert result["rows_written"] == 2
+    clean = pd.read_csv(result["processed_path"])
+    assert _REQUIRED_TRAINING_COLUMNS.issubset(clean.columns)
+    assert clean.loc[0, "home_team"] == "Tottenham Hotspur"
+
+
+def test_download_and_prepare_multiple(tmp_path):
+    import unittest.mock as mock
+
+    raw_dir = tmp_path / "raw"
+    proc_dir = tmp_path / "processed"
+
+    with mock.patch(
+        "football_prediction_v19.importers.football_data.requests.get",
+        return_value=_mock_get(_FAKE_FD_CSV),
+    ):
+        r1 = download_and_prepare("E0", 2022, raw_dir, proc_dir)
+        r2 = download_and_prepare("D1", 2023, raw_dir, proc_dir)
+
+    assert Path(r1["raw_path"]).name == "football_data_E0_2022.csv"
+    assert Path(r2["raw_path"]).name == "football_data_D1_2023.csv"
+    assert r1["rows_written"] == 2
+    assert r2["rows_written"] == 2
+
+
+def test_download_prepare_cli_single(tmp_path):
+    import unittest.mock as mock
+
+    raw_dir = tmp_path / "raw"
+    proc_dir = tmp_path / "processed"
+
+    with mock.patch(
+        "football_prediction_v19.importers.football_data.requests.get",
+        return_value=_mock_get(_FAKE_FD_CSV),
+    ):
+        main([
+            "download-prepare-football-data",
+            "--leagues", "E0",
+            "--seasons", "2023",
+            "--raw-dir", str(raw_dir),
+            "--processed-dir", str(proc_dir),
+        ])
+
+    assert (raw_dir / "football_data_E0_2023.csv").exists()
+    assert (proc_dir / "football_data_E0_2023_clean.csv").exists()
+    clean = pd.read_csv(proc_dir / "football_data_E0_2023_clean.csv")
+    assert _REQUIRED_TRAINING_COLUMNS.issubset(clean.columns)
+
+
+def test_download_prepare_cli_combine_output(tmp_path):
+    import unittest.mock as mock
+
+    raw_dir = tmp_path / "raw"
+    proc_dir = tmp_path / "processed"
+    combined = tmp_path / "combined.csv"
+
+    with mock.patch(
+        "football_prediction_v19.importers.football_data.requests.get",
+        return_value=_mock_get(_FAKE_FD_CSV),
+    ):
+        main([
+            "download-prepare-football-data",
+            "--leagues", "E0", "D1",
+            "--seasons", "2023",
+            "--raw-dir", str(raw_dir),
+            "--processed-dir", str(proc_dir),
+            "--combine-output", str(combined),
+        ])
+
+    assert combined.exists()
+    df = pd.read_csv(combined)
+    assert len(df) == 4  # 2 rows per league
+    assert list(df.columns[:1]) == ["date"]  # sorted by date
+
+
+def test_download_prepare_cli_unknown_league(tmp_path):
+    import pytest
+
+    with pytest.raises(SystemExit, match="Unknown league"):
+        main([
+            "download-prepare-football-data",
+            "--leagues", "NOTACODE",
+            "--seasons", "2023",
+            "--raw-dir", str(tmp_path / "raw"),
+            "--processed-dir", str(tmp_path / "processed"),
+        ])
+
+
+def test_download_prepare_schema_contains_training_columns(tmp_path):
+    import unittest.mock as mock
+
+    raw_dir = tmp_path / "raw"
+    proc_dir = tmp_path / "processed"
+
+    with mock.patch(
+        "football_prediction_v19.importers.football_data.requests.get",
+        return_value=_mock_get(_FAKE_FD_CSV),
+    ):
+        result = download_and_prepare("premier-league", 2023, raw_dir, proc_dir)
+
+    clean = pd.read_csv(result["processed_path"])
+    assert _REQUIRED_TRAINING_COLUMNS.issubset(clean.columns)
+    assert result["league_code"] == "E0"
 
 
 def test_prepare_data_command_writes_clean_csv(tmp_path):

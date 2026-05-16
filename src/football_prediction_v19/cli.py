@@ -15,6 +15,7 @@ from .importers.fbref import normalize_fbref_csv
 from .importers.football_data import (
     LEAGUE_CODES,
     bulk_download,
+    download_and_prepare,
     download_season,
     normalize_football_data_csv,
 )
@@ -288,6 +289,62 @@ def cmd_export_excel(args) -> None:
     print(f"Saved Excel report: {output}")
 
 
+def cmd_download_prepare_football_data(args) -> None:
+    import requests
+
+    raw_dir = Path(args.raw_dir)
+    processed_dir = Path(args.processed_dir)
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    processed_dir.mkdir(parents=True, exist_ok=True)
+
+    if not args.leagues:
+        raise SystemExit("Error: --leagues is required and must not be empty.")
+    if not args.seasons:
+        raise SystemExit("Error: --seasons is required and must not be empty.")
+
+    processed_paths: list[Path] = []
+    total_written = 0
+
+    for league in args.leagues:
+        for season in args.seasons:
+            print(f"\nProcessing {league} season {season}/{season + 1}...")
+            try:
+                result = download_and_prepare(league, season, raw_dir, processed_dir)
+            except ValueError as exc:
+                raise SystemExit(f"Error: {exc}") from exc
+            except requests.HTTPError as exc:
+                raise SystemExit(
+                    f"Download failed for {league} {season}: {exc}\n"
+                    "Check that the league code and season are correct."
+                ) from exc
+
+            processed_paths.append(Path(result["processed_path"]))
+            total_written += result["rows_written"]
+            print(f"  Raw file    : {result['raw_path']}")
+            print(f"  Processed   : {result['processed_path']}")
+            print(f"  Rows read   : {result['rows_read']}")
+            print(f"  Rows written: {result['rows_written']}")
+            print(f"  Rows dropped: {result['rows_dropped']} (incomplete historical rows)")
+            if result.get("optional_found"):
+                print(f"  Advanced columns found: {result['optional_found']}")
+
+    print(f"\nDone. {total_written} total rows written across {len(processed_paths)} file(s).")
+
+    if args.combine_output:
+        import pandas as pd
+
+        combine_path = Path(args.combine_output)
+        combine_path.parent.mkdir(parents=True, exist_ok=True)
+        frames = [pd.read_csv(p) for p in processed_paths if p.exists()]
+        if not frames:
+            raise SystemExit("Error: No processed files to combine.")
+        combined = pd.concat(frames, ignore_index=True)
+        combined["date"] = pd.to_datetime(combined["date"], errors="coerce")
+        combined = combined.sort_values("date").reset_index(drop=True)
+        combined.to_csv(combine_path, index=False)
+        print(f"Combined output: {combine_path} ({len(combined)} rows)")
+
+
 def cmd_download_football_data(args) -> None:
     leagues = args.leagues
     seasons = args.seasons
@@ -394,6 +451,48 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--predictions", required=True)
     p.add_argument("--output", required=True)
     p.set_defaults(func=cmd_export_excel)
+
+    p = sub.add_parser(
+        "download-prepare-football-data",
+        help="Download and prepare football-data.co.uk CSVs into training-ready files",
+    )
+    p.add_argument(
+        "--leagues",
+        nargs="+",
+        required=True,
+        metavar="CODE",
+        help=(
+            "One or more league codes (e.g. E0 D1) or friendly names "
+            f"(e.g. premier-league bundesliga). Available names: {', '.join(sorted(LEAGUE_CODES))}."
+        ),
+    )
+    p.add_argument(
+        "--seasons",
+        nargs="+",
+        type=int,
+        required=True,
+        metavar="YEAR",
+        help="One or more season start years (e.g. 2023 for the 2023-24 season).",
+    )
+    p.add_argument(
+        "--raw-dir",
+        required=True,
+        metavar="DIR",
+        help="Directory where raw downloaded CSV files are saved.",
+    )
+    p.add_argument(
+        "--processed-dir",
+        required=True,
+        metavar="DIR",
+        help="Directory where cleaned training-ready CSV files are saved.",
+    )
+    p.add_argument(
+        "--combine-output",
+        default=None,
+        metavar="FILE",
+        help="Optional path to a combined CSV of all processed files, sorted by date.",
+    )
+    p.set_defaults(func=cmd_download_prepare_football_data)
 
     p = sub.add_parser(
         "download-football-data",
