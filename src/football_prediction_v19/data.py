@@ -28,6 +28,22 @@ LEAKAGE_COLUMNS = {
     "actual_total_goals", "actual_goal_diff"
 }
 
+REAL_MATCH_REQUIRED_COLUMNS = [
+    "date",
+    "season",
+    "league",
+    "home_team",
+    "away_team",
+    "score",
+    "home_xg",
+    "away_xg",
+    "odds_home",
+    "odds_draw",
+    "odds_away",
+    "venue",
+    "referee",
+]
+
 
 def load_matches(path: str | Path) -> pd.DataFrame:
     path = Path(path)
@@ -138,3 +154,45 @@ def save_dataframe(df: pd.DataFrame, path: str | Path) -> None:
         df.to_excel(path, index=False)
     else:
         df.to_csv(path, index=False)
+
+
+def prepare_real_matches(df: pd.DataFrame) -> pd.DataFrame:
+    """Prepare user-supplied historical match data for model training."""
+    out = df.copy()
+    out.columns = [str(c).strip().lower().replace(" ", "_") for c in out.columns]
+    missing = [col for col in REAL_MATCH_REQUIRED_COLUMNS if col not in out.columns]
+    if missing:
+        raise ValueError(f"Missing required columns: {missing}")
+
+    out = out[REAL_MATCH_REQUIRED_COLUMNS].copy()
+    rows_before = len(out)
+    out["date"] = pd.to_datetime(out["date"], errors="coerce")
+    scores = out["score"].apply(parse_score)
+    out["home_goals"] = [score[0] for score in scores]
+    out["away_goals"] = [score[1] for score in scores]
+
+    for col in ["home_xg", "away_xg", "odds_home", "odds_draw", "odds_away"]:
+        out[col] = pd.to_numeric(out[col], errors="coerce")
+
+    for col in ["season", "league", "home_team", "away_team", "venue", "referee"]:
+        out[col] = out[col].fillna("Unknown").astype(str).str.strip()
+
+    out = out.dropna(subset=["date", "score", "home_goals", "away_goals"])
+    out = out.sort_values(["date", "league", "home_team", "away_team"]).reset_index(drop=True)
+    out.attrs["rows_before"] = rows_before
+    out.attrs["rows_after"] = len(out)
+    out.attrs["rows_dropped"] = rows_before - len(out)
+    return out
+
+
+def prepare_real_matches_file(input_path: str | Path, output_path: str | Path) -> dict[str, int | str]:
+    raw = load_matches(input_path)
+    clean = prepare_real_matches(raw)
+    save_dataframe(clean, output_path)
+    return {
+        "input": str(input_path),
+        "output": str(output_path),
+        "rows_read": int(clean.attrs["rows_before"]),
+        "rows_written": int(clean.attrs["rows_after"]),
+        "rows_dropped": int(clean.attrs["rows_dropped"]),
+    }
