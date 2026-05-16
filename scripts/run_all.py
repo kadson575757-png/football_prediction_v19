@@ -6,6 +6,15 @@ from football_prediction_v19.cli import main
 def run_all() -> None:
     main(
         [
+            "import-football-data",
+            "--input",
+            "data/raw/football_data_template.csv",
+            "--output",
+            "data/processed/football_data_clean.csv",
+        ]
+    )
+    main(
+        [
             "train",
             "--input",
             "data/sample_matches.csv",
@@ -38,6 +47,28 @@ def run_all() -> None:
             "3.40",
             "--odds-away",
             "2.90",
+        ]
+    )
+    main(
+        [
+            "predict-fixtures",
+            "--history",
+            "data/sample_matches.csv",
+            "--fixtures",
+            "data/upcoming_fixtures_template.csv",
+            "--model",
+            "models/sample_model.joblib",
+            "--output",
+            "outputs/predictions.csv",
+        ]
+    )
+    main(
+        [
+            "export-excel",
+            "--predictions",
+            "outputs/predictions.csv",
+            "--output",
+            "outputs/predictions_report.xlsx",
         ]
     )
 
