@@ -10,7 +10,13 @@ from football_prediction_v19.features import build_features, build_fixture_featu
 from football_prediction_v19.excel_report import create_predictions_excel_report
 from football_prediction_v19.model import predict_feature_rows, train_from_matches
 from football_prediction_v19.importers.fbref import normalize_fbref_csv
-from football_prediction_v19.importers.football_data import normalize_football_data_csv
+from football_prediction_v19.importers.football_data import (
+    LEAGUE_CODES,
+    build_football_data_url,
+    bulk_download,
+    download_season,
+    normalize_football_data_csv,
+)
 from football_prediction_v19.odds import (
     best_value_side,
     bookmaker_overround,
@@ -647,6 +653,88 @@ def test_optional_columns_create_advanced_rolling_features():
     assert "edge_w5_big_chances" in features.columns
     assert features.loc[0, "home_w5_shots"] == 8
     assert features.loc[0, "away_w5_injuries_count"] == 1
+
+
+def test_build_football_data_url_known_leagues():
+    assert build_football_data_url("E0", 2023) == "https://www.football-data.co.uk/mmz4281/2324/E0.csv"
+    assert build_football_data_url("premier-league", 2022) == "https://www.football-data.co.uk/mmz4281/2223/E0.csv"
+    assert build_football_data_url("bundesliga", 2023) == "https://www.football-data.co.uk/mmz4281/2324/D1.csv"
+    assert build_football_data_url("D2", 2024) == "https://www.football-data.co.uk/mmz4281/2425/D2.csv"
+
+
+def test_league_codes_dict_contains_common_leagues():
+    assert "premier-league" in LEAGUE_CODES
+    assert LEAGUE_CODES["premier-league"] == "E0"
+    assert "bundesliga" in LEAGUE_CODES
+    assert "serie-a" in LEAGUE_CODES
+    assert "la-liga" in LEAGUE_CODES
+
+
+def test_download_season_uses_correct_url_and_filename(tmp_path):
+    import unittest.mock as mock
+
+    fake_csv = b"Date,HomeTeam,AwayTeam\n01/08/2023,Arsenal,Chelsea\n"
+    with mock.patch("football_prediction_v19.importers.football_data.requests.get") as mock_get:
+        mock_get.return_value = mock.Mock(status_code=200, content=fake_csv)
+        mock_get.return_value.raise_for_status = lambda: None
+        path = download_season("E0", 2023, tmp_path)
+
+    assert path.name == "E0_2023_2024.csv"
+    assert path.read_bytes() == fake_csv
+    called_url = mock_get.call_args[0][0]
+    assert called_url == "https://www.football-data.co.uk/mmz4281/2324/E0.csv"
+
+
+def test_bulk_download_downloads_all_combinations(tmp_path):
+    import unittest.mock as mock
+
+    fake_csv = b"Date,HomeTeam,AwayTeam\n01/08/2023,Arsenal,Chelsea\n"
+    with mock.patch("football_prediction_v19.importers.football_data.requests.get") as mock_get:
+        mock_get.return_value = mock.Mock(status_code=200, content=fake_csv)
+        mock_get.return_value.raise_for_status = lambda: None
+        paths = bulk_download(["E0", "D1"], [2022, 2023], tmp_path)
+
+    assert len(paths) == 4
+    names = {p.name for p in paths}
+    assert "E0_2022_2023.csv" in names
+    assert "E0_2023_2024.csv" in names
+    assert "D1_2022_2023.csv" in names
+    assert "D1_2023_2024.csv" in names
+
+
+def test_download_football_data_cli_command(tmp_path):
+    import unittest.mock as mock
+
+    fake_csv = b"Date,HomeTeam,AwayTeam\n01/08/2023,Arsenal,Chelsea\n"
+    with mock.patch("football_prediction_v19.importers.football_data.requests.get") as mock_get:
+        mock_get.return_value = mock.Mock(status_code=200, content=fake_csv)
+        mock_get.return_value.raise_for_status = lambda: None
+        main([
+            "download-football-data",
+            "--leagues", "E0",
+            "--seasons", "2023",
+            "--output-dir", str(tmp_path),
+        ])
+
+    assert (tmp_path / "E0_2023_2024.csv").exists()
+
+
+def test_download_football_data_cli_bulk(tmp_path):
+    import unittest.mock as mock
+
+    fake_csv = b"Date,HomeTeam,AwayTeam\n01/08/2023,Arsenal,Chelsea\n"
+    with mock.patch("football_prediction_v19.importers.football_data.requests.get") as mock_get:
+        mock_get.return_value = mock.Mock(status_code=200, content=fake_csv)
+        mock_get.return_value.raise_for_status = lambda: None
+        main([
+            "download-football-data",
+            "--leagues", "E0", "premier-league",
+            "--seasons", "2022", "2023",
+            "--output-dir", str(tmp_path),
+        ])
+
+    assert (tmp_path / "E0_2022_2023.csv").exists()
+    assert (tmp_path / "E0_2023_2024.csv").exists()
 
 
 def test_prepare_data_command_writes_clean_csv(tmp_path):

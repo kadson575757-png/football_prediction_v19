@@ -12,7 +12,12 @@ from .excel_report import create_predictions_excel_report
 from .fbref_scraper import fetch_and_save
 from .features import build_fixture_features
 from .importers.fbref import normalize_fbref_csv
-from .importers.football_data import normalize_football_data_csv
+from .importers.football_data import (
+    LEAGUE_CODES,
+    bulk_download,
+    download_season,
+    normalize_football_data_csv,
+)
 from .model import load_model, predict_feature_rows, save_model, train_from_matches
 from .odds import value_recommendation
 from .rules_v19 import assess_prediction
@@ -283,6 +288,20 @@ def cmd_export_excel(args) -> None:
     print(f"Saved Excel report: {output}")
 
 
+def cmd_download_football_data(args) -> None:
+    leagues = args.leagues
+    seasons = args.seasons
+    output_dir = args.output_dir
+    if len(leagues) == 1 and len(seasons) == 1:
+        path = download_season(leagues[0], seasons[0], output_dir)
+        print(f"Downloaded: {path}")
+    else:
+        paths = bulk_download(leagues, seasons, output_dir)
+        for path in paths:
+            print(f"Downloaded: {path}")
+        print(f"Total: {len(paths)} file(s)")
+
+
 def cmd_gather_fbref(args) -> None:
     output = fetch_and_save(args.output, args.start_year, args.end_year, args.comp_ids)
     print(f"Saved: {output}")
@@ -375,6 +394,36 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--predictions", required=True)
     p.add_argument("--output", required=True)
     p.set_defaults(func=cmd_export_excel)
+
+    p = sub.add_parser(
+        "download-football-data",
+        help="Download CSV(s) from football-data.co.uk automatically",
+    )
+    p.add_argument(
+        "--leagues",
+        nargs="+",
+        required=True,
+        metavar="CODE",
+        help=(
+            "One or more league codes (e.g. E0 D1) or friendly names "
+            f"(e.g. premier-league bundesliga). Available names: {', '.join(sorted(LEAGUE_CODES))}."
+        ),
+    )
+    p.add_argument(
+        "--seasons",
+        nargs="+",
+        type=int,
+        required=True,
+        metavar="YEAR",
+        help="One or more season start years (e.g. 2022 2023 for 2022-23 and 2023-24).",
+    )
+    p.add_argument(
+        "--output-dir",
+        required=True,
+        metavar="DIR",
+        help="Directory where downloaded CSV files will be saved.",
+    )
+    p.set_defaults(func=cmd_download_football_data)
 
     p = sub.add_parser("gather-fbref", help="Fetch FBref schedules with pandas.read_html")
     p.add_argument("--output", required=True)
