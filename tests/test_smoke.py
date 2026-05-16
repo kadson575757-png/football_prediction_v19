@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 
 from football_prediction_v19.cli import main
-from football_prediction_v19.data import prepare_real_matches
+from football_prediction_v19.data import REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS, prepare_real_matches
 from football_prediction_v19.features import build_features, build_fixture_features
 from football_prediction_v19.model import predict_feature_rows, train_from_matches
 from football_prediction_v19.rules_v19 import assess_prediction
@@ -19,6 +19,16 @@ def test_pipeline_smoke():
     pred = predict_feature_rows(bundle, fixture).iloc[0]
     assessment = assess_prediction(pred, {"H": pred.prob_home, "D": pred.prob_draw, "A": pred.prob_away})
     assert "probabilities" in assessment
+
+
+def test_basic_dataset_still_trains_without_optional_columns():
+    path = Path(__file__).resolve().parents[1] / "data" / "sample_matches.csv"
+    df = pd.read_csv(path)
+    model, table, metrics, cols = train_from_matches(df, test_season=2023)
+
+    assert len(table) > 10
+    assert metrics["feature_count"] == len(cols)
+    assert "home_w5_shots" not in cols
 
 
 def test_predict_fixtures_command(tmp_path):
@@ -120,6 +130,90 @@ def test_prepare_real_matches_cleans_training_rows():
     assert clean.loc[0, "away_goals"] == 1
     assert clean.loc[0, "home_xg"] == 1.9
     assert clean.attrs["rows_dropped"] == 1
+    assert "home_xga" in clean.attrs["optional_missing"]
+
+
+def test_prepare_real_matches_keeps_optional_columns():
+    root = Path(__file__).resolve().parents[1]
+    raw = pd.read_csv(root / "data" / "raw" / "real_matches_template.csv")
+
+    clean = prepare_real_matches(raw)
+
+    assert len(clean) == 2
+    assert clean.attrs["optional_missing"] == []
+    assert set(REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS).issubset(clean.columns)
+    assert clean.loc[0, "home_shots"] == 11
+    assert clean.loc[0, "away_market_value"] == 920000000
+
+
+def test_optional_columns_create_advanced_rolling_features():
+    raw = pd.DataFrame(
+        [
+            {
+                "date": "2023-08-01",
+                "season": "2023-2024",
+                "league": "Premier League",
+                "home_team": "Chelsea",
+                "away_team": "Arsenal",
+                "score": "1-0",
+                "home_xg": 1.3,
+                "away_xg": 0.8,
+                "odds_home": 2.2,
+                "odds_draw": 3.4,
+                "odds_away": 3.1,
+                "venue": "Stamford Bridge",
+                "referee": "Anthony Taylor",
+                "home_xga": 0.7,
+                "away_xga": 1.4,
+                "home_shots": 12,
+                "away_shots": 8,
+                "home_shots_on_target": 5,
+                "away_shots_on_target": 3,
+                "home_big_chances": 3,
+                "away_big_chances": 1,
+                "home_rest_days": 6,
+                "away_rest_days": 5,
+                "home_injuries_count": 1,
+                "away_injuries_count": 2,
+            },
+            {
+                "date": "2023-08-08",
+                "season": "2023-2024",
+                "league": "Premier League",
+                "home_team": "Arsenal",
+                "away_team": "Chelsea",
+                "score": "2-2",
+                "home_xg": 1.5,
+                "away_xg": 1.2,
+                "odds_home": 2.0,
+                "odds_draw": 3.5,
+                "odds_away": 3.6,
+                "venue": "Emirates Stadium",
+                "referee": "Michael Oliver",
+                "home_xga": 1.1,
+                "away_xga": 1.6,
+                "home_shots": 15,
+                "away_shots": 10,
+                "home_shots_on_target": 6,
+                "away_shots_on_target": 4,
+                "home_big_chances": 2,
+                "away_big_chances": 2,
+                "home_rest_days": 7,
+                "away_rest_days": 7,
+                "home_injuries_count": 0,
+                "away_injuries_count": 1,
+            },
+        ]
+    )
+
+    clean = prepare_real_matches(raw)
+    features = build_features(clean, min_history=1)
+
+    assert "home_w5_shots" in features.columns
+    assert "away_w5_shots_on_target" in features.columns
+    assert "edge_w5_big_chances" in features.columns
+    assert features.loc[0, "home_w5_shots"] == 8
+    assert features.loc[0, "away_w5_injuries_count"] == 1
 
 
 def test_prepare_data_command_writes_clean_csv(tmp_path):

@@ -44,6 +44,27 @@ REAL_MATCH_REQUIRED_COLUMNS = [
     "referee",
 ]
 
+REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS = [
+    "home_xga",
+    "away_xga",
+    "home_shots",
+    "away_shots",
+    "home_shots_on_target",
+    "away_shots_on_target",
+    "home_big_chances",
+    "away_big_chances",
+    "home_possession",
+    "away_possession",
+    "home_ppda",
+    "away_ppda",
+    "home_rest_days",
+    "away_rest_days",
+    "home_injuries_count",
+    "away_injuries_count",
+    "home_market_value",
+    "away_market_value",
+]
+
 
 def load_matches(path: str | Path) -> pd.DataFrame:
     path = Path(path)
@@ -68,6 +89,7 @@ def _normalize_columns(df: pd.DataFrame) -> pd.DataFrame:
             "formation_home_xg90", "formation_away_xg90",
             "set_piece_xg_ratio_home", "set_piece_xg_ratio_away",
             "fatigue_home", "fatigue_away", "attendance",
+            *REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS,
         }:
             lower_map[c] = normalized
     out = out.rename(columns=lower_map)
@@ -110,7 +132,7 @@ def clean_matches(df: pd.DataFrame, completed_only: bool = True) -> pd.DataFrame
         out["home_goals"] = np.nan
         out["away_goals"] = np.nan
 
-    for c in ["home_xg", "away_xg", "attendance"]:
+    for c in ["home_xg", "away_xg", "attendance", *REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS]:
         if c in out.columns:
             out[c] = pd.to_numeric(out[c], errors="coerce")
 
@@ -164,14 +186,16 @@ def prepare_real_matches(df: pd.DataFrame) -> pd.DataFrame:
     if missing:
         raise ValueError(f"Missing required columns: {missing}")
 
-    out = out[REAL_MATCH_REQUIRED_COLUMNS].copy()
+    optional_found = [col for col in REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS if col in out.columns]
+    optional_missing = [col for col in REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS if col not in out.columns]
+    out = out[REAL_MATCH_REQUIRED_COLUMNS + optional_found].copy()
     rows_before = len(out)
     out["date"] = pd.to_datetime(out["date"], errors="coerce")
     scores = out["score"].apply(parse_score)
     out["home_goals"] = [score[0] for score in scores]
     out["away_goals"] = [score[1] for score in scores]
 
-    for col in ["home_xg", "away_xg", "odds_home", "odds_draw", "odds_away"]:
+    for col in ["home_xg", "away_xg", "odds_home", "odds_draw", "odds_away", *optional_found]:
         out[col] = pd.to_numeric(out[col], errors="coerce")
 
     for col in ["season", "league", "home_team", "away_team", "venue", "referee"]:
@@ -182,6 +206,8 @@ def prepare_real_matches(df: pd.DataFrame) -> pd.DataFrame:
     out.attrs["rows_before"] = rows_before
     out.attrs["rows_after"] = len(out)
     out.attrs["rows_dropped"] = rows_before - len(out)
+    out.attrs["optional_found"] = optional_found
+    out.attrs["optional_missing"] = optional_missing
     return out
 
 
@@ -195,4 +221,6 @@ def prepare_real_matches_file(input_path: str | Path, output_path: str | Path) -
         "rows_read": int(clean.attrs["rows_before"]),
         "rows_written": int(clean.attrs["rows_after"]),
         "rows_dropped": int(clean.attrs["rows_dropped"]),
+        "optional_found": ", ".join(clean.attrs["optional_found"]) or "none",
+        "optional_missing": ", ".join(clean.attrs["optional_missing"]) or "none",
     }

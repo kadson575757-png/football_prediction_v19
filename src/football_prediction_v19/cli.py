@@ -181,6 +181,8 @@ def cmd_prepare_data(args) -> None:
     print(f"Rows read: {summary['rows_read']}")
     print(f"Rows written: {summary['rows_written']}")
     print(f"Rows dropped because they were incomplete historical matches: {summary['rows_dropped']}")
+    print(f"Optional advanced columns found: {summary['optional_found']}")
+    print(f"Optional advanced columns missing: {summary['optional_missing']}")
 
 
 def cmd_backtest(args) -> None:
