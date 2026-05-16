@@ -2520,3 +2520,200 @@ def test_mls_build_features():
     assert len(features) > 0
     if "league" in features.columns:
         assert (features["league"] == "MLS").all()
+
+
+# ---------------------------------------------------------------------------
+# MLS data source tests
+# ---------------------------------------------------------------------------
+
+def test_import_mls_fbref_column_mapping(tmp_path):
+    from football_prediction_v19.importers.mls_fbref import import_mls_fbref
+    csv = tmp_path / "mls_raw.csv"
+    csv.write_text(
+        "Date,Home,Away,Score,xG,xG.1,Venue,Referee,Comp,Season\n"
+        "2025-03-01,LA Galaxy,Inter Miami,2-1,1.85,0.90,Dignity Health Sports Park,,MLS,2025\n"
+    )
+    df = import_mls_fbref(csv)
+    for col in ["date", "home_team", "away_team", "score", "home_xg", "away_xg"]:
+        assert col in df.columns, f"Missing column: {col}"
+    assert df["date"].iloc[0] == "2025-03-01"
+    assert df["score"].iloc[0] == "2-1"
+    assert abs(float(df["home_xg"].iloc[0]) - 1.85) < 0.01
+
+
+def test_import_mls_fbref_normalizes_aliases(tmp_path):
+    from football_prediction_v19.importers.mls_fbref import import_mls_fbref
+    csv = tmp_path / "mls_raw.csv"
+    csv.write_text(
+        "Date,Home,Away,Score,xG,xG.1\n"
+        "2025-04-01,LAFC,Inter Miami,1-0,1.10,0.50\n"
+    )
+    df = import_mls_fbref(csv)
+    assert df["home_team"].iloc[0] == "Los Angeles FC"
+
+
+def test_import_mls_fbref_infers_league(tmp_path):
+    from football_prediction_v19.importers.mls_fbref import import_mls_fbref
+    csv = tmp_path / "mls_raw.csv"
+    csv.write_text(
+        "Date,Home,Away,Score\n"
+        "2025-04-01,LA Galaxy,Inter Miami,2-1\n"
+    )
+    df = import_mls_fbref(csv)
+    assert "league" in df.columns
+    assert df["league"].iloc[0] == "MLS"
+
+
+def test_import_mls_fbref_infers_season(tmp_path):
+    from football_prediction_v19.importers.mls_fbref import import_mls_fbref
+    csv = tmp_path / "mls_raw.csv"
+    csv.write_text(
+        "Date,Home,Away,Score\n"
+        "2025-06-15,LA Galaxy,Inter Miami,1-1\n"
+    )
+    df = import_mls_fbref(csv)
+    assert "season" in df.columns
+    assert df["season"].iloc[0] == "2025"
+
+
+def test_import_mls_fbref_missing_file_error(tmp_path):
+    from football_prediction_v19.importers.mls_fbref import import_mls_fbref
+    import pytest
+    with pytest.raises(FileNotFoundError):
+        import_mls_fbref(tmp_path / "does_not_exist.csv")
+
+
+def test_import_mls_fbref_empty_file_error(tmp_path):
+    from football_prediction_v19.importers.mls_fbref import import_mls_fbref
+    import pytest
+    csv = tmp_path / "empty.csv"
+    csv.write_text("Date,Home,Away,Score\n")
+    with pytest.raises(ValueError):
+        import_mls_fbref(csv)
+
+
+def test_parse_odds_api_events_maps_h2h():
+    import json
+    from pathlib import Path
+    from football_prediction_v19.importers.the_odds_api import parse_the_odds_api_events
+    sample = Path(__file__).resolve().parents[1] / "data" / "raw" / "mls_the_odds_api_sample.json"
+    payload = json.loads(sample.read_text())
+    df = parse_the_odds_api_events(payload)
+    assert len(df) == 2
+    for col in ["odds_home", "odds_draw", "odds_away"]:
+        assert col in df.columns
+        assert df[col].dtype == float or df[col].apply(lambda x: isinstance(x, (int, float))).all()
+    assert df["home_team"].iloc[0] != ""
+    assert df["away_team"].iloc[0] != ""
+
+
+def test_parse_odds_api_events_normalizes_teams():
+    from football_prediction_v19.importers.the_odds_api import parse_the_odds_api_events
+    payload = [
+        {
+            "id": "x1",
+            "sport_key": "soccer_usa_mls",
+            "commence_time": "2025-04-05T20:30:00Z",
+            "home_team": "LA Galaxy",
+            "away_team": "Inter Miami",
+            "bookmakers": [
+                {
+                    "key": "bet365",
+                    "title": "Bet365",
+                    "last_update": "2025-04-04T18:00:00Z",
+                    "markets": [
+                        {
+                            "key": "h2h",
+                            "outcomes": [
+                                {"name": "LA Galaxy", "price": 2.10},
+                                {"name": "Inter Miami", "price": 3.60},
+                                {"name": "Draw", "price": 3.40},
+                            ],
+                        }
+                    ],
+                }
+            ],
+        }
+    ]
+    df = parse_the_odds_api_events(payload)
+    assert df["home_team"].iloc[0] == "LA Galaxy"
+
+
+def test_parse_odds_api_events_empty_raises():
+    from football_prediction_v19.importers.the_odds_api import parse_the_odds_api_events
+    import pytest
+    with pytest.raises(ValueError):
+        parse_the_odds_api_events([])
+
+
+def test_download_mls_odds_uses_env_key(tmp_path, monkeypatch):
+    import json
+    from unittest.mock import MagicMock, patch
+    sample = Path(__file__).resolve().parents[1] / "data" / "raw" / "mls_the_odds_api_sample.json"
+    payload = json.loads(sample.read_text())
+
+    mock_response = MagicMock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = payload
+    mock_response.raise_for_status = MagicMock()
+
+    monkeypatch.setenv("THE_ODDS_API_KEY", "test-env-key-123")
+
+    with patch("football_prediction_v19.importers.the_odds_api._requests_module") as mock_requests:
+        mock_requests.get.return_value = mock_response
+        from football_prediction_v19.importers.the_odds_api import fetch_mls_odds
+        df = fetch_mls_odds(api_key="test-env-key-123", output_path=tmp_path / "odds.csv")
+
+    call_kwargs = mock_requests.get.call_args
+    assert call_kwargs is not None
+    params = call_kwargs[1].get("params", call_kwargs[0][1] if len(call_kwargs[0]) > 1 else {})
+    assert params.get("apiKey") == "test-env-key-123"
+    assert len(df) > 0
+
+
+def test_download_mls_odds_missing_key_error():
+    from unittest.mock import MagicMock, patch
+    mock_response = MagicMock()
+    mock_response.status_code = 401
+    mock_response.raise_for_status = MagicMock()
+    import pytest
+    with patch("football_prediction_v19.importers.the_odds_api._requests_module") as mock_requests:
+        mock_requests.get.return_value = mock_response
+        from football_prediction_v19.importers.the_odds_api import fetch_mls_odds
+        with pytest.raises(ValueError, match="Invalid API key"):
+            fetch_mls_odds(api_key="bad-key")
+
+
+def test_prepare_mls_data_cli_command(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    fbref_template = root / "data" / "raw" / "mls_fbref_raw_template.csv"
+    matches_out = tmp_path / "mls_matches.csv"
+    processed_out = tmp_path / "mls_processed.csv"
+    main([
+        "prepare-mls-data",
+        "--fbref", str(fbref_template),
+        "--matches-output", str(matches_out),
+        "--processed-output", str(processed_out),
+    ])
+    assert processed_out.exists()
+    df = pd.read_csv(processed_out)
+    assert len(df) > 0
+
+
+def test_mls_sources_smoke_script_exists():
+    root = Path(__file__).resolve().parents[1]
+    assert (root / "scripts" / "run_mls_sources_smoke.py").exists()
+
+
+def test_import_mls_fbref_cli_command(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    fbref_template = root / "data" / "raw" / "mls_fbref_raw_template.csv"
+    output = tmp_path / "mls_out.csv"
+    main([
+        "import-mls-fbref",
+        "--input", str(fbref_template),
+        "--output", str(output),
+    ])
+    assert output.exists()
+    df = pd.read_csv(output)
+    assert len(df) > 0

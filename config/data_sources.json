@@ -1,0 +1,7 @@
+{
+  "mls": {
+    "historical_source": "fbref_csv",
+    "odds_source": "the_odds_api",
+    "odds_api_sport_key": "soccer_usa_mls"
+  }
+}

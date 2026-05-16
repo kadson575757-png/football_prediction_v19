@@ -1,0 +1,54 @@
+[
+  {
+    "id": "abc123",
+    "sport_key": "soccer_usa_mls",
+    "sport_title": "MLS",
+    "commence_time": "2025-04-05T20:30:00Z",
+    "home_team": "LA Galaxy",
+    "away_team": "Inter Miami",
+    "bookmakers": [
+      {
+        "key": "bet365",
+        "title": "Bet365",
+        "last_update": "2025-04-04T18:00:00Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2025-04-04T18:00:00Z",
+            "outcomes": [
+              {"name": "LA Galaxy", "price": 2.10},
+              {"name": "Inter Miami", "price": 3.60},
+              {"name": "Draw", "price": 3.40}
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "def456",
+    "sport_key": "soccer_usa_mls",
+    "sport_title": "MLS",
+    "commence_time": "2025-04-12T23:00:00Z",
+    "home_team": "Seattle Sounders",
+    "away_team": "Portland Timbers",
+    "bookmakers": [
+      {
+        "key": "bet365",
+        "title": "Bet365",
+        "last_update": "2025-04-11T18:00:00Z",
+        "markets": [
+          {
+            "key": "h2h",
+            "last_update": "2025-04-11T18:00:00Z",
+            "outcomes": [
+              {"name": "Seattle Sounders", "price": 2.30},
+              {"name": "Portland Timbers", "price": 3.10},
+              {"name": "Draw", "price": 3.20}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

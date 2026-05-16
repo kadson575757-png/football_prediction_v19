@@ -16,6 +16,8 @@ from .odds_import import merge_odds_file, prepare_odds_file
 from .xg_import import merge_xg_file, prepare_xg_file
 from .training import compare_models
 from .importers.fbref import normalize_fbref_csv
+from .importers.mls_fbref import import_mls_fbref
+from .importers.the_odds_api import fetch_mls_odds
 from .importers.football_data import (
     LEAGUE_CODES,
     bulk_download,
@@ -808,6 +810,58 @@ def cmd_run_pipeline(args) -> None:
         print(f"  Backtest report          : {backtest_report_path}")
 
 
+def cmd_import_mls_fbref(args) -> None:
+    try:
+        df = import_mls_fbref(args.input, args.output)
+    except (FileNotFoundError, ValueError) as exc:
+        raise SystemExit(f"Error: {exc}") from exc
+    print(f"Imported MLS FBref data")
+    print(f"Input : {args.input}")
+    print(f"Output: {args.output}")
+    print(f"Rows  : {len(df)}")
+
+
+def cmd_download_mls_odds(args) -> None:
+    import os
+    api_key = getattr(args, "api_key", None) or os.environ.get("THE_ODDS_API_KEY", "")
+    if not api_key:
+        raise SystemExit(
+            "Error: No API key provided. Set THE_ODDS_API_KEY environment variable or use --api-key."
+        )
+    try:
+        df = fetch_mls_odds(
+            api_key=api_key,
+            output_path=args.output,
+            regions=args.regions,
+            markets=args.markets,
+            odds_format=args.odds_format,
+            bookmaker=getattr(args, "bookmaker", None),
+        )
+    except (ValueError, Exception) as exc:
+        raise SystemExit(f"Error: {exc}") from exc
+    print(f"Downloaded MLS odds")
+    print(f"Output: {args.output}")
+    print(f"Rows  : {len(df)}")
+
+
+def cmd_prepare_mls_data(args) -> None:
+    try:
+        df = import_mls_fbref(args.fbref, args.matches_output)
+    except (FileNotFoundError, ValueError) as exc:
+        raise SystemExit(f"Error importing FBref data: {exc}") from exc
+    print(f"Imported {len(df)} rows from FBref -> {args.matches_output}")
+    try:
+        from .data import prepare_real_matches
+        from pathlib import Path
+        clean = prepare_real_matches(df, input_format="native")
+        output_path = Path(args.processed_output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        clean.to_csv(output_path, index=False)
+    except ValueError as exc:
+        raise SystemExit(f"Error preparing MLS data: {exc}") from exc
+    print(f"Prepared {len(clean)} rows -> {args.processed_output}")
+
+
 def cmd_gather_fbref(args) -> None:
     output = fetch_and_save(args.output, args.start_year, args.end_year, args.comp_ids)
     print(f"Saved: {output}")
@@ -1134,6 +1188,31 @@ def build_parser() -> argparse.ArgumentParser:
                    default="outputs/model_comparison", metavar="DIR",
                    help="Directory where model comparison outputs are saved (default: outputs/model_comparison).")
     p.set_defaults(func=cmd_run_pipeline)
+
+    p = sub.add_parser("import-mls-fbref", help="Import FBref-style MLS CSV into project format")
+    p.add_argument("--input", required=True, help="Path to the FBref-style MLS CSV export.")
+    p.add_argument("--output", required=True, help="Path where the normalized MLS matches CSV is saved.")
+    p.set_defaults(func=cmd_import_mls_fbref)
+
+    p = sub.add_parser("download-mls-odds", help="Download upcoming MLS odds from The Odds API")
+    p.add_argument("--output", required=True, help="Path where the odds CSV is saved.")
+    p.add_argument("--regions", default="us", help="Regions for odds (default: us).")
+    p.add_argument("--markets", default="h2h", help="Markets to fetch (default: h2h).")
+    p.add_argument("--odds-format", default="decimal", dest="odds_format",
+                   help="Odds format: decimal or american (default: decimal).")
+    p.add_argument("--api-key", default=None, dest="api_key",
+                   help="The Odds API key (overrides THE_ODDS_API_KEY env var).")
+    p.add_argument("--bookmaker", default=None,
+                   help="Preferred bookmaker key (e.g. bet365).")
+    p.set_defaults(func=cmd_download_mls_odds)
+
+    p = sub.add_parser("prepare-mls-data", help="Import FBref MLS CSV and prepare for training")
+    p.add_argument("--fbref", required=True, help="Path to the FBref-style MLS CSV export.")
+    p.add_argument("--matches-output", required=True, dest="matches_output",
+                   help="Path where the normalized MLS matches CSV is saved.")
+    p.add_argument("--processed-output", required=True, dest="processed_output",
+                   help="Path where the cleaned/processed MLS matches CSV is saved.")
+    p.set_defaults(func=cmd_prepare_mls_data)
 
     p = sub.add_parser("gather-fbref", help="Fetch FBref schedules with pandas.read_html")
     p.add_argument("--output", required=True)
