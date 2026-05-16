@@ -8,6 +8,7 @@ import pandas as pd
 
 from .backtest import build_betting_report, run_bet_backtest, run_backtest
 from .data import load_matches, prepare_real_matches_file
+from .excel_report import create_predictions_excel_report
 from .fbref_scraper import fetch_and_save
 from .features import build_fixture_features
 from .model import load_model, predict_feature_rows, save_model, train_from_matches
@@ -261,6 +262,11 @@ def cmd_backtest_bets(args) -> None:
     print(f"Saved betting report: {report}")
 
 
+def cmd_export_excel(args) -> None:
+    output = create_predictions_excel_report(args.predictions, args.output)
+    print(f"Saved Excel report: {output}")
+
+
 def cmd_gather_fbref(args) -> None:
     output = fetch_and_save(args.output, args.start_year, args.end_year, args.comp_ids)
     print(f"Saved: {output}")
@@ -332,6 +338,11 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-chaos", type=float, default=7.0)
     p.add_argument("--min-control", type=float, default=7.0)
     p.set_defaults(func=cmd_backtest_bets)
+
+    p = sub.add_parser("export-excel", help="Create an Excel report from prediction CSV output")
+    p.add_argument("--predictions", required=True)
+    p.add_argument("--output", required=True)
+    p.set_defaults(func=cmd_export_excel)
 
     p = sub.add_parser("gather-fbref", help="Fetch FBref schedules with pandas.read_html")
     p.add_argument("--output", required=True)

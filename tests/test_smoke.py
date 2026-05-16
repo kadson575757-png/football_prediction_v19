@@ -1,11 +1,13 @@
 from pathlib import Path
 
 import pandas as pd
+from openpyxl import load_workbook
 
 from football_prediction_v19.cli import main
 from football_prediction_v19.backtest import build_betting_report
 from football_prediction_v19.data import REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS, prepare_real_matches
 from football_prediction_v19.features import build_features, build_fixture_features
+from football_prediction_v19.excel_report import create_predictions_excel_report
 from football_prediction_v19.model import predict_feature_rows, train_from_matches
 from football_prediction_v19.odds import (
     best_value_side,
@@ -110,6 +112,106 @@ def test_predict_fixtures_command(tmp_path):
     assert list(result.columns) == expected_columns
     assert len(result) >= 1
     assert "value_pick" in result.columns
+
+
+def test_excel_report_creation_and_sheets(tmp_path):
+    predictions_path = tmp_path / "predictions.csv"
+    output_path = tmp_path / "predictions_report.xlsx"
+    pd.DataFrame(
+        [
+            {
+                "date": "2024-05-01",
+                "league": "Premier League",
+                "home_team": "Chelsea",
+                "away_team": "Arsenal",
+                "prob_home": 0.38,
+                "prob_draw": 0.36,
+                "prob_away": 0.26,
+                "odds_home": 2.4,
+                "odds_draw": 3.4,
+                "odds_away": 2.9,
+                "fair_home": 0.39,
+                "fair_draw": 0.28,
+                "fair_away": 0.33,
+                "edge_home": -0.01,
+                "edge_draw": 0.08,
+                "edge_away": -0.07,
+                "value_pick": "No Bet",
+                "value_edge": 0.08,
+                "bet_recommendation": "No bet",
+                "control_score": 2.4,
+                "chaos_score": 6.0,
+                "tdi_home": 1,
+                "tdi_away": 0,
+                "no_bet_reasons": "No value bet: control score below 7",
+                "v19_flags": "",
+            },
+            {
+                "date": "2024-05-04",
+                "league": "Premier League",
+                "home_team": "Liverpool",
+                "away_team": "Tottenham",
+                "prob_home": 0.60,
+                "prob_draw": 0.21,
+                "prob_away": 0.19,
+                "odds_home": 1.95,
+                "odds_draw": 3.7,
+                "odds_away": 3.85,
+                "fair_home": 0.49,
+                "fair_draw": 0.26,
+                "fair_away": 0.25,
+                "edge_home": 0.11,
+                "edge_draw": -0.05,
+                "edge_away": -0.06,
+                "value_pick": "Home",
+                "value_edge": 0.11,
+                "bet_recommendation": "Value bet: Home 1X2",
+                "control_score": 8.6,
+                "chaos_score": 3.4,
+                "tdi_home": 0,
+                "tdi_away": 1,
+                "no_bet_reasons": "",
+                "v19_flags": "sample_flag",
+            },
+        ]
+    ).to_csv(predictions_path, index=False)
+
+    create_predictions_excel_report(predictions_path, output_path)
+
+    assert output_path.exists()
+    wb = load_workbook(output_path)
+    assert set(["Summary", "Predictions", "Value Bets", "No Bets", "High Chaos", "v19 Flags"]).issubset(wb.sheetnames)
+    headers = [cell.value for cell in wb["Predictions"][1]]
+    assert "prob_home" in headers
+    assert "bet_recommendation" in headers
+    assert wb["Predictions"].freeze_panes == "A2"
+
+
+def test_export_excel_command_runs_on_sample_predictions(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    history_path = root / "data" / "sample_matches.csv"
+    fixtures_path = root / "data" / "upcoming_fixtures_template.csv"
+    model_path = tmp_path / "sample_model.joblib"
+    predictions_path = tmp_path / "predictions.csv"
+    output_path = tmp_path / "predictions_report.xlsx"
+
+    main(["train", "--input", str(history_path), "--model", str(model_path), "--test-season", "2023"])
+    main([
+        "predict-fixtures",
+        "--history",
+        str(history_path),
+        "--fixtures",
+        str(fixtures_path),
+        "--model",
+        str(model_path),
+        "--output",
+        str(predictions_path),
+    ])
+    main(["export-excel", "--predictions", str(predictions_path), "--output", str(output_path)])
+
+    wb = load_workbook(output_path)
+    assert "Summary" in wb.sheetnames
+    assert "Value Bets" in wb.sheetnames
 
 
 def test_odds_conversion_and_overround_removal():
