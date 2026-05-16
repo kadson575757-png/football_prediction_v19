@@ -118,6 +118,12 @@ Nutze die Vorlage in `data/upcoming_fixtures_template.csv` und fuehre dann aus:
 python -m football_prediction_v19.cli predict-fixtures --history data/sample_matches.csv --fixtures data/upcoming_fixtures_template.csv --model models/sample_model.joblib --output outputs/predictions.csv
 ```
 
+Du kannst die Value-Betting-Schwellen anpassen:
+
+```bash
+python -m football_prediction_v19.cli predict-fixtures --history data/sample_matches.csv --fixtures data/upcoming_fixtures_template.csv --model models/sample_model.joblib --output outputs/predictions.csv --min-edge 0.03 --max-chaos 7.0 --min-control 7.0
+```
+
 Mit echten historischen Daten und deinem echten Modell:
 
 ```bash
@@ -130,7 +136,42 @@ Die CSV-Ausgabe wird automatisch hier angelegt:
 outputs/predictions.csv
 ```
 
-## 8. Alles in Einem Schritt
+Die Ausgabe enthaelt Modellwahrscheinlichkeiten, Marktquoten, faire Markt-Wahrscheinlichkeiten, Edge-Werte, `value_pick`, `value_edge`, `bet_recommendation` und klare `no_bet_reasons`.
+
+## 8. Value Betting Und No-Bet Logik
+
+Decimal Odds werden in implied probability umgerechnet:
+
+```text
+implied_probability = 1 / decimal_odds
+```
+
+Beispiel: Quote `2.00` bedeutet 50 Prozent implied probability. Weil Buchmacher eine Marge einbauen, addieren sich Home/Draw/Away meistens auf mehr als 100 Prozent. Diese Marge heisst Overround. Das Projekt entfernt diese Marge und berechnet faire Markt-Wahrscheinlichkeiten.
+
+Der Value Edge vergleicht Modell gegen fairen Markt:
+
+```text
+value_edge = model_probability - fair_market_probability
+```
+
+Beispiel: Modell 46 Prozent, fairer Markt 41 Prozent ergibt `+0.05` Edge. Standardmaessig wird ein Value Bet erst ab `--min-edge 0.03` empfohlen.
+
+Die v1.9 Schutzlogik kann trotzdem ein No-Bet setzen:
+
+- kein Value Bet, wenn `control_score < --min-control`
+- kein Value Bet, wenn `chaos_score > --max-chaos`
+- kein Away Value Bet, wenn Away-Favorite-Degradation aktiv ist
+- DNB bleibt gesperrt, wenn die v1.9 DNB-Bedingungen nicht erfuellt sind
+
+Beispiel-Interpretation:
+
+```text
+value_pick=Home, value_edge=0.052, bet_recommendation="Value bet: Home 1X2"
+```
+
+Das bedeutet: Das Modell sieht Home um 5.2 Prozentpunkte staerker als der margengefilterte Markt, und die v1.9 Schutzregeln blockieren den Tipp nicht.
+
+## 9. Alles in Einem Schritt
 
 Das Projekt enthaelt auch ein Hilfsskript:
 
@@ -140,7 +181,7 @@ python scripts/run_all.py
 
 Dieses Skript trainiert das Beispielmodell, fuehrt eine Einzel-Prediction aus und schreibt danach eine Fixture-List-Prediction nach `outputs/predictions.csv`.
 
-## 9. Projektstruktur
+## 10. Projektstruktur
 
 ```text
 football_prediction_v19/
@@ -164,7 +205,7 @@ Wichtige Module, die bewusst erhalten bleiben:
 - `backtest.py`
 - `cli.py`
 
-## 10. Wie Das Modell Arbeitet
+## 11. Wie Das Modell Arbeitet
 
 1. Historische Spiele werden bereinigt.
 2. Pro Match werden nur vorherige Spiele genutzt, damit kein Data Leakage entsteht.
