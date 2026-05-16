@@ -4,6 +4,7 @@ from football_prediction_v19.cli import main
 
 
 def run_all() -> None:
+    main(["doctor"])
     main(
         [
             "prepare-fixtures",
