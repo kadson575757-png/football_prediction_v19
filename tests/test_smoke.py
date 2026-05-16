@@ -5,7 +5,7 @@ import pytest
 from openpyxl import load_workbook
 
 from football_prediction_v19.cli import main
-from football_prediction_v19.backtest import build_betting_report
+from football_prediction_v19.backtest import build_betting_report, run_bet_backtest
 from football_prediction_v19.data import REAL_MATCH_OPTIONAL_NUMERIC_COLUMNS, prepare_real_matches
 from football_prediction_v19.features import build_features, build_fixture_features
 from football_prediction_v19.excel_report import create_predictions_excel_report
@@ -2245,3 +2245,28 @@ def test_data_requirements_mentions_key_sections():
     doc = (_PROJECT_ROOT / "docs" / "DATA_REQUIREMENTS.md").read_text(encoding="utf-8")
     for section in ["home_xg", "odds_home", "football-data", "FBref", "team_aliases"]:
         assert section in doc, f"DATA_REQUIREMENTS.md missing: {section}"
+
+
+def test_backtest_test_season_excludes_training_rows():
+    """Backtest with test_season must not evaluate on training-season rows (leakage guard)."""
+    path = Path(__file__).resolve().parents[1] / "data" / "sample_matches.csv"
+    df = pd.read_csv(path)
+    model, _, metrics, cols = train_from_matches(df, test_season=2023)
+    bundle = {"model": model, "feature_cols": cols, "metrics": metrics}
+
+    results_all = run_bet_backtest(df, bundle)
+    results_oos = run_bet_backtest(df, bundle, test_season=2023)
+
+    # Out-of-sample result must contain fewer rows than the full evaluation
+    assert len(results_oos) < len(results_all), (
+        "test_season filter had no effect — training rows are still included in backtest"
+    )
+    # All rows in the filtered result must belong to season >= test_season
+    from football_prediction_v19.features import build_features
+    table = build_features(pd.read_csv(path))
+    oos_seasons = table[table["season_start"] >= 2023]["season_start"].unique()
+    bt_dates = pd.to_datetime(results_oos["date"])
+    bt_seasons = bt_dates.apply(lambda d: d.year - 1 if d.month < 8 else d.year)
+    assert set(bt_seasons.unique()).issubset(set(oos_seasons)), (
+        "Backtest contains rows from before test_season — training data leaked into evaluation"
+    )

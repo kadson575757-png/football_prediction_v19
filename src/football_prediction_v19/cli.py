@@ -295,6 +295,7 @@ def cmd_backtest_bets(args) -> None:
         min_edge=args.min_edge,
         max_chaos=args.max_chaos,
         min_control=args.min_control,
+        test_season=getattr(args, "test_season", None),
     )
     output = Path(args.output)
     report = Path(args.report)
@@ -768,7 +769,7 @@ def cmd_run_pipeline(args) -> None:
         bt_report = Path(args.backtest_report)
         bt_csv.parent.mkdir(parents=True, exist_ok=True)
         bt_report.parent.mkdir(parents=True, exist_ok=True)
-        main([
+        bt_args = [
             "backtest-bets",
             "--history", str(training_history_path),
             "--model", model_path,
@@ -777,7 +778,10 @@ def cmd_run_pipeline(args) -> None:
             "--min-edge", str(args.min_edge),
             "--max-chaos", str(args.max_chaos),
             "--min-control", str(args.min_control),
-        ])
+        ]
+        if args.test_season:
+            bt_args += ["--test-season", str(args.test_season)]
+        main(bt_args)
         backtest_csv_path = str(bt_csv)
         backtest_report_path = str(bt_report)
 
@@ -919,6 +923,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--min-edge", type=float, default=0.03)
     p.add_argument("--max-chaos", type=float, default=7.0)
     p.add_argument("--min-control", type=float, default=7.0)
+    p.add_argument("--test-season", type=int, default=None,
+                   help="Restrict backtest to season_start >= this year (out-of-sample only).")
     p.set_defaults(func=cmd_backtest_bets)
 
     p = sub.add_parser("prepare-odds", help="Prepare a raw odds CSV into a clean normalized format")

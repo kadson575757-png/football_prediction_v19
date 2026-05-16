@@ -261,10 +261,15 @@ def run_bet_backtest(
     min_edge: float = 0.03,
     max_chaos: float = 7.0,
     min_control: float = 7.0,
+    test_season: int | None = None,
 ) -> pd.DataFrame:
     table = build_features(matches).sort_values("date").reset_index(drop=True)
     if table.empty:
         raise ValueError("No historical feature rows available for betting backtest.")
+    if test_season is not None:
+        table = table[table["season_start"] >= test_season].reset_index(drop=True)
+        if table.empty:
+            raise ValueError(f"No out-of-sample rows found for season_start >= {test_season}.")
 
     pred_rows = predict_feature_rows(model_bundle, table)
     rows = []
