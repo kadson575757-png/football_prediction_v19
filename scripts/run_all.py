@@ -53,6 +53,15 @@ def run_all() -> None:
             "outputs/predictions.csv",
         ]
     )
+    main(
+        [
+            "export-excel",
+            "--predictions",
+            "outputs/predictions.csv",
+            "--output",
+            "outputs/predictions_report.xlsx",
+        ]
+    )
 
 
 if __name__ == "__main__":

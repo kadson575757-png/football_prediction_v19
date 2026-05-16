@@ -190,7 +190,30 @@ outputs/predictions.csv
 
 Die Ausgabe enthaelt Modellwahrscheinlichkeiten, Marktquoten, faire Markt-Wahrscheinlichkeiten, Edge-Werte, `value_pick`, `value_edge`, `bet_recommendation` und klare `no_bet_reasons`.
 
-## 8. Value Betting Und No-Bet Logik
+## 8. Excel Report Exportieren
+
+Aus der Prediction-CSV kannst du eine Excel-Datei fuer die Analyse erstellen:
+
+```bash
+python -m football_prediction_v19.cli export-excel --predictions outputs/predictions.csv --output outputs/predictions_report.xlsx
+```
+
+Die Datei wird hier gespeichert:
+
+```text
+outputs/predictions_report.xlsx
+```
+
+Sheets im Report:
+
+- `Summary`: Gesamtanzahl Fixtures, empfohlene Bets, No-Bets, Durchschnitts-Edge, Control/Chaos Scores, Top Value Picks und haeufige No-Bet-Gruende.
+- `Predictions`: Vollstaendige Matchliste mit Wahrscheinlichkeiten, Quoten, fairen Markt-Wahrscheinlichkeiten, Edges, v1.9 Scores und Flags.
+- `Value Bets`: Nur empfohlene Value Bets, nach `value_edge` absteigend sortiert.
+- `No Bets`: Spiele, bei denen die Schutzlogik keinen Bet empfiehlt.
+- `High Chaos`: Alle Spiele nach `chaos_score` absteigend sortiert.
+- `v19 Flags`: Spiele mit aktiven v1.9 Flags.
+
+## 9. Value Betting Und No-Bet Logik
 
 Decimal Odds werden in implied probability umgerechnet:
 
@@ -223,7 +246,7 @@ value_pick=Home, value_edge=0.052, bet_recommendation="Value bet: Home 1X2"
 
 Das bedeutet: Das Modell sieht Home um 5.2 Prozentpunkte staerker als der margengefilterte Markt, und die v1.9 Schutzregeln blockieren den Tipp nicht.
 
-## 9. Betting Backtest Und Calibration Report
+## 10. Betting Backtest Und Calibration Report
 
 Wenn du ein trainiertes Modell und historische Daten mit Ergebnissen und Quoten hast, kannst du die Value-Bet-Regeln historisch testen:
 
@@ -247,7 +270,7 @@ ROI und Yield werden hier als Profit geteilt durch eingesetzte Units gelesen. Be
 
 Ein profitabler Backtest garantiert keinen zukuenftigen Profit. Er zeigt nur, wie diese Modellversion mit diesen Daten und diesen Regeln historisch abgeschnitten haette.
 
-## 10. Alles in Einem Schritt
+## 11. Alles in Einem Schritt
 
 Das Projekt enthaelt auch ein Hilfsskript:
 
@@ -255,9 +278,9 @@ Das Projekt enthaelt auch ein Hilfsskript:
 python scripts/run_all.py
 ```
 
-Dieses Skript trainiert das Beispielmodell, fuehrt eine Einzel-Prediction aus und schreibt danach eine Fixture-List-Prediction nach `outputs/predictions.csv`.
+Dieses Skript trainiert das Beispielmodell, fuehrt eine Einzel-Prediction aus, schreibt eine Fixture-List-Prediction nach `outputs/predictions.csv` und exportiert `outputs/predictions_report.xlsx`.
 
-## 11. Projektstruktur
+## 12. Projektstruktur
 
 ```text
 football_prediction_v19/
@@ -281,7 +304,7 @@ Wichtige Module, die bewusst erhalten bleiben:
 - `backtest.py`
 - `cli.py`
 
-## 12. Wie Das Modell Arbeitet
+## 13. Wie Das Modell Arbeitet
 
 1. Historische Spiele werden bereinigt.
 2. Pro Match werden nur vorherige Spiele genutzt, damit kein Data Leakage entsteht.
