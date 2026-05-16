@@ -104,5 +104,58 @@ def bulk_download(
     return downloaded
 
 
+def download_and_prepare(
+    league_code: str,
+    season: int,
+    raw_dir: str | Path,
+    processed_dir: str | Path,
+) -> dict[str, object]:
+    """Download a football-data.co.uk CSV and prepare it for training.
+
+    Args:
+        league_code: football-data.co.uk code (e.g. "E0") or friendly name.
+        season: four-digit start year, e.g. 2023 for 2023-24.
+        raw_dir: directory where the raw CSV is saved.
+        processed_dir: directory where the cleaned CSV is saved.
+
+    Returns:
+        Dict with keys: league_code, season, raw_path, processed_path, and
+        the prepare summary fields (rows_read, rows_written, rows_dropped, …).
+
+    Raises:
+        ValueError: if the league code is unknown or the processed output is empty.
+        requests.HTTPError: if the download fails.
+    """
+    code = LEAGUE_CODES.get(league_code, league_code)
+    if code not in LEAGUE_CODES.values():
+        known = ", ".join(sorted(LEAGUE_CODES))
+        raise ValueError(
+            f"Unknown league '{league_code}'. "
+            f"Use a raw code (e.g. E0, D1) or a friendly name: {known}."
+        )
+
+    raw_path = Path(raw_dir) / f"football_data_{code}_{season}.csv"
+    processed_path = Path(processed_dir) / f"football_data_{code}_{season}_clean.csv"
+
+    url = build_football_data_url(league_code, season)
+    download_football_data_csv(url, str(raw_path))
+
+    summary = normalize_football_data_csv(str(raw_path), str(processed_path))
+
+    if summary["rows_written"] == 0:
+        raise ValueError(
+            f"Processed file for {code} season {season} is empty — "
+            "no complete historical rows found in the downloaded CSV."
+        )
+
+    return {
+        "league_code": code,
+        "season": season,
+        "raw_path": str(raw_path),
+        "processed_path": str(processed_path),
+        **summary,
+    }
+
+
 def normalize_football_data_csv(input_path: str, output_path: str) -> dict[str, int | str]:
     return prepare_real_matches_file(input_path, output_path, input_format="football-data")
