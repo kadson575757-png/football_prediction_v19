@@ -87,11 +87,24 @@ fpv19 predict-fixtures \
 
 Prepare a raw historical matches CSV into a clean training-ready format.
 
+Supported leagues include Premier League, Championship, Bundesliga, Bundesliga 2, Serie A, Serie B,
+La Liga, Segunda Division, Ligue 1, Ligue 2, Eredivisie, Pro League, Primeira Liga, Super Lig,
+Super League Greece, Scottish Premiership, and **MLS** (native format only — no automatic downloader).
+
 ```bash
 fpv19 prepare-data \
   --input data/raw/real_matches.csv \
   --output data/processed/real_matches_clean.csv \
   --format auto
+```
+
+MLS example (native format):
+
+```bash
+fpv19 prepare-data \
+  --input data/raw/mls_matches.csv \
+  --output data/processed/mls_matches_clean.csv \
+  --format native
 ```
 
 | Flag | Required | Description |

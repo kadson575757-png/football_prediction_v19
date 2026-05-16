@@ -153,3 +153,62 @@ Example entry:
 Any name in the alias list maps to the canonical name (the key).
 Add entries here to handle league-specific or source-specific name variants.
 Matching is case-insensitive and strips whitespace.
+
+---
+
+## MLS Support
+
+MLS is supported as a first-class league across the entire pipeline.
+
+### Key differences from Top-5 European leagues
+
+- **No automatic downloader**: MLS data is not available via the `download-prepare-football-data` command. You must provide historical match data manually.
+- **Not yet validated**: MLS strategies have not been backtested out-of-sample. Do not mix MLS signals with validated Top-5 strategies.
+
+### Required data file
+
+Provide your MLS historical data as:
+
+```
+data/raw/mls_matches.csv
+```
+
+Use the template at `data/raw/mls_matches_template.csv` as a column reference.
+
+### MLS validation workflow
+
+**A. Prepare data:**
+```
+fpv19 prepare-data \
+  --input data/raw/mls_matches.csv \
+  --output data/processed/mls_matches_clean.csv \
+  --format native
+```
+
+**B. Compare models:**
+```
+fpv19 compare-models \
+  --input data/processed/mls_matches_clean.csv \
+  --output-dir outputs/model_comparison_mls \
+  --test-season 2024
+```
+
+**C. Backtest (strict OOS):**
+```
+fpv19 backtest-bets \
+  --history data/processed/mls_matches_clean.csv \
+  --model outputs/model_comparison_mls/best_model.joblib \
+  --output outputs/backtest_mls.csv \
+  --report outputs/backtest_mls_report.md \
+  --test-season 2024 \
+  --min-edge 0.03 \
+  --max-chaos 7.0 \
+  --min-control 7.0
+```
+
+**D. Strategy sweep:**
+```
+python scripts/run_mls_strategy_sweep.py
+```
+
+Only after completing steps A-D and reviewing the results should you decide whether MLS strategies are paper-test eligible.

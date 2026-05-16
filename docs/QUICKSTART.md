@@ -65,7 +65,7 @@ Outputs land in `outputs/` and `models/`.
 
 ## 5. Prepare real football-data.co.uk data
 
-Download and prepare historical data for one or more leagues:
+Download and prepare historical data for one or more leagues (Premier League, Bundesliga, Serie A, etc.):
 
 ```bash
 fpv19 download-prepare-football-data \
@@ -75,6 +75,10 @@ fpv19 download-prepare-football-data \
   --processed-dir data/processed \
   --combine-output data/processed/combined_football_data.csv
 ```
+
+**MLS note:** MLS is not available via `download-prepare-football-data`. Provide historical MLS data
+manually and use `fpv19 prepare-data --format native`. See `docs/DATA_REQUIREMENTS.md` for the
+full MLS workflow.
 
 Or import an existing CSV:
 
