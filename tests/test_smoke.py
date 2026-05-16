@@ -1091,3 +1091,135 @@ def test_prepare_fixtures_then_predict_fixtures(tmp_path):
     preds = pd.read_csv(predictions_path)
     assert "prob_home" in preds.columns
     assert len(preds) >= 1
+
+
+# ---------------------------------------------------------------------------
+# run-pipeline tests
+# ---------------------------------------------------------------------------
+
+def _pipeline_base_args(tmp_path, root):
+    """Return a base args list for run-pipeline using local sample data."""
+    return [
+        "run-pipeline",
+        "--skip-download",
+        "--combine-output", str(root / "data" / "sample_matches.csv"),
+        "--fixtures-raw", str(root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"),
+        "--fixtures-output", str(tmp_path / "fixtures_ready.csv"),
+        "--fixtures-format", "native",
+        "--model", str(tmp_path / "pipeline_model.joblib"),
+        "--predictions", str(tmp_path / "predictions.csv"),
+        "--excel", str(tmp_path / "predictions_report.xlsx"),
+        "--backtest-csv", str(tmp_path / "backtest_bets.csv"),
+        "--backtest-report", str(tmp_path / "backtest_report.md"),
+        "--test-season", "2023",
+    ]
+
+
+def test_run_pipeline_skip_download_creates_all_outputs(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    main(_pipeline_base_args(tmp_path, root))
+
+    assert (tmp_path / "fixtures_ready.csv").exists()
+    assert (tmp_path / "pipeline_model.joblib").exists()
+    assert (tmp_path / "predictions.csv").exists()
+    assert (tmp_path / "predictions_report.xlsx").exists()
+    assert (tmp_path / "backtest_bets.csv").exists()
+    assert (tmp_path / "backtest_report.md").exists()
+
+
+def test_run_pipeline_predictions_have_correct_columns(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    main(_pipeline_base_args(tmp_path, root))
+
+    preds = pd.read_csv(tmp_path / "predictions.csv")
+    for col in ["prob_home", "prob_draw", "prob_away", "bet_recommendation", "value_edge"]:
+        assert col in preds.columns
+    assert len(preds) >= 1
+
+
+def test_run_pipeline_excel_created(tmp_path):
+    from openpyxl import load_workbook
+    root = Path(__file__).resolve().parents[1]
+    main(_pipeline_base_args(tmp_path, root))
+
+    wb = load_workbook(tmp_path / "predictions_report.xlsx")
+    assert "Summary" in wb.sheetnames
+    assert "Predictions" in wb.sheetnames
+
+
+def test_run_pipeline_backtest_files_created(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    main(_pipeline_base_args(tmp_path, root))
+
+    bt = pd.read_csv(tmp_path / "backtest_bets.csv")
+    assert "profit" in bt.columns
+    report_text = (tmp_path / "backtest_report.md").read_text(encoding="utf-8")
+    assert "ROI" in report_text
+
+
+def test_run_pipeline_skip_backtest_no_backtest_files(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    args = _pipeline_base_args(tmp_path, root) + ["--skip-backtest"]
+    main(args)
+
+    assert (tmp_path / "predictions.csv").exists()
+    assert (tmp_path / "predictions_report.xlsx").exists()
+    assert not (tmp_path / "backtest_bets.csv").exists()
+    assert not (tmp_path / "backtest_report.md").exists()
+
+
+def test_run_pipeline_use_existing_fixtures(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    # First prepare the fixtures
+    fixtures_path = tmp_path / "fixtures_ready.csv"
+    main([
+        "prepare-fixtures",
+        "--input", str(root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"),
+        "--output", str(fixtures_path),
+        "--format", "native",
+    ])
+    assert fixtures_path.exists()
+
+    # Now run pipeline without re-preparing fixtures
+    main([
+        "run-pipeline",
+        "--skip-download",
+        "--use-existing-fixtures",
+        "--combine-output", str(root / "data" / "sample_matches.csv"),
+        "--fixtures-output", str(fixtures_path),
+        "--model", str(tmp_path / "model.joblib"),
+        "--predictions", str(tmp_path / "predictions.csv"),
+        "--excel", str(tmp_path / "report.xlsx"),
+        "--skip-backtest",
+    ])
+    assert (tmp_path / "predictions.csv").exists()
+
+
+def test_run_pipeline_missing_combine_output_with_skip_download_gives_error(tmp_path):
+    import pytest
+    with pytest.raises(SystemExit, match="does not exist"):
+        main([
+            "run-pipeline",
+            "--skip-download",
+            "--combine-output", str(tmp_path / "nonexistent.csv"),
+            "--fixtures-raw", str(tmp_path / "fixtures.csv"),
+            "--fixtures-output", str(tmp_path / "fx.csv"),
+            "--model", str(tmp_path / "model.joblib"),
+            "--predictions", str(tmp_path / "preds.csv"),
+            "--excel", str(tmp_path / "report.xlsx"),
+        ])
+
+
+def test_run_pipeline_missing_fixtures_raw_gives_error(tmp_path):
+    import pytest
+    root = Path(__file__).resolve().parents[1]
+    with pytest.raises(SystemExit, match="fixtures-raw"):
+        main([
+            "run-pipeline",
+            "--skip-download",
+            "--combine-output", str(root / "data" / "sample_matches.csv"),
+            "--fixtures-output", str(tmp_path / "fx.csv"),
+            "--model", str(tmp_path / "model.joblib"),
+            "--predictions", str(tmp_path / "preds.csv"),
+            "--excel", str(tmp_path / "report.xlsx"),
+        ])

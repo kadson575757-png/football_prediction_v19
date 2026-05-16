@@ -378,6 +378,191 @@ def cmd_download_football_data(args) -> None:
         print(f"Total: {len(paths)} file(s)")
 
 
+def _pipeline_step(label: str) -> None:
+    print(f"\n{'='*60}")
+    print(f"  {label}")
+    print(f"{'='*60}")
+
+
+def cmd_run_pipeline(args) -> None:
+    combine_output = Path(args.combine_output)
+    fixtures_output = Path(args.fixtures_output)
+    model_path = args.model
+    predictions_path = Path(args.predictions)
+    excel_path = Path(args.excel)
+
+    # Create output directories up front
+    for p in [combine_output, fixtures_output, predictions_path, excel_path]:
+        Path(p).parent.mkdir(parents=True, exist_ok=True)
+    Path(model_path).parent.mkdir(parents=True, exist_ok=True)
+
+    historical_rows: int | None = None
+    fixture_count: int | None = None
+    value_bet_count: int | None = None
+    no_bet_count: int | None = None
+    backtest_csv_path: str | None = None
+    backtest_report_path: str | None = None
+
+    # ---- Step A: Download + prepare historical data -------------------------
+    if args.skip_download:
+        _pipeline_step("Step A: Skipping download (--skip-download)")
+        if not combine_output.exists():
+            raise SystemExit(
+                f"Error: --combine-output '{combine_output}' does not exist.\n"
+                "Either run without --skip-download to download fresh data, "
+                "or point --combine-output at an existing processed CSV."
+            )
+        print(f"  Using existing combined dataset: {combine_output}")
+    else:
+        if not args.leagues:
+            raise SystemExit("Error: --leagues is required when not using --skip-download.")
+        if not args.seasons:
+            raise SystemExit("Error: --seasons is required when not using --skip-download.")
+        _pipeline_step("Step A: Downloading and preparing historical football-data.co.uk CSVs")
+        dl_args = [
+            "download-prepare-football-data",
+            "--leagues", *args.leagues,
+            "--seasons", *[str(s) for s in args.seasons],
+            "--raw-dir", args.raw_dir,
+            "--processed-dir", args.processed_dir,
+            "--combine-output", str(combine_output),
+        ]
+        main(dl_args)
+
+    # ---- Step B: Count historical rows ------------------------------------
+    try:
+        hist_df = pd.read_csv(combine_output)
+        historical_rows = len(hist_df)
+        print(f"\n  Historical rows available: {historical_rows}")
+    except Exception:
+        pass
+
+    # ---- Step C: Prepare upcoming fixtures ----------------------------------
+    if args.use_existing_fixtures:
+        _pipeline_step("Step C: Skipping fixture preparation (--use-existing-fixtures)")
+        if not fixtures_output.exists():
+            raise SystemExit(
+                f"Error: --fixtures-output '{fixtures_output}' does not exist.\n"
+                "Either provide a prepared fixtures file or run without --use-existing-fixtures."
+            )
+        print(f"  Using existing fixtures: {fixtures_output}")
+    else:
+        _pipeline_step("Step C: Preparing upcoming fixtures")
+        if not args.fixtures_raw:
+            raise SystemExit(
+                "Error: --fixtures-raw is required unless --use-existing-fixtures is set.\n"
+                "Provide the path to your raw upcoming fixtures CSV."
+            )
+        if not Path(args.fixtures_raw).exists():
+            raise SystemExit(
+                f"Error: Fixtures raw file '{args.fixtures_raw}' not found.\n"
+                "Check the path or use --use-existing-fixtures if a prepared file already exists."
+            )
+        fix_args = [
+            "prepare-fixtures",
+            "--input", args.fixtures_raw,
+            "--output", str(fixtures_output),
+            "--format", args.fixtures_format,
+        ]
+        if args.default_season:
+            fix_args += ["--default-season", args.default_season]
+        if args.default_league:
+            fix_args += ["--default-league", args.default_league]
+        main(fix_args)
+
+    # Count fixtures
+    try:
+        fx_df = pd.read_csv(fixtures_output)
+        fixture_count = len(fx_df)
+        print(f"  Fixtures ready: {fixture_count}")
+    except Exception:
+        pass
+
+    # ---- Step D: Train model -----------------------------------------------
+    _pipeline_step("Step D: Training the model")
+    train_args = [
+        "train",
+        "--input", str(combine_output),
+        "--model", model_path,
+    ]
+    if args.test_season:
+        train_args += ["--test-season", str(args.test_season)]
+    main(train_args)
+
+    # ---- Step E: Predict upcoming fixtures ----------------------------------
+    _pipeline_step("Step E: Predicting upcoming fixtures")
+    main([
+        "predict-fixtures",
+        "--history", str(combine_output),
+        "--fixtures", str(fixtures_output),
+        "--model", model_path,
+        "--output", str(predictions_path),
+        "--min-edge", str(args.min_edge),
+        "--max-chaos", str(args.max_chaos),
+        "--min-control", str(args.min_control),
+    ])
+    if not predictions_path.exists():
+        raise SystemExit(f"Error: Predictions file was not created at '{predictions_path}'.")
+
+    # Collect value/no-bet counts
+    try:
+        preds_df = pd.read_csv(predictions_path)
+        value_bet_count = int((preds_df["bet_recommendation"] != "No bet").sum())
+        no_bet_count = int((preds_df["bet_recommendation"] == "No bet").sum())
+    except Exception:
+        pass
+
+    # ---- Step F: Export Excel -----------------------------------------------
+    _pipeline_step("Step F: Exporting predictions to Excel")
+    main(["export-excel", "--predictions", str(predictions_path), "--output", str(excel_path)])
+    if not excel_path.exists():
+        raise SystemExit(f"Error: Excel report was not created at '{excel_path}'.")
+
+    # ---- Step G: Backtest ---------------------------------------------------
+    if args.skip_backtest:
+        _pipeline_step("Step G: Skipping backtest (--skip-backtest)")
+    else:
+        _pipeline_step("Step G: Running betting backtest")
+        bt_csv = Path(args.backtest_csv)
+        bt_report = Path(args.backtest_report)
+        bt_csv.parent.mkdir(parents=True, exist_ok=True)
+        bt_report.parent.mkdir(parents=True, exist_ok=True)
+        main([
+            "backtest-bets",
+            "--history", str(combine_output),
+            "--model", model_path,
+            "--output", str(bt_csv),
+            "--report", str(bt_report),
+            "--min-edge", str(args.min_edge),
+            "--max-chaos", str(args.max_chaos),
+            "--min-control", str(args.min_control),
+        ])
+        backtest_csv_path = str(bt_csv)
+        backtest_report_path = str(bt_report)
+
+    # ---- Summary -----------------------------------------------------------
+    print(f"\n{'='*60}")
+    print("  Pipeline complete — summary")
+    print(f"{'='*60}")
+    print(f"  Combined historical data : {combine_output}")
+    if historical_rows is not None:
+        print(f"  Historical rows          : {historical_rows}")
+    print(f"  Fixtures file            : {fixtures_output}")
+    if fixture_count is not None:
+        print(f"  Fixtures prepared        : {fixture_count}")
+    print(f"  Model                    : {model_path}")
+    print(f"  Predictions CSV          : {predictions_path}")
+    if value_bet_count is not None:
+        print(f"  Value bets               : {value_bet_count}")
+    if no_bet_count is not None:
+        print(f"  No-bets                  : {no_bet_count}")
+    print(f"  Excel report             : {excel_path}")
+    if backtest_csv_path:
+        print(f"  Backtest CSV             : {backtest_csv_path}")
+    if backtest_report_path:
+        print(f"  Backtest report          : {backtest_report_path}")
+
+
 def cmd_gather_fbref(args) -> None:
     output = fetch_and_save(args.output, args.start_year, args.end_year, args.comp_ids)
     print(f"Saved: {output}")
@@ -568,6 +753,57 @@ def build_parser() -> argparse.ArgumentParser:
         help="Directory where downloaded CSV files will be saved.",
     )
     p.set_defaults(func=cmd_download_football_data)
+
+    p = sub.add_parser(
+        "run-pipeline",
+        help="Run the full end-to-end pipeline: download → prepare → train → predict → Excel → backtest",
+    )
+    p.add_argument("--leagues", nargs="+", default=None, metavar="CODE",
+                   help="League codes for download (not required with --skip-download).")
+    p.add_argument("--seasons", nargs="+", type=int, default=None, metavar="YEAR",
+                   help="Season start years for download (not required with --skip-download).")
+    p.add_argument("--raw-dir", default="data/raw", metavar="DIR",
+                   help="Directory for raw downloaded CSVs (default: data/raw).")
+    p.add_argument("--processed-dir", default="data/processed", metavar="DIR",
+                   help="Directory for processed CSVs (default: data/processed).")
+    p.add_argument("--combine-output", required=True, metavar="FILE",
+                   help="Path to the combined processed training CSV.")
+    p.add_argument("--fixtures-raw", default=None, metavar="FILE",
+                   help="Path to the raw upcoming fixtures CSV (not required with --use-existing-fixtures).")
+    p.add_argument("--fixtures-output", required=True, metavar="FILE",
+                   help="Path where the prepared fixtures CSV is saved/read.")
+    p.add_argument("--fixtures-format", default="auto",
+                   choices=["auto", "native", "football-data"],
+                   help="Fixture input format (default: auto).")
+    p.add_argument("--default-season", default=None, metavar="SEASON",
+                   help="Default season value for fixtures (e.g. 2024).")
+    p.add_argument("--default-league", default=None, metavar="LEAGUE",
+                   help="Default league value for fixtures.")
+    p.add_argument("--model", required=True, metavar="FILE",
+                   help="Path where the trained model is saved.")
+    p.add_argument("--predictions", required=True, metavar="FILE",
+                   help="Path where the predictions CSV is saved.")
+    p.add_argument("--excel", required=True, metavar="FILE",
+                   help="Path where the Excel report is saved.")
+    p.add_argument("--backtest-csv", default="outputs/backtest_bets.csv", metavar="FILE",
+                   help="Path where the backtest CSV is saved (default: outputs/backtest_bets.csv).")
+    p.add_argument("--backtest-report", default="outputs/backtest_report.md", metavar="FILE",
+                   help="Path where the backtest report is saved (default: outputs/backtest_report.md).")
+    p.add_argument("--test-season", type=int, default=None,
+                   help="Season year to hold out for model evaluation.")
+    p.add_argument("--min-edge", type=float, default=0.03,
+                   help="Minimum edge for value bet recommendation (default: 0.03).")
+    p.add_argument("--max-chaos", type=float, default=7.0,
+                   help="Maximum chaos score to allow a bet (default: 7.0).")
+    p.add_argument("--min-control", type=float, default=7.0,
+                   help="Minimum control score to allow a bet (default: 7.0).")
+    p.add_argument("--skip-download", action="store_true",
+                   help="Skip downloading historical data; assume --combine-output already exists.")
+    p.add_argument("--skip-backtest", action="store_true",
+                   help="Skip the betting backtest step.")
+    p.add_argument("--use-existing-fixtures", action="store_true",
+                   help="Skip prepare-fixtures; assume --fixtures-output already exists.")
+    p.set_defaults(func=cmd_run_pipeline)
 
     p = sub.add_parser("gather-fbref", help="Fetch FBref schedules with pandas.read_html")
     p.add_argument("--output", required=True)
