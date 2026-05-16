@@ -307,7 +307,14 @@ def cmd_backtest_bets(args) -> None:
 
 
 def cmd_export_excel(args) -> None:
-    output = create_predictions_excel_report(args.predictions, args.output)
+    output = create_predictions_excel_report(
+        args.predictions,
+        args.output,
+        model_comparison_csv=getattr(args, "model_comparison", None),
+        model_metadata_json=getattr(args, "model_metadata", None),
+        backtest_csv=getattr(args, "backtest_csv_in", None),
+        backtest_report_md=getattr(args, "backtest_report_in", None),
+    )
     print(f"Saved Excel report: {output}")
 
 
@@ -663,7 +670,25 @@ def cmd_run_pipeline(args) -> None:
 
     # ---- Step F: Export Excel -----------------------------------------------
     _pipeline_step("Step F: Exporting predictions to Excel")
-    main(["export-excel", "--predictions", str(predictions_path), "--output", str(excel_path)])
+    excel_args = ["export-excel", "--predictions", str(predictions_path), "--output", str(excel_path)]
+
+    # Attach model comparison sheets if compare-models was used
+    if getattr(args, "compare_models_flag", False):
+        cmp_dir = Path(getattr(args, "compare_models_dir", "outputs/model_comparison"))
+        cmp_csv = cmp_dir / "model_comparison.csv"
+        cmp_meta = cmp_dir / "best_model_metadata.json"
+        if cmp_csv.exists():
+            excel_args += ["--model-comparison", str(cmp_csv)]
+        if cmp_meta.exists():
+            excel_args += ["--model-metadata", str(cmp_meta)]
+
+    # Attach backtest sheets if backtest was run and output exists
+    if not args.skip_backtest:
+        bt_csv_path = Path(args.backtest_csv)
+        if bt_csv_path.exists():
+            excel_args += ["--backtest-csv", str(bt_csv_path)]
+
+    main(excel_args)
     if not excel_path.exists():
         raise SystemExit(f"Error: Excel report was not created at '{excel_path}'.")
 
@@ -880,8 +905,18 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_compare_models)
 
     p = sub.add_parser("export-excel", help="Create an Excel report from prediction CSV output")
-    p.add_argument("--predictions", required=True)
-    p.add_argument("--output", required=True)
+    p.add_argument("--predictions", required=True, metavar="FILE",
+                   help="Path to the predictions CSV.")
+    p.add_argument("--output", required=True, metavar="FILE",
+                   help="Path where the Excel file is saved.")
+    p.add_argument("--model-comparison", default=None, dest="model_comparison", metavar="FILE",
+                   help="Optional path to model_comparison.csv for dashboard sheets.")
+    p.add_argument("--model-metadata", default=None, dest="model_metadata", metavar="FILE",
+                   help="Optional path to best_model_metadata.json for Best Model / Feature sheets.")
+    p.add_argument("--backtest-csv", default=None, dest="backtest_csv_in", metavar="FILE",
+                   help="Optional path to backtest_bets.csv for Backtest sheets.")
+    p.add_argument("--backtest-report", default=None, dest="backtest_report_in", metavar="FILE",
+                   help="Optional path to backtest_report.md (reserved for future use).")
     p.set_defaults(func=cmd_export_excel)
 
     p = sub.add_parser(

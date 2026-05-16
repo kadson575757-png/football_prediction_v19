@@ -1993,3 +1993,200 @@ def test_run_pipeline_without_compare_models_unchanged(tmp_path):
         "--excel", str(tmp_path / "report.xlsx"),
     ])
     assert out.exists()
+
+
+# ---------------------------------------------------------------------------
+# Excel dashboard tests
+# ---------------------------------------------------------------------------
+
+def _make_predictions_csv(path: Path) -> None:
+    df = pd.DataFrame([{
+        "date": "2024-08-17", "league": "Premier League",
+        "home_team": "Arsenal", "away_team": "Chelsea",
+        "prob_home": 0.45, "prob_draw": 0.28, "prob_away": 0.27,
+        "odds_home": 2.10, "odds_draw": 3.40, "odds_away": 3.50,
+        "fair_home": 0.45, "fair_draw": 0.28, "fair_away": 0.27,
+        "edge_home": 0.05, "edge_draw": 0.0, "edge_away": 0.0,
+        "value_pick": "H", "value_edge": 0.05,
+        "bet_recommendation": "Bet H",
+        "control_score": 8.0, "chaos_score": 2.5,
+        "tdi_home": 0.6, "tdi_away": 0.4,
+        "no_bet_reasons": "", "v19_flags": "",
+    }])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False)
+
+
+def _make_model_comparison_csv(path: Path) -> None:
+    df = pd.DataFrame([{
+        "model_name": "random_forest", "calibrated": True,
+        "accuracy": 0.54, "balanced_accuracy": 0.51,
+        "log_loss": 0.97, "brier_score": 0.62,
+        "avg_confidence": 0.55, "avg_correct_confidence": 0.58,
+        "train_rows": 240, "test_rows": 40,
+        "feature_count": 32, "selected_as_best": True, "warnings": "",
+    }])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False)
+
+
+def _make_model_metadata_json(path: Path) -> None:
+    import json as _json
+    meta = {
+        "model_name": "random_forest", "calibrated": True,
+        "test_season": 2023, "selected_metric": "log_loss",
+        "accuracy": 0.54, "log_loss": 0.97, "brier_score": 0.62,
+        "feature_columns": ["home_form_xg", "away_form_xg"],
+        "training_rows": 240, "test_rows": 40,
+        "created_at": "2025-01-01T00:00:00+00:00",
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(_json.dumps(meta), encoding="utf-8")
+
+
+def _make_backtest_csv(path: Path) -> None:
+    df = pd.DataFrame([{
+        "date": "2023-08-20", "home_team": "Arsenal", "away_team": "Chelsea",
+        "value_pick": "H", "value_edge": 0.08, "odds_used": 2.10,
+        "bet_recommendation": "Bet H", "bet_result": "win",
+        "profit": 1.10, "cumulative_profit": 1.10, "no_bet_reasons": "",
+    }])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(path, index=False)
+
+
+def _sheet_names(xlsx_path: Path) -> list[str]:
+    wb = load_workbook(xlsx_path, read_only=True)
+    return wb.sheetnames
+
+
+def test_export_excel_basic_still_works(tmp_path):
+    pred = tmp_path / "preds.csv"
+    out = tmp_path / "report.xlsx"
+    _make_predictions_csv(pred)
+    main(["export-excel", "--predictions", str(pred), "--output", str(out)])
+    assert out.exists()
+    sheets = _sheet_names(out)
+    assert "Summary" in sheets
+    assert "Predictions" in sheets
+
+
+def test_export_excel_with_model_comparison(tmp_path):
+    pred = tmp_path / "preds.csv"
+    cmp_csv = tmp_path / "model_comparison.csv"
+    out = tmp_path / "report.xlsx"
+    _make_predictions_csv(pred)
+    _make_model_comparison_csv(cmp_csv)
+    main([
+        "export-excel",
+        "--predictions", str(pred),
+        "--output", str(out),
+        "--model-comparison", str(cmp_csv),
+    ])
+    assert out.exists()
+    sheets = _sheet_names(out)
+    assert "Model Comparison" in sheets
+    assert "Calibration" in sheets
+
+
+def test_export_excel_with_model_metadata(tmp_path):
+    pred = tmp_path / "preds.csv"
+    meta = tmp_path / "meta.json"
+    out = tmp_path / "report.xlsx"
+    _make_predictions_csv(pred)
+    _make_model_metadata_json(meta)
+    main([
+        "export-excel",
+        "--predictions", str(pred),
+        "--output", str(out),
+        "--model-metadata", str(meta),
+    ])
+    assert out.exists()
+    sheets = _sheet_names(out)
+    assert "Best Model" in sheets
+    assert "Feature Metadata" in sheets
+
+
+def test_export_excel_with_backtest(tmp_path):
+    pred = tmp_path / "preds.csv"
+    bt = tmp_path / "backtest.csv"
+    out = tmp_path / "report.xlsx"
+    _make_predictions_csv(pred)
+    _make_backtest_csv(bt)
+    main([
+        "export-excel",
+        "--predictions", str(pred),
+        "--output", str(out),
+        "--backtest-csv", str(bt),
+    ])
+    assert out.exists()
+    sheets = _sheet_names(out)
+    assert "Backtest" in sheets
+    assert "Backtest Summary" in sheets
+
+
+def test_export_excel_all_optional_sheets(tmp_path):
+    pred = tmp_path / "preds.csv"
+    cmp_csv = tmp_path / "model_comparison.csv"
+    meta = tmp_path / "meta.json"
+    bt = tmp_path / "backtest.csv"
+    out = tmp_path / "report.xlsx"
+    _make_predictions_csv(pred)
+    _make_model_comparison_csv(cmp_csv)
+    _make_model_metadata_json(meta)
+    _make_backtest_csv(bt)
+    main([
+        "export-excel",
+        "--predictions", str(pred),
+        "--output", str(out),
+        "--model-comparison", str(cmp_csv),
+        "--model-metadata", str(meta),
+        "--backtest-csv", str(bt),
+    ])
+    assert out.exists()
+    sheets = _sheet_names(out)
+    for expected in ["Summary", "Predictions", "Model Comparison", "Calibration",
+                     "Best Model", "Feature Metadata", "Backtest", "Backtest Summary"]:
+        assert expected in sheets, f"Missing sheet: {expected}"
+
+
+def test_export_excel_missing_optional_files_no_crash(tmp_path):
+    pred = tmp_path / "preds.csv"
+    out = tmp_path / "report.xlsx"
+    _make_predictions_csv(pred)
+    main([
+        "export-excel",
+        "--predictions", str(pred),
+        "--output", str(out),
+        "--model-comparison", str(tmp_path / "nonexistent.csv"),
+        "--model-metadata", str(tmp_path / "nonexistent.json"),
+        "--backtest-csv", str(tmp_path / "nonexistent_bt.csv"),
+    ])
+    assert out.exists()
+    sheets = _sheet_names(out)
+    assert "Model Comparison" not in sheets
+    assert "Backtest" not in sheets
+
+
+def test_run_pipeline_compare_models_includes_excel_dashboard(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    out = tmp_path / "predictions.csv"
+    excel_out = tmp_path / "report.xlsx"
+    main([
+        "run-pipeline",
+        "--skip-download",
+        "--combine-output", str(root / "data" / "sample_matches.csv"),
+        "--fixtures-raw", str(root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"),
+        "--fixtures-output", str(tmp_path / "fx.csv"),
+        "--model", str(tmp_path / "model.joblib"),
+        "--predictions", str(out),
+        "--excel", str(excel_out),
+        "--compare-models",
+        "--compare-models-dir", str(tmp_path / "cmp"),
+        "--test-season", "2023",
+        "--skip-backtest",
+    ])
+    assert excel_out.exists()
+    sheets = _sheet_names(excel_out)
+    assert "Model Comparison" in sheets
+    assert "Best Model" in sheets
