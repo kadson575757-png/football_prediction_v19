@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import pytest
 from openpyxl import load_workbook
 
 from football_prediction_v19.cli import main
@@ -10,6 +11,12 @@ from football_prediction_v19.features import build_features, build_fixture_featu
 from football_prediction_v19.excel_report import create_predictions_excel_report
 from football_prediction_v19.model import predict_feature_rows, train_from_matches
 from football_prediction_v19.fixtures import prepare_fixtures
+from football_prediction_v19.odds_import import (
+    merge_odds_file,
+    merge_odds_into_fixtures,
+    prepare_odds,
+    prepare_odds_file,
+)
 from football_prediction_v19.importers.fbref import normalize_fbref_csv
 from football_prediction_v19.importers.football_data import (
     LEAGUE_CODES,
@@ -1223,3 +1230,271 @@ def test_run_pipeline_missing_fixtures_raw_gives_error(tmp_path):
             "--predictions", str(tmp_path / "preds.csv"),
             "--excel", str(tmp_path / "report.xlsx"),
         ])
+
+
+# ---------------------------------------------------------------------------
+# odds_import tests
+# ---------------------------------------------------------------------------
+
+def test_prepare_odds_native_format():
+    from football_prediction_v19.odds_import import prepare_odds
+    df = pd.DataFrame({
+        "date": ["2024-08-17"],
+        "home_team": ["Man Utd"],
+        "away_team": ["Wolves"],
+        "odds_home": [2.10],
+        "odds_draw": [3.50],
+        "odds_away": [3.40],
+    })
+    out = prepare_odds(df)
+    assert len(out) == 1
+    assert out.loc[0, "odds_home"] == pytest.approx(2.10)
+    assert out.loc[0, "home_team"] is not None
+
+
+def test_prepare_odds_b365_columns():
+    from football_prediction_v19.odds_import import prepare_odds
+    df = pd.DataFrame({
+        "Date": ["17/08/2024"],
+        "HomeTeam": ["Man United"],
+        "AwayTeam": ["Wolves"],
+        "B365H": [2.10],
+        "B365D": [3.50],
+        "B365A": [3.40],
+    })
+    out = prepare_odds(df)
+    assert "odds_home" in out.columns
+    assert out.loc[0, "odds_home"] == pytest.approx(2.10)
+
+
+def test_prepare_odds_ps_columns():
+    from football_prediction_v19.odds_import import prepare_odds
+    df = pd.DataFrame({
+        "HomeTeam": ["Arsenal"],
+        "AwayTeam": ["Chelsea"],
+        "PSH": [1.90],
+        "PSD": [3.60],
+        "PSA": [4.00],
+    })
+    out = prepare_odds(df)
+    assert out.loc[0, "odds_home"] == pytest.approx(1.90)
+
+
+def test_prepare_odds_max_avg_columns():
+    from football_prediction_v19.odds_import import prepare_odds
+    df = pd.DataFrame({
+        "HomeTeam": ["Arsenal"],
+        "AwayTeam": ["Chelsea"],
+        "MaxH": [2.00],
+        "MaxD": [3.70],
+        "MaxA": [4.10],
+    })
+    out = prepare_odds(df)
+    assert out.loc[0, "odds_home"] == pytest.approx(2.00)
+
+
+def test_prepare_odds_team_alias_normalization():
+    from football_prediction_v19.odds_import import prepare_odds
+    df = pd.DataFrame({
+        "Home": ["Spurs"],
+        "Away": ["Leicester"],
+        "odds_home": [1.75],
+        "odds_draw": [3.60],
+        "odds_away": [4.80],
+    })
+    out = prepare_odds(df)
+    assert out.loc[0, "home_team"] is not None
+    assert out.loc[0, "away_team"] is not None
+
+
+def test_prepare_odds_empty_raises():
+    from football_prediction_v19.odds_import import prepare_odds
+    with pytest.raises(ValueError, match="empty"):
+        prepare_odds(pd.DataFrame())
+
+
+def test_prepare_odds_missing_team_column_raises():
+    from football_prediction_v19.odds_import import prepare_odds
+    df = pd.DataFrame({"odds_home": [2.0], "odds_draw": [3.5], "odds_away": [3.4]})
+    with pytest.raises(ValueError, match="home_team"):
+        prepare_odds(df)
+
+
+def test_prepare_odds_no_odds_column_raises():
+    from football_prediction_v19.odds_import import prepare_odds
+    df = pd.DataFrame({"home_team": ["Arsenal"], "away_team": ["Chelsea"]})
+    with pytest.raises(ValueError, match="No usable odds"):
+        prepare_odds(df)
+
+
+def test_prepare_odds_all_invalid_raises():
+    from football_prediction_v19.odds_import import prepare_odds
+    df = pd.DataFrame({
+        "home_team": [""],
+        "away_team": [""],
+        "odds_home": [float("nan")],
+        "odds_draw": [float("nan")],
+        "odds_away": [float("nan")],
+    })
+    with pytest.raises(ValueError):
+        prepare_odds(df)
+
+
+def test_prepare_odds_file_missing_input_raises(tmp_path):
+    from football_prediction_v19.odds_import import prepare_odds_file
+    with pytest.raises(ValueError, match="not found"):
+        prepare_odds_file(str(tmp_path / "nonexistent.csv"), str(tmp_path / "out.csv"))
+
+
+def test_cli_prepare_odds_native_template(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    src = root / "data" / "raw" / "odds_raw_template.csv"
+    out = tmp_path / "odds_clean.csv"
+    main(["prepare-odds", "--input", str(src), "--output", str(out)])
+    assert out.exists()
+    df = pd.read_csv(out)
+    assert len(df) == 2
+    assert "odds_home" in df.columns
+
+
+def test_cli_prepare_odds_football_data_template(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    src = root / "data" / "raw" / "football_data_odds_template.csv"
+    out = tmp_path / "odds_clean.csv"
+    main(["prepare-odds", "--input", str(src), "--output", str(out)])
+    assert out.exists()
+    df = pd.read_csv(out)
+    assert len(df) == 2
+    assert "odds_home" in df.columns
+
+
+def test_merge_odds_into_fixtures_basic_match():
+    from football_prediction_v19.odds_import import merge_odds_into_fixtures
+    fixtures = pd.DataFrame({
+        "date": ["2024-08-17"],
+        "home_team": ["Man Utd"],
+        "away_team": ["Wolves"],
+        "odds_home": [float("nan")],
+        "odds_draw": [float("nan")],
+        "odds_away": [float("nan")],
+    })
+    odds = pd.DataFrame({
+        "date": [pd.Timestamp("2024-08-17")],
+        "home_team": ["Man Utd"],
+        "away_team": ["Wolves"],
+        "odds_home": [2.10],
+        "odds_draw": [3.50],
+        "odds_away": [3.40],
+    })
+    updated, matched, missing = merge_odds_into_fixtures(fixtures, odds)
+    assert matched == 1
+    assert missing == 0
+    assert updated.loc[0, "odds_home"] == pytest.approx(2.10)
+
+
+def test_merge_odds_date_window_no_match_at_zero():
+    from football_prediction_v19.odds_import import merge_odds_into_fixtures
+    fixtures = pd.DataFrame({
+        "date": ["2024-08-17"],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+        "odds_home": [float("nan")],
+        "odds_draw": [float("nan")],
+        "odds_away": [float("nan")],
+    })
+    odds = pd.DataFrame({
+        "date": [pd.Timestamp("2024-08-15")],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+        "odds_home": [1.90],
+        "odds_draw": [3.60],
+        "odds_away": [4.00],
+    })
+    _, matched, _ = merge_odds_into_fixtures(fixtures, odds, allow_date_window=0)
+    assert matched == 0
+
+
+def test_merge_odds_date_window_match_within_two_days():
+    from football_prediction_v19.odds_import import merge_odds_into_fixtures
+    fixtures = pd.DataFrame({
+        "date": ["2024-08-17"],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+        "odds_home": [float("nan")],
+        "odds_draw": [float("nan")],
+        "odds_away": [float("nan")],
+    })
+    odds = pd.DataFrame({
+        "date": [pd.Timestamp("2024-08-15")],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+        "odds_home": [1.90],
+        "odds_draw": [3.60],
+        "odds_away": [4.00],
+    })
+    _, matched, _ = merge_odds_into_fixtures(fixtures, odds, allow_date_window=2)
+    assert matched == 1
+
+
+def test_merge_odds_bookmaker_preference():
+    from football_prediction_v19.odds_import import merge_odds_into_fixtures
+    fixtures = pd.DataFrame({
+        "date": [pd.NaT],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+        "odds_home": [float("nan")],
+        "odds_draw": [float("nan")],
+        "odds_away": [float("nan")],
+    })
+    odds = pd.DataFrame({
+        "date": [pd.NaT, pd.NaT],
+        "home_team": ["Arsenal", "Arsenal"],
+        "away_team": ["Chelsea", "Chelsea"],
+        "odds_home": [1.80, 1.90],
+        "odds_draw": [3.50, 3.60],
+        "odds_away": [4.00, 4.10],
+        "bookmaker": ["Other", "Bet365"],
+    })
+    updated, matched, _ = merge_odds_into_fixtures(fixtures, odds, prefer_bookmaker="Bet365")
+    assert matched == 1
+    assert updated.loc[0, "odds_home"] == pytest.approx(1.90)
+
+
+def test_cli_merge_odds_fixtures(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    odds_src = root / "data" / "raw" / "odds_raw_template.csv"
+    odds_clean = tmp_path / "odds_clean.csv"
+    main(["prepare-odds", "--input", str(odds_src), "--output", str(odds_clean)])
+
+    fx_src = root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"
+    fx_clean = tmp_path / "fx_clean.csv"
+    main(["prepare-fixtures", "--input", str(fx_src), "--output", str(fx_clean)])
+
+    out = tmp_path / "fx_with_odds.csv"
+    main([
+        "merge-odds-fixtures",
+        "--fixtures", str(fx_clean),
+        "--odds", str(odds_clean),
+        "--output", str(out),
+    ])
+    assert out.exists()
+
+
+def test_run_pipeline_with_odds_raw(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    odds_raw = root / "data" / "raw" / "odds_raw_template.csv"
+    out = tmp_path / "predictions.csv"
+    main([
+        "run-pipeline",
+        "--skip-download",
+        "--combine-output", str(root / "data" / "sample_matches.csv"),
+        "--fixtures-raw", str(root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"),
+        "--fixtures-output", str(tmp_path / "fx.csv"),
+        "--model", str(tmp_path / "model.joblib"),
+        "--predictions", str(out),
+        "--excel", str(tmp_path / "report.xlsx"),
+        "--odds-raw", str(odds_raw),
+        "--odds-clean", str(tmp_path / "odds_clean.csv"),
+        "--fixtures-with-odds", str(tmp_path / "fx_with_odds.csv"),
+    ])
+    assert out.exists()

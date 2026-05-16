@@ -12,6 +12,7 @@ from .excel_report import create_predictions_excel_report
 from .fbref_scraper import fetch_and_save
 from .features import build_fixture_features
 from .fixtures import prepare_fixtures_file
+from .odds_import import merge_odds_file, prepare_odds_file
 from .importers.fbref import normalize_fbref_csv
 from .importers.football_data import (
     LEAGUE_CODES,
@@ -378,6 +379,36 @@ def cmd_download_football_data(args) -> None:
         print(f"Total: {len(paths)} file(s)")
 
 
+def cmd_prepare_odds(args) -> None:
+    try:
+        summary = prepare_odds_file(args.input, args.output, input_format=args.format)
+    except ValueError as exc:
+        raise SystemExit(f"Error: {exc}") from exc
+    print("Prepared odds file")
+    print(f"Input   : {summary['input']}")
+    print(f"Output  : {summary['output']}")
+    print(f"Rows in : {summary['rows_in']}")
+    print(f"Rows out: {summary['rows_out']}")
+
+
+def cmd_merge_odds_fixtures(args) -> None:
+    try:
+        summary = merge_odds_file(
+            args.fixtures,
+            args.odds,
+            args.output,
+            allow_date_window=args.allow_date_window,
+            prefer_bookmaker=args.prefer,
+        )
+    except (ValueError, FileNotFoundError) as exc:
+        raise SystemExit(f"Error: {exc}") from exc
+    print("Merged odds into fixtures")
+    print(f"Output          : {summary['output']}")
+    print(f"Total fixtures  : {summary['fixtures_total']}")
+    print(f"Fixtures updated: {summary['matched']}")
+    print(f"Still no odds   : {summary['still_missing_odds']}")
+
+
 def _pipeline_step(label: str) -> None:
     print(f"\n{'='*60}")
     print(f"  {label}")
@@ -478,6 +509,28 @@ def cmd_run_pipeline(args) -> None:
     except Exception:
         pass
 
+    # ---- Step C2: Prepare and merge odds (optional) -------------------------
+    predict_fixtures_path = fixtures_output  # default: use prepared fixtures
+    if getattr(args, "odds_raw", None):
+        _pipeline_step("Step C2: Preparing and merging odds")
+        odds_clean = Path(args.odds_clean)
+        odds_clean.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            prepare_odds_file(args.odds_raw, str(odds_clean))
+        except ValueError as exc:
+            raise SystemExit(f"Error preparing odds: {exc}") from exc
+        print(f"  Odds prepared: {odds_clean}")
+
+        fx_with_odds = Path(args.fixtures_with_odds)
+        fx_with_odds.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            summary = merge_odds_file(str(fixtures_output), str(odds_clean), str(fx_with_odds))
+        except ValueError as exc:
+            raise SystemExit(f"Error merging odds: {exc}") from exc
+        print(f"  Odds merged  : {fx_with_odds}")
+        print(f"  Fixtures updated with odds: {summary['matched']}/{summary['fixtures_total']}")
+        predict_fixtures_path = fx_with_odds
+
     # ---- Step D: Train model -----------------------------------------------
     _pipeline_step("Step D: Training the model")
     train_args = [
@@ -494,7 +547,7 @@ def cmd_run_pipeline(args) -> None:
     main([
         "predict-fixtures",
         "--history", str(combine_output),
-        "--fixtures", str(fixtures_output),
+        "--fixtures", str(predict_fixtures_path),
         "--model", model_path,
         "--output", str(predictions_path),
         "--min-edge", str(args.min_edge),
@@ -677,6 +730,24 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--min-control", type=float, default=7.0)
     p.set_defaults(func=cmd_backtest_bets)
 
+    p = sub.add_parser("prepare-odds", help="Prepare a raw odds CSV into a clean normalized format")
+    p.add_argument("--input", required=True, help="Path to the raw odds CSV file.")
+    p.add_argument("--output", required=True, help="Path where the cleaned odds CSV is saved.")
+    p.add_argument("--format", default="auto", choices=["auto", "native"],
+                   help="Input format (default: auto).")
+    p.set_defaults(func=cmd_prepare_odds)
+
+    p = sub.add_parser("merge-odds-fixtures",
+                       help="Merge bookmaker odds into a prepared fixtures CSV")
+    p.add_argument("--fixtures", required=True, help="Path to the prepared fixtures CSV.")
+    p.add_argument("--odds", required=True, help="Path to the cleaned odds CSV.")
+    p.add_argument("--output", required=True, help="Path where the merged fixtures CSV is saved.")
+    p.add_argument("--allow-date-window", type=int, default=0, metavar="N",
+                   help="Match odds within ±N days of fixture date (default: 0 = exact).")
+    p.add_argument("--prefer", default=None, metavar="BOOKMAKER",
+                   help="Prefer odds rows where bookmaker equals this value.")
+    p.set_defaults(func=cmd_merge_odds_fixtures)
+
     p = sub.add_parser("export-excel", help="Create an Excel report from prediction CSV output")
     p.add_argument("--predictions", required=True)
     p.add_argument("--output", required=True)
@@ -803,6 +874,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Skip the betting backtest step.")
     p.add_argument("--use-existing-fixtures", action="store_true",
                    help="Skip prepare-fixtures; assume --fixtures-output already exists.")
+    p.add_argument("--odds-raw", default=None, metavar="FILE",
+                   help="Optional path to a raw odds CSV. If provided, odds are prepared and merged into fixtures.")
+    p.add_argument("--odds-clean", default="data/processed/odds_clean.csv", metavar="FILE",
+                   help="Path where the cleaned odds CSV is saved (default: data/processed/odds_clean.csv).")
+    p.add_argument("--fixtures-with-odds", default="data/upcoming_fixtures_with_odds.csv", metavar="FILE",
+                   help="Path where fixtures merged with odds are saved.")
     p.set_defaults(func=cmd_run_pipeline)
 
     p = sub.add_parser("gather-fbref", help="Fetch FBref schedules with pandas.read_html")
