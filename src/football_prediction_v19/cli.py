@@ -13,6 +13,7 @@ from .fbref_scraper import fetch_and_save
 from .features import build_fixture_features
 from .fixtures import prepare_fixtures_file
 from .odds_import import merge_odds_file, prepare_odds_file
+from .xg_import import merge_xg_file, prepare_xg_file
 from .importers.fbref import normalize_fbref_csv
 from .importers.football_data import (
     LEAGUE_CODES,
@@ -409,6 +410,36 @@ def cmd_merge_odds_fixtures(args) -> None:
     print(f"Still no odds   : {summary['still_missing_odds']}")
 
 
+def cmd_prepare_xg(args) -> None:
+    try:
+        summary = prepare_xg_file(args.input, args.output, input_format=args.format)
+    except ValueError as exc:
+        raise SystemExit(f"Error: {exc}") from exc
+    print("Prepared xG file")
+    print(f"Input   : {summary['input']}")
+    print(f"Output  : {summary['output']}")
+    print(f"Rows in : {summary['rows_in']}")
+    print(f"Rows out: {summary['rows_out']}")
+
+
+def cmd_merge_xg_history(args) -> None:
+    try:
+        summary = merge_xg_file(
+            args.history,
+            args.xg,
+            args.output,
+            allow_date_window=args.allow_date_window,
+            prefer_source=args.prefer_source,
+        )
+    except (ValueError, FileNotFoundError) as exc:
+        raise SystemExit(f"Error: {exc}") from exc
+    print("Merged xG into historical data")
+    print(f"Output            : {summary['output']}")
+    print(f"Total history rows: {summary['history_total']}")
+    print(f"Matches updated   : {summary['matched']}")
+    print(f"Still missing xG  : {summary['still_missing_xg']}")
+
+
 def _pipeline_step(label: str) -> None:
     print(f"\n{'='*60}")
     print(f"  {label}")
@@ -531,11 +562,34 @@ def cmd_run_pipeline(args) -> None:
         print(f"  Fixtures updated with odds: {summary['matched']}/{summary['fixtures_total']}")
         predict_fixtures_path = fx_with_odds
 
+    # ---- Step C3: Prepare and merge xG into history (optional) --------------
+    training_history_path = combine_output  # default: use combined dataset as-is
+    if getattr(args, "xg_raw", None):
+        _pipeline_step("Step C3: Preparing and merging xG into historical data")
+        xg_clean = Path(args.xg_clean)
+        xg_clean.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            prepare_xg_file(args.xg_raw, str(xg_clean))
+        except ValueError as exc:
+            raise SystemExit(f"Error preparing xG: {exc}") from exc
+        print(f"  xG prepared: {xg_clean}")
+
+        hist_with_xg = Path(args.history_with_xg)
+        hist_with_xg.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            xg_summary = merge_xg_file(str(combine_output), str(xg_clean), str(hist_with_xg))
+        except ValueError as exc:
+            raise SystemExit(f"Error merging xG: {exc}") from exc
+        print(f"  xG merged   : {hist_with_xg}")
+        print(f"  History rows updated with xG: {xg_summary['matched']}/{xg_summary['history_total']}")
+        print(f"  Still missing xG: {xg_summary['still_missing_xg']}")
+        training_history_path = hist_with_xg
+
     # ---- Step D: Train model -----------------------------------------------
     _pipeline_step("Step D: Training the model")
     train_args = [
         "train",
-        "--input", str(combine_output),
+        "--input", str(training_history_path),
         "--model", model_path,
     ]
     if args.test_season:
@@ -546,7 +600,7 @@ def cmd_run_pipeline(args) -> None:
     _pipeline_step("Step E: Predicting upcoming fixtures")
     main([
         "predict-fixtures",
-        "--history", str(combine_output),
+        "--history", str(training_history_path),
         "--fixtures", str(predict_fixtures_path),
         "--model", model_path,
         "--output", str(predictions_path),
@@ -582,7 +636,7 @@ def cmd_run_pipeline(args) -> None:
         bt_report.parent.mkdir(parents=True, exist_ok=True)
         main([
             "backtest-bets",
-            "--history", str(combine_output),
+            "--history", str(training_history_path),
             "--model", model_path,
             "--output", str(bt_csv),
             "--report", str(bt_report),
@@ -748,6 +802,25 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Prefer odds rows where bookmaker equals this value.")
     p.set_defaults(func=cmd_merge_odds_fixtures)
 
+    p = sub.add_parser("prepare-xg", help="Prepare a raw xG CSV into a clean normalized format")
+    p.add_argument("--input", required=True, help="Path to the raw xG CSV.")
+    p.add_argument("--output", required=True, help="Path where the cleaned xG CSV is saved.")
+    p.add_argument("--format", default="auto",
+                   choices=["auto", "native", "fbref", "understat"],
+                   help="Input format (default: auto).")
+    p.set_defaults(func=cmd_prepare_xg)
+
+    p = sub.add_parser("merge-xg-history",
+                       help="Merge xG data into a historical matches CSV")
+    p.add_argument("--history", required=True, help="Path to the historical matches CSV.")
+    p.add_argument("--xg", required=True, help="Path to the cleaned xG CSV.")
+    p.add_argument("--output", required=True, help="Path where the enriched history CSV is saved.")
+    p.add_argument("--allow-date-window", type=int, default=0, metavar="N",
+                   help="Match xG within ±N days of match date (default: 0 = exact).")
+    p.add_argument("--prefer-source", default=None, metavar="SOURCE",
+                   help="Prefer xG rows where source equals this value.")
+    p.set_defaults(func=cmd_merge_xg_history)
+
     p = sub.add_parser("export-excel", help="Create an Excel report from prediction CSV output")
     p.add_argument("--predictions", required=True)
     p.add_argument("--output", required=True)
@@ -880,6 +953,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="Path where the cleaned odds CSV is saved (default: data/processed/odds_clean.csv).")
     p.add_argument("--fixtures-with-odds", default="data/upcoming_fixtures_with_odds.csv", metavar="FILE",
                    help="Path where fixtures merged with odds are saved.")
+    p.add_argument("--xg-raw", default=None, metavar="FILE",
+                   help="Optional path to a raw xG CSV. If provided, xG is prepared and merged into history before training.")
+    p.add_argument("--xg-clean", default="data/processed/xg_clean.csv", metavar="FILE",
+                   help="Path where the cleaned xG CSV is saved (default: data/processed/xg_clean.csv).")
+    p.add_argument("--history-with-xg", default="data/processed/combined_football_data_with_xg.csv", metavar="FILE",
+                   help="Path where history enriched with xG is saved.")
     p.set_defaults(func=cmd_run_pipeline)
 
     p = sub.add_parser("gather-fbref", help="Fetch FBref schedules with pandas.read_html")
