@@ -1498,3 +1498,326 @@ def test_run_pipeline_with_odds_raw(tmp_path):
         "--fixtures-with-odds", str(tmp_path / "fx_with_odds.csv"),
     ])
     assert out.exists()
+
+
+# ---------------------------------------------------------------------------
+# xg_import tests
+# ---------------------------------------------------------------------------
+
+def test_prepare_xg_native_format():
+    from football_prediction_v19.xg_import import prepare_xg
+    df = pd.DataFrame({
+        "date": ["2024-08-17"],
+        "home_team": ["Man Utd"],
+        "away_team": ["Wolves"],
+        "home_xg": [1.23],
+        "away_xg": [0.85],
+    })
+    out = prepare_xg(df)
+    assert len(out) == 1
+    assert out.loc[0, "home_xg"] == pytest.approx(1.23)
+    assert out.loc[0, "away_xg"] == pytest.approx(0.85)
+
+
+def test_prepare_xg_fbref_columns():
+    from football_prediction_v19.xg_import import prepare_xg
+    df = pd.DataFrame({
+        "Date": ["17/08/2024"],
+        "Home": ["Man United"],
+        "Away": ["Wolves"],
+        "xG": [1.23],
+        "xG.1": [0.85],
+        "Comp": ["Premier League"],
+        "Season": ["2024-2025"],
+    })
+    out = prepare_xg(df)
+    assert "home_xg" in out.columns
+    assert "away_xg" in out.columns
+    assert out.loc[0, "home_xg"] == pytest.approx(1.23)
+    assert out.loc[0, "away_xg"] == pytest.approx(0.85)
+    assert "league" in out.columns
+    assert "season" in out.columns
+
+
+def test_prepare_xg_understat_columns():
+    from football_prediction_v19.xg_import import prepare_xg
+    df = pd.DataFrame({
+        "date": ["2024-08-17"],
+        "h_team": ["Arsenal"],
+        "a_team": ["Chelsea"],
+        "xG": [2.10],
+        "xGA": [0.65],
+    })
+    out = prepare_xg(df)
+    assert out.loc[0, "home_xg"] == pytest.approx(2.10)
+    assert out.loc[0, "away_xg"] == pytest.approx(0.65)
+
+
+def test_prepare_xg_homexg_awayxg_aliases():
+    from football_prediction_v19.xg_import import prepare_xg
+    df = pd.DataFrame({
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+        "home_xG": [1.50],
+        "away_xG": [0.90],
+    })
+    out = prepare_xg(df)
+    assert out.loc[0, "home_xg"] == pytest.approx(1.50)
+    assert out.loc[0, "away_xg"] == pytest.approx(0.90)
+
+
+def test_prepare_xg_team_alias_normalization():
+    from football_prediction_v19.xg_import import prepare_xg
+    df = pd.DataFrame({
+        "Home": ["Spurs"],
+        "Away": ["Leicester"],
+        "home_xg": [2.10],
+        "away_xg": [0.65],
+    })
+    out = prepare_xg(df)
+    assert out.loc[0, "home_team"] is not None
+    assert out.loc[0, "away_team"] is not None
+
+
+def test_prepare_xg_empty_raises():
+    from football_prediction_v19.xg_import import prepare_xg
+    with pytest.raises(ValueError, match="empty"):
+        prepare_xg(pd.DataFrame())
+
+
+def test_prepare_xg_missing_team_column_raises():
+    from football_prediction_v19.xg_import import prepare_xg
+    df = pd.DataFrame({"home_xg": [1.5], "away_xg": [0.8]})
+    with pytest.raises(ValueError, match="home_team"):
+        prepare_xg(df)
+
+
+def test_prepare_xg_no_xg_column_raises():
+    from football_prediction_v19.xg_import import prepare_xg
+    df = pd.DataFrame({"home_team": ["Arsenal"], "away_team": ["Chelsea"]})
+    with pytest.raises(ValueError, match="No usable xG"):
+        prepare_xg(df)
+
+
+def test_prepare_xg_all_invalid_raises():
+    from football_prediction_v19.xg_import import prepare_xg
+    df = pd.DataFrame({
+        "home_team": [""],
+        "away_team": [""],
+        "home_xg": [float("nan")],
+        "away_xg": [float("nan")],
+    })
+    with pytest.raises(ValueError):
+        prepare_xg(df)
+
+
+def test_prepare_xg_unsupported_format_raises():
+    from football_prediction_v19.xg_import import prepare_xg
+    df = pd.DataFrame({
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+        "home_xg": [1.5],
+        "away_xg": [0.8],
+    })
+    with pytest.raises(ValueError, match="Unsupported format"):
+        prepare_xg(df, input_format="badformat")
+
+
+def test_prepare_xg_file_missing_input_raises(tmp_path):
+    from football_prediction_v19.xg_import import prepare_xg_file
+    with pytest.raises(ValueError, match="not found"):
+        prepare_xg_file(str(tmp_path / "nonexistent.csv"), str(tmp_path / "out.csv"))
+
+
+def test_cli_prepare_xg_native_template(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    src = root / "data" / "raw" / "xg_raw_template.csv"
+    out = tmp_path / "xg_clean.csv"
+    main(["prepare-xg", "--input", str(src), "--output", str(out)])
+    assert out.exists()
+    df = pd.read_csv(out)
+    assert len(df) == 2
+    assert "home_xg" in df.columns
+    assert "away_xg" in df.columns
+
+
+def test_cli_prepare_xg_fbref_template(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    src = root / "data" / "raw" / "fbref_xg_template.csv"
+    out = tmp_path / "xg_clean.csv"
+    main(["prepare-xg", "--input", str(src), "--output", str(out), "--format", "fbref"])
+    assert out.exists()
+    df = pd.read_csv(out)
+    assert len(df) == 2
+    assert "home_xg" in df.columns
+
+
+def test_cli_prepare_xg_understat_template(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    src = root / "data" / "raw" / "understat_xg_template.csv"
+    out = tmp_path / "xg_clean.csv"
+    main(["prepare-xg", "--input", str(src), "--output", str(out), "--format", "understat"])
+    assert out.exists()
+    df = pd.read_csv(out)
+    assert len(df) == 2
+    assert "home_xg" in df.columns
+
+
+def test_merge_xg_into_history_basic():
+    from football_prediction_v19.xg_import import merge_xg_into_history
+    history = pd.DataFrame({
+        "date": ["2024-08-17"],
+        "home_team": ["Man Utd"],
+        "away_team": ["Wolves"],
+        "home_xg": [float("nan")],
+        "away_xg": [float("nan")],
+    })
+    xg = pd.DataFrame({
+        "date": [pd.Timestamp("2024-08-17")],
+        "home_team": ["Man Utd"],
+        "away_team": ["Wolves"],
+        "home_xg": [1.23],
+        "away_xg": [0.85],
+    })
+    updated, matched, missing = merge_xg_into_history(history, xg)
+    assert matched == 1
+    assert missing == 0
+    assert updated.loc[0, "home_xg"] == pytest.approx(1.23)
+    assert updated.loc[0, "away_xg"] == pytest.approx(0.85)
+
+
+def test_merge_xg_derived_xga():
+    from football_prediction_v19.xg_import import merge_xg_into_history
+    history = pd.DataFrame({
+        "date": [pd.NaT],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+    })
+    xg = pd.DataFrame({
+        "date": [pd.NaT],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+        "home_xg": [2.10],
+        "away_xg": [0.65],
+    })
+    updated, matched, _ = merge_xg_into_history(history, xg)
+    assert matched == 1
+    # home_xga = away_xg (goals conceded by home = goals scored by away)
+    assert updated.loc[0, "home_xga"] == pytest.approx(0.65)
+    # away_xga = home_xg (goals conceded by away = goals scored by home)
+    assert updated.loc[0, "away_xga"] == pytest.approx(2.10)
+
+
+def test_merge_xg_date_window_no_match_at_zero():
+    from football_prediction_v19.xg_import import merge_xg_into_history
+    history = pd.DataFrame({
+        "date": ["2024-08-17"],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+    })
+    xg = pd.DataFrame({
+        "date": [pd.Timestamp("2024-08-15")],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+        "home_xg": [1.50],
+        "away_xg": [0.80],
+    })
+    _, matched, _ = merge_xg_into_history(history, xg, allow_date_window=0)
+    assert matched == 0
+
+
+def test_merge_xg_date_window_match_within_two_days():
+    from football_prediction_v19.xg_import import merge_xg_into_history
+    history = pd.DataFrame({
+        "date": ["2024-08-17"],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+    })
+    xg = pd.DataFrame({
+        "date": [pd.Timestamp("2024-08-15")],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+        "home_xg": [1.50],
+        "away_xg": [0.80],
+    })
+    _, matched, _ = merge_xg_into_history(history, xg, allow_date_window=2)
+    assert matched == 1
+
+
+def test_merge_xg_source_preference():
+    from football_prediction_v19.xg_import import merge_xg_into_history
+    history = pd.DataFrame({
+        "date": [pd.NaT],
+        "home_team": ["Arsenal"],
+        "away_team": ["Chelsea"],
+    })
+    xg = pd.DataFrame({
+        "date": [pd.NaT, pd.NaT],
+        "home_team": ["Arsenal", "Arsenal"],
+        "away_team": ["Chelsea", "Chelsea"],
+        "home_xg": [1.80, 2.10],
+        "away_xg": [0.50, 0.65],
+        "source": ["other", "fbref"],
+    })
+    updated, matched, _ = merge_xg_into_history(history, xg, prefer_source="fbref")
+    assert matched == 1
+    assert updated.loc[0, "home_xg"] == pytest.approx(2.10)
+
+
+def test_cli_merge_xg_history(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    xg_src = root / "data" / "raw" / "xg_raw_template.csv"
+    xg_clean = tmp_path / "xg_clean.csv"
+    main(["prepare-xg", "--input", str(xg_src), "--output", str(xg_clean)])
+
+    out = tmp_path / "history_with_xg.csv"
+    main([
+        "merge-xg-history",
+        "--history", str(root / "data" / "sample_matches.csv"),
+        "--xg", str(xg_clean),
+        "--output", str(out),
+    ])
+    assert out.exists()
+    df = pd.read_csv(out)
+    assert "home_xg" in df.columns
+    assert "away_xg" in df.columns
+    assert "home_xga" in df.columns
+    assert "away_xga" in df.columns
+
+
+def test_run_pipeline_without_xg_unchanged(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    out = tmp_path / "predictions.csv"
+    main([
+        "run-pipeline",
+        "--skip-download",
+        "--combine-output", str(root / "data" / "sample_matches.csv"),
+        "--fixtures-raw", str(root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"),
+        "--fixtures-output", str(tmp_path / "fx.csv"),
+        "--model", str(tmp_path / "model.joblib"),
+        "--predictions", str(out),
+        "--excel", str(tmp_path / "report.xlsx"),
+    ])
+    assert out.exists()
+
+
+def test_run_pipeline_with_xg_raw(tmp_path):
+    root = Path(__file__).resolve().parents[1]
+    xg_raw = root / "data" / "raw" / "xg_raw_template.csv"
+    out = tmp_path / "predictions.csv"
+    main([
+        "run-pipeline",
+        "--skip-download",
+        "--combine-output", str(root / "data" / "sample_matches.csv"),
+        "--fixtures-raw", str(root / "data" / "raw" / "upcoming_fixtures_raw_template.csv"),
+        "--fixtures-output", str(tmp_path / "fx.csv"),
+        "--model", str(tmp_path / "model.joblib"),
+        "--predictions", str(out),
+        "--excel", str(tmp_path / "report.xlsx"),
+        "--xg-raw", str(xg_raw),
+        "--xg-clean", str(tmp_path / "xg_clean.csv"),
+        "--history-with-xg", str(tmp_path / "history_with_xg.csv"),
+    ])
+    assert out.exists()
+    assert (tmp_path / "xg_clean.csv").exists()
+    assert (tmp_path / "history_with_xg.csv").exists()

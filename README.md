@@ -493,7 +493,65 @@ ROI und Yield werden hier als Profit geteilt durch eingesetzte Units gelesen. Be
 
 Ein profitabler Backtest garantiert keinen zukuenftigen Profit. Er zeigt nur, wie diese Modellversion mit diesen Daten und diesen Regeln historisch abgeschnitten haette.
 
-## 14. Quoten Importieren Und Zusammenfuehren
+## 14. xG-Daten Importieren Und Zusammenfuehren
+
+football-data.co.uk liefert keine xG-Werte. Das Projekt unterstuetzt den Import von xG-Daten aus separaten CSV-Exporten (FBref-Stil oder Understat-Stil) und die Anreicherung der historischen Trainingsdaten damit.
+
+**Unterstuetzte Formate:**
+- Native: `date, home_team, away_team, home_xg, away_xg`
+- FBref-Stil: `Date, Home, Away, xG, xG.1, Comp, Season`
+- Understat-Stil: `date, h_team, a_team, xG, xGA`
+- Auch: `home_xG / away_xG`, `home_xg / away_xg`
+
+**xG vorbereiten:**
+
+```bash
+fpv19 prepare-xg \
+  --input data/raw/xg_raw.csv \
+  --output data/processed/xg_clean.csv \
+  --format auto
+```
+
+**xG in historische Daten einmergen** (Matching nach Team-Namen und Datum):
+
+```bash
+fpv19 merge-xg-history \
+  --history data/processed/combined_football_data.csv \
+  --xg data/processed/xg_clean.csv \
+  --output data/processed/combined_football_data_with_xg.csv \
+  --allow-date-window 1
+```
+
+`--allow-date-window N` erlaubt ±N Tage Toleranz beim Datum-Abgleich. Mit `--prefer-source fbref` wird die bevorzugte Quelle gewaehlt, wenn mehrere xG-Zeilen zum selben Spiel passen.
+
+Fuer jedes gematchte Spiel werden automatisch abgeleitet:
+- `home_xga` = `away_xg` (Gegentore des Heimteams = xG des Gastteams)
+- `away_xga` = `home_xg` (Gegentore des Gastteams = xG des Heimteams)
+
+**Pipeline mit xG in einem Schritt:**
+
+```bash
+fpv19 run-pipeline \
+  --skip-download \
+  --combine-output data/processed/combined_football_data.csv \
+  --xg-raw data/raw/xg_raw.csv \
+  --xg-clean data/processed/xg_clean.csv \
+  --history-with-xg data/processed/combined_football_data_with_xg.csv \
+  --fixtures-raw data/raw/upcoming_fixtures_raw.csv \
+  --fixtures-output data/upcoming_fixtures.csv \
+  --model models/real_model.joblib \
+  --predictions outputs/predictions.csv \
+  --excel outputs/predictions_report.xlsx
+```
+
+Wenn `--xg-raw` nicht angegeben wird, bleibt das bisherige Verhalten unveraendert.
+
+**Template-Dateien:**
+- `data/raw/xg_raw_template.csv` — natives Format
+- `data/raw/fbref_xg_template.csv` — FBref-Stil
+- `data/raw/understat_xg_template.csv` — Understat-Stil
+
+## 14b. Quoten Importieren Und Zusammenfuehren
 
 Quoten aus externen CSV-Dateien koennen vorbereitet und mit Fixture-Daten zusammengefuehrt werden.
 

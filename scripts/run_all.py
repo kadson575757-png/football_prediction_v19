@@ -114,7 +114,20 @@ def run_odds_smoke() -> None:
     ])
 
 
+def run_xg_smoke() -> None:
+    """xG import smoke test using local template data — no internet required."""
+    main(["prepare-xg", "--input", "data/raw/xg_raw_template.csv",
+          "--output", "data/processed/xg_clean.csv"])
+    main([
+        "merge-xg-history",
+        "--history", "data/sample_matches.csv",
+        "--xg", "data/processed/xg_clean.csv",
+        "--output", "data/processed/sample_matches_with_xg.csv",
+    ])
+
+
 if __name__ == "__main__":
     run_all()
     run_pipeline_smoke()
     run_odds_smoke()
+    run_xg_smoke()
