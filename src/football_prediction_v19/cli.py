@@ -16,6 +16,7 @@ from .odds_import import merge_odds_file, prepare_odds_file
 from .xg_import import merge_xg_file, prepare_xg_file
 from .training import compare_models
 from .importers.fbref import normalize_fbref_csv
+from .importers.historical_odds import import_historical_odds, merge_historical_odds
 from .importers.mls_fbref import import_mls_fbref
 from .importers.the_odds_api import fetch_mls_odds
 from .importers.football_data import (
@@ -862,6 +863,43 @@ def cmd_prepare_mls_data(args) -> None:
     print(f"Prepared {len(clean)} rows -> {args.processed_output}")
 
 
+def cmd_import_historical_odds(args: argparse.Namespace) -> None:
+    import sys
+    try:
+        df = import_historical_odds(args.input, args.output, league=getattr(args, "league", "MLS"))
+        print(f"Imported historical odds")
+        print(f"  Input : {args.input}")
+        print(f"  Output: {args.output}")
+        print(f"  Rows  : {len(df)}")
+        print(f"  Odds non-null home: {df['odds_home'].notna().sum()}")
+        print(f"  Odds non-null draw: {df['odds_draw'].notna().sum()}")
+        print(f"  Odds non-null away: {df['odds_away'].notna().sum()}")
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+def cmd_merge_historical_odds(args: argparse.Namespace) -> None:
+    import sys
+    try:
+        merged, stats = merge_historical_odds(
+            args.matches,
+            args.odds,
+            args.output,
+            date_window=args.date_window,
+            overwrite=args.overwrite,
+        )
+        print(f"Merged historical odds into matches")
+        print(f"  Output          : {args.output}")
+        print(f"  Total matches   : {stats['total_matches']}")
+        print(f"  Matched (odds added): {stats['matched']}")
+        print(f"  Skipped (non-null, no --overwrite): {stats['skipped_non_null']}")
+        print(f"  Missing odds after merge: {stats['missing_odds_after']}")
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
 def cmd_gather_fbref(args) -> None:
     output = fetch_and_save(args.output, args.start_year, args.end_year, args.comp_ids)
     print(f"Saved: {output}")
@@ -1220,6 +1258,23 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--end-year", type=int, required=True)
     p.add_argument("--comp-ids", type=int, nargs="+", default=[9, 12])
     p.set_defaults(func=cmd_gather_fbref)
+
+    # import-historical-odds
+    p = sub.add_parser("import-historical-odds", help="Import historical odds CSV into normalized format")
+    p.add_argument("--input", required=True, metavar="FILE", help="Input odds CSV file")
+    p.add_argument("--output", required=True, metavar="FILE", help="Output normalized odds CSV")
+    p.add_argument("--league", default="MLS", metavar="LEAGUE", help="League name (default: MLS)")
+    p.set_defaults(func=cmd_import_historical_odds)
+
+    # merge-historical-odds
+    p = sub.add_parser("merge-historical-odds", help="Merge historical odds into matches CSV")
+    p.add_argument("--matches", required=True, metavar="FILE", help="Matches CSV file")
+    p.add_argument("--odds", required=True, metavar="FILE", help="Normalized odds CSV file")
+    p.add_argument("--output", required=True, metavar="FILE", help="Output matches CSV with odds filled")
+    p.add_argument("--date-window", type=int, default=2, metavar="DAYS", help="Match date tolerance in days (default: 2)")
+    p.add_argument("--overwrite", action="store_true", help="Overwrite existing non-null odds")
+    p.set_defaults(func=cmd_merge_historical_odds)
+
     return parser
 
 

@@ -225,3 +225,62 @@ python scripts/run_mls_strategy_sweep.py
 ```
 
 Only after completing steps A-D and reviewing the results should you decide whether MLS strategies are paper-test eligible.
+
+### MLS historical odds
+
+To make MLS backtesting value-capable, you need historical 1X2 odds for your MLS matches.
+
+**Step 1: Obtain historical MLS odds**
+
+Sources that provide historical MLS 1X2 odds (closing or opening):
+- OddsPortal (manual export per season)
+- The Odds API (historical endpoint, paid tier)
+- API-Football (historical odds, paid tier)
+- Other bookmaker data providers
+
+Save the file as: `data/raw/mls_historical_odds_raw.csv`
+
+Use the template at `data/raw/mls_historical_odds_template.csv` for the expected column format. The importer accepts many common column name variants automatically.
+
+**Step 2: Import and normalize**
+
+```
+fpv19 import-historical-odds \
+  --input data/raw/mls_historical_odds_raw.csv \
+  --output data/processed/mls_historical_odds_clean.csv \
+  --league MLS
+```
+
+**Step 3: Merge into MLS match history**
+
+```
+fpv19 merge-historical-odds \
+  --matches data/raw/mls_matches.csv \
+  --odds data/processed/mls_historical_odds_clean.csv \
+  --output data/raw/mls_matches_with_odds.csv \
+  --date-window 2
+```
+
+**Step 4: Re-run validation with odds**
+
+```
+fpv19 prepare-mls-data \
+  --fbref data/raw/mls_fbref_raw.csv \
+  --matches-output data/raw/mls_matches_with_odds.csv \
+  --processed-output data/processed/mls_matches_clean.csv
+
+fpv19 compare-models \
+  --input data/processed/mls_matches_clean.csv \
+  --output-dir outputs/model_comparison_mls \
+  --test-season 2025
+
+fpv19 backtest-bets \
+  --history data/processed/mls_matches_clean.csv \
+  --model outputs/model_comparison_mls/best_model.joblib \
+  --output outputs/backtest_mls.csv \
+  --report outputs/backtest_mls_report.md \
+  --test-season 2025 \
+  --min-edge 0.03
+```
+
+Only after seeing value bets fire in the backtest should you consider MLS paper-test eligible.
