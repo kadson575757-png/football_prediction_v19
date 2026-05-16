@@ -223,10 +223,11 @@ def cmd_predict_fixtures(args) -> None:
 
 
 def cmd_prepare_data(args) -> None:
-    summary = prepare_real_matches_file(args.input, args.output)
+    summary = prepare_real_matches_file(args.input, args.output, input_format=args.format)
     print("Prepared real match data")
     print(f"Input: {summary['input']}")
     print(f"Output: {summary['output']}")
+    print(f"Detected format: {summary['format']}")
     print(f"Rows read: {summary['rows_read']}")
     print(f"Rows written: {summary['rows_written']}")
     print(f"Rows dropped because they were incomplete historical matches: {summary['rows_dropped']}")
@@ -313,6 +314,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("prepare-data", help="Clean real historical match data for training")
     p.add_argument("--input", required=True)
     p.add_argument("--output", required=True)
+    p.add_argument("--format", default="auto", choices=["auto", "native", "fbref", "football-data"])
     p.set_defaults(func=cmd_prepare_data)
 
     p = sub.add_parser("backtest", help="Run a season split backtest")

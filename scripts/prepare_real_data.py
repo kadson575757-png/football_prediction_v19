@@ -11,5 +11,7 @@ if __name__ == "__main__":
             "data/raw/real_matches.csv",
             "--output",
             "data/processed/real_matches_clean.csv",
+            "--format",
+            "auto",
         ]
     )
