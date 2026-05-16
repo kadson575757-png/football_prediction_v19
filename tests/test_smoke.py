@@ -2827,3 +2827,213 @@ def test_import_mls_fbref_cli_command(tmp_path):
     assert output.exists()
     df = pd.read_csv(output)
     assert len(df) > 0
+
+
+# --- MLS historical odds importer tests ---
+
+def test_historical_odds_column_aliases(tmp_path):
+    """Common column alias variants map to canonical output names."""
+    from football_prediction_v19.importers.historical_odds import import_historical_odds
+    df = pd.DataFrame({
+        "Date": ["2025-03-01"],
+        "Home Team": ["LA Galaxy"],
+        "Away Team": ["Inter Miami"],
+        "Home Odds": [2.10],
+        "Draw Odds": [3.40],
+        "Away Odds": [3.60],
+        "Bookmaker": ["Bet365"],
+    })
+    p = tmp_path / "odds.csv"
+    df.to_csv(p, index=False)
+    out = import_historical_odds(p)
+    assert "odds_home" in out.columns
+    assert "odds_draw" in out.columns
+    assert "odds_away" in out.columns
+    assert abs(float(out["odds_home"].iloc[0]) - 2.10) < 0.001
+
+
+def test_historical_odds_mls_alias_normalization(tmp_path):
+    """MLS team aliases are normalized during odds import."""
+    from football_prediction_v19.importers.historical_odds import import_historical_odds
+    df = pd.DataFrame({
+        "date": ["2025-03-01"],
+        "home_team": ["LAFC"],
+        "away_team": ["Sporting KC"],
+        "odds_home": [2.10],
+        "odds_draw": [3.40],
+        "odds_away": [3.60],
+    })
+    p = tmp_path / "odds.csv"
+    df.to_csv(p, index=False)
+    out = import_historical_odds(p)
+    assert out["home_team"].iloc[0] == "Los Angeles FC"
+    assert out["away_team"].iloc[0] == "Sporting Kansas City"
+
+
+def test_historical_odds_numeric_conversion(tmp_path):
+    """Odds values are converted to float."""
+    from football_prediction_v19.importers.historical_odds import import_historical_odds
+    df = pd.DataFrame({
+        "date": ["2025-03-01"],
+        "home_team": ["LA Galaxy"],
+        "away_team": ["Inter Miami"],
+        "odds_home": ["2.10"],
+        "odds_draw": ["3.40"],
+        "odds_away": ["3.60"],
+    })
+    p = tmp_path / "odds.csv"
+    df.to_csv(p, index=False)
+    out = import_historical_odds(p)
+    assert out["odds_home"].dtype in [float, "float64"]
+
+
+def test_historical_odds_missing_file_error():
+    """FileNotFoundError for missing input."""
+    from football_prediction_v19.importers.historical_odds import import_historical_odds
+    with pytest.raises(FileNotFoundError):
+        import_historical_odds("nonexistent_odds.csv")
+
+
+def test_historical_odds_empty_file_error(tmp_path):
+    """ValueError for empty input."""
+    from football_prediction_v19.importers.historical_odds import import_historical_odds
+    p = tmp_path / "empty.csv"
+    p.write_text("date,home_team,away_team,odds_home,odds_draw,odds_away\n")
+    with pytest.raises(ValueError):
+        import_historical_odds(p)
+
+
+def test_historical_odds_missing_odds_columns_error(tmp_path):
+    """ValueError when odds columns are missing."""
+    from football_prediction_v19.importers.historical_odds import import_historical_odds
+    df = pd.DataFrame({"date": ["2025-03-01"], "home_team": ["A"], "away_team": ["B"]})
+    p = tmp_path / "no_odds.csv"
+    df.to_csv(p, index=False)
+    with pytest.raises(ValueError, match="No odds columns"):
+        import_historical_odds(p)
+
+
+def test_merge_historical_odds_same_date(tmp_path):
+    """Odds merge when dates match exactly."""
+    import numpy as np
+    from football_prediction_v19.importers.historical_odds import merge_historical_odds
+    matches = pd.DataFrame({
+        "date": ["2025-03-01"],
+        "home_team": ["LA Galaxy"],
+        "away_team": ["Inter Miami"],
+        "score": ["2-1"],
+        "odds_home": [np.nan], "odds_draw": [np.nan], "odds_away": [np.nan],
+    })
+    odds = pd.DataFrame({
+        "date": ["2025-03-01"],
+        "home_team": ["LA Galaxy"],
+        "away_team": ["Inter Miami"],
+        "odds_home": [2.10], "odds_draw": [3.40], "odds_away": [3.60],
+        "bookmaker": ["Bet365"], "market": ["h2h"], "updated_at": [""],
+    })
+    mp = tmp_path / "matches.csv"
+    op = tmp_path / "odds.csv"
+    out_p = tmp_path / "merged.csv"
+    matches.to_csv(mp, index=False)
+    odds.to_csv(op, index=False)
+    merged, stats = merge_historical_odds(mp, op, out_p, date_window=0)
+    assert stats["matched"] == 1
+    result = pd.read_csv(out_p)
+    assert abs(float(result["odds_home"].iloc[0]) - 2.10) < 0.001
+
+
+def test_merge_historical_odds_date_window(tmp_path):
+    """Odds merge within date window."""
+    import numpy as np
+    from football_prediction_v19.importers.historical_odds import merge_historical_odds
+    matches = pd.DataFrame({
+        "date": ["2025-03-03"],  # 2 days after odds date
+        "home_team": ["LA Galaxy"],
+        "away_team": ["Inter Miami"],
+        "score": ["2-1"],
+        "odds_home": [np.nan], "odds_draw": [np.nan], "odds_away": [np.nan],
+    })
+    odds = pd.DataFrame({
+        "date": ["2025-03-01"],
+        "home_team": ["LA Galaxy"],
+        "away_team": ["Inter Miami"],
+        "odds_home": [2.10], "odds_draw": [3.40], "odds_away": [3.60],
+        "bookmaker": ["Bet365"], "market": ["h2h"], "updated_at": [""],
+    })
+    mp = tmp_path / "matches.csv"
+    op = tmp_path / "odds.csv"
+    out_p = tmp_path / "merged.csv"
+    matches.to_csv(mp, index=False)
+    odds.to_csv(op, index=False)
+    merged, stats = merge_historical_odds(mp, op, out_p, date_window=2)
+    assert stats["matched"] == 1
+
+
+def test_merge_preserves_unmatched_rows(tmp_path):
+    """Rows without matching odds are preserved."""
+    import numpy as np
+    from football_prediction_v19.importers.historical_odds import merge_historical_odds
+    matches = pd.DataFrame({
+        "date": ["2025-03-01", "2025-04-01"],
+        "home_team": ["LA Galaxy", "FC Dallas"],
+        "away_team": ["Inter Miami", "Houston Dynamo"],
+        "score": ["2-1", "0-0"],
+        "odds_home": [np.nan, np.nan], "odds_draw": [np.nan, np.nan], "odds_away": [np.nan, np.nan],
+    })
+    odds = pd.DataFrame({
+        "date": ["2025-03-01"],
+        "home_team": ["LA Galaxy"],
+        "away_team": ["Inter Miami"],
+        "odds_home": [2.10], "odds_draw": [3.40], "odds_away": [3.60],
+        "bookmaker": ["Bet365"], "market": ["h2h"], "updated_at": [""],
+    })
+    mp = tmp_path / "matches.csv"
+    op = tmp_path / "odds.csv"
+    out_p = tmp_path / "merged.csv"
+    matches.to_csv(mp, index=False)
+    odds.to_csv(op, index=False)
+    merged, stats = merge_historical_odds(mp, op, out_p, date_window=0)
+    result = pd.read_csv(out_p)
+    assert len(result) == 2  # Both rows preserved
+    assert stats["missing_odds_after"] == 1  # FC Dallas still missing
+
+
+def test_merge_does_not_overwrite_existing_odds(tmp_path):
+    """Existing non-null odds are not overwritten unless --overwrite."""
+    import numpy as np
+    from football_prediction_v19.importers.historical_odds import merge_historical_odds
+    matches = pd.DataFrame({
+        "date": ["2025-03-01"],
+        "home_team": ["LA Galaxy"],
+        "away_team": ["Inter Miami"],
+        "score": ["2-1"],
+        "odds_home": [1.80], "odds_draw": [3.50], "odds_away": [4.00],  # already has odds
+    })
+    odds = pd.DataFrame({
+        "date": ["2025-03-01"],
+        "home_team": ["LA Galaxy"],
+        "away_team": ["Inter Miami"],
+        "odds_home": [2.10], "odds_draw": [3.40], "odds_away": [3.60],
+        "bookmaker": ["Bet365"], "market": ["h2h"], "updated_at": [""],
+    })
+    mp = tmp_path / "matches.csv"
+    op = tmp_path / "odds.csv"
+    out_p = tmp_path / "merged.csv"
+    matches.to_csv(mp, index=False)
+    odds.to_csv(op, index=False)
+    merged, stats = merge_historical_odds(mp, op, out_p, date_window=0, overwrite=False)
+    result = pd.read_csv(out_p)
+    assert abs(float(result["odds_home"].iloc[0]) - 1.80) < 0.001  # original preserved
+    assert stats["skipped_non_null"] == 1
+
+
+def test_mls_historical_odds_template_exists():
+    """Template file exists."""
+    root = Path(__file__).resolve().parents[1]
+    assert (root / "data" / "raw" / "mls_historical_odds_template.csv").exists()
+
+
+def test_mls_historical_odds_smoke_script_exists():
+    """Smoke script exists."""
+    root = Path(__file__).resolve().parents[1]
+    assert (root / "scripts" / "run_mls_historical_odds_smoke.py").exists()

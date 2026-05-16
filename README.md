@@ -399,6 +399,8 @@ Sport key: `soccer_usa_mls`. API keys available free at https://the-odds-api.com
 
 See `docs/DATA_REQUIREMENTS.md` for the full MLS validation workflow.
 
+**Historical odds for MLS backtesting:** Use `import-historical-odds` and `merge-historical-odds` to enrich MLS match history with 1X2 odds from any CSV source (OddsPortal, The Odds API historical, API-Football, etc.). A template is at `data/raw/mls_historical_odds_template.csv`. See `docs/DATA_REQUIREMENTS.md` for the step-by-step workflow.
+
 ## 8. Modell Trainieren
 
 Mit Sample-Daten:

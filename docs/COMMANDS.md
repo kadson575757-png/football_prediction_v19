@@ -436,3 +436,42 @@ fpv19 prepare-mls-data \
 | `--fbref` | yes | Path to FBref-style MLS CSV export |
 | `--matches-output` | yes | Path where the normalized matches CSV is saved |
 | `--processed-output` | yes | Path where the cleaned/processed CSV is saved |
+
+## import-historical-odds
+
+Import historical odds from any CSV with flexible column names and normalize to project schema.
+
+```bash
+fpv19 import-historical-odds \
+  --input data/raw/mls_historical_odds_raw.csv \
+  --output data/processed/mls_historical_odds_clean.csv \
+  --league MLS
+```
+
+| Flag | Required | Description |
+|---|---|---|
+| `--input` | yes | Input odds CSV file (accepts many column name variants) |
+| `--output` | yes | Output normalized odds CSV |
+| `--league` | no | League name (default: MLS) |
+
+The importer automatically maps common column aliases for date, home/away team, and 1X2 odds. Use `data/raw/mls_historical_odds_template.csv` as a column reference.
+
+## merge-historical-odds
+
+Merge historical odds into a matches CSV by date and team name matching.
+
+```bash
+fpv19 merge-historical-odds \
+  --matches data/raw/mls_matches.csv \
+  --odds data/processed/mls_historical_odds_clean.csv \
+  --output data/raw/mls_matches_with_odds.csv \
+  --date-window 2
+```
+
+| Flag | Required | Description |
+|---|---|---|
+| `--matches` | yes | Matches CSV file to enrich with odds |
+| `--odds` | yes | Normalized odds CSV (output of `import-historical-odds`) |
+| `--output` | yes | Output matches CSV with odds_home/draw/away filled in |
+| `--date-window` | no | Tolerance in days for date matching (default: 2) |
+| `--overwrite` | no | Overwrite existing non-null odds (default: skip) |
