@@ -497,3 +497,53 @@ fpv19 merge-historical-odds \
 | `--output` | yes | Output matches CSV with odds_home/draw/away filled in |
 | `--date-window` | no | Tolerance in days for date matching (default: 2) |
 | `--overwrite` | no | Overwrite existing non-null odds (default: skip) |
+
+---
+
+## import-totals-odds
+
+Import historical Over/Under 2.5 odds CSV and normalize to project schema.
+
+Accepts flexible column names including football-data.co.uk format (`B365>2.5`, `BbAv>2.5`).
+
+```bash
+fpv19 import-totals-odds \
+  --input data/raw/my_over25_odds.csv \
+  --output data/processed/totals_odds_normalized.csv
+```
+
+| Flag | Required | Description |
+|---|---|---|
+| `--input` | yes | Input totals odds CSV (accepts many column name variants) |
+| `--output` | yes | Output normalized totals odds CSV |
+
+**Accepted Over 2.5 column aliases:** `over_25_odds`, `Over 2.5`, `Over25`, `over25`, `O2.5`, `BbAv>2.5`, `B365>2.5`
+
+**Accepted Under 2.5 column aliases:** `under_25_odds`, `Under 2.5`, `Under25`, `under25`, `U2.5`, `BbAv<2.5`, `B365<2.5`
+
+Output columns: `date, home_team, away_team, odds_over25, odds_under25, bookmaker, market, updated_at`
+
+Use `data/raw/historical_totals_odds_template.csv` as a column reference.
+
+## merge-totals-odds
+
+Merge Over/Under 2.5 odds into a matches CSV by date and team name matching.
+Adds `odds_over25` and `odds_under25` columns to the matches file.
+
+```bash
+fpv19 merge-totals-odds \
+  --matches data/processed/matches_clean.csv \
+  --odds data/processed/totals_odds_normalized.csv \
+  --output data/processed/matches_with_totals.csv \
+  --date-window 2
+```
+
+| Flag | Required | Description |
+|---|---|---|
+| `--matches` | yes | Matches CSV file to enrich with totals odds |
+| `--odds` | yes | Normalized totals odds CSV (output of `import-totals-odds`) |
+| `--output` | yes | Output matches CSV with odds_over25/odds_under25 filled in |
+| `--date-window` | no | Tolerance in days for date matching (default: 2) |
+| `--overwrite` | no | Overwrite existing non-null odds (default: skip) |
+
+Team aliases are resolved automatically on both sides of the merge (e.g. "Man City" matches "Manchester City").

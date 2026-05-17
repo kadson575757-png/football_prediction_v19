@@ -376,3 +376,80 @@ fpv19 predict-fixtures \
 Use `data/raw/eredivisie_matches_template.csv` as a column reference for the football-data.co.uk format.
 
 Team aliases are automatically normalized (e.g. "Ajax" -> "AFC Ajax", "PSV" -> "PSV Eindhoven", "AZ" -> "AZ Alkmaar", "NEC" -> "NEC Nijmegen").
+
+---
+
+## Historical Over/Under 2.5 Odds
+
+### Why estimated odds are not enough
+
+The form-pattern audit identified strong Over 2.5 signals (e.g. `home_gf_high`, `form_mismatch_H`).
+However, that audit used a single estimated market price of ~1.88 for all Over 2.5 bets.
+
+**This estimate is unreliable because:**
+- Actual bookmaker Over 2.5 odds vary from ~1.65 (heavily favoured) to ~2.20+ (low-scoring game expected).
+- Bookmakers price in form already. A high-scoring home team may face Over 2.5 odds of 1.68, not 1.88.
+- A pattern hitting 59% of the time at 1.88 = +11% ROI. At 1.72 = +1.7% ROI. At 1.68 = -0.5% ROI.
+- Whether any signal beats the market requires knowing the actual obtainable price.
+
+### CSV format
+
+Use `data/raw/historical_totals_odds_template.csv` as a reference.
+
+**Required columns** (flexible aliases accepted):
+
+| Canonical name | Accepted aliases |
+|---|---|
+| `date` | `Date`, `match_date`, `Match Date`, `MatchDate` |
+| `home_team` | `Home`, `Home Team`, `HomeTeam`, `home` |
+| `away_team` | `Away`, `Away Team`, `AwayTeam`, `away` |
+| `over_25_odds` | `Over 2.5`, `Over25`, `over25`, `O2.5`, `o2.5`, `BbAv>2.5`, `B365>2.5` |
+
+**Optional columns:**
+
+| Canonical name | Accepted aliases |
+|---|---|
+| `under_25_odds` | `Under 2.5`, `Under25`, `under25`, `U2.5`, `BbAv<2.5`, `B365<2.5` |
+| `bookmaker` | `Bookmaker`, `bookie`, `source` |
+| `market` | `Market`, `bet_type` |
+| `updated_at` | `Closing Time`, `timestamp`, `closing_time` |
+
+**Minimum example:**
+```csv
+date,home_team,away_team,over_25_odds,under_25_odds
+2024-08-17,Arsenal,Chelsea,1.85,2.05
+2024-08-17,Manchester United,Liverpool,1.92,1.98
+```
+
+**football-data.co.uk format** (B365 columns are recognized automatically):
+```csv
+Date,HomeTeam,AwayTeam,B365>2.5,B365<2.5
+17/08/2024,Arsenal,Chelsea,1.85,2.05
+```
+
+### Workflow
+
+```bash
+# Step 1: Import and normalize totals odds file
+fpv19 import-totals-odds \
+  --input data/raw/my_over25_odds.csv \
+  --output data/processed/totals_odds_normalized.csv
+
+# Step 2: Merge into processed matches file
+fpv19 merge-totals-odds \
+  --matches data/processed/matches_clean.csv \
+  --odds data/processed/totals_odds_normalized.csv \
+  --output data/processed/matches_with_totals.csv \
+  --date-window 2
+
+# Step 3: Run form-pattern Over 2.5 audit with real odds
+python scripts/run_form_over25_real_odds_audit.py \
+  --matches data/processed/matches_with_totals.csv
+```
+
+### Sources for Over 2.5 historical odds
+
+football-data.co.uk provides `BbAv>2.5` and `B365>2.5` columns in its match CSV downloads.
+These are the recommended source as they cover the same leagues already supported.
+
+The `import-totals-odds` command accepts those column names directly without renaming.

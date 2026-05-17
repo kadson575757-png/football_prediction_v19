@@ -16,7 +16,12 @@ from .odds_import import merge_odds_file, prepare_odds_file
 from .xg_import import merge_xg_file, prepare_xg_file
 from .training import compare_models
 from .importers.fbref import normalize_fbref_csv
-from .importers.historical_odds import import_historical_odds, merge_historical_odds
+from .importers.historical_odds import (
+    import_historical_odds,
+    merge_historical_odds,
+    import_totals_odds,
+    merge_totals_odds,
+)
 from .importers.mls_fbref import import_mls_fbref
 from .importers.the_odds_api import fetch_mls_odds
 from .importers.football_data import (
@@ -900,6 +905,43 @@ def cmd_merge_historical_odds(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def cmd_import_totals_odds(args: argparse.Namespace) -> None:
+    import sys
+    try:
+        df = import_totals_odds(args.input, args.output)
+        print(f"Imported Over/Under 2.5 odds")
+        print(f"  Input : {args.input}")
+        print(f"  Output: {args.output}")
+        print(f"  Rows  : {len(df)}")
+        print(f"  Over25 non-null : {df['odds_over25'].notna().sum()}")
+        print(f"  Under25 non-null: {df['odds_under25'].notna().sum()}")
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+def cmd_merge_totals_odds(args: argparse.Namespace) -> None:
+    import sys
+    try:
+        merged, stats = merge_totals_odds(
+            args.matches,
+            args.odds,
+            args.output,
+            date_window=args.date_window,
+            overwrite=args.overwrite,
+        )
+        print(f"Merged Over/Under 2.5 odds into matches")
+        print(f"  Output               : {args.output}")
+        print(f"  Total matches        : {stats['total_matches']}")
+        print(f"  Matched (odds added) : {stats['matched']}")
+        print(f"  Skipped (non-null)   : {stats['skipped_non_null']}")
+        print(f"  Missing over25 after : {stats['missing_odds_after']}")
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+
 def cmd_gather_fbref(args) -> None:
     output = fetch_and_save(args.output, args.start_year, args.end_year, args.comp_ids)
     print(f"Saved: {output}")
@@ -1274,6 +1316,23 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--date-window", type=int, default=2, metavar="DAYS", help="Match date tolerance in days (default: 2)")
     p.add_argument("--overwrite", action="store_true", help="Overwrite existing non-null odds")
     p.set_defaults(func=cmd_merge_historical_odds)
+
+    # import-totals-odds
+    p = sub.add_parser("import-totals-odds",
+                       help="Import historical Over/Under 2.5 odds CSV into normalized format")
+    p.add_argument("--input", required=True, metavar="FILE", help="Input totals odds CSV file")
+    p.add_argument("--output", required=True, metavar="FILE", help="Output normalized totals odds CSV")
+    p.set_defaults(func=cmd_import_totals_odds)
+
+    # merge-totals-odds
+    p = sub.add_parser("merge-totals-odds",
+                       help="Merge Over/Under 2.5 odds into matches CSV")
+    p.add_argument("--matches", required=True, metavar="FILE", help="Matches CSV file")
+    p.add_argument("--odds", required=True, metavar="FILE", help="Normalized totals odds CSV file")
+    p.add_argument("--output", required=True, metavar="FILE", help="Output matches CSV with over/under odds filled")
+    p.add_argument("--date-window", type=int, default=2, metavar="DAYS", help="Match date tolerance in days (default: 2)")
+    p.add_argument("--overwrite", action="store_true", help="Overwrite existing non-null odds")
+    p.set_defaults(func=cmd_merge_totals_odds)
 
     return parser
 
