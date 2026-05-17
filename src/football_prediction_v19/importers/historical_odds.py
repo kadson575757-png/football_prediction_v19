@@ -25,6 +25,24 @@ OUTPUT_COLUMNS = [
     "bookmaker", "market", "updated_at",
 ]
 
+# Over/Under 2.5 column aliases
+OVER25_ALIASES = [
+    "odds_over25", "over_25_odds", "over25_odds", "Over 2.5", "Over25", "over25",
+    "O2.5", "o2.5", "OverOdds", "over_odds", "over",
+    "BbAv>2.5", "B365>2.5",
+]
+UNDER25_ALIASES = [
+    "odds_under25", "under_25_odds", "under25_odds", "Under 2.5", "Under25", "under25",
+    "U2.5", "u2.5", "UnderOdds", "under_odds", "under",
+    "BbAv<2.5", "B365<2.5",
+]
+
+TOTALS_OUTPUT_COLUMNS = [
+    "date", "home_team", "away_team",
+    "odds_over25", "odds_under25",
+    "bookmaker", "market", "updated_at",
+]
+
 
 def _find_column(df: pd.DataFrame, aliases: list[str]) -> str | None:
     """Find the first matching column name from a list of aliases."""
@@ -227,6 +245,210 @@ def merge_historical_odds(
     matches = matches.drop(columns=["_date", "_home", "_away"])
 
     missing_after = matches["odds_home"].isna().sum()
+    total = len(matches)
+
+    stats = {
+        "total_matches": total,
+        "matched": matched,
+        "unmatched": total - matched - skipped_non_null,
+        "skipped_non_null": skipped_non_null,
+        "missing_odds_after": missing_after,
+    }
+
+    if output_path is not None:
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        matches.to_csv(output_path, index=False)
+
+    return matches, stats
+
+
+# ---------------------------------------------------------------------------
+# Over/Under 2.5 totals odds importer
+# ---------------------------------------------------------------------------
+
+def import_totals_odds(
+    input_path: str | Path,
+    output_path: str | Path | None = None,
+) -> pd.DataFrame:
+    """Import historical Over/Under 2.5 odds CSV with flexible column names.
+
+    Accepts a wide variety of column aliases (see OVER25_ALIASES / UNDER25_ALIASES).
+    Normalizes to: date, home_team, away_team, odds_over25, odds_under25,
+    bookmaker, market, updated_at.
+
+    Raises ValueError if Over 2.5 odds column is missing.
+    Under 2.5 column is optional (filled with NaN when absent).
+    """
+    input_path = Path(input_path)
+    if not input_path.exists():
+        raise FileNotFoundError(
+            f"Totals odds file not found: {input_path}\n"
+            f"Provide a CSV with columns like: date, home_team, away_team, over_25_odds, under_25_odds"
+        )
+
+    try:
+        df = pd.read_csv(input_path)
+    except Exception as e:
+        raise ValueError(f"Could not read CSV file {input_path}: {e}") from e
+
+    if df.empty:
+        raise ValueError(f"Totals odds file is empty: {input_path}")
+
+    rename: dict[str, str] = {}
+
+    # Required columns
+    date_col = _find_column(df, DATE_ALIASES)
+    if date_col is None:
+        raise ValueError(
+            f"No date column found in {input_path}.\n"
+            f"Columns found: {list(df.columns)}\n"
+            f"Expected one of: {DATE_ALIASES}"
+        )
+    rename[date_col] = "date"
+
+    home_col = _find_column(df, HOME_TEAM_ALIASES)
+    if home_col is None:
+        raise ValueError(
+            f"No home team column found in {input_path}.\n"
+            f"Columns found: {list(df.columns)}\n"
+            f"Expected one of: {HOME_TEAM_ALIASES}"
+        )
+    rename[home_col] = "home_team"
+
+    away_col = _find_column(df, AWAY_TEAM_ALIASES)
+    if away_col is None:
+        raise ValueError(
+            f"No away team column found in {input_path}.\n"
+            f"Columns found: {list(df.columns)}\n"
+            f"Expected one of: {AWAY_TEAM_ALIASES}"
+        )
+    rename[away_col] = "away_team"
+
+    over_col = _find_column(df, OVER25_ALIASES)
+    if over_col is None:
+        raise ValueError(
+            f"No Over 2.5 odds column found in {input_path}.\n"
+            f"Columns found: {list(df.columns)}\n"
+            f"Expected one of: {OVER25_ALIASES}"
+        )
+    rename[over_col] = "odds_over25"
+
+    under_col = _find_column(df, UNDER25_ALIASES)
+    if under_col:
+        rename[under_col] = "odds_under25"
+
+    # Optional metadata columns
+    bm_col = _find_column(df, BOOKMAKER_ALIASES)
+    if bm_col:
+        rename[bm_col] = "bookmaker"
+    mkt_col = _find_column(df, MARKET_ALIASES)
+    if mkt_col:
+        rename[mkt_col] = "market"
+    upd_col = _find_column(df, UPDATED_AT_ALIASES)
+    if upd_col:
+        rename[upd_col] = "updated_at"
+
+    df = df.rename(columns=rename)
+
+    # Normalize team names
+    df["home_team"] = df["home_team"].astype(str).str.strip().apply(normalize_team_name)
+    df["away_team"] = df["away_team"].astype(str).str.strip().apply(normalize_team_name)
+
+    # Parse dates
+    df["date"] = pd.to_datetime(df["date"], errors="coerce", dayfirst=False)
+    df = df.dropna(subset=["date"])
+    df["date"] = df["date"].dt.strftime("%Y-%m-%d")
+
+    # Convert odds to numeric
+    for col in ["odds_over25", "odds_under25"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+        else:
+            df[col] = np.nan
+
+    # Fill optional metadata columns
+    for col in ["bookmaker", "market", "updated_at"]:
+        if col not in df.columns:
+            df[col] = ""
+        df[col] = df[col].fillna("").astype(str)
+
+    if (df["market"] == "").all():
+        df["market"] = "totals"
+
+    out = df[[c for c in TOTALS_OUTPUT_COLUMNS if c in df.columns]].reset_index(drop=True)
+
+    if output_path is not None:
+        output_path = Path(output_path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        out.to_csv(output_path, index=False)
+
+    return out
+
+
+def merge_totals_odds(
+    matches_path: str | Path,
+    odds_path: str | Path,
+    output_path: str | Path | None = None,
+    date_window: int = 2,
+    overwrite: bool = False,
+) -> tuple[pd.DataFrame, dict[str, int]]:
+    """Merge Over/Under 2.5 odds into a matches DataFrame by date+team matching.
+
+    Adds/fills columns odds_over25 and odds_under25 in the matches file.
+    Returns (merged_df, stats_dict).
+    """
+    matches_path = Path(matches_path)
+    odds_path = Path(odds_path)
+
+    if not matches_path.exists():
+        raise FileNotFoundError(f"Matches file not found: {matches_path}")
+    if not odds_path.exists():
+        raise FileNotFoundError(f"Totals odds file not found: {odds_path}")
+
+    matches = pd.read_csv(matches_path)
+    odds = pd.read_csv(odds_path)
+
+    matches["_date"] = pd.to_datetime(matches["date"], errors="coerce")
+    odds["_date"] = pd.to_datetime(odds["date"], errors="coerce")
+
+    matches["_home"] = matches["home_team"].astype(str).apply(normalize_team_name)
+    matches["_away"] = matches["away_team"].astype(str).apply(normalize_team_name)
+    odds["_home"] = odds["home_team"].astype(str).apply(normalize_team_name)
+    odds["_away"] = odds["away_team"].astype(str).apply(normalize_team_name)
+
+    # Ensure target columns exist in matches
+    for col in ["odds_over25", "odds_under25"]:
+        if col not in matches.columns:
+            matches[col] = np.nan
+        matches[col] = pd.to_numeric(matches[col], errors="coerce")
+
+    matched = 0
+    skipped_non_null = 0
+
+    for _, odds_row in odds.iterrows():
+        if pd.isna(odds_row["_date"]):
+            continue
+        date_diff = (matches["_date"] - odds_row["_date"]).abs()
+        team_match = (matches["_home"] == odds_row["_home"]) & (matches["_away"] == odds_row["_away"])
+        within_window = date_diff <= pd.Timedelta(days=date_window)
+        candidates = matches[team_match & within_window]
+
+        if candidates.empty:
+            continue
+
+        for idx in candidates.index:
+            has_odds = pd.notna(matches.at[idx, "odds_over25"])
+            if has_odds and not overwrite:
+                skipped_non_null += 1
+                continue
+            matches.at[idx, "odds_over25"] = odds_row.get("odds_over25", np.nan)
+            matches.at[idx, "odds_under25"] = odds_row.get("odds_under25", np.nan)
+            matched += 1
+
+    matches = matches.drop(columns=["_date", "_home", "_away"])
+
+    missing_after = matches["odds_over25"].isna().sum()
     total = len(matches)
 
     stats = {
