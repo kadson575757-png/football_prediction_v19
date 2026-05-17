@@ -3037,3 +3037,59 @@ def test_mls_historical_odds_smoke_script_exists():
     """Smoke script exists."""
     root = Path(__file__).resolve().parents[1]
     assert (root / "scripts" / "run_mls_historical_odds_smoke.py").exists()
+
+
+# --- FBref MLS team-name alias regression tests (fix/mls-fbref-team-aliases) ---
+
+def test_fbref_alias_ne_revolution():
+    """NE Revolution (FBref shorthand) normalizes to New England Revolution."""
+    from football_prediction_v19.team_names import normalize_team_name
+    assert normalize_team_name("NE Revolution") == "New England Revolution"
+
+
+def test_fbref_alias_sj_earthquakes():
+    """SJ Earthquakes (FBref shorthand) normalizes to San Jose Earthquakes."""
+    from football_prediction_v19.team_names import normalize_team_name
+    assert normalize_team_name("SJ Earthquakes") == "San Jose Earthquakes"
+
+
+def test_fbref_alias_minnesota_utd():
+    """Minnesota Utd (FBref shorthand) normalizes to Minnesota United."""
+    from football_prediction_v19.team_names import normalize_team_name
+    assert normalize_team_name("Minnesota Utd") == "Minnesota United"
+
+
+def test_fbref_alias_vancouver_wcaps():
+    """Vancouver W'caps (FBref shorthand) normalizes to Vancouver Whitecaps."""
+    from football_prediction_v19.team_names import normalize_team_name
+    assert normalize_team_name("Vancouver W'caps") == "Vancouver Whitecaps"
+
+
+def test_fbref_alias_cf_montreal_accented():
+    """CF Montréal (accented, FBref variant) normalizes to CF Montreal."""
+    from football_prediction_v19.team_names import normalize_team_name
+    assert normalize_team_name("CF Montréal") == "CF Montreal"
+
+
+def test_fbref_alias_cf_montreal_plain():
+    """CF Montreal (plain) still normalizes correctly."""
+    from football_prediction_v19.team_names import normalize_team_name
+    assert normalize_team_name("CF Montreal") == "CF Montreal"
+
+
+def test_fbref_alias_lafc():
+    """LAFC normalizes to Los Angeles FC."""
+    from football_prediction_v19.team_names import normalize_team_name
+    assert normalize_team_name("LAFC") == "Los Angeles FC"
+
+
+def test_fbref_alias_sporting_kc():
+    """Sporting KC normalizes to Sporting Kansas City."""
+    from football_prediction_v19.team_names import normalize_team_name
+    assert normalize_team_name("Sporting KC") == "Sporting Kansas City"
+
+
+def test_fbref_alias_ny_red_bulls():
+    """NY Red Bulls normalizes to New York Red Bulls."""
+    from football_prediction_v19.team_names import normalize_team_name
+    assert normalize_team_name("NY Red Bulls") == "New York Red Bulls"
