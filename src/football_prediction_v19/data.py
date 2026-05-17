@@ -100,7 +100,7 @@ _DIV_TO_LEAGUE: dict[str, str] = {
     "E2": "League One",
     "E3": "League Two",
     "D1": "Bundesliga",
-    "D2": "Bundesliga 2",
+    "D2": "2. Bundesliga",
     "SP1": "La Liga",
     "SP2": "Segunda Division",
     "I1": "Serie A",
