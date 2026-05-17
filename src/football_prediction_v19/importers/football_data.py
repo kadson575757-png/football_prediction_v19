@@ -17,6 +17,7 @@ LEAGUE_CODES: dict[str, str] = {
     "scottish-premiership": "SC0",
     "bundesliga": "D1",
     "bundesliga-2": "D2",
+    "2-bundesliga": "D2",
     "serie-a": "I1",
     "serie-b": "I2",
     "la-liga": "SP1",

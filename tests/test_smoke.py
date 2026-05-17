@@ -3093,3 +3093,126 @@ def test_fbref_alias_ny_red_bulls():
     """NY Red Bulls normalizes to New York Red Bulls."""
     from football_prediction_v19.team_names import normalize_team_name
     assert normalize_team_name("NY Red Bulls") == "New York Red Bulls"
+
+
+# ── D2 / Eredivisie league support ──────────────────────────────────────────
+
+
+class TestD2EredivisieLeagueCodes:
+    def test_d2_bundesliga2(self):
+        from football_prediction_v19.importers.football_data import LEAGUE_CODES
+        assert LEAGUE_CODES.get("bundesliga-2") == "D2"
+
+    def test_d2_2bundesliga(self):
+        from football_prediction_v19.importers.football_data import LEAGUE_CODES
+        assert LEAGUE_CODES.get("2-bundesliga") == "D2"
+
+    def test_n1_eredivisie(self):
+        from football_prediction_v19.importers.football_data import LEAGUE_CODES
+        assert LEAGUE_CODES.get("eredivisie") == "N1"
+
+
+class TestD2EredivisieDivToLeague:
+    def test_d2_human_name(self):
+        from football_prediction_v19.data import _DIV_TO_LEAGUE
+        assert _DIV_TO_LEAGUE.get("D2") == "2. Bundesliga"
+
+    def test_n1_human_name(self):
+        from football_prediction_v19.data import _DIV_TO_LEAGUE
+        assert _DIV_TO_LEAGUE.get("N1") == "Eredivisie"
+
+
+class TestD2AliasNormalization:
+    def _n(self, alias):
+        from football_prediction_v19.team_names import normalize_team_name
+        return normalize_team_name(alias)
+
+    def test_schalke(self): assert self._n("Schalke") == "FC Schalke 04"
+    def test_hsv(self): assert self._n("HSV") == "Hamburger SV"
+    def test_hamburg(self): assert self._n("Hamburg") == "Hamburger SV"
+    def test_hertha_berlin(self): assert self._n("Hertha Berlin") == "Hertha BSC"
+    def test_nurnberg(self): assert self._n("Nurnberg") == "1. FC N\u00fcrnberg"
+    def test_kaiserslautern(self): assert self._n("Kaiserslautern") == "1. FC Kaiserslautern"
+    def test_dusseldorf(self): assert self._n("Dusseldorf") == "Fortuna D\u00fcsseldorf"
+    def test_karlsruhe(self): assert self._n("Karlsruhe") == "Karlsruher SC"
+    def test_greuther_furth(self): assert self._n("Greuther Furth") == "SpVgg Greuther F\u00fcrth"
+    def test_paderborn(self): assert self._n("Paderborn") == "SC Paderborn 07"
+    def test_darmstadt(self): assert self._n("Darmstadt") == "SV Darmstadt 98"
+    def test_kiel(self): assert self._n("Kiel") == "Holstein Kiel"
+    def test_st_pauli(self): assert self._n("St. Pauli") == "FC St. Pauli"
+    def test_ulm(self): assert self._n("Ulm") == "SSV Ulm 1846"
+    def test_preussen_munster(self): assert self._n("Preussen Munster") == "Preu\u00dfen M\u00fcnster"
+    def test_bielefeld(self): assert self._n("Bielefeld") == "Arminia Bielefeld"
+    def test_hannover(self): assert self._n("Hannover") == "Hannover 96"
+    def test_elversberg(self): assert self._n("Elversberg") == "SV Elversberg"
+
+
+class TestN1AliasNormalization:
+    def _n(self, alias):
+        from football_prediction_v19.team_names import normalize_team_name
+        return normalize_team_name(alias)
+
+    def test_ajax(self): assert self._n("Ajax") == "AFC Ajax"
+    def test_psv(self): assert self._n("PSV") == "PSV Eindhoven"
+    def test_az(self): assert self._n("AZ") == "AZ Alkmaar"
+    def test_twente(self): assert self._n("Twente") == "FC Twente"
+    def test_utrecht(self): assert self._n("Utrecht") == "FC Utrecht"
+    def test_heerenveen(self): assert self._n("Heerenveen") == "SC Heerenveen"
+    def test_groningen(self): assert self._n("Groningen") == "FC Groningen"
+    def test_nec(self): assert self._n("NEC") == "NEC Nijmegen"
+    def test_nijmegen(self): assert self._n("Nijmegen") == "NEC Nijmegen"
+    def test_heracles(self): assert self._n("Heracles") == "Heracles Almelo"
+    def test_zwolle(self): assert self._n("Zwolle") == "PEC Zwolle"
+    def test_sittard(self): assert self._n("Sittard") == "Fortuna Sittard"
+    def test_rkc(self): assert self._n("RKC") == "RKC Waalwijk"
+    def test_almere_city(self): assert self._n("Almere City") == "Almere City FC"
+    def test_volendam(self): assert self._n("Volendam") == "FC Volendam"
+    def test_excelsior(self): assert self._n("Excelsior") == "Excelsior Rotterdam"
+    def test_go_ahead(self): assert self._n("Go Ahead") == "Go Ahead Eagles"
+    def test_nac(self): assert self._n("NAC") == "NAC Breda"
+
+
+class TestD2EredivisiePrepareMatcher:
+    def _make_rows(self, div):
+        import pandas as pd
+        pairs = {
+            "D2": [("Hamburger SV", "FC Schalke 04"), ("Hertha BSC", "Hannover 96")],
+            "N1": [("AFC Ajax", "PSV Eindhoven"), ("Feyenoord", "AZ Alkmaar")],
+        }
+        rows = [
+            {"Div": div, "Date": "20/08/2023", "HomeTeam": h, "AwayTeam": a,
+             "FTHG": 1, "FTAG": 1, "FTR": "D",
+             "B365H": 2.50, "B365D": 3.20, "B365A": 2.80}
+            for h, a in pairs[div]
+        ]
+        return pd.DataFrame(rows)
+
+    def test_d2_league_name(self):
+        import tempfile
+        from pathlib import Path
+        import pandas as pd
+        from football_prediction_v19.data import prepare_real_matches
+        raw = self._make_rows("D2")
+        with tempfile.NamedTemporaryFile(suffix=".csv", delete=False, mode="w") as f:
+            raw.to_csv(f, index=False)
+            p = f.name
+        try:
+            clean = prepare_real_matches(pd.read_csv(p), input_format="football-data")
+            assert "2. Bundesliga" in clean["league"].unique().tolist()
+        finally:
+            Path(p).unlink(missing_ok=True)
+
+    def test_n1_league_name(self):
+        import tempfile
+        from pathlib import Path
+        import pandas as pd
+        from football_prediction_v19.data import prepare_real_matches
+        raw = self._make_rows("N1")
+        with tempfile.NamedTemporaryFile(suffix=".csv", delete=False, mode="w") as f:
+            raw.to_csv(f, index=False)
+            p = f.name
+        try:
+            clean = prepare_real_matches(pd.read_csv(p), input_format="football-data")
+            assert "Eredivisie" in clean["league"].unique().tolist()
+        finally:
+            Path(p).unlink(missing_ok=True)

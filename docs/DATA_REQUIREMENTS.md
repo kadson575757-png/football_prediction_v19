@@ -284,3 +284,95 @@ fpv19 backtest-bets \
 ```
 
 Only after seeing value bets fire in the backtest should you consider MLS paper-test eligible.
+
+---
+
+## 2. Bundesliga Support
+
+The 2. Bundesliga (Germany's second division) is supported as a first-class league using football-data.co.uk as the data source.
+
+**League codes:**
+- Raw div code: `D2`
+- Friendly slugs: `bundesliga-2` or `2-bundesliga`
+- Human-readable name in processed output: `2. Bundesliga`
+
+**Validation workflow:**
+
+```bash
+# Step 1: Download and prepare historical data
+fpv19 download-prepare-football-data \
+  --leagues D2 \
+  --seasons 2021 2022 2023 \
+  --raw-dir data/raw \
+  --processed-dir data/processed \
+  --combine-output data/processed/d2_history_clean.csv
+
+# Step 2: Train a model
+fpv19 train \
+  --input data/processed/d2_history_clean.csv \
+  --model models/d2_model.joblib \
+  --test-season 2023
+
+# Step 3: Prepare upcoming fixtures (football-data.co.uk format)
+fpv19 prepare-fixtures \
+  --input data/raw/d2_upcoming_raw.csv \
+  --output data/d2_upcoming.csv \
+  --format football-data
+
+# Step 4: Predict
+fpv19 predict-fixtures \
+  --fixtures data/d2_upcoming.csv \
+  --history data/processed/d2_history_clean.csv \
+  --model models/d2_model.joblib \
+  --output outputs/d2_predictions.csv
+```
+
+Use `data/raw/d2_matches_template.csv` as a column reference for the football-data.co.uk format (columns: Div, Date, HomeTeam, AwayTeam, FTHG, FTAG, FTR, B365H, B365D, B365A).
+
+Team aliases are automatically normalized (e.g. "HSV" -> "Hamburger SV", "Schalke" -> "FC Schalke 04", "Nurnberg" -> "1. FC Nürnberg").
+
+---
+
+## Eredivisie Support
+
+The Dutch Eredivisie is supported as a first-class league using football-data.co.uk as the data source.
+
+**League codes:**
+- Raw div code: `N1`
+- Friendly slug: `eredivisie`
+- Human-readable name in processed output: `Eredivisie`
+
+**Validation workflow:**
+
+```bash
+# Step 1: Download and prepare historical data
+fpv19 download-prepare-football-data \
+  --leagues N1 \
+  --seasons 2021 2022 2023 \
+  --raw-dir data/raw \
+  --processed-dir data/processed \
+  --combine-output data/processed/eredivisie_history_clean.csv
+
+# Step 2: Train a model
+fpv19 train \
+  --input data/processed/eredivisie_history_clean.csv \
+  --model models/eredivisie_model.joblib \
+  --test-season 2023
+
+# Step 3: Prepare upcoming fixtures (football-data.co.uk format)
+fpv19 prepare-fixtures \
+  --input data/raw/eredivisie_upcoming_raw.csv \
+  --output data/eredivisie_upcoming.csv \
+  --format football-data
+
+# Step 4: Predict
+fpv19 predict-fixtures \
+  --fixtures data/eredivisie_upcoming.csv \
+  --history data/processed/eredivisie_history_clean.csv \
+  --model models/eredivisie_model.joblib \
+  --output outputs/eredivisie_predictions.csv
+```
+
+Use `data/raw/eredivisie_matches_template.csv` as a column reference for the football-data.co.uk format.
+
+Team aliases are automatically normalized (e.g. "Ajax" -> "AFC Ajax", "PSV" -> "PSV Eindhoven", "AZ" -> "AZ Alkmaar", "NEC" -> "NEC Nijmegen").

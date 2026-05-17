@@ -401,6 +401,30 @@ See `docs/DATA_REQUIREMENTS.md` for the full MLS validation workflow.
 
 **Historical odds for MLS backtesting:** Use `import-historical-odds` and `merge-historical-odds` to enrich MLS match history with 1X2 odds from any CSV source (OddsPortal, The Odds API historical, API-Football, etc.). A template is at `data/raw/mls_historical_odds_template.csv`. See `docs/DATA_REQUIREMENTS.md` for the step-by-step workflow.
 
+### 2. Bundesliga
+
+Download and prepare historical data from football-data.co.uk (div code `D2`):
+
+```bash
+fpv19 download-prepare-football-data --leagues D2 --seasons 2021 2022 2023 \
+  --raw-dir data/raw --processed-dir data/processed \
+  --combine-output data/processed/d2_history_clean.csv
+```
+
+Friendly slug `bundesliga-2` and `2-bundesliga` both resolve to `D2`. Team names are normalized automatically (e.g. "HSV" -> "Hamburger SV", "Schalke" -> "FC Schalke 04"). See `data/raw/d2_matches_template.csv` for the expected column layout.
+
+### Eredivisie
+
+Download and prepare historical data from football-data.co.uk (div code `N1`):
+
+```bash
+fpv19 download-prepare-football-data --leagues N1 --seasons 2021 2022 2023 \
+  --raw-dir data/raw --processed-dir data/processed \
+  --combine-output data/processed/eredivisie_history_clean.csv
+```
+
+Friendly slug `eredivisie` resolves to `N1`. Team names are normalized automatically (e.g. "Ajax" -> "AFC Ajax", "PSV" -> "PSV Eindhoven"). See `data/raw/eredivisie_matches_template.csv` for the expected column layout.
+
 ## 8. Modell Trainieren
 
 Mit Sample-Daten:

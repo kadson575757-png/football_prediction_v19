@@ -87,8 +87,8 @@ fpv19 predict-fixtures \
 
 Prepare a raw historical matches CSV into a clean training-ready format.
 
-Supported leagues include Premier League, Championship, Bundesliga, Bundesliga 2, Serie A, Serie B,
-La Liga, Segunda Division, Ligue 1, Ligue 2, Eredivisie, Pro League, Primeira Liga, Super Lig,
+Supported leagues include Premier League, Championship, Bundesliga, **2. Bundesliga**, Serie A, Serie B,
+La Liga, Segunda Division, Ligue 1, Ligue 2, **Eredivisie**, Pro League, Primeira Liga, Super Lig,
 Super League Greece, Scottish Premiership, and **MLS** (native format only — no automatic downloader).
 
 ```bash
@@ -176,6 +176,28 @@ fpv19 download-prepare-football-data \
   --raw-dir data/raw \
   --processed-dir data/processed \
   --combine-output data/processed/combined_football_data.csv
+```
+
+**2. Bundesliga example** (code `D2`, slugs `bundesliga-2` or `2-bundesliga`):
+
+```bash
+fpv19 download-prepare-football-data \
+  --leagues D2 \
+  --seasons 2021 2022 2023 \
+  --raw-dir data/raw \
+  --processed-dir data/processed \
+  --combine-output data/processed/d2_history_clean.csv
+```
+
+**Eredivisie example** (code `N1`, slug `eredivisie`):
+
+```bash
+fpv19 download-prepare-football-data \
+  --leagues N1 \
+  --seasons 2021 2022 2023 \
+  --raw-dir data/raw \
+  --processed-dir data/processed \
+  --combine-output data/processed/eredivisie_history_clean.csv
 ```
 
 | Flag | Required | Description |
