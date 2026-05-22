@@ -453,3 +453,58 @@ football-data.co.uk provides `BbAv>2.5` and `B365>2.5` columns in its match CSV 
 These are the recommended source as they cover the same leagues already supported.
 
 The `import-totals-odds` command accepts those column names directly without renaming.
+
+
+---
+
+## Official Match Results (final_scores.csv)
+
+### Why this file exists
+
+ is the post-match verification source for the daily recommendation evaluator.  
+It is **never filled with guessed or estimated scores**.  
+Every row must come from a verified source.
+
+### Source: football-data.org
+
+Set up your API key once:
+
+
+
+Then fetch results after matches finish:
+
+
+
+### Verification rules (enforced in code)
+
+| Condition | Result |
+|-----------|--------|
+| API status =  AND goals present |  |
+| API status =  /  /  /  | , goals blank |
+| API status =  but goals missing | , goals blank |
+| No API match found for this fixture | ,  |
+| Multiple API matches for same fixture | ,  |
+| Unsupported league (2. Bundesliga, MLS) | ,  |
+
+The evaluator () will **refuse to compute success rates** unless at least one  row is present.
+
+### Manual entry (fallback)
+
+If the API is unavailable, you may enter results manually:
+
+
+
+Use team names that exactly match the pre-match report CSVs in .
+
+### Supported leagues
+
+| League | API Code | Notes |
+|--------|----------|-------|
+| Premier League / EPL | PL | Supported |
+| Serie A / Late Serie A | SA | Supported |
+| La Liga | PD | Supported |
+| Bundesliga | BL1 | Supported |
+| Ligue 1 | FL1 | Supported |
+| Eredivisie | DED | Supported |
+| 2. Bundesliga | — | Not in free plan; manual only |
+| MLS | — | Not in free plan; manual only |

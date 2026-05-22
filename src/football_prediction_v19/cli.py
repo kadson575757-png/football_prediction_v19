@@ -920,6 +920,65 @@ def cmd_import_totals_odds(args: argparse.Namespace) -> None:
         sys.exit(1)
 
 
+def cmd_fetch_official_results(args: argparse.Namespace) -> None:
+    """CLI handler for fetch-official-results command."""
+    import sys
+    from .importers.official_results import (
+        LEAGUE_TO_FD_CODE,
+        UNSUPPORTED_LEAGUES,
+        fetch_football_data_results,
+        merge_official_results_with_daily_reports,
+        normalize_official_results,
+    )
+
+    leagues = args.leagues.split(",") if args.leagues else None
+
+    # Warn about unsupported leagues in the requested list
+    if leagues:
+        for lg in leagues:
+            if lg.strip() in UNSUPPORTED_LEAGUES:
+                print(f"  [WARN] '{lg.strip()}' is not supported by football-data.org (free/basic plan). Skipped.")
+            elif lg.strip() not in LEAGUE_TO_FD_CODE:
+                print(f"  [WARN] '{lg.strip()}' has no competition code mapping. Skipped.")
+
+    try:
+        print(f"Fetching results from football-data.org ...")
+        print(f"  date_from : {args.date_from}")
+        print(f"  date_to   : {args.date_to}")
+        raw_df = fetch_football_data_results(
+            api_key=args.api_key,
+            date_from=args.date_from,
+            date_to=args.date_to,
+            leagues=leagues,
+        )
+        df = normalize_official_results(raw_df)
+
+        verified   = (df["verified"] == "yes").sum()
+        unverified = (df["verified"] != "yes").sum()
+        print(f"  Fetched   : {len(df)} match records")
+        print(f"  verified  : {verified}")
+        print(f"  pending   : {unverified}")
+
+        output = merge_official_results_with_daily_reports(
+            results_df=df,
+            reports_dir=args.reports_dir,
+            output_path=args.output,
+        )
+
+        final_verified = (output["verified"] == "yes").sum()
+        print(f"\nOutput written: {args.output}")
+        print(f"  Total rows      : {len(output)}")
+        print(f"  verified=yes    : {final_verified}")
+        print(f"  verified=no     : {len(output) - final_verified}")
+
+    except EnvironmentError as e:
+        print(f"\n[ERROR] {e}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"\n[ERROR] {e}", file=sys.stderr)
+        sys.exit(1)
+
+
 def cmd_merge_totals_odds(args: argparse.Namespace) -> None:
     import sys
     try:
@@ -1333,6 +1392,52 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--date-window", type=int, default=2, metavar="DAYS", help="Match date tolerance in days (default: 2)")
     p.add_argument("--overwrite", action="store_true", help="Overwrite existing non-null odds")
     p.set_defaults(func=cmd_merge_totals_odds)
+
+    # fetch-official-results
+    p = sub.add_parser(
+        "fetch-official-results",
+        help="Fetch finished match results from football-data.org and write final_scores.csv",
+    )
+    p.add_argument(
+        "--date-from", required=True, metavar="YYYY-MM-DD",
+        help="Start date (inclusive)",
+    )
+    p.add_argument(
+        "--date-to", required=True, metavar="YYYY-MM-DD",
+        help="End date (inclusive)",
+    )
+    p.add_argument(
+        "--reports-dir",
+        default="outputs/daily_reports",
+        metavar="DIR",
+        help="Directory containing daily report CSVs (default: outputs/daily_reports)",
+    )
+    p.add_argument(
+        "--output",
+        default="data/final_scores.csv",
+        metavar="FILE",
+        help="Output path for final_scores.csv (default: data/final_scores.csv)",
+    )
+    p.add_argument(
+        "--source",
+        default="football-data",
+        choices=["football-data"],
+        help="Data source (default: football-data)",
+    )
+    p.add_argument(
+        "--api-key",
+        default=None,
+        metavar="KEY",
+        help="football-data.org API key. Falls back to FOOTBALL_DATA_API_KEY env var.",
+    )
+    p.add_argument(
+        "--leagues",
+        default=None,
+        metavar="LEAGUES",
+        help="Comma-separated league names to fetch (default: all supported). "
+             "Unsupported leagues (2. Bundesliga, MLS) are always skipped.",
+    )
+    p.set_defaults(func=cmd_fetch_official_results)
 
     return parser
 
