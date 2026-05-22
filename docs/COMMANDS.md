@@ -547,3 +547,103 @@ fpv19 merge-totals-odds \
 | `--overwrite` | no | Overwrite existing non-null odds (default: skip) |
 
 Team aliases are resolved automatically on both sides of the merge (e.g. "Man City" matches "Manchester City").
+
+---
+
+## fetch-official-results
+
+Fetch finished match results from football-data.org and write `data/final_scores.csv`.
+
+Only rows where the API reports status `FINISHED` with numeric goals are written as `verified=yes`.
+All other rows (scheduled, postponed, cancelled, missing goals) remain `verified=no`.
+**No scores are guessed or estimated.**
+
+### Prerequisites
+
+Register for a free API key: https://www.football-data.org/client/register
+
+```bash
+# Linux / macOS
+export FOOTBALL_DATA_API_KEY=your_key_here
+
+# Windows PowerShell
+$env:FOOTBALL_DATA_API_KEY = "your_key_here"
+
+# Windows Command Prompt
+set FOOTBALL_DATA_API_KEY=your_key_here
+```
+
+### Usage
+
+```bash
+fpv19 fetch-official-results \
+  --date-from 2026-05-17 \
+  --date-to   2026-05-17
+
+# Specific leagues only
+fpv19 fetch-official-results \
+  --date-from 2026-05-17 \
+  --date-to   2026-05-17 \
+  --leagues "Eredivisie,EPL,Ligue 1"
+
+# Explicit key (not recommended; prefer env var)
+fpv19 fetch-official-results \
+  --date-from 2026-05-17 \
+  --date-to   2026-05-17 \
+  --api-key your_key_here
+```
+
+### Options
+
+| Flag | Required | Description |
+|------|----------|-------------|
+| `--date-from YYYY-MM-DD` | yes | Start date (inclusive) |
+| `--date-to YYYY-MM-DD` | yes | End date (inclusive) |
+| `--reports-dir DIR` | no | Daily report CSVs (default: `outputs/daily_reports`) |
+| `--output FILE` | no | Output CSV (default: `data/final_scores.csv`) |
+| `--source` | no | Data source — only `football-data` supported |
+| `--api-key KEY` | no | API key (falls back to `FOOTBALL_DATA_API_KEY`) |
+| `--leagues LEAGUES` | no | Comma-separated league names (default: all supported) |
+
+### Supported leagues
+
+| Project Name | Code | Notes |
+|---|---|---|
+| Premier League / EPL | PL | Supported |
+| Serie A / Late Serie A | SA | Supported |
+| La Liga | PD | Supported |
+| Bundesliga | BL1 | Supported |
+| Ligue 1 | FL1 | Supported |
+| Eredivisie | DED | Supported |
+| 2. Bundesliga | — | Not in free plan — left blank |
+| MLS | — | Not in free plan — left blank |
+
+### Full workflow
+
+```bash
+# 1. Run daily reports (generates outputs/daily_reports/*.csv)
+python scripts/eredivisie_daily_probability_report.py
+python scripts/epl_daily_probability_report.py
+
+# 2. After matches finish, fetch official results
+fpv19 fetch-official-results --date-from 2026-05-17 --date-to 2026-05-17
+
+# 3. Run post-match evaluator (only uses verified=yes rows)
+python scripts/evaluate_daily_recommendations.py
+```
+
+### Output schema (data/final_scores.csv)
+
+| Column | Description |
+|--------|-------------|
+| `date` | Match date YYYY-MM-DD |
+| `league` | Project league name |
+| `home_team` | Home team (normalised via team_aliases.json) |
+| `away_team` | Away team (normalised) |
+| `home_goals` | Blank if unverified |
+| `away_goals` | Blank if unverified |
+| `verified` | `yes` only when API says FINISHED + goals present |
+| `source_note` | `football-data.org`, `status:scheduled`, `no_match_found`, `ambiguous_match` |
+| `source_match_id` | football-data.org internal match ID |
+| `source_status` | Raw API status (`FINISHED`, `SCHEDULED`, etc.) |
+| `last_updated` | UTC timestamp of fetch |
