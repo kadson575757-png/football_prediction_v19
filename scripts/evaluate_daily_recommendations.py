@@ -82,6 +82,44 @@ def _chaos_bucket(chaos_10: float) -> str:
     return "low (<4)"
 
 
+def _parse_bool_success(val) -> Optional[bool]:
+    """Robustly coerce a success value to True/False/None.
+
+    Accepts: True, False, 1, 0, "True", "False", "true", "false",
+             "TRUE", "FALSE", "1", "0", "yes", "no", "YES", "NO".
+    Returns None for NaN, None, empty string, or unrecognised values.
+    """
+    if val is None:
+        return None
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, (int, float)):
+        if pd.isna(val):
+            return None
+        return bool(val)
+    s = str(val).strip().lower()
+    if s in ("true", "1", "yes"):
+        return True
+    if s in ("false", "0", "no"):
+        return False
+    return None
+
+
+def _tier_score_bucket(score) -> str:
+    """Map a numeric market_tier_score (0-100) to a display bucket label."""
+    try:
+        s = float(score)
+    except (TypeError, ValueError):
+        return "unknown"
+    if s >= 80:
+        return "80+"
+    if s >= 70:
+        return "70-79"
+    if s >= 50:
+        return "50-69"
+    return "<50"
+
+
 # ---------------------------------------------------------------------------
 # Success logic per recommended_market_type
 # ---------------------------------------------------------------------------
@@ -381,24 +419,25 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
             return None
         return fn(row)
 
-    m["success"] = m.apply(eval_row, axis=1)
+    m["type_success"] = m.apply(eval_row, axis=1).apply(_parse_bool_success)
 
     # ---- Subtype success (more precise, per-subtype success criteria) --------
-    m["subtype_success"] = m.apply(_subtype_success, axis=1)
+    m["subtype_success"] = m.apply(_subtype_success, axis=1).apply(_parse_bool_success)
 
     # Clean up temp keys
     m = m.drop(columns=[c for c in m.columns if c.startswith("_")])
 
-    # ---- Save detailed CSV ----
+    # ---- Save detailed CSV — preserve tier fields ----
+    # Column order: put market_tier fields after standard fields if present
     eval_csv = out_dir / "daily_recommendation_eval.csv"
     m.to_csv(eval_csv, index=False)
     print(f"\nDetailed results saved: {eval_csv}")
 
     # ---- Build summary ----
-    # Only rows that were actually matched (have a real verified score) are included.
+    # Only rows with a verified score AND a non-null actual_result are included.
     # Unmatched rows (no verified score) are never evaluated.
-    m_with_score = m[m["home_goals"].notna()].copy()
-    scored = m_with_score[m_with_score["success"].notna()].copy()
+    m_with_score = m[m["home_goals"].notna() & m["actual_result"].notna()].copy()
+    scored = m_with_score[m_with_score["type_success"].notna()].copy()
     total_scored = len(scored)
 
     lines: list[str] = []
@@ -422,7 +461,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
     btts_over_breakdown: dict = {}   # populated when BTTS_OVER is encountered
     for mtype, grp in scored.groupby("recommended_market_type"):
         n    = len(grp)
-        hits = int(grp["success"].sum())
+        hits = int(grp["type_success"].sum())
         rate = hits / n if n else 0.0
         notes = ""
         if mtype == "BTTS_OVER":
@@ -520,9 +559,9 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
                 lines.append("")
                 lines.append(
                     "  BTTS_OVER (type-level OR):  "
-                    f"{int(scored[scored['recommended_market_type']=='BTTS_OVER']['success'].sum())}/"
+                    f"{int(scored[scored['recommended_market_type']=='BTTS_OVER']['type_success'].sum())}/"
                     f"{len(scored[scored['recommended_market_type']=='BTTS_OVER'])}  "
-                    f"({scored[scored['recommended_market_type']=='BTTS_OVER']['success'].mean():.1%})"
+                    f"({scored[scored['recommended_market_type']=='BTTS_OVER']['type_success'].mean():.1%})"
                 )
                 for subtype, sg in btts_over_sub.groupby("recommended_market_subtype"):
                     sv = int(sg["subtype_success"].sum())
@@ -537,6 +576,59 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
         else:
             lines.append("## Subtype Evaluation")
             lines.append("  (No subtype column in pre-match CSVs — re-run daily reports)")
+            lines.append("")
+
+    # ---- Success Rate by Market Tier -----------------------------------------
+    if "market_tier" in scored.columns:
+        tier_ev = scored[scored["market_tier"].notna() & (scored["market_tier"].astype(str).str.strip() != "")]
+        if not tier_ev.empty:
+            lines.append("## Success Rate by Market Tier")
+            lines.append("")
+            lines.append(f"  {'Tier':<14} {'n':>4} {'hits':>4} {'rate':>7}")
+            lines.append("  " + "-" * 36)
+            tier_order = ["A_TIER", "B_TIER", "C_TIER", "DOWNGRADE", "HARD_NO_GO", "OBSERVE_ONLY"]
+            present_tiers = tier_ev["market_tier"].unique().tolist()
+            ordered = [t for t in tier_order if t in present_tiers]
+            ordered += [t for t in present_tiers if t not in tier_order]
+            for tier in ordered:
+                grp = tier_ev[tier_ev["market_tier"] == tier]
+                n = len(grp)
+                ts_col = grp["type_success"]
+                hits = int(ts_col.sum()) if n else 0
+                rate = hits / n if n else 0.0
+                lines.append(f"  {tier:<14} {n:>4} {hits:>4} {rate:7.1%}")
+            lines.append("")
+
+            # A+B combined line
+            ab = tier_ev[tier_ev["market_tier"].isin(["A_TIER", "B_TIER"])]
+            if not ab.empty:
+                ab_n = len(ab)
+                ab_hits = int(ab["type_success"].sum())
+                lines.append(
+                    f"  A_TIER + B_TIER combined: {ab_hits}/{ab_n} "
+                    f"({ab_hits/ab_n:.1%})"
+                )
+                lines.append("")
+
+    # ---- Success Rate by Market Tier Score Bucket ----------------------------
+    if "market_tier_score" in scored.columns:
+        tier_score_ev = scored[scored["market_tier_score"].notna()].copy()
+        if not tier_score_ev.empty:
+            tier_score_ev["_score_bucket"] = tier_score_ev["market_tier_score"].apply(_tier_score_bucket)
+            lines.append("## Success Rate by Market Tier Score Bucket")
+            lines.append("")
+            lines.append(f"  {'Score bucket':<14} {'n':>4} {'hits':>4} {'rate':>7}")
+            lines.append("  " + "-" * 36)
+            bucket_order = ["80+", "70-79", "50-69", "<50"]
+            present_buckets = tier_score_ev["_score_bucket"].unique().tolist()
+            ordered_buckets = [b for b in bucket_order if b in present_buckets]
+            ordered_buckets += [b for b in present_buckets if b not in bucket_order]
+            for bucket in ordered_buckets:
+                grp = tier_score_ev[tier_score_ev["_score_bucket"] == bucket]
+                n = len(grp)
+                hits = int(grp["type_success"].sum()) if n else 0
+                rate = hits / n if n else 0.0
+                lines.append(f"  {bucket:<14} {n:>4} {hits:>4} {rate:7.1%}")
             lines.append("")
 
     # OBSERVE_ONLY separately
@@ -556,7 +648,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
         lines.append(f"{'League':<20} {'n':>4} {'hits':>4} {'rate':>7}")
         lines.append("-" * 40)
         for league, grp in scored.groupby("league"):
-            n = len(grp); hits = int(grp["success"].sum())
+            n = len(grp); hits = int(grp["type_success"].sum())
             lines.append(f"  {league:<18} {n:>4} {hits:>4} {hits/n:7.1%}")
         lines.append("")
 
@@ -567,7 +659,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
         lines.append(f"{'Confidence':<16} {'n':>4} {'hits':>4} {'rate':>7}")
         lines.append("-" * 40)
         for conf, grp in scored.groupby("confidence"):
-            n = len(grp); hits = int(grp["success"].sum())
+            n = len(grp); hits = int(grp["type_success"].sum())
             lines.append(f"  {conf:<14} {n:>4} {hits:>4} {hits/n:7.1%}")
         lines.append("")
 
@@ -579,7 +671,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
         lines.append(f"{'Control':<18} {'n':>4} {'hits':>4} {'rate':>7}")
         lines.append("-" * 40)
         for bucket, grp in scored.groupby("_ctrl_bucket"):
-            n = len(grp); hits = int(grp["success"].sum())
+            n = len(grp); hits = int(grp["type_success"].sum())
             lines.append(f"  {bucket:<16} {n:>4} {hits:>4} {hits/n:7.1%}")
         lines.append("")
 
@@ -591,12 +683,12 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
         lines.append(f"{'Chaos':<18} {'n':>4} {'hits':>4} {'rate':>7}")
         lines.append("-" * 40)
         for bucket, grp in scored.groupby("_chaos_bucket"):
-            n = len(grp); hits = int(grp["success"].sum())
+            n = len(grp); hits = int(grp["type_success"].sum())
             lines.append(f"  {bucket:<16} {n:>4} {hits:>4} {hits/n:7.1%}")
         lines.append("")
 
     # Top misses
-    misses = scored[scored["success"] == False].copy()
+    misses = scored[scored["type_success"] == False].copy()
     if not misses.empty:
         lines.append("## Top Misses")
         lines.append("")
