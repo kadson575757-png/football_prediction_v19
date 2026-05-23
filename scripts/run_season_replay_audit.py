@@ -65,6 +65,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from football_prediction_v19.diagnostics import build_recommended_market  # noqa: E402
 from football_prediction_v19.diagnostics import apply_league_market_profile  # noqa: E402
+from football_prediction_v19.diagnostics import build_market_tier  # noqa: E402
 from football_prediction_v19.features import (          # noqa: E402
     build_features as _build_features,
     build_fixture_features as _build_fixture_features,
@@ -908,8 +909,10 @@ def run_walk_forward(
                 "risk_note":                   rec["risk_note"],
             }
 
-            # 4. League-aware profile layer (report interpretation only)
+            # League-aware profile layer (report interpretation only)
             pred = apply_league_market_profile(pred, league_name)
+            # Market tier diagnostic layer (report interpretation only)
+            pred = build_market_tier(pred)
 
             pred_rows.append(pred)
 
@@ -1017,6 +1020,8 @@ def run_replay(
 
             # League-aware profile layer (report interpretation only)
             pred = apply_league_market_profile(pred, league_name)
+            # Market tier diagnostic layer (report interpretation only)
+            pred = build_market_tier(pred)
 
             pred_rows.append(pred)
 

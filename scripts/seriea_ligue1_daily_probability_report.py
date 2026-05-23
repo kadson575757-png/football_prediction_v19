@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market, apply_league_market_profile
+from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market, apply_league_market_profile, build_market_tier
 from football_prediction_v19.features import build_fixture_features
 from football_prediction_v19.team_names import normalize_team_name
 
@@ -324,6 +324,7 @@ def run_league(config: dict, bundle: dict) -> list[dict]:
         })
         _league_for_profile = "Serie A" if "Serie" in league_name else "Ligue 1"
         recommended_market = apply_league_market_profile(recommended_market, _league_for_profile)
+        recommended_market = build_market_tier(recommended_market)
         if not data_ok:
             data_warnings.append(f"{home} vs {away} (home n={h_all['n']}, away n={a_all['n']})")
 
@@ -381,6 +382,12 @@ def run_league(config: dict, bundle: dict) -> list[dict]:
         print(f"    suppressed : {recommended_market['league_suppressed_subtype']}")
         if recommended_market['league_warning_flags']:
             print(f"    WARNING    : {recommended_market['league_warning_flags']}")
+        print("\n  MARKET TIER  [diagnostic only]")
+        print(f"    tier       : {recommended_market['market_tier']}")
+        print(f"    score      : {recommended_market['market_tier_score']}/100")
+        print(f"    reason     : {recommended_market['market_tier_reason']}")
+        if recommended_market['market_tier_flags']:
+            print(f"    flags      : {recommended_market['market_tier_flags']}")
         if not data_ok:
             print(f"\n  ** DATA WARNING: Insufficient {league_name} history for one or both teams. (home n={h_all['n']}, away n={a_all['n']})")
         if no_conf:
@@ -544,6 +551,10 @@ def main() -> None:
             "league_warning_flags":       rec.get("league_warning_flags", ""),
             "league_preferred_subtype":   rec.get("league_preferred_subtype", ""),
             "league_suppressed_subtype":  rec.get("league_suppressed_subtype", ""),
+            "market_tier":                rec.get("market_tier", ""),
+            "market_tier_score":          rec.get("market_tier_score", ""),
+            "market_tier_reason":         rec.get("market_tier_reason", ""),
+            "market_tier_flags":          rec.get("market_tier_flags", ""),
         })
     import pandas as _pd
     _df = _pd.DataFrame(_csv_rows)
