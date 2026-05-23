@@ -19,7 +19,7 @@ warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market
+from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market, apply_league_market_profile
 from football_prediction_v19.features import build_fixture_features
 from football_prediction_v19.team_names import normalize_team_name
 
@@ -322,6 +322,8 @@ def run_league(config: dict, bundle: dict) -> list[dict]:
             "both_btts": both_btts,
             "score_family": profile["score_family"],
         })
+        _league_for_profile = "Serie A" if "Serie" in league_name else "Ligue 1"
+        recommended_market = apply_league_market_profile(recommended_market, _league_for_profile)
         if not data_ok:
             data_warnings.append(f"{home} vs {away} (home n={h_all['n']}, away n={a_all['n']})")
 
@@ -372,6 +374,13 @@ def run_league(config: dict, bundle: dict) -> list[dict]:
         print(f"    read       : {recommended_market['recommended_market_read']}")
         print(f"    strength   : {recommended_market['recommendation_strength']}")
         print(f"    risk_note  : {recommended_market['risk_note']}")
+        print(f"\n  LEAGUE PROFILE  [{league_name} / diagnostic only]")
+        print(f"    profile    : {recommended_market['league_profile']}")
+        print(f"    adj.strength: {recommended_market['league_adjusted_strength']}")
+        print(f"    preferred  : {recommended_market['league_preferred_subtype']}")
+        print(f"    suppressed : {recommended_market['league_suppressed_subtype']}")
+        if recommended_market['league_warning_flags']:
+            print(f"    WARNING    : {recommended_market['league_warning_flags']}")
         if not data_ok:
             print(f"\n  ** DATA WARNING: Insufficient {league_name} history for one or both teams. (home n={h_all['n']}, away n={a_all['n']})")
         if no_conf:
@@ -529,6 +538,12 @@ def main() -> None:
             "recommended_market_read":    rec["recommended_market_read"],
             "recommendation_strength":    rec["recommendation_strength"],
             "risk_note":                  rec["risk_note"],
+            "league_profile":             rec.get("league_profile", ""),
+            "league_adjusted_strength":   rec.get("league_adjusted_strength", ""),
+            "league_profile_note":        rec.get("league_profile_note", ""),
+            "league_warning_flags":       rec.get("league_warning_flags", ""),
+            "league_preferred_subtype":   rec.get("league_preferred_subtype", ""),
+            "league_suppressed_subtype":  rec.get("league_suppressed_subtype", ""),
         })
     import pandas as _pd
     _df = _pd.DataFrame(_csv_rows)
