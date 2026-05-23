@@ -17,7 +17,7 @@ from typing import Any
 
 import pandas as pd
 
-from ..team_names import normalize_team_name
+from ..team_names import fuzzy_team_key, normalize_team_name
 
 # ---------------------------------------------------------------------------
 # Competition mapping
@@ -258,13 +258,20 @@ def merge_official_results_with_daily_reports(
     def _n(name: str) -> str:
         return normalize_team_name(str(name))
 
+    def _fz(name: str) -> str:
+        return fuzzy_team_key(str(name)) if name else ""
+
     pre["_ht_norm"]   = pre["home_team"].apply(_n)
     pre["_at_norm"]   = pre["away_team"].apply(_n)
+    pre["_ht_fuzz"]   = pre["home_team"].apply(_fz)
+    pre["_at_fuzz"]   = pre["away_team"].apply(_fz)
     pre["_date_norm"] = pre["date"].astype(str).str[:10]
 
     res = results_df.copy()
     res["_ht_norm"]   = res["home_team"].apply(lambda x: _n(x) if x else "")
     res["_at_norm"]   = res["away_team"].apply(lambda x: _n(x) if x else "")
+    res["_ht_fuzz"]   = res["home_team"].apply(lambda x: _fz(x) if x else "")
+    res["_at_fuzz"]   = res["away_team"].apply(lambda x: _fz(x) if x else "")
     res["_date_norm"] = res["date"].astype(str).str[:10]
 
     # ---- Build output rows --------------------------------------------------
@@ -274,14 +281,27 @@ def merge_official_results_with_daily_reports(
         dt = pre_row["_date_norm"]
         ht = pre_row["_ht_norm"]
         at = pre_row["_at_norm"]
+        ht_fz = pre_row["_ht_fuzz"]
+        at_fz = pre_row["_at_fuzz"]
         league = str(pre_row.get("league", ""))
 
-        # Find matching API rows: date + teams (normalised)
+        # Stage 1: Exact normalised match (date + normalised home + normalised away)
         cand = res[
             (res["_date_norm"] == dt) &
             (res["_ht_norm"]   == ht) &
             (res["_at_norm"]   == at)
         ]
+
+        fuzzy_used = False
+        if len(cand) == 0 and ht_fz and at_fz:
+            # Stage 2: Fuzzy fallback — strips FC/AFC/CF/accents/etc.
+            # Only accepted when a SINGLE unambiguous candidate is found.
+            cand = res[
+                (res["_date_norm"] == dt) &
+                (res["_ht_fuzz"]   == ht_fz) &
+                (res["_at_fuzz"]   == at_fz)
+            ]
+            fuzzy_used = True
 
         if len(cand) == 0:
             output_rows.append(_no_score_row(pre_row, "no_match_found"))
@@ -289,6 +309,9 @@ def merge_official_results_with_daily_reports(
             output_rows.append(_no_score_row(pre_row, "ambiguous_match"))
         else:
             api_row = cand.iloc[0]
+            base_note = api_row["source_note"]
+            if fuzzy_used and api_row["verified"] == "yes":
+                base_note = f"{base_note};fuzzy_match"
             if api_row["verified"] == "yes":
                 output_rows.append({
                     "date":            dt,
@@ -298,7 +321,7 @@ def merge_official_results_with_daily_reports(
                     "home_goals":      api_row["home_goals"],
                     "away_goals":      api_row["away_goals"],
                     "verified":        "yes",
-                    "source_note":     api_row["source_note"],
+                    "source_note":     base_note,
                     "source_match_id": api_row.get("source_match_id"),
                     "source_status":   api_row.get("source_status"),
                     "last_updated":    api_row.get("last_updated", _now_iso()),
