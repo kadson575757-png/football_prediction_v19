@@ -23,7 +23,8 @@ warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from football_prediction_v19.features import build_fixture_features
+from football_prediction_v19.features import build_fixture_features, build_extended_features
+from football_prediction_v19.context_features import build_context_features
 from football_prediction_v19.diagnostics import (
     build_control_chaos_profile,
     build_recommended_market,
@@ -33,6 +34,7 @@ from football_prediction_v19.diagnostics import (
 from football_prediction_v19.team_names import normalize_team_name
 from football_prediction_v19.reports.watchlist import append_watchlist_to_report
 from _watchlist import print_priority_watchlist
+from _context_signals import get_fixture_context_features, print_context_signals_section, context_csv_fields
 
 # ---------------------------------------------------------------------------
 # Config
@@ -196,6 +198,10 @@ history["home_team"] = history["home_team"].apply(normalize_team_name)
 history["away_team"] = history["away_team"].apply(normalize_team_name)
 print(f"  {len(history)} matches  |  "
       f"{history['date'].min().date()} to {history['date'].max().date()}")
+try:
+    history = build_extended_features(history)
+except Exception as _exc:
+    print(f"  [context] build_extended_features skipped: {_exc}")
 
 # Model: Belgium-specific > shared top-5 > generic fallback
 for model_path in [_MODEL_BELGIUM, _MODEL_SHARED, _MODEL_FALLBACK]:
@@ -257,6 +263,10 @@ for _, fix in fixtures.iterrows():
     odds_h    = float(fix.get("odds_home", 2.0))
     odds_d    = float(fix.get("odds_draw", 3.3))
     odds_a    = float(fix.get("odds_away", 3.5))
+    try:
+        _ctx = get_fixture_context_features(home, away, game_date, history)
+    except Exception:
+        _ctx = {}
 
     raw_h, raw_d, raw_a = 1/odds_h, 1/odds_d, 1/odds_a
     ov = raw_h + raw_d + raw_a
@@ -454,6 +464,7 @@ for _, fix in fixtures.iterrows():
         "data_ok": data_ok, "no_conf": no_conf, "diverge": diverge,
         "odds_h": odds_h, "odds_d": odds_d, "odds_a": odds_a,
         "recommended_market": recommended_market,
+        "ctx": _ctx,
     })
 
 # ---------------------------------------------------------------------------
@@ -492,6 +503,7 @@ for r in results:
 print()
 print(SEP)
 print_priority_watchlist(results, LEAGUE_NAME, sep=SEP)
+print_context_signals_section(results, sep=SEP)
 
 print("  NOTE: Probabilities are model/market estimates. No betting claims.")
 print("  Over2.5 / BTTS are rolling form rates (last 5 games). No edge claims.")
@@ -540,6 +552,7 @@ for r in results:
         "market_tier_score":          rec.get("market_tier_score", ""),
         "market_tier_reason":         rec.get("market_tier_reason", ""),
         "market_tier_flags":          rec.get("market_tier_flags", ""),
+        **context_csv_fields(r.get("ctx", {})),
     })
 import pandas as _pd
 _df = _pd.DataFrame(_csv_rows)

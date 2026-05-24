@@ -20,10 +20,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market, apply_league_market_profile, build_market_tier
-from football_prediction_v19.features import build_fixture_features
+from football_prediction_v19.features import build_fixture_features, build_extended_features
+from football_prediction_v19.context_features import build_context_features
 from football_prediction_v19.team_names import normalize_team_name
 from football_prediction_v19.reports.watchlist import append_watchlist_to_report
 from _watchlist import print_priority_watchlist
+from _context_signals import get_fixture_context_features, print_context_signals_section, context_csv_fields
 
 FIXTURE_FILE = ROOT / "data" / "upcoming_laliga_fixtures.csv"
 HISTORY_PATTERN = str(ROOT / "data" / "processed" / "football_data_SP1_*_clean.csv")
@@ -199,6 +201,10 @@ history["home_team"] = history["home_team"].apply(normalize_team_name)
 history["away_team"] = history["away_team"].apply(normalize_team_name)
 historical_teams = set(history["home_team"]) | set(history["away_team"])
 print(f"  {len(history)} matches  |  {history['date'].min().date()} to {history['date'].max().date()}")
+try:
+    history = build_extended_features(history)
+except Exception as _exc:
+    print(f"  [context] build_extended_features skipped: {_exc}")
 
 print(f"Loading model: {MODEL_FILE}")
 bundle = joblib.load(MODEL_FILE)
@@ -238,6 +244,10 @@ for _, fix in fixtures.iterrows():
     venue = str(fix.get("venue", "Unknown"))
     referee = str(fix.get("referee", "Unknown"))
     odds_h, odds_d, odds_a = float(fix["odds_home"]), float(fix["odds_draw"]), float(fix["odds_away"])
+    try:
+        _ctx = get_fixture_context_features(home, away, game_date, history)
+    except Exception:
+        _ctx = {}
     raw_h, raw_d, raw_a = 1 / odds_h, 1 / odds_d, 1 / odds_a
     ov = raw_h + raw_d + raw_a
     mkt_h, mkt_d, mkt_a = raw_h / ov, raw_d / ov, raw_a / ov
@@ -389,6 +399,7 @@ for _, fix in fixtures.iterrows():
         "over25_p": over25_p, "btts_p": btts_p, "goals_pic": goals_picture(over25_p, btts_p),
         "ctrl": ctrl, "chaos": chaos, "profile": profile, "data_ok": data_ok, "no_conf": no_conf,
         "recommended_market": recommended_market,
+        "ctx": _ctx,
     })
 
 print()
@@ -479,6 +490,7 @@ else:
 print()
 print(SEP)
 print_priority_watchlist(results, "La Liga", sep=SEP)
+print_context_signals_section(results, sep=SEP)
 
 print("  NOTE: Probabilities are model/market estimates. No betting claims.")
 print("  Control/Chaos are probability-confidence indicators only.")
@@ -526,6 +538,7 @@ for r in results:
         "market_tier_score":          rec.get("market_tier_score", ""),
         "market_tier_reason":         rec.get("market_tier_reason", ""),
         "market_tier_flags":          rec.get("market_tier_flags", ""),
+        **context_csv_fields(r.get("ctx", {})),
     })
 import pandas as _pd
 _df = _pd.DataFrame(_csv_rows)
