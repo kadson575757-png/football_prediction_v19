@@ -125,6 +125,10 @@ def get_fixture_context_features(
         ctx["is_derby"]   = ""
         ctx["derby_name"] = ""
 
+    # ---- Phase 10: ensemble fields (populated by walk-forward / daily scripts) ----
+    ctx.setdefault("ensemble_agreement", "")
+    ctx.setdefault("ensemble_note", "")
+
     return ctx
 
 
@@ -147,6 +151,9 @@ CONTEXT_CSV_KEYS: tuple[str, ...] = (
     "home_table_rank",
     "away_table_rank",
     "rank_diff",
+    # Phase 10
+    "ensemble_agreement",
+    "ensemble_note",
 )
 
 
@@ -199,7 +206,16 @@ def print_context_signals_section(
         away = r["away"]
         tier = r.get("recommended_market", {}).get("market_tier", "")
 
-        print(f"\n  {home} vs {away}  [{tier}]")
+        # Phase-10 ensemble tier signals
+        ensemble_note = r.get("ensemble_note", "") or ctx.get("ensemble_note", "")
+        if tier == "SUPER_A_TIER":
+            tier_label = f"⭐ {tier}"
+        elif ensemble_note == "DISAGREEMENT":
+            tier_label = f"⚠️  {tier}"
+        else:
+            tier_label = tier
+
+        print(f"\n  {home} vs {away}  [{tier_label}]")
         print(f"  {'─' * 60}")
 
         # H2H BTTS

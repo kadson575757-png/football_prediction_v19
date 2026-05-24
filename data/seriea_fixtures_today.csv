@@ -1,0 +1,6 @@
+date,season,league,home_team,away_team,venue,referee,odds_home,odds_draw,odds_away,formation_home_xg90,formation_away_xg90,fatigue_home,fatigue_away
+2026-05-24,2025-2026,Serie A,Milan,Cagliari,San Siro,,1.45,4.5,7.0,0.0,0.0,0.0,0.0
+2026-05-24,2025-2026,Serie A,Cremonese,Como,Stadio Giovanni Zini,,5.0,3.4,1.75,0.0,0.0,0.0,0.0
+2026-05-24,2025-2026,Serie A,Verona,Roma,Stadio Bentegodi,,4.5,3.5,1.8,0.0,0.0,0.0,0.0
+2026-05-24,2025-2026,Serie A,Lecce,Genoa,Via del Mare,,2.8,3.1,2.6,0.0,0.0,0.0,0.0
+2026-05-24,2025-2026,Serie A,Torino,Juventus,Stadio Olimpico Grande Torino,,4.0,3.4,1.9,0.0,0.0,0.0,0.0
