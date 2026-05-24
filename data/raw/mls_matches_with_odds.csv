@@ -1,0 +1,2073 @@
+date,season,league,home_team,away_team,score,home_xg,away_xg,odds_home,odds_draw,odds_away,venue,referee
+2022-02-26,2022,MLS,Los Angeles FC,Colorado Rapids,3-0,,,,,,Banc of California Stadium,Armando Villarreal
+2022-02-26,2022,MLS,Philadelphia Union,Minnesota United,1-1,,,,,,Subaru Park,Rubiel Vazquez
+2022-02-26,2022,MLS,San Jose Earthquakes,New York Red Bulls,1-3,,,,,,PayPal Park,Drew Fischer
+2022-02-26,2022,MLS,Columbus Crew,Vancouver Whitecaps,4-0,,,,,,Lower.com Field,Nima Saghafi
+2022-02-26,2022,MLS,FC Dallas,Toronto FC,1-1,,,,,,Toyota Stadium,Jair Marrufo
+2022-02-26,2022,MLS,Austin FC,FC Cincinnati,5-0,,,,,,Q2 Stadium,Ismail Elfath
+2022-02-26,2022,MLS,DC United,Charlotte FC,3-0,,,,,,Audi Field,Victor Rivas
+2022-02-26,2022,MLS,Inter Miami,Chicago Fire,0-0,,,,,,DRV PNK Stadium,Lukasz Szpala
+2022-02-27,2022,MLS,Orlando City,CF Montreal,2-0,,,,,,Exploria Stadium,Marcos de Oliveira
+2022-02-27,2022,MLS,LA Galaxy,New York City FC,1-0,,,,,,Dignity Health Sports Park,Joe Dickerson
+2022-02-27,2022,MLS,Atlanta United,Sporting Kansas City,3-1,,,,,,Mercedes-Benz Stadium,Ted Unkel
+2022-02-26,2022,MLS,Portland Timbers,New England Revolution,2-2,,,,,,Providence Park,Chris Penso
+2022-02-27,2022,MLS,Seattle Sounders,Nashville SC,0-1,,,,,,Lumen Field,Alex Chilowicz
+2022-02-27,2022,MLS,Houston Dynamo,Real Salt Lake,0-0,,,,,,PNC Stadium,Ramy Touchan
+2022-03-05,2022,MLS,New England Revolution,FC Dallas,1-0,,,,,,Gillette Stadium,Ted Unkel
+2022-03-05,2022,MLS,Toronto FC,New York Red Bulls,1-4,,,,,,BMO Field,Rubiel Vazquez
+2022-03-05,2022,MLS,San Jose Earthquakes,Columbus Crew,3-3,,,,,,PayPal Park,Guido Gonzalez Jr.
+2022-03-05,2022,MLS,Sporting Kansas City,Houston Dynamo,1-0,,,,,,Children's Mercy Park,Victor Rivas
+2022-03-05,2022,MLS,Vancouver Whitecaps,New York City FC,0-0,,,,,,BC Place Stadium,Marcos de Oliveira
+2022-03-05,2022,MLS,Real Salt Lake,Seattle Sounders,1-0,,,,,,Rio Tinto Stadium,Nima Saghafi
+2022-03-05,2022,MLS,CF Montreal,Philadelphia Union,1-2,,,,,,Stade Olympique,Drew Fischer
+2022-03-05,2022,MLS,Colorado Rapids,Atlanta United,3-0,,,,,,Dick's Sporting Goods Park,Joe Dickerson
+2022-03-05,2022,MLS,Minnesota United,Nashville SC,1-1,,,,,,Allianz Field,Armando Villarreal
+2022-03-05,2022,MLS,Chicago Fire,Orlando City,0-0,,,,,,Soldier Field,Ismir Pekmic
+2022-03-05,2022,MLS,FC Cincinnati,DC United,0-1,,,,,,TQL Stadium,Pierre-Luc Lauziere
+2022-03-06,2022,MLS,Austin FC,Inter Miami,5-1,,,,,,Q2 Stadium,Chris Penso
+2022-03-05,2022,MLS,Charlotte FC,LA Galaxy,0-1,,,,,,Bank of America Stadium,Jair Marrufo
+2022-03-06,2022,MLS,Los Angeles FC,Portland Timbers,1-1,,,,,,Banc of California Stadium,Ismail Elfath
+2022-03-12,2022,MLS,Seattle Sounders,LA Galaxy,3-2,,,,,,Lumen Field,Allen Chapman
+2022-03-12,2022,MLS,New York City FC,CF Montreal,4-1,,,,,,Yankee Stadium,Armando Villarreal
+2022-03-12,2022,MLS,Columbus Crew,Toronto FC,2-1,,,,,,Lower.com Field,Ismail Elfath
+2022-03-12,2022,MLS,Inter Miami,Los Angeles FC,0-2,,,,,,DRV PNK Stadium,Ted Unkel
+2022-03-12,2022,MLS,Houston Dynamo,Vancouver Whitecaps,2-1,,,,,,PNC Stadium,Pierre-Luc Lauziere
+2022-03-13,2022,MLS,Atlanta United,Charlotte FC,2-1,,,,,,Mercedes-Benz Stadium,Guido Gonzalez Jr.
+2022-03-13,2022,MLS,New York Red Bulls,Minnesota United,0-1,,,,,,Red Bull Arena,Lukasz Szpala
+2022-03-12,2022,MLS,Colorado Rapids,Sporting Kansas City,2-0,,,,,,Dick's Sporting Goods Park,Alex Chilowicz
+2022-03-12,2022,MLS,Portland Timbers,Austin FC,1-0,,,,,,Providence Park,Joe Dickerson
+2022-03-12,2022,MLS,FC Dallas,Nashville SC,2-0,,,,,,Toyota Stadium,Ramy Touchan
+2022-03-12,2022,MLS,Philadelphia Union,San Jose Earthquakes,2-0,,,,,,Subaru Park,Victor Rivas
+2022-03-12,2022,MLS,Orlando City,FC Cincinnati,1-2,,,,,,Exploria Stadium,Chris Penso
+2022-03-12,2022,MLS,DC United,Chicago Fire,0-2,,,,,,Audi Field,Rubiel Vazquez
+2022-03-12,2022,MLS,New England Revolution,Real Salt Lake,2-3,,,,,,Gillette Stadium,Drew Fischer
+2022-03-19,2022,MLS,LA Galaxy,Orlando City,0-1,,,,,,Dignity Health Sports Park,Alex Chilowicz
+2022-03-19,2022,MLS,New York City FC,Philadelphia Union,0-2,,,,,,Yankee Stadium,Ted Unkel
+2022-03-19,2022,MLS,FC Cincinnati,Inter Miami,3-1,,,,,,TQL Stadium,Ismir Pekmic
+2022-03-19,2022,MLS,Toronto FC,DC United,2-1,,,,,,BMO Field,Ramy Touchan
+2022-03-19,2022,MLS,Atlanta United,CF Montreal,3-3,,,,,,Mercedes-Benz Stadium,Chris Penso
+2022-03-19,2022,MLS,Chicago Fire,Sporting Kansas City,3-1,,,,,,Soldier Field,Tim Ford
+2022-03-19,2022,MLS,Charlotte FC,New England Revolution,3-1,,,,,,Bank of America Stadium,Marcos de Oliveira
+2022-03-20,2022,MLS,New York Red Bulls,Columbus Crew,1-1,,,,,,Red Bull Arena,Joe Dickerson
+2022-03-20,2022,MLS,Austin FC,Seattle Sounders,1-1,,,,,,Q2 Stadium,Lukasz Szpala
+2022-03-19,2022,MLS,Minnesota United,San Jose Earthquakes,1-0,,,,,,Allianz Field,Pierre-Luc Lauziere
+2022-03-19,2022,MLS,FC Dallas,Portland Timbers,4-1,,,,,,Toyota Stadium,Allen Chapman
+2022-03-19,2022,MLS,Real Salt Lake,Nashville SC,2-1,,,,,,Rio Tinto Stadium,Tori Penso
+2022-03-19,2022,MLS,Houston Dynamo,Colorado Rapids,1-1,,,,,,PNC Stadium,Nima Saghafi
+2022-03-20,2022,MLS,Los Angeles FC,Vancouver Whitecaps,3-1,,,,,,Banc of California Stadium,Guido Gonzalez Jr.
+2022-03-26,2022,MLS,Charlotte FC,FC Cincinnati,2-0,,,,,,Bank of America Stadium,Alex Chilowicz
+2022-03-26,2022,MLS,Sporting Kansas City,Real Salt Lake,1-0,,,,,,Children's Mercy Park,Joe Dickerson
+2022-03-27,2022,MLS,Portland Timbers,Orlando City,1-1,,,,,,Providence Park,Marcos de Oliveira
+2022-04-02,2022,MLS,Chicago Fire,FC Dallas,0-0,,,,,,Soldier Field,Pierre-Luc Lauziere
+2022-04-02,2022,MLS,Toronto FC,New York City FC,2-1,,,,,,BMO Field,Drew Fischer
+2022-04-02,2022,MLS,FC Cincinnati,CF Montreal,3-4,,,,,,TQL Stadium,Tori Penso
+2022-04-02,2022,MLS,San Jose Earthquakes,Austin FC,2-2,,,,,,PayPal Park,Alex Chilowicz
+2022-04-02,2022,MLS,Columbus Crew,Nashville SC,0-1,,,,,,Lower.com Field,Rubiel Vazquez
+2022-04-02,2022,MLS,Philadelphia Union,Charlotte FC,2-0,,,,,,Subaru Park,Tim Ford
+2022-04-02,2022,MLS,DC United,Atlanta United,0-1,,,,,,Audi Field,Armando Villarreal
+2022-04-02,2022,MLS,Orlando City,Los Angeles FC,2-4,,,,,,Exploria Stadium,Joe Dickerson
+2022-04-02,2022,MLS,New England Revolution,New York Red Bulls,0-1,,,,,,Gillette Stadium,Victor Rivas
+2022-04-03,2022,MLS,Portland Timbers,LA Galaxy,1-3,,,,,,Providence Park,Nima Saghafi
+2022-04-02,2022,MLS,Vancouver Whitecaps,Sporting Kansas City,1-0,,,,,,BC Place Stadium,Fotis Bazakos
+2022-04-02,2022,MLS,Minnesota United,Seattle Sounders,1-2,,,,,,Allianz Field,Ismail Elfath
+2022-04-02,2022,MLS,Colorado Rapids,Real Salt Lake,1-1,,,,,,Dick's Sporting Goods Park,Ted Unkel
+2022-04-02,2022,MLS,Inter Miami,Houston Dynamo,1-3,,,,,,DRV PNK Stadium,Allen Chapman
+2022-04-09,2022,MLS,Orlando City,Chicago Fire,1-0,,,,,,Exploria Stadium,Victor Rivas
+2022-04-09,2022,MLS,Inter Miami,New England Revolution,3-2,,,,,,DRV PNK Stadium,Ramy Touchan
+2022-04-09,2022,MLS,New York Red Bulls,CF Montreal,1-2,,,,,,Red Bull Arena,Guido Gonzalez Jr.
+2022-04-09,2022,MLS,LA Galaxy,Los Angeles FC,2-1,,,,,,Dignity Health Sports Park,Chris Penso
+2022-04-09,2022,MLS,Philadelphia Union,Columbus Crew,1-0,,,,,,Subaru Park,Armando Villarreal
+2022-04-10,2022,MLS,Charlotte FC,Atlanta United,1-0,,,,,,Bank of America Stadium,Allen Chapman
+2022-04-09,2022,MLS,Real Salt Lake,Toronto FC,2-2,,,,,,Rio Tinto Stadium,Marcos de Oliveira
+2022-04-10,2022,MLS,Austin FC,Minnesota United,1-0,,,,,,Q2 Stadium,Rosendo Mendoza
+2022-04-09,2022,MLS,Vancouver Whitecaps,Portland Timbers,2-3,,,,,,BC Place Stadium,Silviu Petrescu
+2022-04-09,2022,MLS,Houston Dynamo,San Jose Earthquakes,4-3,,,,,,PNC Stadium,Ismir Pekmic
+2022-04-09,2022,MLS,Sporting Kansas City,Nashville SC,1-2,,,,,,Children's Mercy Park,Ismail Elfath
+2022-04-09,2022,MLS,FC Dallas,Colorado Rapids,3-1,,,,,,Toyota Stadium,Lukasz Szpala
+2022-04-16,2022,MLS,San Jose Earthquakes,Nashville SC,2-2,,,,,,PayPal Park,Tim Ford
+2022-04-16,2022,MLS,CF Montreal,Vancouver Whitecaps,2-1,,,,,,Stade Saputo,Nima Saghafi
+2022-04-16,2022,MLS,Houston Dynamo,Portland Timbers,0-0,,,,,,PNC Stadium,Rosendo Mendoza
+2022-04-16,2022,MLS,Atlanta United,FC Cincinnati,0-0,,,,,,Mercedes-Benz Stadium,Rubiel Vazquez
+2022-04-16,2022,MLS,New York Red Bulls,FC Dallas,0-0,,,,,,Red Bull Arena,Fotis Bazakos
+2022-04-16,2022,MLS,DC United,Austin FC,2-3,,,,,,Audi Field,Tori Penso
+2022-04-16,2022,MLS,Columbus Crew,Orlando City,0-2,,,,,,Lower.com Field,Drew Fischer
+2022-04-16,2022,MLS,Toronto FC,Philadelphia Union,2-1,,,,,,BMO Field,Alex Chilowicz
+2022-04-16,2022,MLS,New England Revolution,Charlotte FC,2-1,,,,,,Gillette Stadium,Pierre-Luc Lauziere
+2022-04-17,2022,MLS,New York City FC,Real Salt Lake,6-0,,,,,,Yankee Stadium,Ismail Elfath
+2022-04-17,2022,MLS,Los Angeles FC,Sporting Kansas City,3-1,,,,,,Banc of California Stadium,Armando Villarreal
+2022-04-16,2022,MLS,Chicago Fire,LA Galaxy,0-0,,,,,,Soldier Field,Ted Unkel
+2022-04-16,2022,MLS,Minnesota United,Colorado Rapids,3-1,,,,,,Allianz Field,Chris Penso
+2022-04-16,2022,MLS,Seattle Sounders,Inter Miami,0-1,,,,,,Lumen Field,Joe Dickerson
+2022-04-23,2022,MLS,FC Dallas,Houston Dynamo,2-1,,,,,,Toyota Stadium,Victor Rivas
+2022-04-23,2022,MLS,Philadelphia Union,CF Montreal,1-1,,,,,,Subaru Park,Lukasz Szpala
+2022-04-23,2022,MLS,Minnesota United,Chicago Fire,3-0,,,,,,Allianz Field,Silviu Petrescu
+2022-04-23,2022,MLS,DC United,New England Revolution,3-2,,,,,,Audi Field,Marcos de Oliveira
+2022-04-24,2022,MLS,Inter Miami,Atlanta United,2-1,,,,,,DRV PNK Stadium,Jair Marrufo
+2022-04-24,2022,MLS,Orlando City,New York Red Bulls,0-3,,,,,,Exploria Stadium,Alex Chilowicz
+2022-04-24,2022,MLS,FC Cincinnati,Los Angeles FC,1-2,,,,,,TQL Stadium,Ismail Elfath
+2022-04-24,2022,MLS,New York City FC,Toronto FC,5-4,,,,,,Citi Field,Rubiel Vazquez
+2022-04-23,2022,MLS,Colorado Rapids,Charlotte FC,0-0,,,,,,Dick's Sporting Goods Park,Ismir Pekmic
+2022-04-23,2022,MLS,San Jose Earthquakes,Seattle Sounders,4-3,,,,,,PayPal Park,Ted Unkel
+2022-04-23,2022,MLS,Portland Timbers,Real Salt Lake,0-0,,,,,,Providence Park,Chris Penso
+2022-04-23,2022,MLS,LA Galaxy,Nashville SC,1-0,,,,,,Dignity Health Sports Park,Allen Chapman
+2022-04-23,2022,MLS,Sporting Kansas City,Columbus Crew,0-0,,,,,,Children's Mercy Park,Rosendo Mendoza
+2022-04-23,2022,MLS,Austin FC,Vancouver Whitecaps,3-0,,,,,,Q2 Stadium,Ramy Touchan
+2022-04-30,2022,MLS,Houston Dynamo,Austin FC,1-2,,,,,,PNC Stadium,Ted Unkel
+2022-04-30,2022,MLS,Real Salt Lake,LA Galaxy,1-0,,,,,,Rio Tinto Stadium,Drew Fischer
+2022-04-30,2022,MLS,Toronto FC,FC Cincinnati,1-2,,,,,,BMO Field,Pierre-Luc Lauziere
+2022-04-30,2022,MLS,CF Montreal,Atlanta United,2-1,,,,,,Stade Saputo,Alex Chilowicz
+2022-04-30,2022,MLS,Orlando City,Charlotte FC,2-1,,,,,,Exploria Stadium,Fotis Bazakos
+2022-04-30,2022,MLS,New England Revolution,Inter Miami,2-0,,,,,,Gillette Stadium,Ismail Elfath
+2022-04-30,2022,MLS,Columbus Crew,DC United,3-0,,,,,,Lower.com Field,Tim Ford
+2022-05-01,2022,MLS,New York City FC,San Jose Earthquakes,3-0,,,,,,Yankee Stadium,Guido Gonzalez Jr.
+2022-05-01,2022,MLS,Nashville SC,Philadelphia Union,1-1,,,,,,Geodis Park,Chris Penso
+2022-04-30,2022,MLS,Colorado Rapids,Portland Timbers,2-0,,,,,,Dick's Sporting Goods Park,Armando Villarreal
+2022-04-30,2022,MLS,Chicago Fire,New York Red Bulls,1-2,,,,,,Soldier Field,Jon Freemon
+2022-04-30,2022,MLS,Sporting Kansas City,FC Dallas,2-2,,,,,,Children's Mercy Park,Nima Saghafi
+2022-05-01,2022,MLS,Los Angeles FC,Minnesota United,2-0,,,,,,Banc of California Stadium,Allen Chapman
+2022-05-04,2022,MLS,FC Cincinnati,Toronto FC,2-0,,,,,,TQL Stadium,Lukasz Szpala
+2022-05-07,2022,MLS,Charlotte FC,Inter Miami,1-0,,,,,,Bank of America Stadium,Rubiel Vazquez
+2022-05-07,2022,MLS,CF Montreal,Orlando City,4-1,,,,,,Stade Saputo,Guido Gonzalez Jr.
+2022-05-07,2022,MLS,Atlanta United,Chicago Fire,4-1,,,,,,Mercedes-Benz Stadium,Ramy Touchan
+2022-05-07,2022,MLS,New York City FC,Sporting Kansas City,0-0,,,,,,Citi Field,Tim Ford
+2022-05-07,2022,MLS,New York Red Bulls,Portland Timbers,1-1,,,,,,Red Bull Arena,Joe Dickerson
+2022-05-07,2022,MLS,DC United,Houston Dynamo,2-0,,,,,,Audi Field,Jon Freemon
+2022-05-07,2022,MLS,New England Revolution,Columbus Crew,2-2,,,,,,Gillette Stadium,Nima Saghafi
+2022-05-08,2022,MLS,Vancouver Whitecaps,Toronto FC,1-0,,,,,,BC Place Stadium,Victor Rivas
+2022-05-08,2022,MLS,Nashville SC,Real Salt Lake,2-0,,,,,,Geodis Park,Fotis Bazakos
+2022-05-08,2022,MLS,Austin FC,LA Galaxy,0-1,,,,,,Q2 Stadium,Ismail Elfath
+2022-05-07,2022,MLS,San Jose Earthquakes,Colorado Rapids,1-0,,,,,,PayPal Park,Tori Penso
+2022-05-07,2022,MLS,Minnesota United,FC Cincinnati,0-1,,,,,,Allianz Field,Marcos de Oliveira
+2022-05-07,2022,MLS,FC Dallas,Seattle Sounders,2-0,,,,,,Toyota Stadium,Allen Chapman
+2022-05-07,2022,MLS,Los Angeles FC,Philadelphia Union,2-2,,,,,,Banc of California Stadium,Jair Marrufo
+2022-05-14,2022,MLS,Toronto FC,Orlando City,0-1,,,,,,BMO Field,Nima Saghafi
+2022-05-14,2022,MLS,Colorado Rapids,Los Angeles FC,2-0,,,,,,Dick's Sporting Goods Park,Ted Unkel
+2022-05-14,2022,MLS,Vancouver Whitecaps,San Jose Earthquakes,3-3,,,,,,BC Place Stadium,Tim Ford
+2022-05-14,2022,MLS,Charlotte FC,CF Montreal,0-2,,,,,,Bank of America Stadium,Silviu Petrescu
+2022-05-14,2022,MLS,New York City FC,Columbus Crew,2-0,,,,,,Yankee Stadium,Marcos de Oliveira
+2022-05-14,2022,MLS,Philadelphia Union,New York Red Bulls,1-1,,,,,,Subaru Park,Rubiel Vazquez
+2022-05-15,2022,MLS,Seattle Sounders,Minnesota United,3-1,,,,,,Lumen Field,Joe Dickerson
+2022-05-15,2022,MLS,Atlanta United,New England Revolution,2-2,,,,,,Mercedes-Benz Stadium,Allen Chapman
+2022-05-14,2022,MLS,Chicago Fire,FC Cincinnati,1-2,,,,,,Soldier Field,Tori Penso
+2022-05-14,2022,MLS,Portland Timbers,Sporting Kansas City,7-2,,,,,,Providence Park,Victor Rivas
+2022-05-14,2022,MLS,Real Salt Lake,Austin FC,2-1,,,,,,Rio Tinto Stadium,Lukasz Szpala
+2022-05-14,2022,MLS,Houston Dynamo,Nashville SC,2-0,,,,,,PNC Stadium,Ramy Touchan
+2022-05-14,2022,MLS,LA Galaxy,FC Dallas,1-3,,,,,,Dignity Health Sports Park,Chris Penso
+2022-05-14,2022,MLS,Inter Miami,DC United,2-2,,,,,,DRV PNK Stadium,Pierre-Luc Lauziere
+2022-05-18,2022,MLS,Philadelphia Union,Inter Miami,0-0,,,,,,Subaru Park,Fotis Bazakos
+2022-05-18,2022,MLS,New York Red Bulls,Chicago Fire,3-3,,,,,,Red Bull Arena,Ted Unkel
+2022-05-18,2022,MLS,DC United,New York City FC,0-2,,,,,,Audi Field,Chris Penso
+2022-05-18,2022,MLS,Minnesota United,LA Galaxy,1-1,,,,,,Allianz Field,Jair Marrufo
+2022-05-18,2022,MLS,Vancouver Whitecaps,FC Dallas,2-1,,,,,,BC Place Stadium,Ismir Pekmic
+2022-05-18,2022,MLS,San Jose Earthquakes,Portland Timbers,3-2,,,,,,PayPal Park,Lukasz Szpala
+2022-05-18,2022,MLS,Los Angeles FC,Austin FC,1-2,,,,,,Banc of California Stadium,Armando Villarreal
+2022-05-18,2022,MLS,Houston Dynamo,Seattle Sounders,0-1,,,,,,PNC Stadium,Rubiel Vazquez
+2022-05-18,2022,MLS,Sporting Kansas City,Colorado Rapids,2-1,,,,,,Children's Mercy Park,Drew Fischer
+2022-05-18,2022,MLS,Nashville SC,CF Montreal,2-1,,,,,,Geodis Park,Jon Freemon
+2022-05-21,2022,MLS,Columbus Crew,Los Angeles FC,0-2,,,,,,Lower.com Field,Victor Rivas
+2022-05-21,2022,MLS,FC Cincinnati,New England Revolution,2-3,,,,,,TQL Stadium,Silviu Petrescu
+2022-05-21,2022,MLS,Nashville SC,Atlanta United,2-2,,,,,,Geodis Park,Ted Unkel
+2022-05-21,2022,MLS,DC United,Toronto FC,2-2,,,,,,Audi Field,Ismir Pekmic
+2022-05-22,2022,MLS,CF Montreal,Real Salt Lake,1-2,,,,,,Stade Saputo,Ramy Touchan
+2022-05-22,2022,MLS,San Jose Earthquakes,Sporting Kansas City,1-1,,,,,,PayPal Park,Pierre-Luc Lauziere
+2022-05-22,2022,MLS,New York City FC,Chicago Fire,1-0,,,,,,Yankee Stadium,Fotis Bazakos
+2022-05-22,2022,MLS,Charlotte FC,Vancouver Whitecaps,2-1,,,,,,Bank of America Stadium,Nima Saghafi
+2022-05-22,2022,MLS,Inter Miami,New York Red Bulls,2-0,,,,,,DRV PNK Stadium,Jon Freemon
+2022-05-22,2022,MLS,FC Dallas,Minnesota United,1-2,,,,,,Toyota Stadium,Lukasz Szpala
+2022-05-22,2022,MLS,LA Galaxy,Houston Dynamo,0-3,,,,,,Dignity Health Sports Park,Marcos de Oliveira
+2022-05-22,2022,MLS,Colorado Rapids,Seattle Sounders,1-0,,,,,,Dick's Sporting Goods Park,Tim Ford
+2022-05-22,2022,MLS,Austin FC,Orlando City,2-2,,,,,,Q2 Stadium,Joe Dickerson
+2022-05-22,2022,MLS,Portland Timbers,Philadelphia Union,0-2,,,,,,Providence Park,Allen Chapman
+2022-05-28,2022,MLS,Los Angeles FC,San Jose Earthquakes,3-2,,,,,,Banc of California Stadium,Ismail Elfath
+2022-05-28,2022,MLS,Atlanta United,Columbus Crew,1-2,,,,,,Mercedes-Benz Stadium,Joe Dickerson
+2022-05-28,2022,MLS,New York Red Bulls,DC United,4-1,,,,,,Red Bull Arena,Allen Chapman
+2022-05-28,2022,MLS,Toronto FC,Chicago Fire,3-2,,,,,,BMO Field,Guido Gonzalez Jr.
+2022-05-28,2022,MLS,Orlando City,FC Dallas,1-3,,,,,,Exploria Stadium,Marcos de Oliveira
+2022-05-28,2022,MLS,CF Montreal,FC Cincinnati,4-3,,,,,,Stade Saputo,Fotis Bazakos
+2022-05-28,2022,MLS,New England Revolution,Philadelphia Union,1-1,,,,,,Gillette Stadium,Jon Freemon
+2022-05-29,2022,MLS,LA Galaxy,Austin FC,4-1,,,,,,Dignity Health Sports Park,Rubiel Vazquez
+2022-05-28,2022,MLS,Colorado Rapids,Nashville SC,1-3,,,,,,Dick's Sporting Goods Park,Nima Saghafi
+2022-05-28,2022,MLS,Minnesota United,New York City FC,0-1,,,,,,Allianz Field,Michael Radchuk
+2022-05-28,2022,MLS,Real Salt Lake,Houston Dynamo,3-0,,,,,,Rio Tinto Stadium,Armando Villarreal
+2022-05-28,2022,MLS,Inter Miami,Portland Timbers,2-1,,,,,,DRV PNK Stadium,Chris Penso
+2022-05-28,2022,MLS,Sporting Kansas City,Vancouver Whitecaps,0-1,,,,,,Children's Mercy Park,Ted Unkel
+2022-05-29,2022,MLS,Seattle Sounders,Charlotte FC,2-1,,,,,,Lumen Field,Rosendo Mendoza
+2022-06-04,2022,MLS,Vancouver Whitecaps,Real Salt Lake,2-1,,,,,,BC Place Stadium,Jon Freemon
+2022-06-11,2022,MLS,Charlotte FC,New York Red Bulls,2-0,,,,,,Bank of America Stadium,Guido Gonzalez Jr.
+2022-06-12,2022,MLS,Sporting Kansas City,New England Revolution,1-2,,,,,,Children's Mercy Park,Chris Penso
+2022-06-11,2022,MLS,Nashville SC,San Jose Earthquakes,0-0,,,,,,Geodis Park,Allen Chapman
+2022-06-14,2022,MLS,Seattle Sounders,Vancouver Whitecaps,4-0,,,,,,Lumen Field,Lukasz Szpala
+2022-06-15,2022,MLS,New England Revolution,Orlando City,1-1,,,,,,Gillette Stadium,Ramy Touchan
+2022-06-18,2022,MLS,Seattle Sounders,Los Angeles FC,1-1,,,,,,Lumen Field,Allen Chapman
+2022-06-18,2022,MLS,LA Galaxy,Portland Timbers,1-1,,,,,,Dignity Health Sports Park,Joe Dickerson
+2022-06-18,2022,MLS,New York Red Bulls,Toronto FC,2-0,,,,,,Red Bull Arena,Ramy Touchan
+2022-06-18,2022,MLS,Philadelphia Union,FC Cincinnati,1-1,,,,,,Subaru Park,Tim Ford
+2022-06-18,2022,MLS,Columbus Crew,Charlotte FC,1-1,,,,,,Lower.com Field,Silviu Petrescu
+2022-06-18,2022,MLS,Orlando City,Houston Dynamo,2-1,,,,,,Exploria Stadium,Rosendo Mendoza
+2022-06-18,2022,MLS,CF Montreal,Austin FC,0-1,,,,,,Stade Saputo,Ted Unkel
+2022-06-19,2022,MLS,Atlanta United,Inter Miami,2-0,,,,,,Mercedes-Benz Stadium,Armando Villarreal
+2022-06-19,2022,MLS,New York City FC,Colorado Rapids,1-1,,,,,,Yankee Stadium,Marcos de Oliveira
+2022-06-19,2022,MLS,New England Revolution,Minnesota United,2-1,,,,,,Gillette Stadium,Ismir Pekmic
+2022-06-19,2022,MLS,Nashville SC,Sporting Kansas City,1-2,,,,,,Geodis Park,Victor Rivas
+2022-06-18,2022,MLS,Chicago Fire,DC United,1-0,,,,,,Soldier Field,Nima Saghafi
+2022-06-18,2022,MLS,Real Salt Lake,San Jose Earthquakes,2-0,,,,,,Rio Tinto Stadium,Alex Chilowicz
+2022-06-18,2022,MLS,FC Dallas,Vancouver Whitecaps,0-2,,,,,,Toyota Stadium,Tori Penso
+2022-06-24,2022,MLS,FC Cincinnati,Orlando City,1-0,,,,,,TQL Stadium,Guido Gonzalez Jr.
+2022-06-25,2022,MLS,Seattle Sounders,Sporting Kansas City,3-0,,,,,,Lumen Field,Alex Chilowicz
+2022-06-25,2022,MLS,DC United,Nashville SC,1-3,,,,,,Audi Field,Lukasz Szpala
+2022-06-25,2022,MLS,Toronto FC,Atlanta United,2-1,,,,,,BMO Field,Jon Freemon
+2022-06-25,2022,MLS,CF Montreal,Charlotte FC,2-1,,,,,,Stade Saputo,Nima Saghafi
+2022-06-26,2022,MLS,Los Angeles FC,New York Red Bulls,2-0,,,,,,Banc of California Stadium,Joe Dickerson
+2022-06-26,2022,MLS,Philadelphia Union,New York City FC,2-1,,,,,,Subaru Park,Armando Villarreal
+2022-06-25,2022,MLS,Houston Dynamo,Chicago Fire,2-0,,,,,,PNC Stadium,Ismir Pekmic
+2022-06-25,2022,MLS,Portland Timbers,Colorado Rapids,3-0,,,,,,Providence Park,Rosendo Mendoza
+2022-06-25,2022,MLS,Inter Miami,Minnesota United,2-1,,,,,,DRV PNK Stadium,Victor Rivas
+2022-06-25,2022,MLS,Real Salt Lake,Columbus Crew,0-0,,,,,,Rio Tinto Stadium,Mark Allatin
+2022-06-25,2022,MLS,Austin FC,FC Dallas,2-2,,,,,,Q2 Stadium,Allen Chapman
+2022-06-26,2022,MLS,Vancouver Whitecaps,New England Revolution,0-0,,,,,,BC Place Stadium,Filip Dujic
+2022-06-29,2022,MLS,FC Cincinnati,New York City FC,4-4,,,,,,TQL Stadium,Ismir Pekmic
+2022-06-29,2022,MLS,Toronto FC,Columbus Crew,1-2,,,,,,BMO Field,Armando Villarreal
+2022-06-30,2022,MLS,Charlotte FC,Austin FC,0-1,,,,,,Bank of America Stadium,Tim Ford
+2022-06-29,2022,MLS,Seattle Sounders,CF Montreal,1-2,,,,,,Lumen Field,Joe Dickerson
+2022-06-29,2022,MLS,Chicago Fire,Philadelphia Union,1-0,,,,,,Soldier Field,Michael Radchuk
+2022-06-29,2022,MLS,Los Angeles FC,FC Dallas,3-1,,,,,,Banc of California Stadium,Marcos de Oliveira
+2022-06-29,2022,MLS,LA Galaxy,Minnesota United,2-3,,,,,,Dignity Health Sports Park,Ted Unkel
+2022-06-29,2022,MLS,Portland Timbers,Houston Dynamo,2-1,,,,,,Providence Park,Lukasz Szpala
+2022-06-30,2022,MLS,New York Red Bulls,Atlanta United,2-1,,,,,,Red Bull Arena,Alex Chilowicz
+2022-07-02,2022,MLS,Toronto FC,Seattle Sounders,0-2,,,,,,BMO Field,Silviu Petrescu
+2022-07-03,2022,MLS,New York City FC,Atlanta United,2-2,,,,,,Yankee Stadium,Rosendo Mendoza
+2022-07-02,2022,MLS,Vancouver Whitecaps,Los Angeles FC,1-0,,,,,,BC Place Stadium,Guido Gonzalez Jr.
+2022-07-03,2022,MLS,New England Revolution,FC Cincinnati,2-2,,,,,,Gillette Stadium,Jon Freemon
+2022-07-03,2022,MLS,Columbus Crew,Philadelphia Union,0-0,,,,,,Lower.com Field,Nima Saghafi
+2022-07-03,2022,MLS,San Jose Earthquakes,Chicago Fire,2-1,,,,,,PayPal Park,Victor Rivas
+2022-07-04,2022,MLS,Orlando City,DC United,3-5,,,,,,Exploria Stadium,Allen Chapman
+2022-07-03,2022,MLS,Minnesota United,Real Salt Lake,3-2,,,,,,Allianz Field,Ramy Touchan
+2022-07-03,2022,MLS,Sporting Kansas City,New York Red Bulls,0-1,,,,,,Children's Mercy Park,Marcos de Oliveira
+2022-07-03,2022,MLS,Nashville SC,Portland Timbers,2-2,,,,,,Geodis Park,Armando Villarreal
+2022-07-03,2022,MLS,Houston Dynamo,Charlotte FC,1-2,,,,,,PNC Stadium,Jair Marrufo
+2022-07-04,2022,MLS,Colorado Rapids,Austin FC,2-3,,,,,,Dick's Sporting Goods Park,Joe Dickerson
+2022-07-04,2022,MLS,LA Galaxy,CF Montreal,4-0,,,,,,Dignity Health Sports Park,Tim Ford
+2022-07-04,2022,MLS,FC Dallas,Inter Miami,1-1,,,,,,Toyota Stadium,Alex Chilowicz
+2022-07-08,2022,MLS,Philadelphia Union,DC United,7-0,,,,,,Subaru Park,Ted Unkel
+2022-07-09,2022,MLS,New York City FC,New England Revolution,4-2,,,,,,Yankee Stadium,Tim Ford
+2022-07-09,2022,MLS,Seattle Sounders,Portland Timbers,0-3,,,,,,Lumen Field,Chris Penso
+2022-07-08,2022,MLS,Los Angeles FC,LA Galaxy,3-2,,,,,,Banc of California Stadium,Armando Villarreal
+2022-07-09,2022,MLS,Atlanta United,Austin FC,0-3,,,,,,Mercedes-Benz Stadium,Jair Marrufo
+2022-07-09,2022,MLS,Charlotte FC,Nashville SC,4-1,,,,,,Bank of America Stadium,Joe Dickerson
+2022-07-09,2022,MLS,FC Cincinnati,New York Red Bulls,1-1,,,,,,TQL Stadium,Rosendo Mendoza
+2022-07-09,2022,MLS,Toronto FC,San Jose Earthquakes,2-2,,,,,,BMO Field,Fotis Bazakos
+2022-07-08,2022,MLS,Vancouver Whitecaps,Minnesota United,1-3,,,,,,BC Place Stadium,Alex Chilowicz
+2022-07-09,2022,MLS,CF Montreal,Sporting Kansas City,1-2,,,,,,Stade Saputo,Ismir Pekmic
+2022-07-09,2022,MLS,Chicago Fire,Columbus Crew,2-3,,,,,,Soldier Field,Ramy Touchan
+2022-07-09,2022,MLS,Houston Dynamo,FC Dallas,2-2,,,,,,PNC Stadium,Jon Freemon
+2022-07-09,2022,MLS,Real Salt Lake,Colorado Rapids,2-2,,,,,,Rio Tinto Stadium,Lukasz Szpala
+2022-07-09,2022,MLS,Orlando City,Inter Miami,1-0,,,,,,Exploria Stadium,Nima Saghafi
+2022-07-13,2022,MLS,Atlanta United,Real Salt Lake,2-1,,,,,,Mercedes-Benz Stadium,Drew Fischer
+2022-07-12,2022,MLS,Austin FC,Houston Dynamo,3-1,,,,,,Q2 Stadium,Chris Penso
+2022-07-13,2022,MLS,Chicago Fire,Toronto FC,2-0,,,,,,Soldier Field,Lukasz Szpala
+2022-07-13,2022,MLS,LA Galaxy,San Jose Earthquakes,2-3,,,,,,Dignity Health Sports Park,Allen Chapman
+2022-07-13,2022,MLS,Minnesota United,Sporting Kansas City,1-1,,,,,,Allianz Field,Guido Gonzalez Jr.
+2022-07-13,2022,MLS,Colorado Rapids,Orlando City,1-1,,,,,,Dick's Sporting Goods Park,Fotis Bazakos
+2022-07-13,2022,MLS,Nashville SC,Seattle Sounders,1-0,,,,,,Geodis Park,Rubiel Vazquez
+2022-07-13,2022,MLS,DC United,Columbus Crew,2-2,,,,,,Audi Field,Rosendo Mendoza
+2022-07-13,2022,MLS,FC Cincinnati,Vancouver Whitecaps,2-2,,,,,,TQL Stadium,Pierre-Luc Lauziere
+2022-07-13,2022,MLS,Inter Miami,Philadelphia Union,1-2,,,,,,DRV PNK Stadium,Marcos de Oliveira
+2022-07-13,2022,MLS,FC Dallas,New York City FC,0-1,,,,,,Toyota Stadium,Victor Rivas
+2022-07-16,2022,MLS,Philadelphia Union,New England Revolution,2-1,,,,,,Subaru Park,Rubiel Vazquez
+2022-07-16,2022,MLS,CF Montreal,Toronto FC,1-0,,,,,,Stade Saputo,Ted Unkel
+2022-07-17,2022,MLS,Atlanta United,Orlando City,1-1,,,,,,Mercedes-Benz Stadium,Victor Rivas
+2022-07-17,2022,MLS,New York Red Bulls,New York City FC,0-1,,,,,,Red Bull Arena,Chris Penso
+2022-07-16,2022,MLS,Minnesota United,DC United,2-0,,,,,,Allianz Field,Jair Marrufo
+2022-07-16,2022,MLS,Colorado Rapids,LA Galaxy,2-0,,,,,,Dick's Sporting Goods Park,Guido Gonzalez Jr.
+2022-07-16,2022,MLS,Chicago Fire,Seattle Sounders,1-0,,,,,,Soldier Field,Pierre-Luc Lauziere
+2022-07-17,2022,MLS,Columbus Crew,FC Cincinnati,2-0,,,,,,Lower.com Field,Marcos de Oliveira
+2022-07-16,2022,MLS,FC Dallas,Austin FC,1-1,,,,,,Toyota Stadium,Armando Villarreal
+2022-07-16,2022,MLS,Inter Miami,Charlotte FC,3-2,,,,,,DRV PNK Stadium,Jon Freemon
+2022-07-17,2022,MLS,San Jose Earthquakes,Houston Dynamo,1-2,,,,,,PayPal Park,Tim Ford
+2022-07-17,2022,MLS,Portland Timbers,Vancouver Whitecaps,1-1,,,,,,Providence Park,Ramy Touchan
+2022-07-17,2022,MLS,Nashville SC,Los Angeles FC,1-2,,,,,,Geodis Park,Drew Fischer
+2022-07-17,2022,MLS,Real Salt Lake,Sporting Kansas City,3-0,,,,,,Rio Tinto Stadium,Joe Dickerson
+2022-07-23,2022,MLS,New York City FC,Inter Miami,2-0,,,,,,Yankee Stadium,Allen Chapman
+2022-07-23,2022,MLS,Orlando City,Philadelphia Union,0-1,,,,,,Exploria Stadium,Alex Chilowicz
+2022-07-23,2022,MLS,Columbus Crew,New England Revolution,0-0,,,,,,Lower.com Field,Silviu Petrescu
+2022-07-23,2022,MLS,FC Cincinnati,Nashville SC,1-1,,,,,,TQL Stadium,Chris Penso
+2022-07-23,2022,MLS,Toronto FC,Charlotte FC,4-0,,,,,,BMO Field,Filip Dujic
+2022-07-23,2022,MLS,Seattle Sounders,Colorado Rapids,2-1,,,,,,Lumen Field,Rosendo Mendoza
+2022-07-23,2022,MLS,Vancouver Whitecaps,Chicago Fire,1-3,,,,,,BC Place Stadium,Joe Dickerson
+2022-07-23,2022,MLS,Sporting Kansas City,Los Angeles FC,0-2,,,,,,Children's Mercy Park,Lukasz Szpala
+2022-07-23,2022,MLS,Portland Timbers,San Jose Earthquakes,2-1,,,,,,Providence Park,Jon Freemon
+2022-07-23,2022,MLS,Houston Dynamo,Minnesota United,1-2,,,,,,PNC Stadium,Nima Saghafi
+2022-07-23,2022,MLS,DC United,CF Montreal,1-2,,,,,,Audi Field,Rubiel Vazquez
+2022-07-23,2022,MLS,Real Salt Lake,FC Dallas,0-1,,,,,,Rio Tinto Stadium,Matt Conger
+2022-07-24,2022,MLS,LA Galaxy,Atlanta United,2-0,,,,,,Dignity Health Sports Park,Marcos de Oliveira
+2022-07-24,2022,MLS,Austin FC,New York Red Bulls,3-4,,,,,,Q2 Stadium,Guido Gonzalez Jr.
+2022-07-30,2022,MLS,Minnesota United,Portland Timbers,4-4,,,,,,Allianz Field,Victor Rivas
+2022-07-30,2022,MLS,Chicago Fire,Atlanta United,0-0,,,,,,Soldier Field,Tim Ford
+2022-07-30,2022,MLS,Philadelphia Union,Houston Dynamo,6-0,,,,,,Subaru Park,Kevin Stott
+2022-07-30,2022,MLS,CF Montreal,New York City FC,0-0,,,,,,Stade Saputo,Ramy Touchan
+2022-07-29,2022,MLS,Los Angeles FC,Seattle Sounders,2-1,,,,,,Banc of California Stadium,Joe Dickerson
+2022-07-31,2022,MLS,DC United,Orlando City,2-1,,,,,,Audi Field,Armando Villarreal
+2022-07-30,2022,MLS,San Jose Earthquakes,Real Salt Lake,2-2,,,,,,PayPal Park,Nima Saghafi
+2022-07-30,2022,MLS,Nashville SC,Vancouver Whitecaps,1-1,,,,,,Geodis Park,Marcos de Oliveira
+2022-07-30,2022,MLS,Sporting Kansas City,Austin FC,0-2,,,,,,Children's Mercy Park,Fotis Bazakos
+2022-07-30,2022,MLS,FC Dallas,LA Galaxy,1-0,,,,,,Toyota Stadium,Pierre-Luc Lauziere
+2022-07-30,2022,MLS,Inter Miami,FC Cincinnati,4-4,,,,,,DRV PNK Stadium,Tori Penso
+2022-07-30,2022,MLS,New England Revolution,Toronto FC,0-0,,,,,,Gillette Stadium,Ismir Pekmic
+2022-08-02,2022,MLS,New York Red Bulls,Colorado Rapids,4-5,,,,,,Red Bull Arena,Drew Fischer
+2022-08-03,2022,MLS,Charlotte FC,DC United,3-0,,,,,,Bank of America Stadium,Guido Gonzalez Jr.
+2022-08-02,2022,MLS,Seattle Sounders,FC Dallas,1-0,,,,,,Lumen Field,Allen Chapman
+2022-08-03,2022,MLS,Columbus Crew,CF Montreal,1-2,,,,,,Lower.com Field,Lukasz Szpala
+2022-08-03,2022,MLS,Portland Timbers,Nashville SC,1-1,,,,,,Providence Park,Silviu Petrescu
+2022-08-03,2022,MLS,San Jose Earthquakes,Inter Miami,0-1,,,,,,PayPal Park,Mark Allatin
+2022-08-06,2022,MLS,Atlanta United,Seattle Sounders,2-1,,,,,,Mercedes-Benz Stadium,Armando Villarreal
+2022-08-06,2022,MLS,Charlotte FC,Chicago Fire,2-3,,,,,,Bank of America Stadium,Nima Saghafi
+2022-08-06,2022,MLS,Orlando City,New England Revolution,0-3,,,,,,Exploria Stadium,Ramy Touchan
+2022-08-06,2022,MLS,CF Montreal,Inter Miami,2-2,,,,,,Stade Saputo,Kevin Stott
+2022-08-05,2022,MLS,Vancouver Whitecaps,Houston Dynamo,2-1,,,,,,BC Place Stadium,Fotis Bazakos
+2022-08-06,2022,MLS,Columbus Crew,New York City FC,3-2,,,,,,Lower.com Field,Rubiel Vazquez
+2022-08-06,2022,MLS,DC United,New York Red Bulls,0-0,,,,,,Audi Field,Pierre-Luc Lauziere
+2022-08-06,2022,MLS,FC Cincinnati,Philadelphia Union,3-1,,,,,,TQL Stadium,Drew Fischer
+2022-08-06,2022,MLS,Nashville SC,Toronto FC,3-4,,,,,,Geodis Park,Allen Chapman
+2022-08-06,2022,MLS,Colorado Rapids,Minnesota United,4-3,,,,,,Dick's Sporting Goods Park,Ismir Pekmic
+2022-08-06,2022,MLS,Sporting Kansas City,LA Galaxy,4-2,,,,,,Children's Mercy Park,Michael Radchuk
+2022-08-06,2022,MLS,Portland Timbers,FC Dallas,1-1,,,,,,Providence Park,Ted Unkel
+2022-08-06,2022,MLS,Real Salt Lake,Los Angeles FC,1-4,,,,,,Rio Tinto Stadium,Victor Rivas
+2022-08-06,2022,MLS,Austin FC,San Jose Earthquakes,3-3,,,,,,Q2 Stadium,Lukasz Szpala
+2022-08-13,2022,MLS,New York Red Bulls,Orlando City,0-1,,,,,,Red Bull Arena,Rubiel Vazquez
+2022-08-13,2022,MLS,New England Revolution,DC United,1-0,,,,,,Gillette Stadium,Malik Badawi
+2022-08-13,2022,MLS,FC Cincinnati,Atlanta United,2-2,,,,,,TQL Stadium,Fotis Bazakos
+2022-08-13,2022,MLS,Philadelphia Union,Chicago Fire,4-1,,,,,,Subaru Park,Ismail Elfath
+2022-08-13,2022,MLS,Toronto FC,Portland Timbers,3-1,,,,,,BMO Field,Nima Saghafi
+2022-08-13,2022,MLS,LA Galaxy,Vancouver Whitecaps,5-2,,,,,,Dignity Health Sports Park,Silviu Petrescu
+2022-08-13,2022,MLS,Colorado Rapids,Columbus Crew,1-1,,,,,,Dick's Sporting Goods Park,Jon Freemon
+2022-08-13,2022,MLS,Los Angeles FC,Charlotte FC,5-0,,,,,,Banc of California Stadium,Chris Penso
+2022-08-13,2022,MLS,Austin FC,Sporting Kansas City,4-3,,,,,,Q2 Stadium,Pierre-Luc Lauziere
+2022-08-13,2022,MLS,FC Dallas,San Jose Earthquakes,4-1,,,,,,Toyota Stadium,Victor Rivas
+2022-08-13,2022,MLS,Inter Miami,New York City FC,3-2,,,,,,DRV PNK Stadium,Drew Fischer
+2022-08-13,2022,MLS,Houston Dynamo,CF Montreal,2-3,,,,,,PNC Stadium,Guido Gonzalez Jr.
+2022-08-14,2022,MLS,Seattle Sounders,Real Salt Lake,1-2,,,,,,Lumen Field,Tim Ford
+2022-08-14,2022,MLS,Nashville SC,Minnesota United,1-2,,,,,,Geodis Park,Alex Chilowicz
+2022-08-17,2022,MLS,Atlanta United,New York Red Bulls,1-2,,,,,,Mercedes-Benz Stadium,Ted Unkel
+2022-08-16,2022,MLS,Los Angeles FC,DC United,1-0,,,,,,Banc of California Stadium,Ramy Touchan
+2022-08-17,2022,MLS,Toronto FC,New England Revolution,2-2,,,,,,BMO Field,Fotis Bazakos
+2022-08-17,2022,MLS,Vancouver Whitecaps,Colorado Rapids,2-1,,,,,,BC Place Stadium,Filip Dujic
+2022-08-17,2022,MLS,New York City FC,Charlotte FC,1-3,,,,,,Red Bull Arena,Jon Freemon
+2022-08-17,2022,MLS,FC Dallas,Philadelphia Union,1-0,,,,,,Toyota Stadium,Nima Saghafi
+2022-08-20,2022,MLS,New York Red Bulls,FC Cincinnati,1-1,,,,,,Red Bull Arena,Ismail Elfath
+2022-08-19,2022,MLS,LA Galaxy,Seattle Sounders,3-3,,,,,,Dignity Health Sports Park,Victor Rivas
+2022-08-20,2022,MLS,CF Montreal,New England Revolution,4-0,,,,,,Stade Saputo,Chris Penso
+2022-08-20,2022,MLS,DC United,Philadelphia Union,0-6,,,,,,Audi Field,Ted Unkel
+2022-08-21,2022,MLS,Chicago Fire,New York City FC,0-2,,,,,,Soldier Field,Rosendo Mendoza
+2022-08-21,2022,MLS,Columbus Crew,Atlanta United,2-2,,,,,,Lower.com Field,Joe Dickerson
+2022-08-21,2022,MLS,Sporting Kansas City,Portland Timbers,4-1,,,,,,Children's Mercy Park,Armando Villarreal
+2022-08-20,2022,MLS,San Jose Earthquakes,Los Angeles FC,2-1,,,,,,PayPal Park,Michael Radchuk
+2022-08-20,2022,MLS,Minnesota United,Austin FC,2-1,,,,,,Allianz Field,Allen Chapman
+2022-08-20,2022,MLS,Colorado Rapids,Houston Dynamo,1-1,,,,,,Dick's Sporting Goods Park,Marcos de Oliveira
+2022-08-21,2022,MLS,Charlotte FC,Orlando City,1-2,,,,,,Bank of America Stadium,Lukasz Szpala
+2022-08-20,2022,MLS,Inter Miami,Toronto FC,2-1,,,,,,DRV PNK Stadium,Pierre-Luc Lauziere
+2022-08-20,2022,MLS,Real Salt Lake,Vancouver Whitecaps,1-1,,,,,,Rio Tinto Stadium,Ismir Pekmic
+2022-08-21,2022,MLS,Nashville SC,FC Dallas,4-0,,,,,,Geodis Park,Kevin Stott
+2022-08-27,2022,MLS,Minnesota United,Houston Dynamo,2-1,,,,,,Allianz Field,Rosendo Mendoza
+2022-08-27,2022,MLS,New York Red Bulls,Inter Miami,3-1,,,,,,Red Bull Arena,Fotis Bazakos
+2022-08-27,2022,MLS,Charlotte FC,Toronto FC,0-2,,,,,,Bank of America Stadium,Tim Ford
+2022-08-26,2022,MLS,Austin FC,Los Angeles FC,4-1,,,,,,Q2 Stadium,Alex Chilowicz
+2022-08-26,2022,MLS,Portland Timbers,Seattle Sounders,2-1,,,,,,Providence Park,Ismail Elfath
+2022-08-27,2022,MLS,Philadelphia Union,Colorado Rapids,6-0,,,,,,Subaru Park,Allen Chapman
+2022-08-27,2022,MLS,FC Cincinnati,Columbus Crew,2-2,,,,,,TQL Stadium,Kevin Stott
+2022-08-28,2022,MLS,Atlanta United,DC United,3-2,,,,,,Mercedes-Benz Stadium,Nima Saghafi
+2022-08-27,2022,MLS,Vancouver Whitecaps,Nashville SC,0-3,,,,,,BC Place Stadium,Jon Freemon
+2022-08-27,2022,MLS,Chicago Fire,CF Montreal,0-2,,,,,,Soldier Field,Michael Radchuk
+2022-08-27,2022,MLS,Sporting Kansas City,San Jose Earthquakes,1-0,,,,,,Children's Mercy Park,Guido Gonzalez Jr.
+2022-08-28,2022,MLS,Orlando City,New York City FC,2-1,,,,,,Exploria Stadium,Chris Penso
+2022-08-27,2022,MLS,FC Dallas,Real Salt Lake,1-1,,,,,,Toyota Stadium,Ramy Touchan
+2022-08-28,2022,MLS,New England Revolution,LA Galaxy,1-2,,,,,,Gillette Stadium,Lukasz Szpala
+2022-08-31,2022,MLS,Philadelphia Union,Atlanta United,4-1,,,,,,Subaru Park,Lukasz Szpala
+2022-08-31,2022,MLS,Columbus Crew,Inter Miami,1-0,,,,,,Lower.com Field,Armando Villarreal
+2022-08-31,2022,MLS,New England Revolution,Chicago Fire,0-0,,,,,,Gillette Stadium,Marcos de Oliveira
+2022-08-31,2022,MLS,CF Montreal,New York Red Bulls,0-1,,,,,,Stade Saputo,Victor Rivas
+2022-08-31,2022,MLS,Toronto FC,LA Galaxy,2-2,,,,,,BMO Field,Ted Unkel
+2022-08-31,2022,MLS,Nashville SC,Colorado Rapids,4-1,,,,,,Geodis Park,Mark Allatin
+2022-08-31,2022,MLS,Houston Dynamo,Los Angeles FC,2-1,,,,,,PNC Stadium,Matt Conger
+2022-08-31,2022,MLS,Real Salt Lake,Minnesota United,3-0,,,,,,Rio Tinto Stadium,Drew Fischer
+2022-08-31,2022,MLS,Austin FC,Portland Timbers,1-2,,,,,,Q2 Stadium,Chris Penso
+2022-08-31,2022,MLS,New York City FC,DC United,1-2,,,,,,Yankee Stadium,Ismir Pekmic
+2022-08-31,2022,MLS,Orlando City,Seattle Sounders,3-2,,,,,,Exploria Stadium,Alex Chilowicz
+2022-09-03,2022,MLS,Minnesota United,FC Dallas,0-3,,,,,,Allianz Field,Ismail Elfath
+2022-09-03,2022,MLS,Columbus Crew,Chicago Fire,0-0,,,,,,Lower.com Field,Ismir Pekmic
+2022-09-03,2022,MLS,New York Red Bulls,Philadelphia Union,0-2,,,,,,Red Bull Arena,Tim Ford
+2022-09-03,2022,MLS,FC Cincinnati,Charlotte FC,2-0,,,,,,TQL Stadium,Michael Radchuk
+2022-09-04,2022,MLS,Portland Timbers,Atlanta United,2-1,,,,,,Providence Park,Jon Freemon
+2022-09-04,2022,MLS,DC United,Colorado Rapids,0-0,,,,,,Audi Field,Tori Penso
+2022-09-04,2022,MLS,Toronto FC,CF Montreal,3-4,,,,,,BMO Field,Allen Chapman
+2022-09-03,2022,MLS,Nashville SC,Austin FC,3-0,,,,,,Geodis Park,Nima Saghafi
+2022-09-04,2022,MLS,LA Galaxy,Sporting Kansas City,2-2,,,,,,Dignity Health Sports Park,Ramy Touchan
+2022-09-04,2022,MLS,Seattle Sounders,Houston Dynamo,2-1,,,,,,Lumen Field,Silviu Petrescu
+2022-09-04,2022,MLS,San Jose Earthquakes,Vancouver Whitecaps,2-0,,,,,,PayPal Park,Rosendo Mendoza
+2022-09-04,2022,MLS,Los Angeles FC,Real Salt Lake,2-0,,,,,,Banc of California Stadium,Lukasz Szpala
+2022-09-04,2022,MLS,New England Revolution,New York City FC,3-0,,,,,,Gillette Stadium,Guido Gonzalez Jr.
+2022-09-07,2022,MLS,New York City FC,FC Cincinnati,1-1,,,,,,Citi Field,Ted Unkel
+2022-09-09,2022,MLS,CF Montreal,Columbus Crew,2-2,,,,,,Stade Saputo,Lukasz Szpala
+2022-09-10,2022,MLS,Charlotte FC,New York City FC,1-0,,,,,,Bank of America Stadium,Victor Rivas
+2022-09-10,2022,MLS,Nashville SC,LA Galaxy,1-1,,,,,,Geodis Park,Chris Penso
+2022-09-10,2022,MLS,New York Red Bulls,New England Revolution,2-1,,,,,,Red Bull Arena,Alex Chilowicz
+2022-09-10,2022,MLS,Atlanta United,Toronto FC,4-2,,,,,,Mercedes-Benz Stadium,Rosendo Mendoza
+2022-09-10,2022,MLS,FC Cincinnati,San Jose Earthquakes,6-0,,,,,,TQL Stadium,Ismir Pekmic
+2022-09-10,2022,MLS,Philadelphia Union,Orlando City,5-1,,,,,,Subaru Park,Armando Villarreal
+2022-09-10,2022,MLS,Seattle Sounders,Austin FC,3-0,,,,,,Lumen Field,Marcos de Oliveira
+2022-09-10,2022,MLS,Portland Timbers,Minnesota United,1-0,,,,,,Providence Park,Guido Gonzalez Jr.
+2022-09-10,2022,MLS,Chicago Fire,Inter Miami,3-1,,,,,,SeatGeek Stadium,Matt Conger
+2022-09-10,2022,MLS,Houston Dynamo,Sporting Kansas City,0-0,,,,,,PNC Stadium,Tori Penso
+2022-09-10,2022,MLS,Colorado Rapids,Vancouver Whitecaps,3-1,,,,,,Dick's Sporting Goods Park,Kevin Stott
+2022-09-10,2022,MLS,FC Dallas,Los Angeles FC,2-1,,,,,,Toyota Stadium,Jon Freemon
+2022-09-10,2022,MLS,Real Salt Lake,DC United,0-0,,,,,,Rio Tinto Stadium,Kevin Broadley
+2022-09-13,2022,MLS,CF Montreal,Chicago Fire,3-2,,,,,,Stade Saputo,Ted Unkel
+2022-09-14,2022,MLS,Orlando City,Atlanta United,0-1,,,,,,Exploria Stadium,Rubiel Vazquez
+2022-09-13,2022,MLS,Minnesota United,Los Angeles FC,1-1,,,,,,Allianz Field,Tim Ford
+2022-09-13,2022,MLS,Sporting Kansas City,DC United,3-0,,,,,,Children's Mercy Park,Rosendo Mendoza
+2022-09-13,2022,MLS,Houston Dynamo,New England Revolution,3-1,,,,,,PNC Stadium,Ismail Elfath
+2022-09-13,2022,MLS,Inter Miami,Columbus Crew,2-1,,,,,,DRV PNK Stadium,Jon Freemon
+2022-09-14,2022,MLS,Vancouver Whitecaps,LA Galaxy,3-0,,,,,,BC Place Stadium,Fotis Bazakos
+2022-09-14,2022,MLS,Colorado Rapids,San Jose Earthquakes,2-1,,,,,,Dick's Sporting Goods Park,Pierre-Luc Lauziere
+2022-09-14,2022,MLS,Austin FC,Real Salt Lake,3-0,,,,,,Q2 Stadium,Joe Dickerson
+2022-09-17,2022,MLS,New York City FC,New York Red Bulls,2-0,,,,,,Yankee Stadium,Allen Chapman
+2022-09-17,2022,MLS,Atlanta United,Philadelphia Union,0-0,,,,,,Mercedes-Benz Stadium,Guido Gonzalez Jr.
+2022-09-17,2022,MLS,New England Revolution,CF Montreal,0-1,,,,,,Gillette Stadium,Rosendo Mendoza
+2022-09-17,2022,MLS,Orlando City,Toronto FC,4-0,,,,,,Exploria Stadium,Nima Saghafi
+2022-09-18,2022,MLS,Columbus Crew,Portland Timbers,1-1,,,,,,Lower.com Field,Victor Rivas
+2022-09-18,2022,MLS,DC United,Inter Miami,2-3,,,,,,Audi Field,Ismail Elfath
+2022-09-17,2022,MLS,Chicago Fire,Charlotte FC,2-3,,,,,,Soldier Field,Tori Penso
+2022-09-17,2022,MLS,Vancouver Whitecaps,Seattle Sounders,2-1,,,,,,BC Place Stadium,Ramy Touchan
+2022-09-17,2022,MLS,Real Salt Lake,FC Cincinnati,1-2,,,,,,Rio Tinto Stadium,Chris Penso
+2022-09-17,2022,MLS,LA Galaxy,Colorado Rapids,4-1,,,,,,Dignity Health Sports Park,Joe Dickerson
+2022-09-17,2022,MLS,San Jose Earthquakes,FC Dallas,1-1,,,,,,PayPal Park,Drew Fischer
+2022-09-17,2022,MLS,Sporting Kansas City,Minnesota United,4-1,,,,,,Children's Mercy Park,Marcos de Oliveira
+2022-09-17,2022,MLS,Austin FC,Nashville SC,1-1,,,,,,Q2 Stadium,Lukasz Szpala
+2022-09-18,2022,MLS,Los Angeles FC,Houston Dynamo,3-1,,,,,,Banc of California Stadium,Kevin Stott
+2022-09-24,2022,MLS,San Jose Earthquakes,LA Galaxy,2-3,,,,,,Stanford Stadium,Alex Chilowicz
+2022-09-27,2022,MLS,Seattle Sounders,FC Cincinnati,1-1,,,,,,Lumen Field,Rubiel Vazquez
+2022-09-30,2022,MLS,Toronto FC,Inter Miami,0-1,,,,,,BMO Field,Silviu Petrescu
+2022-10-01,2022,MLS,New England Revolution,Atlanta United,2-1,,,,,,Gillette Stadium,Armando Villarreal
+2022-10-01,2022,MLS,Colorado Rapids,FC Dallas,1-0,,,,,,Dick's Sporting Goods Park,Chris Penso
+2022-10-01,2022,MLS,Charlotte FC,Philadelphia Union,4-0,,,,,,Bank of America Stadium,Jon Freemon
+2022-10-01,2022,MLS,Columbus Crew,New York Red Bulls,2-1,,,,,,Lower.com Field,Marcos de Oliveira
+2022-10-01,2022,MLS,CF Montreal,DC United,1-0,,,,,,Stade Saputo,Ramy Touchan
+2022-10-01,2022,MLS,FC Cincinnati,Chicago Fire,2-3,,,,,,TQL Stadium,Lukasz Szpala
+2022-10-02,2022,MLS,Portland Timbers,Los Angeles FC,1-2,,,,,,Providence Park,Ismail Elfath
+2022-10-02,2022,MLS,New York City FC,Orlando City,2-1,,,,,,Red Bull Arena,Joe Dickerson
+2022-10-02,2022,MLS,Sporting Kansas City,Seattle Sounders,1-0,,,,,,Children's Mercy Park,Ted Unkel
+2022-10-01,2022,MLS,Vancouver Whitecaps,Austin FC,2-0,,,,,,BC Place Stadium,Tim Ford
+2022-10-01,2022,MLS,San Jose Earthquakes,Minnesota United,2-0,,,,,,PayPal Park,Nima Saghafi
+2022-10-01,2022,MLS,LA Galaxy,Real Salt Lake,1-1,,,,,,Dignity Health Sports Park,Kevin Stott
+2022-10-02,2022,MLS,Nashville SC,Houston Dynamo,1-2,,,,,,Geodis Park,Guido Gonzalez Jr.
+2022-10-05,2022,MLS,Charlotte FC,Columbus Crew,2-2,,,,,,Bank of America Stadium,Matt Conger
+2022-10-05,2022,MLS,Inter Miami,Orlando City,4-1,,,,,,DRV PNK Stadium,Victor Rivas
+2022-10-09,2022,MLS,Chicago Fire,New England Revolution,1-1,,,,,,SeatGeek Stadium,Michael Radchuk
+2022-10-09,2022,MLS,Los Angeles FC,Nashville SC,0-1,,,,,,Banc of California Stadium,Ted Unkel
+2022-10-09,2022,MLS,Seattle Sounders,San Jose Earthquakes,2-2,,,,,,Lumen Field,Marcos de Oliveira
+2022-10-09,2022,MLS,Philadelphia Union,Toronto FC,4-0,,,,,,Subaru Park,Lukasz Szpala
+2022-10-09,2022,MLS,Atlanta United,New York City FC,1-2,,,,,,Mercedes-Benz Stadium,Chris Penso
+2022-10-09,2022,MLS,New York Red Bulls,Charlotte FC,2-0,,,,,,Red Bull Arena,Rubiel Vazquez
+2022-10-09,2022,MLS,DC United,FC Cincinnati,2-5,,,,,,Audi Field,Tim Ford
+2022-10-09,2022,MLS,Orlando City,Columbus Crew,2-1,,,,,,Exploria Stadium,Alex Chilowicz
+2022-10-09,2022,MLS,Inter Miami,CF Montreal,1-3,,,,,,DRV PNK Stadium,Joe Dickerson
+2022-10-09,2022,MLS,Real Salt Lake,Portland Timbers,3-1,,,,,,Rio Tinto Stadium,Armando Villarreal
+2022-10-09,2022,MLS,Minnesota United,Vancouver Whitecaps,2-0,,,,,,Allianz Field,Allen Chapman
+2022-10-09,2022,MLS,Austin FC,Colorado Rapids,1-1,,,,,,Q2 Stadium,Pierre-Luc Lauziere
+2022-10-09,2022,MLS,FC Dallas,Sporting Kansas City,2-1,,,,,,Toyota Stadium,Victor Rivas
+2022-10-09,2022,MLS,Houston Dynamo,LA Galaxy,1-3,,,,,,PNC Stadium,Drew Fischer
+2022-10-15,2022,MLS,New York Red Bulls,FC Cincinnati,1-2,,,,,,Red Bull Arena,Alex Chilowicz
+2022-10-15,2022,MLS,LA Galaxy,Nashville SC,1-0,,,,,,Dignity Health Sports Park,Armando Villarreal
+2022-10-16,2022,MLS,Austin FC,Real Salt Lake,2-2,,,,,,Q2 Stadium,Victor Rivas
+2022-10-17,2022,MLS,New York City FC,Inter Miami,3-0,,,,,,Red Bull Arena,Rubiel Vazquez
+2022-10-16,2022,MLS,CF Montreal,Orlando City,2-0,,,,,,Stade Saputo,Ismail Elfath
+2022-10-17,2022,MLS,FC Dallas,Minnesota United,1-1,,,,,,Toyota Stadium,Ted Unkel
+2022-10-20,2022,MLS,Los Angeles FC,LA Galaxy,3-2,,,,,,Banc of California Stadium,Allen Chapman
+2022-10-20,2022,MLS,Philadelphia Union,FC Cincinnati,1-0,,,,,,Subaru Park,Tim Ford
+2022-10-23,2022,MLS,CF Montreal,New York City FC,1-3,,,,,,Stade Saputo,Drew Fischer
+2022-10-23,2022,MLS,Austin FC,FC Dallas,2-1,,,,,,Q2 Stadium,Joe Dickerson
+2022-10-30,2022,MLS,Los Angeles FC,Austin FC,3-0,,,,,,Banc of California Stadium,Armando Villarreal
+2022-10-30,2022,MLS,Philadelphia Union,New York City FC,3-1,,,,,,Subaru Park,Allen Chapman
+2022-11-05,2022,MLS,Los Angeles FC,Philadelphia Union,3-3,,,,,,Banc of California Stadium,Ismail Elfath
+2023-02-25,2023,MLS,Nashville SC,New York City FC,2-0,,,,,,Geodis Park,Armando Villarreal
+2023-02-25,2023,MLS,FC Cincinnati,Houston Dynamo,2-1,,,,,,TQL Stadium,Chris Penso
+2023-02-25,2023,MLS,Orlando City,New York Red Bulls,1-0,,,,,,Exploria Stadium,Guido Gonzalez Jr.
+2023-02-25,2023,MLS,Vancouver Whitecaps,Real Salt Lake,1-2,,,,,,BC Place Stadium,Ismir Pekmic
+2023-02-25,2023,MLS,Inter Miami,CF Montreal,2-0,,,,,,DRV PNK Stadium,Drew Fischer
+2023-02-25,2023,MLS,Atlanta United,San Jose Earthquakes,2-1,,,,,,Mercedes-Benz Stadium,Jon Freemon
+2023-02-25,2023,MLS,Charlotte FC,New England Revolution,0-1,,,,,,Bank of America Stadium,Rubiel Vazquez
+2023-02-25,2023,MLS,DC United,Toronto FC,3-2,,,,,,Audi Field,Ted Unkel
+2023-02-25,2023,MLS,Austin FC,St. Louis City,2-3,,,,,,Q2 Stadium,Allen Chapman
+2023-02-25,2023,MLS,FC Dallas,Minnesota United,0-1,,,,,,Toyota Stadium,Ramy Touchan
+2023-02-25,2023,MLS,Philadelphia Union,Columbus Crew,4-1,,,,,,Subaru Park,Lukasz Szpala
+2023-02-26,2023,MLS,Seattle Sounders,Colorado Rapids,4-0,,,,,,Lumen Field,Alex Chilowicz
+2023-02-27,2023,MLS,Portland Timbers,Sporting Kansas City,1-0,,,,,,Providence Park,Tim Ford
+2023-03-04,2023,MLS,Los Angeles FC,Portland Timbers,3-2,,,,,,BMO Field,Joe Dickerson
+2023-03-04,2023,MLS,St. Louis City,Charlotte FC,3-1,,,,,,Citypark,Ted Unkel
+2023-03-04,2023,MLS,Seattle Sounders,Real Salt Lake,2-0,,,,,,Lumen Field,Victor Rivas
+2023-03-04,2023,MLS,Chicago Fire,New York City FC,1-1,,,,,,Soldier Field,Filip Dujic
+2023-03-04,2023,MLS,New England Revolution,Houston Dynamo,3-0,,,,,,Gillette Stadium,Fotis Bazakos
+2023-03-04,2023,MLS,Inter Miami,Philadelphia Union,2-0,,,,,,DRV PNK Stadium,Chris Penso
+2023-03-04,2023,MLS,Columbus Crew,DC United,2-0,,,,,,Lower.com Field,Marcos de Oliveira
+2023-03-04,2023,MLS,Atlanta United,Toronto FC,1-1,,,,,,Mercedes-Benz Stadium,Nima Saghafi
+2023-03-04,2023,MLS,San Jose Earthquakes,Vancouver Whitecaps,2-1,,,,,,PayPal Park,Mark Allatin
+2023-03-04,2023,MLS,Austin FC,CF Montreal,1-0,,,,,,Q2 Stadium,Lukasz Szpala
+2023-03-04,2023,MLS,New York Red Bulls,Nashville SC,0-0,,,,,,Red Bull Arena,Pierre-Luc Lauziere
+2023-03-04,2023,MLS,FC Dallas,LA Galaxy,3-1,,,,,,Toyota Stadium,Tim Ford
+2023-03-04,2023,MLS,Orlando City,FC Cincinnati,0-0,,,,,,Exploria Stadium,Ismail Elfath
+2023-03-04,2023,MLS,Colorado Rapids,Sporting Kansas City,0-0,,,,,,Dick's Sporting Goods Park,Allen Chapman
+2023-03-11,2023,MLS,Charlotte FC,Atlanta United,0-3,,,,,,Bank of America Stadium,Ismail Elfath
+2023-03-11,2023,MLS,Vancouver Whitecaps,FC Dallas,1-1,,,,,,BC Place Stadium,Marcos de Oliveira
+2023-03-11,2023,MLS,Real Salt Lake,Austin FC,1-2,,,,,,America First Field,Alex Chilowicz
+2023-03-11,2023,MLS,Nashville SC,CF Montreal,2-0,,,,,,Geodis Park,Rubiel Vazquez
+2023-03-11,2023,MLS,New York City FC,Inter Miami,1-0,,,,,,Yankee Stadium,Lukasz Szpala
+2023-03-11,2023,MLS,Toronto FC,Columbus Crew,1-1,,,,,,BMO Field,Ismir Pekmic
+2023-03-11,2023,MLS,Philadelphia Union,Chicago Fire,1-0,,,,,,Subaru Park,Guido Gonzalez Jr.
+2023-03-11,2023,MLS,Sporting Kansas City,LA Galaxy,0-0,,,,,,Children's Mercy Park,Armando Villarreal
+2023-03-11,2023,MLS,FC Cincinnati,Seattle Sounders,1-0,,,,,,TQL Stadium,Joe Dickerson
+2023-03-11,2023,MLS,San Jose Earthquakes,Colorado Rapids,1-0,,,,,,PayPal Park,Ramy Touchan
+2023-03-11,2023,MLS,Minnesota United,New York Red Bulls,1-1,,,,,,Allianz Field,Chris Penso
+2023-03-11,2023,MLS,DC United,Orlando City,1-1,,,,,,Audi Field,Jon Freemon
+2023-03-11,2023,MLS,Portland Timbers,St. Louis City,1-2,,,,,,Providence Park,Victor Rivas
+2023-03-12,2023,MLS,Los Angeles FC,New England Revolution,4-0,,,,,,BMO Field,Allen Chapman
+2023-03-18,2023,MLS,Seattle Sounders,Los Angeles FC,0-0,,,2.17,3.4,3.05,Lumen Field,Ismail Elfath
+2023-03-18,2023,MLS,CF Montreal,Philadelphia Union,3-2,,,2.5,3.25,2.65,Stade Olympique,Nima Saghafi
+2023-03-18,2023,MLS,Atlanta United,Portland Timbers,5-1,,,1.53,4.2,5.2,Mercedes-Benz Stadium,Ted Unkel
+2023-03-18,2023,MLS,Toronto FC,Inter Miami,2-0,,,2.1,3.35,3.25,BMO Field,Alex Chilowicz
+2023-03-18,2023,MLS,New York City FC,DC United,3-2,,,1.62,3.9,4.9,Yankee Stadium,Mark Allatin
+2023-03-18,2023,MLS,Orlando City,Charlotte FC,1-2,,,2.03,3.35,3.45,Exploria Stadium,Armando Villarreal
+2023-03-18,2023,MLS,New York Red Bulls,Columbus Crew,2-1,,,1.8,3.4,4.3,Red Bull Arena,Tim Ford
+2023-03-18,2023,MLS,New England Revolution,Nashville SC,1-0,,,2.29,3.2,3.0,Gillette Stadium,Jon Freemon
+2023-03-18,2023,MLS,St. Louis City,San Jose Earthquakes,3-0,,,2.17,3.4,3.1,Citypark,Rosendo Mendoza
+2023-03-18,2023,MLS,Houston Dynamo,Austin FC,2-0,,,2.34,3.35,2.85,Shell Energy Stadium,Drew Fischer
+2023-03-18,2023,MLS,FC Dallas,Sporting Kansas City,2-1,,,1.92,3.45,3.75,Toyota Stadium,Pierre-Luc Lauziere
+2023-03-18,2023,MLS,LA Galaxy,Vancouver Whitecaps,1-1,,,1.7,3.9,4.3,Dignity Health Sports Park,Victor Rivas
+2023-03-18,2023,MLS,Colorado Rapids,Minnesota United,1-2,,,2.09,3.35,3.3,Dick's Sporting Goods Park,Rubiel Vazquez
+2023-03-18,2023,MLS,Chicago Fire,FC Cincinnati,3-3,,,2.5,3.25,2.7,Soldier Field,Fotis Bazakos
+2023-03-25,2023,MLS,Portland Timbers,LA Galaxy,0-0,,,2.36,3.45,2.75,Providence Park,Chris Penso
+2023-03-25,2023,MLS,Inter Miami,Chicago Fire,2-3,,,2.04,3.35,3.4,DRV PNK Stadium,Tori Penso
+2023-03-25,2023,MLS,Philadelphia Union,Orlando City,1-2,,,1.6,3.75,5.4,Subaru Park,Allen Chapman
+2023-03-25,2023,MLS,DC United,New England Revolution,1-2,,,2.25,3.3,3.0,Audi Field,Filip Dujic
+2023-03-25,2023,MLS,Columbus Crew,Atlanta United,6-1,,,2.75,3.2,2.46,Lower.com Field,Ramy Touchan
+2023-03-25,2023,MLS,Charlotte FC,New York Red Bulls,1-1,,,2.75,3.15,2.55,Bank of America Stadium,Marcos de Oliveira
+2023-03-25,2023,MLS,San Jose Earthquakes,Toronto FC,0-0,,,1.71,3.75,4.4,PayPal Park,Fotis Bazakos
+2023-03-25,2023,MLS,Minnesota United,Vancouver Whitecaps,1-1,,,2.4,3.3,2.8,Allianz Field,Rosendo Mendoza
+2023-03-25,2023,MLS,Austin FC,Colorado Rapids,1-1,,,1.71,3.8,4.3,Q2 Stadium,Ted Unkel
+2023-03-25,2023,MLS,Nashville SC,FC Cincinnati,0-1,,,1.95,3.35,3.75,Geodis Park,Ismir Pekmic
+2023-03-25,2023,MLS,Sporting Kansas City,Seattle Sounders,1-4,,,2.09,3.3,3.3,Children's Mercy Park,Alex Chilowicz
+2023-03-25,2023,MLS,Real Salt Lake,St. Louis City,0-4,,,2.07,3.4,3.3,America First Field,Mark Allatin
+2023-03-25,2023,MLS,Houston Dynamo,New York City FC,1-0,,,2.7,3.2,2.55,Shell Energy Stadium,Guido Gonzalez Jr.
+2023-03-25,2023,MLS,Los Angeles FC,FC Dallas,2-1,,,1.54,4.1,5.4,BMO Field,Lukasz Szpala
+2023-04-01,2023,MLS,LA Galaxy,Seattle Sounders,1-2,,,2.42,3.35,2.75,Dignity Health Sports Park,Allen Chapman
+2023-04-01,2023,MLS,Orlando City,Nashville SC,0-2,,,2.39,3.15,2.9,Exploria Stadium,Chris Penso
+2023-04-01,2023,MLS,FC Cincinnati,Inter Miami,1-0,,,1.58,4.0,5.0,TQL Stadium,Nima Saghafi
+2023-04-01,2023,MLS,New England Revolution,New York City FC,1-1,,,2.35,3.35,2.8,Gillette Stadium,Ismail Elfath
+2023-04-01,2023,MLS,Philadelphia Union,Sporting Kansas City,0-0,,,1.62,3.85,5.0,Subaru Park,Victor Rivas
+2023-04-01,2023,MLS,Atlanta United,New York Red Bulls,1-0,,,2.06,3.4,3.3,Mercedes-Benz Stadium,Alex Chilowicz
+2023-04-01,2023,MLS,Toronto FC,Charlotte FC,2-2,,,1.98,3.4,3.55,BMO Field,Ramy Touchan
+2023-04-01,2023,MLS,Columbus Crew,Real Salt Lake,4-0,,,1.52,4.1,5.6,Lower.com Field,Rubiel Vazquez
+2023-04-01,2023,MLS,Vancouver Whitecaps,CF Montreal,5-0,,,2.07,3.55,3.2,BC Place Stadium,Tim Ford
+2023-04-01,2023,MLS,Chicago Fire,DC United,0-0,,,1.89,3.5,3.75,Soldier Field,Pierre-Luc Lauziere
+2023-04-01,2023,MLS,San Jose Earthquakes,Houston Dynamo,2-1,,,1.87,3.5,3.85,PayPal Park,Tori Penso
+2023-04-01,2023,MLS,FC Dallas,Portland Timbers,1-1,,,1.65,3.75,4.8,Toyota Stadium,Armando Villarreal
+2023-04-01,2023,MLS,Colorado Rapids,Los Angeles FC,0-0,,,3.2,3.4,2.1,Dick's Sporting Goods Park,Drew Fischer
+2023-04-01,2023,MLS,St. Louis City,Minnesota United,0-1,,,1.8,3.65,4.0,Citypark,Jon Freemon
+2023-04-08,2023,MLS,Los Angeles FC,Austin FC,3-0,,,1.46,4.6,5.6,BMO Stadium,Victor Rivas
+2023-04-08,2023,MLS,New York City FC,Atlanta United,1-1,,,2.01,3.45,3.4,Yankee Stadium,Drew Fischer
+2023-04-08,2023,MLS,New England Revolution,CF Montreal,4-0,,,1.62,4.0,4.7,Gillette Stadium,Tori Penso
+2023-04-08,2023,MLS,DC United,Columbus Crew,0-2,,,2.34,3.3,2.9,Audi Field,Rosendo Mendoza
+2023-04-08,2023,MLS,New York Red Bulls,San Jose Earthquakes,1-1,,,1.69,3.6,4.7,Red Bull Arena,Ismir Pekmic
+2023-04-08,2023,MLS,FC Cincinnati,Philadelphia Union,1-0,,,1.65,3.7,4.9,TQL Stadium,Ted Unkel
+2023-04-08,2023,MLS,Inter Miami,FC Dallas,0-1,,,2.31,3.15,3.05,DRV PNK Stadium,Filip Dujic
+2023-04-08,2023,MLS,Nashville SC,Toronto FC,0-0,,,1.73,3.7,4.4,Geodis Park,Guido Gonzalez Jr.
+2023-04-08,2023,MLS,Houston Dynamo,LA Galaxy,3-0,,,2.13,3.55,3.05,Shell Energy Stadium,Alex Chilowicz
+2023-04-08,2023,MLS,Vancouver Whitecaps,Portland Timbers,1-0,,,1.74,3.75,4.2,BC Place Stadium,Nima Saghafi
+2023-04-08,2023,MLS,Seattle Sounders,St. Louis City,3-0,,,1.51,4.2,5.6,Lumen Field,Rubiel Vazquez
+2023-04-08,2023,MLS,Chicago Fire,Minnesota United,2-1,,,2.06,3.35,3.35,Soldier Field,Tim Ford
+2023-04-08,2023,MLS,Sporting Kansas City,Colorado Rapids,0-1,,,1.89,3.45,3.8,Children's Mercy Park,Joe Dickerson
+2023-04-08,2023,MLS,Real Salt Lake,Charlotte FC,3-1,,,1.98,3.45,3.5,America First Field,Fotis Bazakos
+2023-04-15,2023,MLS,New York City FC,Nashville SC,2-1,,,2.23,3.1,3.2,Citi Field,Allen Chapman
+2023-04-15,2023,MLS,New York Red Bulls,Houston Dynamo,1-1,,,1.86,3.25,4.3,Red Bull Arena,Ramy Touchan
+2023-04-15,2023,MLS,Toronto FC,Atlanta United,2-2,,,2.55,3.4,2.55,BMO Field,Ted Unkel
+2023-04-15,2023,MLS,Charlotte FC,Colorado Rapids,2-2,,,2.05,3.45,3.35,Bank of America Stadium,Guido Gonzalez Jr.
+2023-04-15,2023,MLS,CF Montreal,DC United,0-1,,,2.43,3.3,2.75,Stade Saputo,Joe Dickerson
+2023-04-15,2023,MLS,Columbus Crew,New England Revolution,1-1,,,1.89,3.45,3.8,Lower.com Field,Chris Penso
+2023-04-16,2023,MLS,LA Galaxy,Los Angeles FC,2-3,,,3.05,3.55,2.12,Dignity Health Sports Park,Armando Villarreal
+2023-04-15,2023,MLS,St. Louis City,FC Cincinnati,5-1,,,2.33,3.35,2.8,Citypark,Lukasz Szpala
+2023-04-15,2023,MLS,San Jose Earthquakes,Sporting Kansas City,3-0,,,1.98,3.4,3.6,PayPal Park,Tim Ford
+2023-04-15,2023,MLS,Minnesota United,Orlando City,1-2,,,2.09,3.35,3.3,Allianz Field,Pierre-Luc Lauziere
+2023-04-15,2023,MLS,Chicago Fire,Philadelphia Union,2-2,,,2.55,3.1,2.75,Soldier Field,Ismail Elfath
+2023-04-15,2023,MLS,Portland Timbers,Seattle Sounders,4-1,,,3.25,3.3,2.11,Providence Park,Drew Fischer
+2023-04-15,2023,MLS,Austin FC,Vancouver Whitecaps,0-0,,,2.13,3.5,3.05,Q2 Stadium,Mark Allatin
+2023-04-15,2023,MLS,FC Dallas,Real Salt Lake,2-1,,,1.73,3.6,4.4,Toyota Stadium,Serhiy Boyko
+2023-04-22,2023,MLS,Orlando City,DC United,1-3,,,2.01,3.45,3.45,Exploria Stadium,Lukasz Szpala
+2023-04-22,2023,MLS,Philadelphia Union,Toronto FC,4-2,,,1.6,3.95,4.9,Subaru Park,Alex Chilowicz
+2023-04-22,2023,MLS,New England Revolution,Sporting Kansas City,2-1,,,2.04,3.35,3.45,Gillette Stadium,Nima Saghafi
+2023-04-22,2023,MLS,New York City FC,FC Dallas,3-1,,,1.81,3.45,4.2,Citi Field,Fotis Bazakos
+2023-04-22,2023,MLS,Charlotte FC,Columbus Crew,1-0,,,2.29,3.35,2.9,Bank of America Stadium,Jon Freemon
+2023-04-22,2023,MLS,CF Montreal,New York Red Bulls,2-0,,,3.3,3.2,2.15,Stade Saputo,Rubiel Vazquez
+2023-04-22,2023,MLS,FC Cincinnati,Portland Timbers,2-1,,,1.55,4.1,5.2,TQL Stadium,Allen Chapman
+2023-04-23,2023,MLS,Atlanta United,Chicago Fire,2-1,,,1.62,4.0,4.7,Mercedes-Benz Stadium,Victor Rivas
+2023-04-22,2023,MLS,Real Salt Lake,San Jose Earthquakes,3-1,,,2.04,3.55,3.25,America First Field,Filip Dujic
+2023-04-22,2023,MLS,Seattle Sounders,Minnesota United,1-0,,,1.68,3.75,4.6,Lumen Field,Armando Villarreal
+2023-04-22,2023,MLS,Nashville SC,Los Angeles FC,1-1,,,2.48,3.2,2.75,Geodis Park,Ted Unkel
+2023-04-22,2023,MLS,LA Galaxy,Austin FC,2-0,,,1.65,4.1,4.4,Dignity Health Sports Park,Chris Penso
+2023-04-22,2023,MLS,Houston Dynamo,Inter Miami,1-0,,,1.8,3.5,4.1,Shell Energy Stadium,Rosendo Mendoza
+2023-04-22,2023,MLS,Colorado Rapids,St. Louis City,1-1,,,1.89,3.6,3.65,Dick's Sporting Goods Park,Marcos de Oliveira
+2023-04-29,2023,MLS,Nashville SC,Atlanta United,3-1,,,2.03,3.3,3.5,Geodis Park,Joe Dickerson
+2023-04-29,2023,MLS,DC United,Charlotte FC,3-0,,,1.74,3.7,4.2,Audi Field,Ismir Pekmic
+2023-04-29,2023,MLS,Columbus Crew,Inter Miami,1-2,,,1.55,3.9,5.6,Lower.com Field,Pierre-Luc Lauziere
+2023-04-29,2023,MLS,Orlando City,LA Galaxy,2-0,,,2.17,3.45,3.05,Exploria Stadium,Jon Freemon
+2023-04-29,2023,MLS,Toronto FC,New York City FC,1-0,,,2.18,3.4,3.05,BMO Field,Armando Villarreal
+2023-04-29,2023,MLS,New England Revolution,FC Cincinnati,1-1,,,2.19,3.25,3.2,Gillette Stadium,Alex Chilowicz
+2023-04-29,2023,MLS,Sporting Kansas City,CF Montreal,0-2,,,1.73,3.55,4.5,Children's Mercy Park,Ramy Touchan
+2023-04-29,2023,MLS,Chicago Fire,New York Red Bulls,1-1,,,2.31,3.05,3.1,Soldier Field,Chris Penso
+2023-04-29,2023,MLS,Austin FC,San Jose Earthquakes,2-2,,,2.09,3.45,3.2,Q2 Stadium,Guido Gonzalez Jr.
+2023-04-29,2023,MLS,St. Louis City,Portland Timbers,1-2,,,1.76,3.7,4.1,Citypark,Ismail Elfath
+2023-04-29,2023,MLS,Vancouver Whitecaps,Colorado Rapids,0-0,,,1.79,3.65,4.0,BC Place Stadium,Tori Penso
+2023-04-29,2023,MLS,Real Salt Lake,Seattle Sounders,0-0,,,2.36,3.2,2.9,America First Field,Nima Saghafi
+2023-04-30,2023,MLS,Minnesota United,FC Dallas,0-0,,,2.14,3.3,3.25,Allianz Field,Allen Chapman
+2023-05-06,2023,MLS,San Jose Earthquakes,Los Angeles FC,2-1,,,3.25,3.45,2.08,Levi's Stadium,Rubiel Vazquez
+2023-05-06,2023,MLS,Charlotte FC,New York City FC,3-2,,,2.34,3.2,2.95,Bank of America Stadium,Chris Penso
+2023-05-06,2023,MLS,Toronto FC,New England Revolution,0-2,,,2.04,3.45,3.35,BMO Field,Fotis Bazakos
+2023-05-06,2023,MLS,FC Cincinnati,DC United,2-1,,,1.87,3.45,3.85,TQL Stadium,Guido Gonzalez Jr.
+2023-05-06,2023,MLS,New York Red Bulls,Philadelphia Union,0-1,,,2.12,3.1,3.5,Red Bull Arena,Joe Dickerson
+2023-05-06,2023,MLS,Inter Miami,Atlanta United,2-1,,,2.55,3.25,2.65,DRV PNK Stadium,Armando Villarreal
+2023-05-06,2023,MLS,CF Montreal,Orlando City,2-0,,,2.27,3.15,3.1,Stade Saputo,Marcos de Oliveira
+2023-05-07,2023,MLS,Seattle Sounders,Sporting Kansas City,1-2,,,1.66,3.65,4.9,Lumen Field,Victor Rivas
+2023-05-06,2023,MLS,Vancouver Whitecaps,Minnesota United,3-2,,,1.65,3.75,4.8,BC Place Stadium,Filip Dujic
+2023-05-06,2023,MLS,Houston Dynamo,Real Salt Lake,0-0,,,1.85,3.5,3.95,Shell Energy Stadium,Lukasz Szpala
+2023-05-06,2023,MLS,Nashville SC,Chicago Fire,3-0,,,1.89,3.4,3.9,Geodis Park,Mark Allatin
+2023-05-06,2023,MLS,LA Galaxy,Colorado Rapids,1-3,,,1.72,3.85,4.2,Dignity Health Sports Park,Ramy Touchan
+2023-05-06,2023,MLS,Portland Timbers,Austin FC,2-2,,,1.81,3.65,3.95,Providence Park,Jon Freemon
+2023-05-13,2023,MLS,Chicago Fire,St. Louis City,1-0,,,1.93,3.55,3.55,Soldier Field,Filip Dujic
+2023-05-13,2023,MLS,Columbus Crew,Orlando City,2-2,,,2.09,3.3,3.35,Lower.com Field,Drew Fischer
+2023-05-13,2023,MLS,CF Montreal,Toronto FC,2-0,,,2.13,3.4,3.15,Stade Saputo,Chris Penso
+2023-05-13,2023,MLS,Inter Miami,New England Revolution,2-1,,,2.85,3.3,2.34,DRV PNK Stadium,Ismir Pekmic
+2023-05-13,2023,MLS,Atlanta United,Charlotte FC,1-3,,,1.61,4.0,4.8,Mercedes-Benz Stadium,Lukasz Szpala
+2023-05-13,2023,MLS,New York Red Bulls,New York City FC,1-0,,,2.08,3.05,3.7,Red Bull Arena,Ted Unkel
+2023-05-13,2023,MLS,DC United,Nashville SC,1-1,,,2.45,3.1,2.85,Audi Field,Nima Saghafi
+2023-05-13,2023,MLS,Austin FC,FC Dallas,0-1,,,2.41,3.2,2.85,Q2 Stadium,Ismail Elfath
+2023-05-13,2023,MLS,Colorado Rapids,Philadelphia Union,1-2,,,2.24,3.3,3.0,Dick's Sporting Goods Park,Victor Rivas
+2023-05-13,2023,MLS,Portland Timbers,Vancouver Whitecaps,3-1,,,2.37,3.4,2.75,Providence Park,Guido Gonzalez Jr.
+2023-05-13,2023,MLS,Real Salt Lake,Los Angeles FC,0-3,,,3.0,3.45,2.18,America First Field,Pierre-Luc Lauziere
+2023-05-13,2023,MLS,Sporting Kansas City,Minnesota United,3-0,,,1.95,3.5,3.55,Children's Mercy Park,Alex Chilowicz
+2023-05-13,2023,MLS,Houston Dynamo,Seattle Sounders,0-1,,,2.45,3.15,2.8,Shell Energy Stadium,Rubiel Vazquez
+2023-05-14,2023,MLS,LA Galaxy,San Jose Earthquakes,2-1,,,1.88,3.8,3.55,Dignity Health Sports Park,Joe Dickerson
+2023-05-17,2023,MLS,FC Cincinnati,CF Montreal,3-0,,,1.65,3.8,4.8,TQL Stadium,Mark Allatin
+2023-05-17,2023,MLS,Atlanta United,Colorado Rapids,4-0,,,1.72,4.0,4.0,Mercedes-Benz Stadium,Fotis Bazakos
+2023-05-17,2023,MLS,Orlando City,New York City FC,1-1,,,2.37,3.1,3.0,Exploria Stadium,Serhiy Boyko
+2023-05-17,2023,MLS,Toronto FC,New York Red Bulls,0-0,,,2.25,3.15,3.15,BMO Field,Guido Gonzalez Jr.
+2023-05-17,2023,MLS,Columbus Crew,LA Galaxy,2-0,,,1.66,4.0,4.4,Lower.com Field,Ted Unkel
+2023-05-17,2023,MLS,Philadelphia Union,DC United,0-0,,,1.74,3.55,4.4,Subaru Park,Pierre-Luc Lauziere
+2023-05-17,2023,MLS,Charlotte FC,Chicago Fire,2-1,,,2.17,3.35,3.1,Bank of America Stadium,Tori Penso
+2023-05-17,2023,MLS,Nashville SC,Inter Miami,2-1,,,1.5,4.0,6.0,Geodis Park,Alex Chilowicz
+2023-05-17,2023,MLS,Minnesota United,Houston Dynamo,1-0,,,1.63,3.6,5.2,Allianz Field,Marcos de Oliveira
+2023-05-17,2023,MLS,FC Dallas,Vancouver Whitecaps,2-1,,,2.14,3.3,3.25,Toyota Stadium,Jon Freemon
+2023-05-17,2023,MLS,Real Salt Lake,Portland Timbers,0-0,,,2.11,3.45,3.15,America First Field,Ramy Touchan
+2023-05-17,2023,MLS,Seattle Sounders,Austin FC,1-2,,,1.52,4.2,5.6,Lumen Field,Rosendo Mendoza
+2023-05-17,2023,MLS,Los Angeles FC,Sporting Kansas City,1-1,,,1.39,4.7,6.6,BMO Stadium,Armando Villarreal
+2023-05-20,2023,MLS,DC United,LA Galaxy,3-0,,,2.17,3.4,3.1,Audi Field,Fotis Bazakos
+2023-05-20,2023,MLS,FC Cincinnati,Columbus Crew,3-2,,,2.15,3.4,3.15,TQL Stadium,Nima Saghafi
+2023-05-20,2023,MLS,New York Red Bulls,CF Montreal,2-1,,,1.69,3.45,5.0,Red Bull Arena,Drew Fischer
+2023-05-20,2023,MLS,Charlotte FC,Nashville SC,1-2,,,2.5,3.2,2.75,Bank of America Stadium,Rubiel Vazquez
+2023-05-20,2023,MLS,Inter Miami,Orlando City,1-3,,,2.37,3.15,2.95,DRV PNK Stadium,Ramy Touchan
+2023-05-20,2023,MLS,Philadelphia Union,New England Revolution,3-0,,,2.01,3.3,3.55,Subaru Park,Lukasz Szpala
+2023-05-20,2023,MLS,Vancouver Whitecaps,Seattle Sounders,2-0,,,2.27,3.25,3.0,BC Place Stadium,Joe Dickerson
+2023-05-20,2023,MLS,Austin FC,Toronto FC,1-0,,,2.04,3.35,3.45,Q2 Stadium,Ismir Pekmic
+2023-05-20,2023,MLS,Colorado Rapids,Real Salt Lake,2-3,,,1.78,3.6,4.2,Dick's Sporting Goods Park,Jon Freemon
+2023-05-20,2023,MLS,Los Angeles FC,San Jose Earthquakes,2-1,,,1.59,4.1,4.8,BMO Stadium,Ismail Elfath
+2023-05-20,2023,MLS,FC Dallas,Houston Dynamo,1-1,,,1.85,3.35,4.1,Toyota Stadium,Victor Rivas
+2023-05-20,2023,MLS,Chicago Fire,Atlanta United,3-3,,,2.32,3.45,2.8,Soldier Field,Rosendo Mendoza
+2023-05-20,2023,MLS,Portland Timbers,Minnesota United,0-1,,,1.93,3.55,3.55,Providence Park,Armando Villarreal
+2023-05-20,2023,MLS,St. Louis City,Sporting Kansas City,4-0,,,2.16,3.25,3.25,Citypark,Chris Penso
+2023-05-27,2023,MLS,New York City FC,Philadelphia Union,1-3,,,2.49,3.15,2.75,Citi Field,Guido Gonzalez Jr.
+2023-05-27,2023,MLS,Toronto FC,DC United,2-1,,,2.55,3.25,2.65,BMO Field,Lukasz Szpala
+2023-05-27,2023,MLS,CF Montreal,Inter Miami,1-0,,,1.86,3.55,3.85,Stade Saputo,Nima Saghafi
+2023-05-27,2023,MLS,Orlando City,Atlanta United,1-1,,,2.25,3.4,2.9,Exploria Stadium,Allen Chapman
+2023-05-27,2023,MLS,New England Revolution,Chicago Fire,3-3,,,1.64,4.0,4.5,Gillette Stadium,Malik Badawi
+2023-05-28,2023,MLS,Sporting Kansas City,Portland Timbers,4-1,,,1.89,3.55,3.75,Children's Mercy Park,Rubiel Vazquez
+2023-05-27,2023,MLS,LA Galaxy,Charlotte FC,0-1,,,1.64,3.9,4.6,Dignity Health Sports Park,Drew Fischer
+2023-05-27,2023,MLS,Houston Dynamo,Austin FC,2-1,,,1.93,3.35,3.75,Shell Energy Stadium,Ted Unkel
+2023-05-27,2023,MLS,Minnesota United,Real Salt Lake,1-1,,,1.96,3.5,3.55,Allianz Field,Rosendo Mendoza
+2023-05-27,2023,MLS,Colorado Rapids,FC Cincinnati,0-1,,,2.24,3.15,3.15,Dick's Sporting Goods Park,Marcos de Oliveira
+2023-05-27,2023,MLS,Seattle Sounders,New York Red Bulls,1-0,,,1.93,3.25,3.95,Lumen Field,Jon Freemon
+2023-05-27,2023,MLS,San Jose Earthquakes,FC Dallas,1-1,,,1.98,3.45,3.5,PayPal Park,Filip Dujic
+2023-05-27,2023,MLS,St. Louis City,Vancouver Whitecaps,3-1,,,2.24,3.45,2.9,Citypark,Serhiy Boyko
+2023-05-28,2023,MLS,Nashville SC,Columbus Crew,3-1,,,2.12,3.3,3.25,Geodis Park,Victor Rivas
+2023-05-31,2023,MLS,Atlanta United,New England Revolution,3-3,,,1.78,3.8,3.9,Mercedes-Benz Stadium,Rubiel Vazquez
+2023-05-31,2023,MLS,Inter Miami,New York Red Bulls,0-1,,,3.15,2.95,2.36,DRV PNK Stadium,Pierre-Luc Lauziere
+2023-05-31,2023,MLS,Toronto FC,Chicago Fire,0-0,,,2.25,3.5,2.9,BMO Field,Nima Saghafi
+2023-05-31,2023,MLS,Columbus Crew,Colorado Rapids,3-2,,,1.51,4.2,5.6,Lower.com Field,Tori Penso
+2023-05-31,2023,MLS,DC United,CF Montreal,2-2,,,1.67,3.7,4.8,Audi Field,Alex Chilowicz
+2023-05-31,2023,MLS,New York City FC,FC Cincinnati,1-3,,,2.27,3.25,3.0,Yankee Stadium,Armando Villarreal
+2023-05-31,2023,MLS,Philadelphia Union,Charlotte FC,1-0,,,1.53,4.0,5.6,Subaru Park,Ted Unkel
+2023-05-31,2023,MLS,Vancouver Whitecaps,Houston Dynamo,6-2,,,1.67,3.95,4.4,BC Place Stadium,Mark Allatin
+2023-05-31,2023,MLS,Real Salt Lake,LA Galaxy,2-3,,,2.11,3.5,3.1,America First Field,Ismir Pekmic
+2023-05-31,2023,MLS,Sporting Kansas City,FC Dallas,2-1,,,1.85,3.5,3.95,Children's Mercy Park,Guido Gonzalez Jr.
+2023-05-31,2023,MLS,Seattle Sounders,San Jose Earthquakes,0-1,,,1.69,3.75,4.5,Lumen Field,Ramy Touchan
+2023-05-31,2023,MLS,Austin FC,Minnesota United,2-1,,,2.13,3.3,3.3,Q2 Stadium,Fotis Bazakos
+2023-06-03,2023,MLS,Seattle Sounders,Portland Timbers,0-0,,,1.85,3.45,3.95,Lumen Field,Allen Chapman
+2023-06-03,2023,MLS,New York City FC,New England Revolution,0-0,,,2.18,3.35,3.1,Yankee Stadium,Rosendo Mendoza
+2023-06-03,2023,MLS,Philadelphia Union,CF Montreal,3-0,,,1.38,4.6,7.2,Subaru Park,Jon Freemon
+2023-06-03,2023,MLS,New York Red Bulls,Orlando City,0-3,,,1.95,3.2,3.95,Red Bull Arena,Victor Rivas
+2023-06-03,2023,MLS,Columbus Crew,Charlotte FC,4-2,,,1.65,3.9,4.6,Lower.com Field,Alex Chilowicz
+2023-06-03,2023,MLS,Inter Miami,DC United,1-2,,,2.7,3.25,2.48,DRV PNK Stadium,Marcos de Oliveira
+2023-06-03,2023,MLS,FC Cincinnati,Chicago Fire,1-0,,,1.71,3.8,4.3,TQL Stadium,Chris Penso
+2023-06-03,2023,MLS,St. Louis City,Houston Dynamo,3-0,,,1.92,3.45,3.7,Citypark,Joe Dickerson
+2023-06-03,2023,MLS,Colorado Rapids,San Jose Earthquakes,0-0,,,1.86,3.55,3.85,Dick's Sporting Goods Park,Serhiy Boyko
+2023-06-03,2023,MLS,FC Dallas,Nashville SC,1-2,,,2.65,3.1,2.65,Toyota Stadium,Pierre-Luc Lauziere
+2023-06-03,2023,MLS,Vancouver Whitecaps,Sporting Kansas City,1-1,,,1.72,3.85,4.2,BC Place Stadium,Lukasz Szpala
+2023-06-03,2023,MLS,Austin FC,Real Salt Lake,1-2,,,1.77,3.75,4.1,Q2 Stadium,Tori Penso
+2023-06-03,2023,MLS,Minnesota United,Toronto FC,1-1,,,1.98,3.5,3.45,Allianz Field,Ramy Touchan
+2023-06-07,2023,MLS,FC Dallas,St. Louis City,2-0,,,,,,Toyota Stadium,Drew Fischer
+2023-06-07,2023,MLS,Los Angeles FC,Atlanta United,0-0,,,1.62,4.1,4.6,BMO Stadium,Joe Dickerson
+2023-06-10,2023,MLS,Atlanta United,DC United,3-1,,,1.93,3.65,3.45,Mercedes-Benz Stadium,Filip Dujic
+2023-06-10,2023,MLS,New England Revolution,Inter Miami,3-1,,,1.29,5.2,8.6,Gillette Stadium,Serhiy Boyko
+2023-06-10,2023,MLS,Orlando City,Colorado Rapids,2-0,,,1.72,3.65,4.4,Exploria Stadium,Rosendo Mendoza
+2023-06-10,2023,MLS,Toronto FC,Nashville SC,1-1,,,2.35,3.25,2.9,BMO Field,Jon Freemon
+2023-06-10,2023,MLS,CF Montreal,Minnesota United,4-0,,,2.36,3.4,2.75,Stade Saputo,Guido Gonzalez Jr.
+2023-06-10,2023,MLS,Charlotte FC,Seattle Sounders,3-3,,,2.6,3.1,2.7,Bank of America Stadium,Lukasz Szpala
+2023-06-11,2023,MLS,St. Louis City,LA Galaxy,1-1,,,2.02,3.8,3.15,Citypark,Victor Rivas
+2023-06-10,2023,MLS,Real Salt Lake,New York City FC,0-0,,,2.1,3.4,3.25,America First Field,Fotis Bazakos
+2023-06-10,2023,MLS,San Jose Earthquakes,Philadelphia Union,2-1,,,2.95,3.35,2.26,PayPal Park,Nima Saghafi
+2023-06-10,2023,MLS,Vancouver Whitecaps,FC Cincinnati,1-1,,,2.08,3.5,3.2,BC Place Stadium,Ismir Pekmic
+2023-06-10,2023,MLS,Chicago Fire,Columbus Crew,1-2,,,2.31,3.55,2.7,Soldier Field,Mark Allatin
+2023-06-10,2023,MLS,Houston Dynamo,Los Angeles FC,4-0,,,3.1,3.5,2.12,Shell Energy Stadium,Alex Chilowicz
+2023-06-10,2023,MLS,Sporting Kansas City,Austin FC,4-1,,,1.87,3.7,3.65,Children's Mercy Park,Marcos de Oliveira
+2023-06-11,2023,MLS,Portland Timbers,FC Dallas,1-0,,,2.3,2.85,3.4,Providence Park,Ted Unkel
+2023-06-14,2023,MLS,Los Angeles FC,Houston Dynamo,0-1,,,1.53,4.3,5.2,BMO Stadium,Guido Gonzalez Jr.
+2023-06-17,2023,MLS,New York City FC,Columbus Crew,1-1,,,2.14,3.45,3.1,Yankee Stadium,Pierre-Luc Lauziere
+2023-06-17,2023,MLS,DC United,Real Salt Lake,1-2,,,1.69,3.7,4.5,Audi Field,Malik Badawi
+2023-06-17,2023,MLS,New England Revolution,Orlando City,3-1,,,1.6,4.2,4.7,Gillette Stadium,Fotis Bazakos
+2023-06-17,2023,MLS,San Jose Earthquakes,Portland Timbers,0-0,,,2.44,3.3,2.7,PayPal Park,Alex Chilowicz
+2023-06-17,2023,MLS,Sporting Kansas City,Los Angeles FC,1-2,,,1.85,3.6,3.85,Children's Mercy Park,Rosendo Mendoza
+2023-06-17,2023,MLS,Nashville SC,St. Louis City,3-1,,,1.71,3.7,4.4,Geodis Park,Nima Saghafi
+2023-06-21,2023,MLS,Orlando City,Philadelphia Union,2-2,,,2.37,3.4,2.75,Exploria Stadium,Alex Chilowicz
+2023-06-21,2023,MLS,CF Montreal,Nashville SC,1-0,,,2.5,3.2,2.7,Stade Saputo,Tori Penso
+2023-06-21,2023,MLS,New York Red Bulls,Charlotte FC,2-2,,,1.71,3.55,4.7,Red Bull Arena,Serhiy Boyko
+2023-06-21,2023,MLS,FC Cincinnati,Toronto FC,3-0,,,1.89,3.65,3.65,TQL Stadium,Mark Allatin
+2023-06-21,2023,MLS,Atlanta United,New York City FC,2-2,,,2.28,3.4,2.85,Mercedes-Benz Stadium,Jon Freemon
+2023-06-21,2023,MLS,Houston Dynamo,San Jose Earthquakes,4-1,,,1.61,3.9,5.0,Shell Energy Stadium,Ismir Pekmic
+2023-06-21,2023,MLS,Los Angeles FC,Seattle Sounders,1-0,,,1.69,3.7,4.6,BMO Stadium,Ted Unkel
+2023-06-21,2023,MLS,Portland Timbers,Chicago Fire,1-2,,,1.71,3.75,4.3,Providence Park,Fotis Bazakos
+2023-06-21,2023,MLS,St. Louis City,Real Salt Lake,1-3,,,1.79,3.7,4.0,Citypark,Lukasz Szpala
+2023-06-21,2023,MLS,LA Galaxy,Sporting Kansas City,2-2,,,2.16,3.5,3.0,Dignity Health Sports Park,Filip Dujic
+2023-06-21,2023,MLS,Austin FC,FC Dallas,3-0,,,2.14,3.3,3.25,Q2 Stadium,Rosendo Mendoza
+2023-06-24,2023,MLS,Charlotte FC,CF Montreal,0-0,,,1.64,3.95,4.6,Bank of America Stadium,Mark Allatin
+2023-06-24,2023,MLS,Philadelphia Union,Inter Miami,4-1,,,1.26,5.6,9.2,Subaru Park,Malik Badawi
+2023-06-24,2023,MLS,Columbus Crew,Nashville SC,2-0,,,1.9,3.6,3.6,Lower.com Field,Filip Dujic
+2023-06-24,2023,MLS,New York Red Bulls,Atlanta United,4-0,,,1.77,3.65,4.2,Red Bull Arena,Rosendo Mendoza
+2023-06-24,2023,MLS,DC United,FC Cincinnati,3-0,,,1.87,3.55,3.75,Audi Field,Serhiy Boyko
+2023-06-24,2023,MLS,New England Revolution,Toronto FC,2-1,,,1.53,4.3,5.2,Gillette Stadium,Ted Unkel
+2023-06-24,2023,MLS,San Jose Earthquakes,St. Louis City,1-2,,,1.76,3.8,4.0,PayPal Park,Marcos de Oliveira
+2023-06-24,2023,MLS,Colorado Rapids,LA Galaxy,0-0,,,1.85,3.8,3.6,Dick's Sporting Goods Park,Lukasz Szpala
+2023-06-24,2023,MLS,Seattle Sounders,Orlando City,0-0,,,1.96,3.3,3.7,Lumen Field,Pierre-Luc Lauziere
+2023-06-24,2023,MLS,Portland Timbers,New York City FC,1-1,,,1.91,3.5,3.7,Providence Park,Nima Saghafi
+2023-06-24,2023,MLS,Los Angeles FC,Vancouver Whitecaps,2-3,,,1.54,4.4,5.0,BMO Stadium,Jon Freemon
+2023-06-24,2023,MLS,Sporting Kansas City,Chicago Fire,0-1,,,1.66,3.95,4.5,Children's Mercy Park,Alex Chilowicz
+2023-06-24,2023,MLS,Real Salt Lake,Minnesota United,2-2,,,1.88,3.7,3.6,America First Field,Tori Penso
+2023-06-24,2023,MLS,Austin FC,Houston Dynamo,3-0,,,2.5,3.4,2.6,Q2 Stadium,Victor Rivas
+2023-07-01,2023,MLS,Columbus Crew,New York Red Bulls,2-1,,,1.96,3.55,3.5,Lower.com Field,Ismir Pekmic
+2023-07-01,2023,MLS,FC Cincinnati,New England Revolution,2-2,,,1.99,3.65,3.3,TQL Stadium,Jon Freemon
+2023-07-01,2023,MLS,CF Montreal,New York City FC,0-1,,,2.42,3.35,2.75,Stade Saputo,Victor Rivas
+2023-07-01,2023,MLS,Orlando City,Chicago Fire,3-1,,,1.87,3.55,3.8,Exploria Stadium,Nima Saghafi
+2023-07-01,2023,MLS,Toronto FC,Real Salt Lake,0-1,,,2.33,3.55,2.7,BMO Field,Marcos de Oliveira
+2023-07-01,2023,MLS,Inter Miami,Austin FC,1-1,,,2.7,3.5,2.36,DRV PNK Stadium,Filip Dujic
+2023-07-02,2023,MLS,Atlanta United,Philadelphia Union,2-0,,,2.47,3.55,2.55,Mercedes-Benz Stadium,Ted Unkel
+2023-07-01,2023,MLS,FC Dallas,Los Angeles FC,2-0,,,2.9,3.45,2.22,Toyota Stadium,Serhiy Boyko
+2023-07-01,2023,MLS,San Jose Earthquakes,LA Galaxy,2-2,,,2.15,3.6,2.95,Stanford Stadium,Ramy Touchan
+2023-07-01,2023,MLS,Seattle Sounders,Houston Dynamo,1-0,,,1.86,3.45,4.0,Lumen Field,Rosendo Mendoza
+2023-07-01,2023,MLS,Minnesota United,Portland Timbers,4-1,,,1.73,3.85,4.2,Allianz Field,Lukasz Szpala
+2023-07-01,2023,MLS,Nashville SC,DC United,2-0,,,2.12,3.25,3.35,Geodis Park,Guido Gonzalez Jr.
+2023-07-01,2023,MLS,St. Louis City,Colorado Rapids,2-0,,,1.97,3.6,3.4,Citypark,Fotis Bazakos
+2023-07-01,2023,MLS,Sporting Kansas City,Vancouver Whitecaps,3-0,,,1.78,3.75,3.95,Children's Mercy Park,Malik Badawi
+2023-07-04,2023,MLS,Orlando City,Toronto FC,4-0,,,1.42,4.6,6.4,Exploria Stadium,Guido Gonzalez Jr.
+2023-07-04,2023,MLS,Inter Miami,Columbus Crew,2-2,,,2.95,3.6,2.17,DRV PNK Stadium,Alex Chilowicz
+2023-07-04,2023,MLS,FC Dallas,DC United,0-1,,,2.26,3.25,3.05,Toyota Stadium,Mark Allatin
+2023-07-04,2023,MLS,LA Galaxy,Los Angeles FC,2-1,,,3.25,4.1,1.89,Rose Bowl,Victor Rivas
+2023-07-05,2023,MLS,New York City FC,Charlotte FC,1-1,,,1.99,3.35,3.6,Citi Field,Filip Dujic
+2023-07-08,2023,MLS,New York Red Bulls,New England Revolution,2-1,,,1.7,3.75,4.4,Red Bull Arena,Rubiel Vazquez
+2023-07-08,2023,MLS,Charlotte FC,FC Cincinnati,2-2,,,2.65,3.35,2.47,Bank of America Stadium,Ted Unkel
+2023-07-08,2023,MLS,CF Montreal,Atlanta United,0-1,,,2.38,3.3,2.8,Stade Saputo,Ismir Pekmic
+2023-07-08,2023,MLS,Columbus Crew,New York City FC,1-1,,,1.67,3.95,4.4,Lower.com Field,Serhiy Boyko
+2023-07-08,2023,MLS,Toronto FC,St. Louis City,0-1,,,2.95,3.55,2.18,BMO Field,Filip Dujic
+2023-07-08,2023,MLS,DC United,Inter Miami,2-2,,,1.46,4.5,5.8,Audi Field,Rosendo Mendoza
+2023-07-08,2023,MLS,Los Angeles FC,San Jose Earthquakes,1-1,,,1.37,4.9,6.8,BMO Stadium,Lukasz Szpala
+2023-07-08,2023,MLS,LA Galaxy,Philadelphia Union,3-1,,,2.43,3.6,2.55,Dignity Health Sports Park,Fotis Bazakos
+2023-07-08,2023,MLS,Vancouver Whitecaps,Seattle Sounders,2-3,,,2.16,3.4,3.1,BC Place Stadium,Ramy Touchan
+2023-07-08,2023,MLS,Chicago Fire,Nashville SC,1-0,,,2.27,3.25,3.0,Soldier Field,Pierre-Luc Lauziere
+2023-07-08,2023,MLS,Houston Dynamo,Sporting Kansas City,2-2,,,2.17,3.35,3.1,Shell Energy Stadium,Nima Saghafi
+2023-07-08,2023,MLS,Real Salt Lake,Orlando City,4-0,,,1.78,3.75,4.0,America First Field,Mark Allatin
+2023-07-08,2023,MLS,Minnesota United,Austin FC,1-4,,,1.75,4.0,3.9,Allianz Field,Alex Chilowicz
+2023-07-08,2023,MLS,Colorado Rapids,FC Dallas,2-1,,,1.86,3.35,4.1,Dick's Sporting Goods Park,Marcos de Oliveira
+2023-07-12,2023,MLS,New England Revolution,Atlanta United,2-1,,,2.11,3.55,3.1,Gillette Stadium,Alex Chilowicz
+2023-07-12,2023,MLS,New York Red Bulls,FC Cincinnati,1-2,,,1.71,3.65,4.5,Red Bull Arena,Lukasz Szpala
+2023-07-12,2023,MLS,Colorado Rapids,Portland Timbers,0-0,,,,,,Dick's Sporting Goods Park,Pierre-Luc Lauziere
+2023-07-12,2023,MLS,Nashville SC,Philadelphia Union,0-2,,,1.89,3.45,3.85,Geodis Park,Serhiy Boyko
+2023-07-12,2023,MLS,Sporting Kansas City,Real Salt Lake,2-2,,,1.71,3.9,4.2,Children's Mercy Park,Rubiel Vazquez
+2023-07-12,2023,MLS,Chicago Fire,CF Montreal,3-0,,,1.88,3.6,3.7,Soldier Field,Malik Badawi
+2023-07-12,2023,MLS,San Jose Earthquakes,Seattle Sounders,2-0,,,2.44,3.25,2.75,PayPal Park,Fotis Bazakos
+2023-07-12,2023,MLS,Vancouver Whitecaps,Austin FC,2-1,,,1.74,3.95,4.0,BC Place Stadium,Nima Saghafi
+2023-07-12,2023,MLS,Los Angeles FC,St. Louis City,3-0,,,1.39,4.7,6.6,BMO Stadium,Joe Dickerson
+2023-07-12,2023,MLS,Houston Dynamo,Minnesota United,0-3,,,1.8,3.7,3.9,Shell Energy Stadium,Marcos de Oliveira
+2023-07-15,2023,MLS,FC Cincinnati,Nashville SC,3-1,,,1.69,3.75,4.5,TQL Stadium,Ramy Touchan
+2023-07-15,2023,MLS,New England Revolution,DC United,4-0,,,2.16,3.45,3.05,Gillette Stadium,Ismir Pekmic
+2023-07-15,2023,MLS,Philadelphia Union,New York City FC,2-1,,,1.82,3.5,4.0,Subaru Park,Alex Chilowicz
+2023-07-15,2023,MLS,Atlanta United,Orlando City,1-2,,,2.13,3.5,3.05,Mercedes-Benz Stadium,Victor Rivas
+2023-07-15,2023,MLS,CF Montreal,Charlotte FC,2-0,,,2.18,3.3,3.15,Stade Saputo,Pierre-Luc Lauziere
+2023-07-15,2023,MLS,St. Louis City,Inter Miami,3-0,,,1.63,3.9,4.7,Citypark,Lukasz Szpala
+2023-07-15,2023,MLS,Chicago Fire,Toronto FC,1-0,,,1.64,3.85,4.7,Soldier Field,Serhiy Boyko
+2023-07-15,2023,MLS,Vancouver Whitecaps,LA Galaxy,4-2,,,1.89,3.95,3.35,BC Place Stadium,Joe Dickerson
+2023-07-15,2023,MLS,Colorado Rapids,Houston Dynamo,0-0,,,2.17,3.25,3.2,Dick's Sporting Goods Park,Filip Dujic
+2023-07-15,2023,MLS,Portland Timbers,Columbus Crew,3-2,,,2.0,3.6,3.3,Providence Park,Tim Ford
+2023-07-15,2023,MLS,Minnesota United,Los Angeles FC,1-1,,,2.7,3.6,2.33,Allianz Field,Allen Chapman
+2023-07-15,2023,MLS,Real Salt Lake,New York Red Bulls,3-1,,,1.91,3.55,3.65,America First Field,Alexis Da Silva
+2023-07-15,2023,MLS,Seattle Sounders,FC Dallas,1-1,,,1.57,3.8,5.6,Lumen Field,Nima Saghafi
+2023-07-15,2023,MLS,Austin FC,Sporting Kansas City,2-1,,,2.07,3.65,3.1,Q2 Stadium,Ted Unkel
+2023-08-20,2023,MLS,New York Red Bulls,DC United,1-0,,,1.71,3.5,4.8,Red Bull Arena,Jon Freemon
+2023-08-20,2023,MLS,Columbus Crew,FC Cincinnati,3-0,,,1.92,3.75,3.4,Lower.com Field,Ted Unkel
+2023-08-20,2023,MLS,New York City FC,Minnesota United,0-2,,,1.72,3.85,4.2,Citi Field,Nima Saghafi
+2023-08-20,2023,MLS,Toronto FC,CF Montreal,2-3,,,2.19,3.35,3.05,BMO Field,Joe Dickerson
+2023-08-20,2023,MLS,Chicago Fire,Orlando City,1-3,,,2.22,3.4,3.0,Soldier Field,Lukasz Szpala
+2023-08-20,2023,MLS,Houston Dynamo,Portland Timbers,5-0,,,1.8,3.75,3.9,Shell Energy Stadium,Marcos de Oliveira
+2023-08-20,2023,MLS,Vancouver Whitecaps,San Jose Earthquakes,0-1,,,1.72,3.95,4.1,BC Place Stadium,Ismir Pekmic
+2023-08-20,2023,MLS,Seattle Sounders,Atlanta United,0-2,,,1.73,3.8,4.2,Lumen Field,Allen Chapman
+2023-08-20,2023,MLS,St. Louis City,Austin FC,6-3,,,1.86,3.85,3.55,Citypark,Tim Ford
+2023-08-23,2023,MLS,Los Angeles FC,Colorado Rapids,4-0,,,1.36,5.3,8.0,BMO Stadium,Guido Gonzalez Jr.
+2023-08-26,2023,MLS,Columbus Crew,Toronto FC,2-0,,,1.37,5.5,7.3,Lower.com Field,Elton Garcia
+2023-08-26,2023,MLS,Atlanta United,Nashville SC,4-0,,,1.98,3.65,3.75,Mercedes-Benz Stadium,Jon Freemon
+2023-08-26,2023,MLS,CF Montreal,New England Revolution,1-0,,,1.98,3.7,3.65,Stade Saputo,Ted Unkel
+2023-08-26,2023,MLS,Orlando City,St. Louis City,2-1,,,1.8,3.95,4.2,Exploria Stadium,Joe Dickerson
+2023-08-26,2023,MLS,Charlotte FC,Los Angeles FC,2-1,,,3.05,3.65,2.22,Bank of America Stadium,Victor Rivas
+2023-08-26,2023,MLS,DC United,Philadelphia Union,1-3,,,2.52,3.45,2.77,Audi Field,Marcos de Oliveira
+2023-08-26,2023,MLS,FC Cincinnati,New York City FC,3-0,,,1.95,3.5,4.0,TQL Stadium,Chris Penso
+2023-08-26,2023,MLS,New York Red Bulls,Inter Miami,0-2,,,1.98,3.7,3.85,Red Bull Arena,Allen Chapman
+2023-08-27,2023,MLS,Minnesota United,Seattle Sounders,1-1,,,2.2,3.6,3.15,Allianz Field,Tim Ford
+2023-08-26,2023,MLS,Sporting Kansas City,San Jose Earthquakes,3-0,,,1.78,3.7,4.55,Children's Mercy Park,Pierre-Luc Lauziere
+2023-08-26,2023,MLS,LA Galaxy,Chicago Fire,3-0,,,1.78,4.05,4.1,Dignity Health Sports Park,Ismail Elfath
+2023-08-26,2023,MLS,Portland Timbers,Vancouver Whitecaps,2-3,,,2.45,3.65,2.72,Providence Park,Rosendo Mendoza
+2023-08-26,2023,MLS,FC Dallas,Austin FC,1-0,,,2.18,3.5,3.3,Toyota Stadium,Rubiel Vazquez
+2023-08-26,2023,MLS,Real Salt Lake,Houston Dynamo,0-3,,,2.02,3.5,3.7,America First Field,Alex Chilowicz
+2023-08-30,2023,MLS,Inter Miami,Nashville SC,0-0,,,1.47,4.65,6.3,DRV PNK Stadium,Chris Penso
+2023-08-30,2023,MLS,Atlanta United,FC Cincinnati,1-2,,,1.93,4.0,3.55,Mercedes-Benz Stadium,Armando Villarreal
+2023-08-30,2023,MLS,New York City FC,CF Montreal,2-0,,,1.75,3.75,4.8,Yankee Stadium,Fotis Bazakos
+2023-08-30,2023,MLS,Toronto FC,Philadelphia Union,3-1,,,3.6,3.85,1.95,BMO Field,Mark Allatin
+2023-08-30,2023,MLS,Charlotte FC,Orlando City,1-1,,,2.25,3.5,3.1,Bank of America Stadium,Rosendo Mendoza
+2023-08-30,2023,MLS,New England Revolution,New York Red Bulls,1-0,,,2.47,3.45,2.82,Gillette Stadium,Malik Badawi
+2023-08-30,2023,MLS,Minnesota United,Colorado Rapids,3-0,,,1.57,4.2,5.8,Allianz Field,Marcos de Oliveira
+2023-08-30,2023,MLS,San Jose Earthquakes,LA Galaxy,2-3,,,2.05,3.75,3.4,PayPal Park,Lukasz Szpala
+2023-08-30,2023,MLS,Chicago Fire,Vancouver Whitecaps,0-1,,,2.22,3.65,3.05,Soldier Field,Ricardo Fierro
+2023-08-30,2023,MLS,Portland Timbers,Real Salt Lake,2-1,,,1.9,3.85,3.8,Providence Park,Joe Dickerson
+2023-08-30,2023,MLS,Houston Dynamo,Columbus Crew,2-0,,,1.87,3.9,3.85,Shell Energy Stadium,Jair Marrufo
+2023-08-30,2023,MLS,St. Louis City,FC Dallas,2-1,,,1.95,3.6,3.9,Citypark,Guido Gonzalez Jr.
+2023-08-30,2023,MLS,Austin FC,Seattle Sounders,1-2,,,1.93,3.55,3.95,Q2 Stadium,Drew Fischer
+2023-09-02,2023,MLS,New York City FC,Vancouver Whitecaps,1-1,,,2.02,3.6,3.65,Yankee Stadium,Pierre-Luc Lauziere
+2023-09-02,2023,MLS,FC Cincinnati,Orlando City,0-1,,,1.75,3.75,4.65,TQL Stadium,Drew Fischer
+2023-09-02,2023,MLS,New England Revolution,Austin FC,2-2,,,1.95,3.9,3.55,Gillette Stadium,Marcos de Oliveira
+2023-09-02,2023,MLS,CF Montreal,Columbus Crew,2-4,,,3.2,3.7,2.16,Stade Saputo,Filip Dujic
+2023-09-02,2023,MLS,DC United,Chicago Fire,4-0,,,1.87,3.75,4.05,Audi Field,Serhiy Boyko
+2023-09-02,2023,MLS,Real Salt Lake,Colorado Rapids,2-0,,,1.65,4.15,4.9,America First Field,Nima Saghafi
+2023-09-02,2023,MLS,San Jose Earthquakes,Minnesota United,1-1,,,1.95,3.85,3.6,PayPal Park,Alexis Da Silva
+2023-09-02,2023,MLS,Sporting Kansas City,St. Louis City,2-1,,,1.72,3.9,4.65,Children's Mercy Park,Allen Chapman
+2023-09-02,2023,MLS,LA Galaxy,Houston Dynamo,0-0,,,2.2,3.6,3.15,Dignity Health Sports Park,Armando Villarreal
+2023-09-02,2023,MLS,Seattle Sounders,Portland Timbers,2-2,,,1.87,3.7,4.15,Lumen Field,Jon Freemon
+2023-09-02,2023,MLS,Nashville SC,Charlotte FC,1-1,,,1.83,3.7,4.25,Geodis Park,Alex Chilowicz
+2023-09-03,2023,MLS,Philadelphia Union,New York Red Bulls,4-1,,,2.0,3.45,3.85,Subaru Park,Rubiel Vazquez
+2023-09-02,2023,MLS,FC Dallas,Atlanta United,2-2,,,2.37,3.5,2.92,Toyota Stadium,Ismir Pekmic
+2023-09-03,2023,MLS,Los Angeles FC,Inter Miami,1-3,,,2.15,3.95,3.15,BMO Stadium,Ted Unkel
+2023-09-09,2023,MLS,DC United,San Jose Earthquakes,0-0,,,1.72,4.05,4.55,Audi Field,Tori Penso
+2023-09-09,2023,MLS,Inter Miami,Sporting Kansas City,3-2,,,2.18,3.5,3.25,DRV PNK Stadium,Ismail Elfath
+2023-09-09,2023,MLS,Portland Timbers,Los Angeles FC,2-0,,,2.9,3.9,2.25,Providence Park,Drew Fischer
+2023-09-09,2023,MLS,Minnesota United,New England Revolution,1-1,,,1.88,3.85,3.8,Allianz Field,Jair Marrufo
+2023-09-10,2023,MLS,LA Galaxy,St. Louis City,2-2,,,2.05,3.8,3.3,Dignity Health Sports Park,Filip Dujic
+2023-09-16,2023,MLS,New York City FC,New York Red Bulls,0-0,,,2.1,3.25,3.8,Yankee Stadium,Joe Dickerson
+2023-09-16,2023,MLS,Atlanta United,Inter Miami,5-2,,,1.91,4.0,3.6,Mercedes-Benz Stadium,Jair Marrufo
+2023-09-16,2023,MLS,Orlando City,Columbus Crew,4-3,,,2.45,3.7,2.7,Exploria Stadium,Rubiel Vazquez
+2023-09-16,2023,MLS,Toronto FC,Vancouver Whitecaps,1-2,,,3.2,3.7,2.15,BMO Field,Ramy Touchan
+2023-09-16,2023,MLS,CF Montreal,Chicago Fire,0-0,,,1.98,3.55,3.8,Stade Saputo,Mark Allatin
+2023-09-16,2023,MLS,Philadelphia Union,FC Cincinnati,2-2,,,1.88,3.7,4.05,Subaru Park,Ismail Elfath
+2023-09-16,2023,MLS,Charlotte FC,DC United,0-0,,,1.93,3.75,3.8,Bank of America Stadium,Jon Freemon
+2023-09-16,2023,MLS,Los Angeles FC,LA Galaxy,4-2,,,1.47,5.0,5.8,BMO Stadium,Chris Penso
+2023-09-16,2023,MLS,Houston Dynamo,St. Louis City,1-1,,,1.7,4.05,4.75,Shell Energy Stadium,Ismir Pekmic
+2023-09-16,2023,MLS,FC Dallas,Seattle Sounders,1-1,,,2.2,3.25,3.45,Toyota Stadium,Allen Chapman
+2023-09-16,2023,MLS,Minnesota United,Sporting Kansas City,0-1,,,2.02,3.85,3.35,Allianz Field,Tori Penso
+2023-09-16,2023,MLS,San Jose Earthquakes,Real Salt Lake,2-1,,,2.12,3.65,3.25,PayPal Park,Natalie Simon
+2023-09-16,2023,MLS,Colorado Rapids,New England Revolution,2-1,,,2.18,3.6,3.2,Dick's Sporting Goods Park,Rosendo Mendoza
+2023-09-17,2023,MLS,Austin FC,Portland Timbers,1-2,,,1.8,4.15,3.95,Q2 Stadium,Armando Villarreal
+2023-09-20,2023,MLS,Columbus Crew,Chicago Fire,3-0,,,1.47,5.0,5.9,Lower.com Field,Ismir Pekmic
+2023-09-20,2023,MLS,CF Montreal,FC Cincinnati,1-1,,,2.85,3.55,2.4,Stade Saputo,Jon Freemon
+2023-09-20,2023,MLS,New York City FC,Orlando City,2-0,,,2.0,3.55,3.7,Citi Field,Ismail Elfath
+2023-09-20,2023,MLS,Charlotte FC,Philadelphia Union,2-2,,,2.37,3.55,2.87,Bank of America Stadium,Guido Gonzalez Jr.
+2023-09-20,2023,MLS,DC United,Atlanta United,1-1,,,2.07,3.9,3.2,Audi Field,Lukasz Szpala
+2023-09-20,2023,MLS,Inter Miami,Toronto FC,4-0,,,1.31,5.9,8.5,DRV PNK Stadium,Drew Fischer
+2023-09-20,2023,MLS,New York Red Bulls,Austin FC,1-1,,,1.65,4.05,5.0,Red Bull Arena,Nima Saghafi
+2023-09-20,2023,MLS,LA Galaxy,Minnesota United,4-3,,,2.15,3.95,3.05,Dignity Health Sports Park,Rosendo Mendoza
+2023-09-20,2023,MLS,Colorado Rapids,Seattle Sounders,1-2,,,2.67,3.3,2.67,Dick's Sporting Goods Park,Filip Dujic
+2023-09-20,2023,MLS,Portland Timbers,San Jose Earthquakes,2-1,,,1.87,3.85,3.95,Providence Park,Ramy Touchan
+2023-09-20,2023,MLS,Houston Dynamo,Vancouver Whitecaps,4-1,,,1.95,3.6,3.85,Shell Energy Stadium,Fotis Bazakos
+2023-09-20,2023,MLS,Real Salt Lake,FC Dallas,1-3,,,1.82,3.8,4.25,America First Field,Pierre-Luc Lauziere
+2023-09-20,2023,MLS,St. Louis City,Los Angeles FC,0-0,,,2.5,3.65,2.67,Citypark,Rubiel Vazquez
+2023-09-20,2023,MLS,Sporting Kansas City,Nashville SC,0-3,,,2.07,3.4,3.65,Children's Mercy Park,Victor Rivas
+2023-09-23,2023,MLS,Atlanta United,CF Montreal,4-1,,,1.65,4.2,5.1,Mercedes-Benz Stadium,Rubiel Vazquez
+2023-09-23,2023,MLS,DC United,New York Red Bulls,3-5,,,2.35,3.4,3.05,Audi Field,Alex Chilowicz
+2023-09-23,2023,MLS,Philadelphia Union,Los Angeles FC,0-0,,,2.2,3.65,3.1,Subaru Park,Allen Chapman
+2023-09-23,2023,MLS,FC Cincinnati,Charlotte FC,3-0,,,1.65,4.15,4.9,TQL Stadium,Jair Marrufo
+2023-09-24,2023,MLS,New York City FC,Toronto FC,3-0,,,1.42,4.7,7.3,Red Bull Arena,Serhiy Boyko
+2023-09-23,2023,MLS,Minnesota United,St. Louis City,1-2,,,1.85,3.9,3.95,Allianz Field,Victor Rivas
+2023-09-23,2023,MLS,Sporting Kansas City,Houston Dynamo,2-1,,,2.13,3.4,3.55,Children's Mercy Park,Chris Penso
+2023-09-23,2023,MLS,San Jose Earthquakes,Nashville SC,1-1,,,2.27,3.35,3.25,PayPal Park,Joe Dickerson
+2023-09-23,2023,MLS,Real Salt Lake,Vancouver Whitecaps,2-1,,,2.15,3.65,3.2,America First Field,Malik Badawi
+2023-09-23,2023,MLS,Portland Timbers,Colorado Rapids,3-2,,,1.52,4.4,6.2,Providence Park,Guido Gonzalez Jr.
+2023-09-24,2023,MLS,Orlando City,Inter Miami,1-1,,,1.78,4.05,4.3,Exploria Stadium,Armando Villarreal
+2023-09-23,2023,MLS,FC Dallas,Columbus Crew,1-1,,,2.57,3.55,2.75,Toyota Stadium,Tori Penso
+2023-09-23,2023,MLS,Chicago Fire,New England Revolution,2-2,,,2.4,3.6,2.8,Soldier Field,Tim Ford
+2023-09-24,2023,MLS,Austin FC,LA Galaxy,3-3,,,1.96,4.1,3.45,Q2 Stadium,Ted Unkel
+2023-09-27,2023,MLS,Philadelphia Union,FC Dallas,1-1,,,1.62,3.95,5.5,Subaru Park,Fotis Bazakos
+2023-09-27,2023,MLS,Colorado Rapids,Vancouver Whitecaps,2-2,,,2.62,3.65,2.52,Dick's Sporting Goods Park,Elton Garcia
+2023-09-30,2023,MLS,Toronto FC,FC Cincinnati,2-3,,,4.9,4.3,1.62,BMO Field,Alex Chilowicz
+2023-09-30,2023,MLS,Inter Miami,New York City FC,1-1,,,2.52,3.45,2.72,DRV PNK Stadium,Victor Rivas
+2023-09-30,2023,MLS,New England Revolution,Charlotte FC,2-1,,,1.85,3.9,3.9,Gillette Stadium,Lukasz Szpala
+2023-09-30,2023,MLS,Orlando City,CF Montreal,3-0,,,1.62,4.15,5.2,Exploria Stadium,Serhiy Boyko
+2023-09-30,2023,MLS,New York Red Bulls,Chicago Fire,0-1,,,1.57,4.15,5.7,Red Bull Arena,Filip Dujic
+2023-09-30,2023,MLS,Columbus Crew,Philadelphia Union,1-1,,,1.6,4.4,5.0,Lower.com Field,Jon Freemon
+2023-09-30,2023,MLS,LA Galaxy,Portland Timbers,3-3,,,2.22,3.75,3.0,Dignity Health Sports Park,Joe Dickerson
+2023-09-30,2023,MLS,St. Louis City,Sporting Kansas City,4-1,,,2.07,3.55,3.45,Citypark,Armando Villarreal
+2023-09-30,2023,MLS,Colorado Rapids,Austin FC,1-0,,,2.2,3.55,3.2,Dick's Sporting Goods Park,Mark Allatin
+2023-09-30,2023,MLS,Houston Dynamo,FC Dallas,0-0,,,1.87,3.5,4.4,Shell Energy Stadium,Ismail Elfath
+2023-09-30,2023,MLS,Vancouver Whitecaps,DC United,2-2,,,1.65,4.15,4.85,BC Place Stadium,Drew Fischer
+2023-09-30,2023,MLS,Nashville SC,Seattle Sounders,0-0,,,1.93,3.45,4.15,Geodis Park,Chris Penso
+2023-09-30,2023,MLS,Minnesota United,San Jose Earthquakes,1-1,,,1.7,4.1,4.6,Allianz Field,Ted Unkel
+2023-10-01,2023,MLS,Los Angeles FC,Real Salt Lake,0-1,,,1.53,4.65,5.6,BMO Stadium,Tim Ford
+2023-10-04,2023,MLS,CF Montreal,Houston Dynamo,1-1,,,2.4,3.35,3.0,Stade Saputo,Ramy Touchan
+2023-10-04,2023,MLS,New England Revolution,Columbus Crew,1-2,,,2.45,3.65,2.72,Gillette Stadium,Alexis Da Silva
+2023-10-04,2023,MLS,Charlotte FC,Toronto FC,3-0,,,1.36,5.3,7.9,Bank of America Stadium,Malik Badawi
+2023-10-04,2023,MLS,Philadelphia Union,Atlanta United,3-2,,,1.98,3.85,3.55,Subaru Park,Alex Chilowicz
+2023-10-04,2023,MLS,FC Cincinnati,New York Red Bulls,1-2,,,2.27,3.3,3.25,TQL Stadium,Chris Penso
+2023-10-04,2023,MLS,Vancouver Whitecaps,St. Louis City,3-0,,,1.65,4.45,4.7,BC Place Stadium,Pierre-Luc Lauziere
+2023-10-04,2023,MLS,Seattle Sounders,LA Galaxy,2-1,,,1.57,4.25,5.7,Lumen Field,Victor Rivas
+2023-10-04,2023,MLS,Los Angeles FC,Minnesota United,5-1,,,1.52,4.7,5.5,BMO Stadium,Guido Gonzalez Jr.
+2023-10-04,2023,MLS,Austin FC,DC United,3-0,,,2.22,3.7,3.05,Q2 Stadium,Jair Marrufo
+2023-10-04,2023,MLS,Chicago Fire,Inter Miami,4-1,,,2.18,3.6,3.2,Soldier Field,Joe Dickerson
+2023-10-04,2023,MLS,Nashville SC,Orlando City,0-1,,,2.15,3.4,3.45,Geodis Park,Rosendo Mendoza
+2023-10-07,2023,MLS,CF Montreal,Portland Timbers,4-1,,,2.2,3.7,3.05,Stade Saputo,Lukasz Szpala
+2023-10-07,2023,MLS,Philadelphia Union,Nashville SC,0-0,,,1.95,3.55,3.95,Subaru Park,Armando Villarreal
+2023-10-07,2023,MLS,Atlanta United,Columbus Crew,1-1,,,2.12,4.15,2.95,Mercedes-Benz Stadium,Ismail Elfath
+2023-10-07,2023,MLS,New York Red Bulls,Toronto FC,3-0,,,1.26,5.8,12.0,Red Bull Arena,Ricardo Fierro
+2023-10-07,2023,MLS,DC United,New York City FC,2-0,,,2.8,3.45,2.5,Audi Field,Fotis Bazakos
+2023-10-07,2023,MLS,Orlando City,New England Revolution,3-2,,,1.72,4.05,4.5,Exploria Stadium,Allen Chapman
+2023-10-07,2023,MLS,Inter Miami,FC Cincinnati,0-1,,,2.27,3.85,2.85,DRV PNK Stadium,Rubiel Vazquez
+2023-10-07,2023,MLS,Chicago Fire,Charlotte FC,0-2,,,2.32,3.6,2.9,Soldier Field,Natalie Simon
+2023-10-07,2023,MLS,Seattle Sounders,Vancouver Whitecaps,0-0,,,1.98,3.55,3.8,Lumen Field,Nima Saghafi
+2023-10-07,2023,MLS,Austin FC,Los Angeles FC,2-4,,,3.25,3.7,2.12,Q2 Stadium,Jon Freemon
+2023-10-07,2023,MLS,FC Dallas,San Jose Earthquakes,1-1,,,1.95,3.65,3.8,Toyota Stadium,Filip Dujic
+2023-10-07,2023,MLS,Houston Dynamo,Colorado Rapids,5-1,,,1.42,4.7,7.3,Shell Energy Stadium,Tori Penso
+2023-10-07,2023,MLS,Minnesota United,LA Galaxy,5-2,,,1.72,4.3,4.4,Allianz Field,Tim Ford
+2023-10-07,2023,MLS,Real Salt Lake,Sporting Kansas City,2-3,,,1.75,4.0,4.35,America First Field,Ted Unkel
+2023-10-14,2023,MLS,FC Dallas,Colorado Rapids,1-1,,,1.5,4.35,6.7,Toyota Stadium,Marcos de Oliveira
+2023-10-14,2023,MLS,Nashville SC,New England Revolution,3-2,,,1.82,3.7,4.35,Geodis Park,Guido Gonzalez Jr.
+2023-10-14,2023,MLS,LA Galaxy,Real Salt Lake,2-2,,,2.35,3.75,2.8,Dignity Health Sports Park,Jair Marrufo
+2023-10-18,2023,MLS,Inter Miami,Charlotte FC,2-2,,,2.65,3.55,2.55,DRV PNK Stadium,Lukasz Szpala
+2023-10-21,2023,MLS,Nashville SC,New York Red Bulls,0-1,,,2.3,3.3,3.2,Geodis Park,Lukasz Szpala
+2023-10-21,2023,MLS,Toronto FC,Orlando City,0-2,,,2.52,3.8,2.55,BMO Field,Mathieu Souaré
+2023-10-21,2023,MLS,New England Revolution,Philadelphia Union,2-1,,,2.42,3.8,2.7,Gillette Stadium,Tori Penso
+2023-10-21,2023,MLS,FC Cincinnati,Atlanta United,2-2,,,1.72,4.4,4.1,TQL Stadium,Joe Dickerson
+2023-10-21,2023,MLS,Charlotte FC,Inter Miami,1-0,,,2.0,4.0,3.3,Bank of America Stadium,Guido Gonzalez Jr.
+2023-10-21,2023,MLS,New York City FC,Chicago Fire,1-0,,,1.65,4.1,5.1,Citi Field,Allen Chapman
+2023-10-21,2023,MLS,Columbus Crew,CF Montreal,2-1,,,1.5,4.9,5.7,Lower.com Field,Drew Fischer
+2023-10-21,2023,MLS,Vancouver Whitecaps,Los Angeles FC,1-1,,,2.8,3.65,2.37,BC Place Stadium,Fotis Bazakos
+2023-10-21,2023,MLS,San Jose Earthquakes,Austin FC,1-1,,,1.65,4.4,4.7,PayPal Park,Rosendo Mendoza
+2023-10-21,2023,MLS,LA Galaxy,FC Dallas,1-4,,,2.87,3.85,2.27,Dignity Health Sports Park,Victor Rivas
+2023-10-21,2023,MLS,Portland Timbers,Houston Dynamo,1-3,,,2.1,3.7,3.25,Providence Park,Rubiel Vazquez
+2023-10-21,2023,MLS,Colorado Rapids,Real Salt Lake,0-1,,,2.85,3.6,2.4,Dick's Sporting Goods Park,Tim Ford
+2023-10-21,2023,MLS,St. Louis City,Seattle Sounders,0-2,,,2.42,3.5,2.85,Citypark,Jair Marrufo
+2023-10-21,2023,MLS,Sporting Kansas City,Minnesota United,3-1,,,1.75,4.35,4.0,Children's Mercy Park,Ismail Elfath
+2023-10-25,2023,MLS,New York Red Bulls,Charlotte FC,5-2,,,1.75,3.65,4.9,Red Bull Arena,Ismail Elfath
+2023-10-25,2023,MLS,Sporting Kansas City,San Jose Earthquakes,0-0,,,1.8,3.85,4.3,Children's Mercy Park,Allen Chapman
+2023-10-28,2023,MLS,Philadelphia Union,New England Revolution,3-1,,,1.72,4.1,4.5,Subaru Park,Pierre-Luc Lauziere
+2023-10-29,2023,MLS,Houston Dynamo,Real Salt Lake,2-1,,,1.55,4.25,5.9,Shell Energy Stadium,Guido Gonzalez Jr.
+2023-10-28,2023,MLS,Los Angeles FC,Vancouver Whitecaps,5-2,,,,,,BMO Stadium,Jon Freemon
+2023-10-30,2023,MLS,Orlando City,Nashville SC,1-0,,,2.05,3.4,3.75,Exploria Stadium,Armando Villarreal
+2023-10-29,2023,MLS,FC Cincinnati,New York Red Bulls,3-0,,,1.87,3.6,4.2,TQL Stadium,Rubiel Vazquez
+2023-10-29,2023,MLS,St. Louis City,Sporting Kansas City,1-4,,,2.12,3.65,3.3,Citypark,Ted Unkel
+2023-10-30,2023,MLS,Seattle Sounders,FC Dallas,2-0,,,1.78,3.55,4.9,Lumen Field,Joe Dickerson
+2023-11-01,2023,MLS,Columbus Crew,Atlanta United,2-0,,,1.5,4.7,6.0,Lower.com Field,Lukasz Szpala
+2023-11-04,2023,MLS,New York Red Bulls,FC Cincinnati,1-1,,,2.02,3.5,3.7,Red Bull Arena,Victor Rivas
+2023-11-05,2023,MLS,Sporting Kansas City,St. Louis City,2-1,,,1.72,4.2,4.4,Children's Mercy Park,Ismail Elfath
+2023-11-04,2023,MLS,FC Dallas,Seattle Sounders,3-1,,,2.57,3.15,2.92,Toyota Stadium,Rosendo Mendoza
+2023-11-05,2023,MLS,Vancouver Whitecaps,Los Angeles FC,0-1,,,2.77,3.55,2.45,BC Place Stadium,Tim Ford
+2023-11-06,2023,MLS,Real Salt Lake,Houston Dynamo,1-1,,,2.42,3.4,2.9,America First Field,Fotis Bazakos
+2023-11-07,2023,MLS,Atlanta United,Columbus Crew,4-2,,,2.47,3.85,2.6,Mercedes-Benz Stadium,Chris Penso
+2023-11-07,2023,MLS,Nashville SC,Orlando City,0-1,,,2.1,3.35,3.65,Geodis Park,Allen Chapman
+2023-11-08,2023,MLS,New England Revolution,Philadelphia Union,0-1,,,2.18,3.7,3.15,Gillette Stadium,Drew Fischer
+2023-11-11,2023,MLS,Houston Dynamo,Real Salt Lake,1-1,,,1.62,3.9,5.6,Shell Energy Stadium,Chris Penso
+2023-11-10,2023,MLS,Seattle Sounders,FC Dallas,1-0,,,1.62,3.65,6.2,Lumen Field,Fotis Bazakos
+2023-11-12,2023,MLS,Columbus Crew,Atlanta United,4-2,,,1.6,4.45,5.0,Lower.com Field,Armando Villarreal
+2023-11-25,2023,MLS,Orlando City,Columbus Crew,0-2,,,2.37,3.55,2.9,Exploria Stadium,Jon Freemon
+2023-11-25,2023,MLS,FC Cincinnati,Philadelphia Union,1-0,,,1.83,3.85,4.05,TQL Stadium,Ismail Elfath
+2023-11-26,2023,MLS,Houston Dynamo,Sporting Kansas City,1-0,,,1.87,3.35,4.55,Shell Energy Stadium,Guido Gonzalez Jr.
+2023-11-26,2023,MLS,Seattle Sounders,Los Angeles FC,0-1,,,2.55,3.15,2.92,Lumen Field,Ted Unkel
+2023-12-02,2023,MLS,FC Cincinnati,Columbus Crew,2-3,,,2.2,3.55,3.2,TQL Stadium,Allen Chapman
+2023-12-02,2023,MLS,Los Angeles FC,Houston Dynamo,2-0,,,1.75,3.6,5.0,BMO Stadium,Victor Rivas
+2023-12-09,2023,MLS,Columbus Crew,Los Angeles FC,2-1,,,2.25,3.45,3.15,Lower.com Field,Armando Villarreal
+2024-02-21,2024,MLS,Inter Miami,Real Salt Lake,2-0,,,1.55,4.65,5.2,Chase Stadium,
+2024-02-24,2024,MLS,Los Angeles FC,Seattle Sounders,2-1,,,1.7,3.85,5.0,BMO Stadium,
+2024-02-24,2024,MLS,Columbus Crew,Atlanta United,1-0,,,1.7,4.05,4.55,Lower.com Field,
+2024-02-25,2024,MLS,FC Cincinnati,Toronto FC,0-0,,,1.72,3.95,4.75,TQL Stadium,
+2024-02-25,2024,MLS,Nashville SC,New York Red Bulls,0-0,,,2.8,3.1,2.72,Geodis Park,
+2024-02-24,2024,MLS,Austin FC,Minnesota United,1-2,,,2.15,3.55,3.3,Q2 Stadium,
+2024-02-24,2024,MLS,Orlando City,CF Montreal,0-0,,,1.6,4.15,5.4,Inter&Co Stadium,
+2024-02-24,2024,MLS,Portland Timbers,Colorado Rapids,4-1,,,1.75,3.95,4.45,Providence Park,
+2024-02-24,2024,MLS,Houston Dynamo,Sporting Kansas City,1-1,,,2.27,3.25,3.35,Shell Energy Stadium,
+2024-02-24,2024,MLS,Philadelphia Union,Chicago Fire,2-2,,,1.8,3.85,4.25,Subaru Park,
+2024-02-24,2024,MLS,FC Dallas,San Jose Earthquakes,2-1,,,2.2,3.3,3.4,Toyota Stadium,
+2024-02-24,2024,MLS,St. Louis City,Real Salt Lake,1-1,,,2.12,3.7,3.25,Energizer Park,
+2024-02-24,2024,MLS,DC United,New England Revolution,3-1,,,2.1,3.55,3.45,Audi Field,
+2024-02-24,2024,MLS,Charlotte FC,New York City FC,1-0,,,2.37,3.25,3.15,Bank of America Stadium,
+2024-02-25,2024,MLS,LA Galaxy,Inter Miami,1-1,,,2.95,3.85,2.22,Dignity Health Sports Park,
+2024-03-02,2024,MLS,Real Salt Lake,Los Angeles FC,3-0,,,2.75,3.55,2.47,America First Field,
+2024-03-02,2024,MLS,Minnesota United,Columbus Crew,1-1,,,3.2,3.7,2.12,Allianz Field,
+2024-03-02,2024,MLS,Inter Miami,Orlando City,5-0,,,1.75,4.05,4.3,Chase Stadium,
+2024-03-03,2024,MLS,New England Revolution,Toronto FC,0-1,,,1.98,3.65,3.75,Gillette Stadium,
+2024-03-02,2024,MLS,Vancouver Whitecaps,Charlotte FC,1-1,,,1.83,3.8,4.15,BC Place Stadium,
+2024-03-02,2024,MLS,Houston Dynamo,New York Red Bulls,1-2,,,2.6,3.05,3.0,Shell Energy Stadium,
+2024-03-02,2024,MLS,Chicago Fire,FC Cincinnati,1-2,,,2.27,3.55,3.05,Soldier Field,
+2024-03-02,2024,MLS,St. Louis City,New York City FC,2-0,,,2.4,3.35,3.0,Energizer Park,
+2024-03-02,2024,MLS,FC Dallas,CF Montreal,1-2,,,1.98,3.55,3.8,Toyota Stadium,
+2024-03-02,2024,MLS,Portland Timbers,DC United,2-2,,,2.15,3.65,3.25,Providence Park,
+2024-03-02,2024,MLS,Sporting Kansas City,Philadelphia Union,1-1,,,1.85,3.65,4.2,Children's Mercy Park,
+2024-03-02,2024,MLS,Seattle Sounders,Austin FC,0-0,,,1.57,4.15,5.7,Lumen Field,
+2024-03-02,2024,MLS,Colorado Rapids,Nashville SC,1-1,,,2.02,3.3,3.95,Dick's Sporting Goods Park,
+2024-03-02,2024,MLS,San Jose Earthquakes,LA Galaxy,1-3,,,2.32,3.7,2.87,PayPal Park,
+2024-03-09,2024,MLS,Toronto FC,Charlotte FC,1-0,,,2.57,3.3,2.8,BMO Field,
+2024-03-09,2024,MLS,New York City FC,Portland Timbers,1-2,,,1.88,3.55,4.2,Yankee Stadium,
+2024-03-10,2024,MLS,Nashville SC,LA Galaxy,2-2,,,3.35,3.4,2.2,Geodis Park,
+2024-03-10,2024,MLS,FC Cincinnati,DC United,0-0,,,2.0,3.6,3.7,TQL Stadium,
+2024-03-10,2024,MLS,Inter Miami,CF Montreal,2-3,,,1.9,3.6,4.05,Chase Stadium,
+2024-03-09,2024,MLS,San Jose Earthquakes,Vancouver Whitecaps,0-2,,,2.45,3.5,2.8,PayPal Park,
+2024-03-09,2024,MLS,Real Salt Lake,Colorado Rapids,1-2,,,1.82,3.6,4.5,America First Field,
+2024-03-09,2024,MLS,Austin FC,St. Louis City,2-2,,,2.67,3.25,2.72,Q2 Stadium,
+2024-03-09,2024,MLS,Columbus Crew,Chicago Fire,2-1,,,1.47,4.65,6.4,Lower.com Field,
+2024-03-09,2024,MLS,Orlando City,Minnesota United,2-3,,,1.91,3.8,3.75,Inter&Co Stadium,
+2024-03-09,2024,MLS,Atlanta United,New England Revolution,4-1,,,1.7,4.15,4.5,Mercedes-Benz Stadium,
+2024-03-09,2024,MLS,New York Red Bulls,FC Dallas,2-1,,,1.57,4.05,5.9,Red Bull Arena,
+2024-03-09,2024,MLS,Los Angeles FC,Sporting Kansas City,0-0,,,1.6,4.15,5.4,BMO Stadium,
+2024-03-16,2024,MLS,Seattle Sounders,Colorado Rapids,1-1,,,1.65,3.9,5.3,Lumen Field,
+2024-03-16,2024,MLS,Chicago Fire,CF Montreal,4-3,,,2.0,3.5,3.75,Soldier Field,
+2024-03-16,2024,MLS,DC United,Inter Miami,1-3,,,1.93,3.75,3.75,Audi Field,
+2024-03-16,2024,MLS,Columbus Crew,New York Red Bulls,3-0,,,1.95,3.5,4.0,Lower.com Field,
+2024-03-16,2024,MLS,New York City FC,Toronto FC,2-1,,,1.62,3.85,5.7,Yankee Stadium,
+2024-03-17,2024,MLS,New England Revolution,FC Cincinnati,1-2,,,2.15,3.55,3.3,Gillette Stadium,
+2024-03-17,2024,MLS,Atlanta United,Orlando City,2-0,,,1.78,3.9,4.35,Mercedes-Benz Stadium,
+2024-03-16,2024,MLS,Houston Dynamo,Portland Timbers,1-0,,,1.85,3.7,4.15,Shell Energy Stadium,
+2024-03-16,2024,MLS,Nashville SC,Charlotte FC,2-1,,,2.1,3.25,3.8,Geodis Park,
+2024-03-16,2024,MLS,Austin FC,Philadelphia Union,2-2,,,3.1,3.35,2.32,Q2 Stadium,
+2024-03-16,2024,MLS,Sporting Kansas City,San Jose Earthquakes,2-1,,,1.8,3.65,4.6,Children's Mercy Park,
+2024-03-16,2024,MLS,Minnesota United,Los Angeles FC,2-0,,,3.35,3.5,2.15,Allianz Field,Kyle Johnston
+2024-03-16,2024,MLS,LA Galaxy,St. Louis City,3-3,,,1.7,4.15,4.6,Dignity Health Sports Park,
+2024-03-16,2024,MLS,FC Dallas,Vancouver Whitecaps,1-3,,,2.45,3.35,2.9,Toyota Stadium,
+2024-03-23,2024,MLS,New England Revolution,Chicago Fire,1-1,,,2.05,3.7,3.45,Gillette Stadium,
+2024-03-23,2024,MLS,New York Red Bulls,Inter Miami,4-0,,,2.0,3.8,3.5,Red Bull Arena,
+2024-03-23,2024,MLS,Vancouver Whitecaps,Real Salt Lake,1-2,,,1.88,3.6,4.25,BC Place Stadium,
+2024-03-23,2024,MLS,Charlotte FC,Columbus Crew,2-0,,,3.15,3.35,2.3,Bank of America Stadium,
+2024-03-23,2024,MLS,Orlando City,Austin FC,2-0,,,1.75,3.85,4.5,Inter&Co Stadium,
+2024-03-23,2024,MLS,FC Cincinnati,New York City FC,1-0,,,1.8,3.5,4.85,TQL Stadium,
+2024-03-23,2024,MLS,Toronto FC,Atlanta United,2-0,,,2.2,3.4,3.3,BMO Field,
+2024-03-23,2024,MLS,San Jose Earthquakes,Seattle Sounders,3-2,,,2.55,3.2,2.92,PayPal Park,
+2024-03-23,2024,MLS,Colorado Rapids,Houston Dynamo,0-1,,,1.95,3.45,4.0,Dick's Sporting Goods Park,
+2024-03-23,2024,MLS,Sporting Kansas City,LA Galaxy,2-3,,,2.3,3.5,3.0,Children's Mercy Park,
+2024-03-23,2024,MLS,Portland Timbers,Philadelphia Union,1-3,,,1.87,4.0,3.75,Providence Park,
+2024-03-23,2024,MLS,Los Angeles FC,Nashville SC,5-0,,,1.47,4.3,7.3,BMO Stadium,
+2024-03-23,2024,MLS,St. Louis City,DC United,2-2,,,1.93,3.65,3.85,Energizer Park,
+2024-03-30,2024,MLS,Colorado Rapids,Los Angeles FC,3-2,,,2.77,3.45,2.52,Dick's Sporting Goods Park,
+2024-03-30,2024,MLS,Philadelphia Union,Minnesota United,2-0,,,1.65,4.35,4.7,Subaru Park,
+2024-03-30,2024,MLS,Inter Miami,New York City FC,1-1,,,1.95,3.7,3.8,Chase Stadium,
+2024-03-30,2024,MLS,Charlotte FC,FC Cincinnati,1-1,,,2.67,3.25,2.7,Bank of America Stadium,
+2024-03-30,2024,MLS,DC United,CF Montreal,1-0,,,1.83,4.0,3.95,Audi Field,
+2024-03-30,2024,MLS,Toronto FC,Sporting Kansas City,1-3,,,2.47,3.3,2.92,BMO Field,
+2024-03-30,2024,MLS,Orlando City,New York Red Bulls,1-1,,,2.15,3.2,3.65,Inter&Co Stadium,
+2024-03-31,2024,MLS,Atlanta United,Chicago Fire,3-0,,,1.72,4.1,4.45,Mercedes-Benz Stadium,
+2024-03-30,2024,MLS,LA Galaxy,Seattle Sounders,1-0,,,1.91,3.75,3.85,Dignity Health Sports Park,
+2024-03-30,2024,MLS,Real Salt Lake,St. Louis City,3-1,,,1.65,4.2,4.9,America First Field,
+2024-03-30,2024,MLS,Austin FC,FC Dallas,2-1,,,2.4,3.35,2.95,Q2 Stadium,
+2024-03-30,2024,MLS,Vancouver Whitecaps,Portland Timbers,3-2,,,2.05,3.55,3.6,BC Place Stadium,
+2024-03-30,2024,MLS,Houston Dynamo,San Jose Earthquakes,2-1,,,1.82,3.35,5.0,Shell Energy Stadium,
+2024-03-30,2024,MLS,Nashville SC,Columbus Crew,2-2,,,3.1,3.4,2.3,Geodis Park,
+2024-04-06,2024,MLS,Vancouver Whitecaps,Toronto FC,4-0,,,1.57,4.05,6.1,BC Place Stadium,
+2024-04-06,2024,MLS,Los Angeles FC,LA Galaxy,2-1,,,1.78,4.25,4.0,BMO Stadium,
+2024-04-06,2024,MLS,Columbus Crew,DC United,1-1,,,1.65,4.15,4.85,Lower.com Field,
+2024-04-06,2024,MLS,FC Cincinnati,New York Red Bulls,1-2,,,2.25,3.15,3.45,TQL Stadium,
+2024-04-06,2024,MLS,Inter Miami,Colorado Rapids,2-2,,,2.3,3.55,3.0,Chase Stadium,
+2024-04-06,2024,MLS,New England Revolution,Charlotte FC,1-0,,,2.27,3.45,3.1,Gillette Stadium,
+2024-04-06,2024,MLS,New York City FC,Atlanta United,1-1,,,2.05,3.6,3.5,Citi Field,
+2024-04-07,2024,MLS,Sporting Kansas City,Portland Timbers,3-3,,,1.98,3.7,3.7,Children's Mercy Park,
+2024-04-06,2024,MLS,Minnesota United,Real Salt Lake,1-1,,,2.32,3.6,2.95,Allianz Field,
+2024-04-06,2024,MLS,Seattle Sounders,CF Montreal,5-0,,,1.55,4.1,6.3,Lumen Field,
+2024-04-06,2024,MLS,Austin FC,San Jose Earthquakes,4-3,,,2.12,3.4,3.5,Q2 Stadium,
+2024-04-06,2024,MLS,Nashville SC,Philadelphia Union,1-2,,,2.62,3.15,2.85,Geodis Park,
+2024-04-06,2024,MLS,Chicago Fire,Houston Dynamo,2-1,,,2.3,3.35,3.15,Soldier Field,
+2024-04-06,2024,MLS,St. Louis City,FC Dallas,0-0,,,1.78,3.8,4.5,Energizer Park,
+2024-04-13,2024,MLS,Portland Timbers,Los Angeles FC,2-2,,,2.94,3.65,2.32,Providence Park,
+2024-04-13,2024,MLS,New York Red Bulls,Chicago Fire,0-0,,,1.62,3.85,5.7,Red Bull Arena,
+2024-04-13,2024,MLS,CF Montreal,FC Cincinnati,2-1,,,2.75,3.35,2.57,Stade Saputo,
+2024-04-13,2024,MLS,DC United,Orlando City,2-3,,,2.22,3.55,3.15,Audi Field,
+2024-04-13,2024,MLS,New York City FC,New England Revolution,2-0,,,1.88,3.7,4.0,Yankee Stadium,
+2024-04-13,2024,MLS,Charlotte FC,Toronto FC,3-2,,,1.7,3.85,5.0,Bank of America Stadium,
+2024-04-14,2024,MLS,Atlanta United,Philadelphia Union,2-2,,,2.32,3.75,2.82,Mercedes-Benz Stadium,
+2024-04-14,2024,MLS,St. Louis City,Austin FC,1-0,,,1.88,3.7,4.0,Energizer Park,
+2024-04-13,2024,MLS,Vancouver Whitecaps,LA Galaxy,1-3,,,2.25,3.9,2.9,BC Place Stadium,
+2024-04-13,2024,MLS,FC Dallas,Seattle Sounders,0-0,,,3.2,3.25,2.32,Toyota Stadium,
+2024-04-13,2024,MLS,San Jose Earthquakes,Colorado Rapids,0-3,,,2.02,3.45,3.75,PayPal Park,
+2024-04-13,2024,MLS,Minnesota United,Houston Dynamo,1-2,,,2.3,3.5,3.05,Allianz Field,
+2024-04-13,2024,MLS,Real Salt Lake,Columbus Crew,0-0,,,1.72,3.9,4.7,America First Field,
+2024-04-13,2024,MLS,Sporting Kansas City,Inter Miami,2-3,,,2.6,3.75,2.52,GEHA Field at Arrowhead Stadium,
+2024-04-20,2024,MLS,Atlanta United,FC Cincinnati,1-2,,,2.07,3.85,3.25,Mercedes-Benz Stadium,
+2024-04-20,2024,MLS,Inter Miami,Nashville SC,3-1,,,1.45,4.8,6.6,Chase Stadium,
+2024-04-20,2024,MLS,Columbus Crew,Portland Timbers,2-2,,,1.57,4.3,5.5,Lower.com Field,
+2024-04-20,2024,MLS,Toronto FC,New England Revolution,1-0,,,2.32,3.6,2.92,BMO Field,
+2024-04-20,2024,MLS,CF Montreal,Orlando City,2-2,,,2.7,3.5,2.52,Stade Saputo,
+2024-04-20,2024,MLS,New York City FC,DC United,2-0,,,1.7,3.9,4.85,Citi Field,
+2024-04-21,2024,MLS,Charlotte FC,Minnesota United,0-3,,,2.02,3.7,3.5,Bank of America Stadium,
+2024-04-20,2024,MLS,Los Angeles FC,New York Red Bulls,2-2,,,1.87,3.5,4.4,BMO Stadium,
+2024-04-20,2024,MLS,Chicago Fire,Real Salt Lake,0-4,,,2.1,3.7,3.25,Soldier Field,
+2024-04-20,2024,MLS,Sporting Kansas City,St. Louis City,3-3,,,1.98,3.65,3.7,Children's Mercy Park,
+2024-04-20,2024,MLS,Seattle Sounders,Vancouver Whitecaps,0-2,,,1.8,3.35,5.1,Lumen Field,
+2024-04-20,2024,MLS,Colorado Rapids,FC Dallas,2-1,,,1.65,3.65,5.9,Dick's Sporting Goods Park,
+2024-04-20,2024,MLS,Houston Dynamo,Austin FC,0-1,,,1.75,3.75,4.75,Shell Energy Stadium,
+2024-04-21,2024,MLS,LA Galaxy,San Jose Earthquakes,4-3,,,1.47,4.7,6.4,Dignity Health Sports Park,
+2024-04-27,2024,MLS,Austin FC,LA Galaxy,2-0,,,2.57,3.75,2.52,Q2 Stadium,
+2024-04-27,2024,MLS,New York Red Bulls,Vancouver Whitecaps,1-1,,,1.72,3.8,4.8,Red Bull Arena,
+2024-04-27,2024,MLS,Columbus Crew,CF Montreal,0-0,,,1.62,4.2,5.2,Lower.com Field,
+2024-04-27,2024,MLS,Philadelphia Union,Real Salt Lake,1-2,,,1.87,3.8,3.95,Subaru Park,
+2024-04-27,2024,MLS,New England Revolution,Inter Miami,1-4,,,2.8,3.8,2.35,Gillette Stadium,
+2024-04-27,2024,MLS,New York City FC,Charlotte FC,2-1,,,1.82,3.85,4.15,Yankee Stadium,
+2024-04-27,2024,MLS,DC United,Seattle Sounders,2-1,,,2.12,3.55,3.35,Audi Field,
+2024-04-27,2024,MLS,Orlando City,Toronto FC,1-2,,,1.47,4.2,7.7,Inter&Co Stadium,
+2024-04-27,2024,MLS,FC Cincinnati,Colorado Rapids,2-1,,,1.75,3.95,4.45,TQL Stadium,
+2024-04-27,2024,MLS,Chicago Fire,Atlanta United,0-0,,,2.22,3.9,2.92,Soldier Field,
+2024-04-27,2024,MLS,Minnesota United,Sporting Kansas City,2-1,,,1.98,3.7,3.7,Allianz Field,
+2024-04-27,2024,MLS,Nashville SC,San Jose Earthquakes,1-1,,,1.93,3.55,4.0,Geodis Park,
+2024-04-27,2024,MLS,Los Angeles FC,Portland Timbers,3-2,,,1.47,4.85,6.0,BMO Stadium,
+2024-04-27,2024,MLS,FC Dallas,Houston Dynamo,2-0,,,2.67,3.25,2.75,Toyota Stadium,
+2024-04-30,2024,MLS,Philadelphia Union,Seattle Sounders,2-3,,,1.78,3.35,4.65,Subaru Park,
+2024-05-04,2024,MLS,San Jose Earthquakes,Los Angeles FC,3-1,,,3.15,3.7,2.18,Levi's Stadium,
+2024-05-04,2024,MLS,Toronto FC,FC Dallas,3-1,,,2.05,3.55,3.55,BMO Field,
+2024-05-04,2024,MLS,DC United,Philadelphia Union,2-2,,,2.3,3.55,3.0,Audi Field,
+2024-05-04,2024,MLS,Inter Miami,New York Red Bulls,6-2,,,1.91,3.7,3.9,Chase Stadium,
+2024-05-04,2024,MLS,Charlotte FC,Portland Timbers,2-0,,,1.93,3.75,3.75,Bank of America Stadium,
+2024-05-04,2024,MLS,Atlanta United,Minnesota United,1-2,,,1.6,4.5,4.85,Mercedes-Benz Stadium,
+2024-05-04,2024,MLS,Orlando City,FC Cincinnati,0-1,,,2.22,3.35,3.3,Inter&Co Stadium,
+2024-05-05,2024,MLS,Seattle Sounders,LA Galaxy,0-0,,,1.75,4.05,4.4,Lumen Field,
+2024-05-05,2024,MLS,New York City FC,Colorado Rapids,0-2,,,1.62,4.15,5.3,Citi Field,
+2024-05-04,2024,MLS,Real Salt Lake,Sporting Kansas City,1-0,,,1.62,4.2,5.1,America First Field,
+2024-05-04,2024,MLS,Chicago Fire,New England Revolution,0-1,,,1.87,3.8,3.95,Soldier Field,
+2024-05-04,2024,MLS,Vancouver Whitecaps,Austin FC,0-0,,,1.6,3.9,6.1,BC Place Stadium,
+2024-05-04,2024,MLS,Nashville SC,CF Montreal,4-1,,,1.75,3.55,5.1,Geodis Park,
+2024-05-04,2024,MLS,Houston Dynamo,St. Louis City,0-0,,,2.0,3.45,3.85,Shell Energy Stadium,
+2024-05-11,2024,MLS,Philadelphia Union,Orlando City,2-3,,,2.07,3.45,3.6,Subaru Park,
+2024-05-11,2024,MLS,New York Red Bulls,New England Revolution,4-2,,,1.53,4.25,6.1,Red Bull Arena,Jon Freemon
+2024-05-11,2024,MLS,Atlanta United,DC United,2-3,,,1.75,4.35,4.05,Mercedes-Benz Stadium,
+2024-05-11,2024,MLS,Toronto FC,New York City FC,2-3,,,2.47,3.3,2.92,BMO Field,
+2024-05-11,2024,MLS,CF Montreal,Inter Miami,2-3,,,4.1,4.2,1.75,Stade Saputo,
+2024-05-11,2024,MLS,Charlotte FC,Nashville SC,1-0,,,2.18,3.2,3.55,Bank of America Stadium,
+2024-05-11,2024,MLS,Columbus Crew,FC Cincinnati,1-2,,,1.78,3.75,4.5,Lower.com Field,
+2024-05-12,2024,MLS,Portland Timbers,Seattle Sounders,1-2,,,2.7,3.55,2.52,Providence Park,
+2024-05-11,2024,MLS,LA Galaxy,Real Salt Lake,2-2,,,1.93,4.05,3.5,Dignity Health Sports Park,
+2024-05-11,2024,MLS,FC Dallas,Austin FC,2-1,,,1.95,3.45,4.0,Toyota Stadium,
+2024-05-11,2024,MLS,Sporting Kansas City,Houston Dynamo,1-2,,,2.32,3.35,3.1,Children's Mercy Park,
+2024-05-11,2024,MLS,St. Louis City,Chicago Fire,3-1,,,1.75,4.05,4.25,Energizer Park,
+2024-05-11,2024,MLS,Colorado Rapids,San Jose Earthquakes,2-3,,,1.78,3.8,4.45,Dick's Sporting Goods Park,
+2024-05-11,2024,MLS,Los Angeles FC,Vancouver Whitecaps,3-0,,,1.65,4.1,5.1,BMO Stadium,
+2024-05-15,2024,MLS,FC Cincinnati,Atlanta United,1-0,,,1.8,4.0,4.1,TQL Stadium,
+2024-05-15,2024,MLS,DC United,New York Red Bulls,1-4,,,2.32,3.5,3.0,Audi Field,
+2024-05-15,2024,MLS,Philadelphia Union,New York City FC,1-2,,,1.95,3.7,3.75,Subaru Park,
+2024-05-15,2024,MLS,Orlando City,Inter Miami,0-0,,,2.07,3.9,3.25,Inter&Co Stadium,
+2024-05-15,2024,MLS,CF Montreal,Columbus Crew,1-3,,,3.15,3.65,2.18,Stade Saputo,
+2024-05-15,2024,MLS,Austin FC,Houston Dynamo,1-0,,,2.52,3.15,2.95,Q2 Stadium,
+2024-05-15,2024,MLS,Minnesota United,LA Galaxy,2-2,,,2.18,3.85,3.05,Allianz Field,
+2024-05-15,2024,MLS,Real Salt Lake,Seattle Sounders,2-0,,,1.7,3.9,4.9,America First Field,Ismir Pekmic
+2024-05-15,2024,MLS,Chicago Fire,Charlotte FC,0-1,,,2.1,3.35,3.65,Soldier Field,
+2024-05-15,2024,MLS,Portland Timbers,San Jose Earthquakes,4-2,,,2.2,3.8,3.0,Providence Park,Pierre-Luc Lauziere
+2024-05-15,2024,MLS,Nashville SC,Toronto FC,2-0,,,1.6,4.0,5.7,Geodis Park,
+2024-05-15,2024,MLS,Colorado Rapids,Vancouver Whitecaps,1-0,,,1.98,3.7,3.7,Dick's Sporting Goods Park,
+2024-05-15,2024,MLS,St. Louis City,Los Angeles FC,0-2,,,2.55,3.65,2.62,Energizer Park,Joe Dickerson
+2024-05-18,2024,MLS,Nashville SC,Atlanta United,1-1,,,1.83,3.6,4.45,Geodis Park,
+2024-05-18,2024,MLS,Charlotte FC,LA Galaxy,0-0,,,2.12,3.65,3.3,Bank of America Stadium,
+2024-05-18,2024,MLS,New York City FC,New York Red Bulls,2-1,,,2.55,3.35,2.8,Citi Field,
+2024-05-18,2024,MLS,Toronto FC,CF Montreal,5-1,,,1.75,3.85,4.55,BMO Field,
+2024-05-18,2024,MLS,FC Cincinnati,St. Louis City,3-1,,,1.72,3.9,4.65,TQL Stadium,
+2024-05-18,2024,MLS,New England Revolution,Philadelphia Union,0-3,,,2.82,3.7,2.4,Gillette Stadium,
+2024-05-18,2024,MLS,Inter Miami,DC United,1-0,,,1.53,5.0,5.2,Chase Stadium,
+2024-05-18,2024,MLS,Chicago Fire,Columbus Crew,1-3,,,2.6,3.5,2.62,Soldier Field,
+2024-05-18,2024,MLS,Real Salt Lake,Colorado Rapids,5-3,,,1.72,3.9,4.75,America First Field,
+2024-05-18,2024,MLS,San Jose Earthquakes,Orlando City,0-1,,,2.07,3.6,3.5,PayPal Park,
+2024-05-18,2024,MLS,Austin FC,Sporting Kansas City,3-2,,,2.15,3.6,3.4,Q2 Stadium,
+2024-05-18,2024,MLS,Minnesota United,Portland Timbers,2-1,,,1.78,4.0,4.2,Allianz Field,
+2024-05-18,2024,MLS,Houston Dynamo,FC Dallas,1-1,,,1.65,3.85,5.3,Shell Energy Stadium,
+2024-05-18,2024,MLS,Seattle Sounders,Vancouver Whitecaps,1-1,,,1.88,3.6,4.15,Lumen Field,
+2024-05-25,2024,MLS,CF Montreal,Nashville SC,0-0,,,2.8,3.4,2.5,Stade Saputo,
+2024-05-25,2024,MLS,Charlotte FC,Philadelphia Union,0-0,,,2.6,3.5,2.65,Bank of America Stadium,
+2024-05-25,2024,MLS,New England Revolution,New York City FC,0-1,,,2.57,3.65,2.6,Gillette Stadium,
+2024-05-25,2024,MLS,Orlando City,Columbus Crew,0-2,,,2.12,3.7,3.3,Inter&Co Stadium,
+2024-05-25,2024,MLS,Toronto FC,FC Cincinnati,3-4,,,2.82,3.5,2.47,BMO Field,
+2024-05-25,2024,MLS,Atlanta United,Los Angeles FC,0-1,,,2.95,3.75,2.26,Mercedes-Benz Stadium,
+2024-05-25,2024,MLS,DC United,Chicago Fire,1-1,,,1.6,4.35,5.1,Audi Field,
+2024-05-25,2024,MLS,Colorado Rapids,Minnesota United,3-3,,,1.85,4.0,3.8,Dick's Sporting Goods Park,
+2024-05-25,2024,MLS,LA Galaxy,Houston Dynamo,2-1,,,1.72,4.0,4.55,Dignity Health Sports Park,
+2024-05-25,2024,MLS,Portland Timbers,Sporting Kansas City,2-1,,,1.98,3.8,3.55,Providence Park,
+2024-05-25,2024,MLS,San Jose Earthquakes,Austin FC,1-1,,,1.85,3.85,4.15,PayPal Park,
+2024-05-25,2024,MLS,St. Louis City,Seattle Sounders,1-2,,,2.3,3.35,3.15,Energizer Park,
+2024-05-25,2024,MLS,Vancouver Whitecaps,Inter Miami,1-2,,,1.87,4.0,4.75,BC Place Stadium,
+2024-05-25,2024,MLS,FC Dallas,Real Salt Lake,3-3,,,2.85,3.45,2.45,Toyota Stadium,
+2024-05-29,2024,MLS,New York Red Bulls,Charlotte FC,3-1,,,1.65,3.95,5.2,Red Bull Arena,Chris Penso
+2024-05-29,2024,MLS,Inter Miami,Atlanta United,1-3,,,1.5,5.1,5.4,Chase Stadium,
+2024-05-29,2024,MLS,FC Cincinnati,Nashville SC,0-2,,,1.76,3.5,5.1,TQL Stadium,
+2024-05-29,2024,MLS,CF Montreal,DC United,4-2,,,2.87,3.55,2.38,Stade Saputo,
+2024-05-29,2024,MLS,Philadelphia Union,Toronto FC,0-0,,,1.66,3.95,5.2,Subaru Park,
+2024-05-29,2024,MLS,Sporting Kansas City,Vancouver Whitecaps,1-2,,,2.85,3.35,2.5,Children's Mercy Park,
+2024-05-29,2024,MLS,Chicago Fire,Orlando City,1-1,,,2.77,3.3,2.57,Soldier Field,
+2024-05-29,2024,MLS,Austin FC,Portland Timbers,0-2,,,2.1,3.5,3.45,Q2 Stadium,
+2024-05-29,2024,MLS,Houston Dynamo,Colorado Rapids,3-1,,,1.8,3.9,4.2,Shell Energy Stadium,
+2024-05-29,2024,MLS,Seattle Sounders,Real Salt Lake,1-1,,,1.72,4.05,4.65,Lumen Field,
+2024-05-29,2024,MLS,LA Galaxy,FC Dallas,3-1,,,1.57,4.45,5.4,Dignity Health Sports Park,
+2024-05-29,2024,MLS,Los Angeles FC,Minnesota United,2-0,,,1.54,4.55,6.0,BMO Stadium,
+2024-05-31,2024,MLS,New York City FC,San Jose Earthquakes,5-1,,,1.6,4.2,5.3,Yankee Stadium,
+2024-06-01,2024,MLS,Inter Miami,St. Louis City,3-3,,,1.54,4.6,5.5,Chase Stadium,
+2024-06-01,2024,MLS,Philadelphia Union,CF Montreal,2-2,,,1.5,4.65,6.1,Subaru Park,
+2024-06-01,2024,MLS,DC United,Toronto FC,2-2,,,1.83,3.85,4.1,Audi Field,
+2024-06-01,2024,MLS,New York Red Bulls,Orlando City,1-0,,,1.82,3.75,4.4,Red Bull Arena,
+2024-06-02,2024,MLS,Atlanta United,Charlotte FC,2-3,,,1.82,3.7,4.35,Mercedes-Benz Stadium,
+2024-06-01,2024,MLS,Real Salt Lake,Austin FC,5-1,,,1.42,4.85,7.7,America First Field,
+2024-06-01,2024,MLS,Chicago Fire,LA Galaxy,2-1,,,2.27,3.7,3.0,Soldier Field,
+2024-06-01,2024,MLS,Minnesota United,Sporting Kansas City,3-1,,,1.8,3.85,4.3,Allianz Field,
+2024-06-01,2024,MLS,Vancouver Whitecaps,Colorado Rapids,2-1,,,1.72,4.1,4.5,BC Place Stadium,
+2024-06-01,2024,MLS,Nashville SC,New England Revolution,1-2,,,1.9,3.75,4.6,Geodis Park,
+2024-06-01,2024,MLS,Los Angeles FC,FC Dallas,1-0,,,1.36,5.2,8.5,BMO Stadium,
+2024-06-01,2024,MLS,Portland Timbers,Houston Dynamo,2-2,,,2.15,3.6,3.3,Providence Park,
+2024-06-08,2024,MLS,New England Revolution,New York Red Bulls,1-0,,,2.52,3.6,2.95,Gillette Stadium,
+2024-06-08,2024,MLS,St. Louis City,Portland Timbers,0-0,,,1.65,4.45,4.65,Energizer Park,
+2024-06-08,2024,MLS,Sporting Kansas City,Seattle Sounders,2-1,,,2.54,3.5,2.8,Children's Mercy Park,
+2024-06-08,2024,MLS,Minnesota United,FC Dallas,1-1,,,2.22,3.45,3.2,Allianz Field,
+2024-06-15,2024,MLS,Orlando City,Los Angeles FC,1-3,,,2.65,3.45,2.6,Inter&Co Stadium,
+2024-06-15,2024,MLS,Philadelphia Union,Inter Miami,1-2,,,1.93,3.8,3.75,Subaru Park,
+2024-06-15,2024,MLS,CF Montreal,Real Salt Lake,0-0,,,3.4,3.8,2.02,Stade Saputo,
+2024-06-15,2024,MLS,Atlanta United,Houston Dynamo,2-2,,,2.15,3.8,3.15,Mercedes-Benz Stadium,
+2024-06-15,2024,MLS,Charlotte FC,DC United,1-0,,,1.85,4.05,4.1,Bank of America Stadium,
+2024-06-15,2024,MLS,New England Revolution,Vancouver Whitecaps,3-2,,,2.27,3.6,3.05,Gillette Stadium,
+2024-06-15,2024,MLS,Toronto FC,Chicago Fire,1-4,,,2.0,3.55,3.75,BMO Field,
+2024-06-15,2024,MLS,New York Red Bulls,Nashville SC,0-0,,,1.85,3.6,4.4,Red Bull Arena,Guido Gonzalez Jr.
+2024-06-14,2024,MLS,New York City FC,Columbus Crew,2-3,,,2.22,3.7,3.1,Yankee Stadium,
+2024-06-15,2024,MLS,Seattle Sounders,Minnesota United,2-0,,,1.55,4.3,6.0,Lumen Field,
+2024-06-15,2024,MLS,San Jose Earthquakes,FC Cincinnati,2-4,,,2.6,3.65,2.57,PayPal Park,
+2024-06-15,2024,MLS,FC Dallas,St. Louis City,2-0,,,2.27,3.6,3.0,Toyota Stadium,
+2024-06-15,2024,MLS,LA Galaxy,Sporting Kansas City,4-2,,,1.62,4.3,5.0,Dignity Health Sports Park,
+2024-06-15,2024,MLS,Colorado Rapids,Austin FC,2-0,,,1.57,4.3,5.4,Dick's Sporting Goods Park,
+2024-06-19,2024,MLS,Inter Miami,Columbus Crew,2-1,,,3.15,4.0,2.1,Chase Stadium,
+2024-06-19,2024,MLS,Toronto FC,Nashville SC,1-2,,,2.0,3.55,3.7,BMO Field,
+2024-06-19,2024,MLS,DC United,Atlanta United,0-1,,,1.93,4.1,3.6,Audi Field,
+2024-06-19,2024,MLS,Charlotte FC,Orlando City,2-2,,,2.05,3.65,3.5,Bank of America Stadium,
+2024-06-19,2024,MLS,CF Montreal,New York Red Bulls,2-2,,,3.05,3.5,2.3,Stade Saputo,
+2024-06-19,2024,MLS,FC Cincinnati,Philadelphia Union,4-3,,,1.72,3.95,4.7,TQL Stadium,
+2024-06-19,2024,MLS,Houston Dynamo,Seattle Sounders,2-2,,,1.95,3.45,4.0,Shell Energy Stadium,
+2024-06-19,2024,MLS,Sporting Kansas City,Real Salt Lake,3-4,,,2.2,3.7,3.05,Children's Mercy Park,
+2024-06-19,2024,MLS,San Jose Earthquakes,Portland Timbers,1-2,,,2.12,3.9,3.1,PayPal Park,
+2024-06-19,2024,MLS,St. Louis City,Colorado Rapids,0-3,,,1.98,3.9,3.5,Energizer Park,
+2024-06-19,2024,MLS,Austin FC,Los Angeles FC,1-1,,,3.35,3.6,2.1,Q2 Stadium,
+2024-06-19,2024,MLS,FC Dallas,Minnesota United,5-3,,,1.95,3.65,3.8,Toyota Stadium,
+2024-06-19,2024,MLS,LA Galaxy,New York City FC,2-0,,,1.95,4.0,3.5,Dignity Health Sports Park,
+2024-06-22,2024,MLS,FC Cincinnati,New England Revolution,1-2,,,1.57,4.35,5.4,TQL Stadium,
+2024-06-22,2024,MLS,Philadelphia Union,Charlotte FC,0-2,,,2.32,3.6,2.95,Subaru Park,
+2024-06-22,2024,MLS,Columbus Crew,Sporting Kansas City,4-0,,,1.37,5.25,8.0,Lower.com Field,
+2024-06-22,2024,MLS,DC United,Houston Dynamo,1-4,,,2.25,3.6,3.05,Audi Field,
+2024-06-22,2024,MLS,New York Red Bulls,Toronto FC,3-0,,,1.7,4.1,4.9,Red Bull Arena,
+2024-06-22,2024,MLS,Orlando City,Chicago Fire,4-2,,,1.66,4.2,4.75,Inter&Co Stadium,
+2024-06-22,2024,MLS,Nashville SC,New York City FC,1-0,,,2.52,3.35,2.8,Geodis Park,
+2024-06-22,2024,MLS,Portland Timbers,Vancouver Whitecaps,2-0,,,2.18,3.8,3.1,Providence Park,
+2024-06-22,2024,MLS,Colorado Rapids,CF Montreal,4-1,,,1.37,5.25,7.8,Dick's Sporting Goods Park,
+2024-06-22,2024,MLS,Minnesota United,Austin FC,0-1,,,1.66,4.2,5.0,Allianz Field,
+2024-06-22,2024,MLS,St. Louis City,Atlanta United,1-1,,,2.0,3.85,3.55,Energizer Park,
+2024-06-22,2024,MLS,Seattle Sounders,FC Dallas,3-2,,,1.65,3.95,5.8,Lumen Field,
+2024-06-22,2024,MLS,Los Angeles FC,San Jose Earthquakes,6-2,,,1.33,5.75,8.6,BMO Stadium,
+2024-06-22,2024,MLS,Real Salt Lake,LA Galaxy,0-1,,,1.6,4.65,4.8,America First Field,
+2024-06-28,2024,MLS,New York City FC,Orlando City,4-2,,,1.8,3.95,4.15,Yankee Stadium,
+2024-06-29,2024,MLS,Atlanta United,Toronto FC,2-1,,,1.75,4.2,4.25,Mercedes-Benz Stadium,
+2024-06-29,2024,MLS,New England Revolution,Columbus Crew,1-5,,,3.05,3.75,2.25,Gillette Stadium,
+2024-06-29,2024,MLS,CF Montreal,Philadelphia Union,4-2,,,2.55,3.6,2.65,Stade Saputo,
+2024-06-29,2024,MLS,New York Red Bulls,DC United,2-2,,,1.7,4.0,4.75,Red Bull Arena,
+2024-06-29,2024,MLS,Sporting Kansas City,Austin FC,2-0,,,1.95,3.65,3.75,Children's Mercy Park,
+2024-06-29,2024,MLS,San Jose Earthquakes,LA Galaxy,0-3,,,2.82,4.05,2.25,Stanford Stadium,
+2024-06-29,2024,MLS,Portland Timbers,Minnesota United,3-2,,,1.8,4.15,4.1,Providence Park,
+2024-06-29,2024,MLS,Seattle Sounders,Chicago Fire,2-1,,,1.65,3.95,5.2,Lumen Field,
+2024-06-29,2024,MLS,Houston Dynamo,Charlotte FC,1-0,,,1.87,3.6,4.2,Shell Energy Stadium,
+2024-06-29,2024,MLS,Nashville SC,Inter Miami,1-2,,,2.15,3.6,3.3,Geodis Park,
+2024-06-29,2024,MLS,Los Angeles FC,Colorado Rapids,3-0,,,1.47,4.75,6.1,BMO Stadium,
+2024-06-29,2024,MLS,Vancouver Whitecaps,St. Louis City,4-3,,,1.66,4.2,4.75,BC Place Stadium,
+2024-06-29,2024,MLS,FC Dallas,FC Cincinnati,0-1,,,2.76,3.7,2.42,Toyota Stadium,
+2024-07-03,2024,MLS,Toronto FC,Orlando City,1-2,,,2.32,3.75,2.85,BMO Field,
+2024-07-03,2024,MLS,Charlotte FC,Inter Miami,1-2,,,2.0,3.75,3.55,Bank of America Stadium,
+2024-07-03,2024,MLS,New York City FC,CF Montreal,2-0,,,1.42,5.3,6.9,Citi Field,
+2024-07-03,2024,MLS,DC United,FC Cincinnati,2-3,,,2.8,3.5,2.45,Audi Field,
+2024-07-03,2024,MLS,New England Revolution,Atlanta United,2-1,,,2.35,3.5,2.96,Gillette Stadium,
+2024-07-03,2024,MLS,Chicago Fire,Philadelphia Union,4-3,,,2.0,3.7,3.55,Soldier Field,
+2024-07-03,2024,MLS,Real Salt Lake,Houston Dynamo,3-2,,,1.8,3.85,4.25,America First Field,
+2024-07-03,2024,MLS,St. Louis City,San Jose Earthquakes,2-0,,,1.82,3.9,4.15,Energizer Park,
+2024-07-03,2024,MLS,Minnesota United,Vancouver Whitecaps,1-3,,,2.27,3.7,3.0,Allianz Field,
+2024-07-03,2024,MLS,Columbus Crew,Nashville SC,2-0,,,1.45,4.75,6.8,Lower.com Field,
+2024-07-04,2024,MLS,FC Dallas,Portland Timbers,3-2,,,2.55,3.55,2.67,Toyota Stadium,
+2024-07-04,2024,MLS,Colorado Rapids,Sporting Kansas City,2-1,,,1.56,4.5,5.7,Dick's Sporting Goods Park,
+2024-07-04,2024,MLS,LA Galaxy,Los Angeles FC,1-2,,,3.1,4.05,2.18,Rose Bowl,
+2024-07-06,2024,MLS,CF Montreal,Vancouver Whitecaps,1-1,,,2.55,3.6,2.65,Stade Saputo,
+2024-07-06,2024,MLS,Columbus Crew,Toronto FC,4-0,,,1.36,5.5,8.0,Lower.com Field,
+2024-07-06,2024,MLS,FC Cincinnati,Inter Miami,6-1,,,1.65,4.1,5.0,TQL Stadium,
+2024-07-06,2024,MLS,Orlando City,DC United,5-0,,,1.68,4.05,5.0,Inter&Co Stadium,
+2024-07-06,2024,MLS,Philadelphia Union,New York Red Bulls,0-0,,,2.87,3.7,2.32,Subaru Park,
+2024-07-06,2024,MLS,Seattle Sounders,New England Revolution,2-0,,,1.46,4.65,7.0,Lumen Field,
+2024-07-06,2024,MLS,Real Salt Lake,Atlanta United,5-2,,,1.57,4.4,5.4,America First Field,
+2024-07-06,2024,MLS,Austin FC,New York City FC,2-1,,,2.76,3.4,2.42,Q2 Stadium,
+2024-07-07,2024,MLS,San Jose Earthquakes,Chicago Fire,1-0,,,2.35,3.85,2.75,PayPal Park,
+2024-07-07,2024,MLS,Sporting Kansas City,FC Dallas,3-2,,,1.65,4.1,5.1,Children's Mercy Park,
+2024-07-07,2024,MLS,LA Galaxy,Minnesota United,2-1,,,1.5,5.1,5.4,Dignity Health Sports Park,
+2024-07-07,2024,MLS,Portland Timbers,Nashville SC,4-1,,,1.83,3.75,4.2,Providence Park,
+2024-07-07,2024,MLS,Colorado Rapids,St. Louis City,4-1,,,1.62,4.3,4.9,Dick's Sporting Goods Park,
+2024-07-13,2024,MLS,FC Cincinnati,Charlotte FC,1-3,,,1.72,4.0,4.7,TQL Stadium,
+2024-07-13,2024,MLS,Toronto FC,Philadelphia Union,2-1,,,2.15,3.7,3.2,BMO Field,
+2024-07-13,2024,MLS,DC United,Nashville SC,2-1,,,1.93,3.95,3.6,Audi Field,Filip Dujic
+2024-07-13,2024,MLS,New England Revolution,Orlando City,1-3,,,3.0,3.55,2.3,Gillette Stadium,
+2024-07-13,2024,MLS,CF Montreal,Atlanta United,1-0,,,2.62,3.7,2.52,Stade Saputo,Ted Unkel
+2024-07-13,2024,MLS,Portland Timbers,Real Salt Lake,3-0,,,2.15,4.1,3.0,Providence Park,
+2024-07-13,2024,MLS,San Jose Earthquakes,Sporting Kansas City,1-2,,,2.07,3.85,3.3,PayPal Park,
+2024-07-13,2024,MLS,FC Dallas,LA Galaxy,2-0,,,2.77,3.75,2.37,Toyota Stadium,
+2024-07-13,2024,MLS,Los Angeles FC,Columbus Crew,1-5,,,1.95,3.85,3.55,BMO Stadium,
+2024-07-13,2024,MLS,Austin FC,Seattle Sounders,0-1,,,2.7,3.25,2.7,Q2 Stadium,
+2024-07-13,2024,MLS,Chicago Fire,New York City FC,0-0,,,2.3,3.6,3.0,Soldier Field,Rosendo Mendoza
+2024-07-13,2024,MLS,St. Louis City,Vancouver Whitecaps,1-4,,,2.05,3.7,3.4,Energizer Park,Pierre-Luc Lauziere
+2024-07-13,2024,MLS,Colorado Rapids,New York Red Bulls,1-1,,,2.02,3.75,3.5,Dick's Sporting Goods Park,Tim Ford
+2024-07-13,2024,MLS,Houston Dynamo,Minnesota United,1-1,,,1.62,4.55,5.0,Shell Energy Stadium,Jon Freemon
+2024-07-17,2024,MLS,Atlanta United,New York City FC,2-2,,,2.15,3.7,3.25,Mercedes-Benz Stadium,
+2024-07-17,2024,MLS,Philadelphia Union,New England Revolution,5-1,,,1.57,4.2,5.6,Subaru Park,Rubiel Vazquez
+2024-07-17,2024,MLS,Inter Miami,Toronto FC,3-1,,,1.88,4.0,3.75,Chase Stadium,Jair Marrufo
+2024-07-17,2024,MLS,Columbus Crew,Charlotte FC,1-1,,,1.55,4.6,5.5,Lower.com Field,
+2024-07-17,2024,MLS,FC Cincinnati,Chicago Fire,0-1,,,1.87,3.8,4.05,TQL Stadium,
+2024-07-17,2024,MLS,New York Red Bulls,CF Montreal,2-2,,,1.47,4.8,6.4,Red Bull Arena,
+2024-07-17,2024,MLS,Seattle Sounders,St. Louis City,2-0,,,1.62,4.1,5.2,Lumen Field,
+2024-07-17,2024,MLS,San Jose Earthquakes,Houston Dynamo,0-1,,,3.1,3.75,2.18,PayPal Park,
+2024-07-17,2024,MLS,Minnesota United,DC United,2-3,,,1.98,4.0,3.4,Allianz Field,
+2024-07-17,2024,MLS,Vancouver Whitecaps,Sporting Kansas City,2-1,,,1.62,4.35,5.0,BC Place Stadium,Marcos de Oliveira
+2024-07-17,2024,MLS,Nashville SC,Orlando City,0-3,,,2.85,3.55,2.42,Geodis Park,Pierre-Luc Lauziere
+2024-07-17,2024,MLS,LA Galaxy,Colorado Rapids,3-2,,,1.88,4.1,3.65,Dignity Health Sports Park,
+2024-07-17,2024,MLS,FC Dallas,Austin FC,3-1,,,1.93,3.65,3.95,Toyota Stadium,Armando Villarreal
+2024-07-17,2024,MLS,Los Angeles FC,Real Salt Lake,1-1,,,1.47,5.0,5.8,BMO Stadium,Guido Gonzalez Jr.
+2024-07-20,2024,MLS,Philadelphia Union,Nashville SC,3-0,,,1.6,4.2,5.4,Subaru Park,
+2024-07-20,2024,MLS,Inter Miami,Chicago Fire,2-1,,,1.87,3.9,3.9,Chase Stadium,Marcos de Oliveira
+2024-07-20,2024,MLS,Atlanta United,Columbus Crew,2-1,,,2.82,4.0,2.25,Mercedes-Benz Stadium,Rosendo Mendoza
+2024-07-20,2024,MLS,New England Revolution,FC Dallas,1-1,,,2.2,3.35,3.4,Gillette Stadium,
+2024-07-20,2024,MLS,New York Red Bulls,FC Cincinnati,3-1,,,1.82,3.85,4.15,Red Bull Arena,Ted Unkel
+2024-07-20,2024,MLS,Orlando City,New York City FC,1-1,,,1.94,3.85,3.7,Inter&Co Stadium,Joe Dickerson
+2024-07-20,2024,MLS,CF Montreal,Toronto FC,0-1,,,2.22,3.85,2.95,Stade Saputo,Armando Villarreal
+2024-07-20,2024,MLS,Vancouver Whitecaps,Houston Dynamo,3-4,,,2.18,3.6,3.3,BC Place Stadium,
+2024-07-20,2024,MLS,Colorado Rapids,Real Salt Lake,3-2,,,2.07,3.85,3.3,Dick's Sporting Goods Park,Ramy Touchan
+2024-07-20,2024,MLS,Sporting Kansas City,St. Louis City,1-1,,,1.98,3.9,3.5,Children's Mercy Park,
+2024-07-20,2024,MLS,Seattle Sounders,Los Angeles FC,0-3,,,2.27,3.45,3.2,Lumen Field,Allen Chapman
+2024-07-20,2024,MLS,Austin FC,Charlotte FC,2-2,,,2.47,3.25,2.95,Q2 Stadium,Jon Freemon
+2024-07-20,2024,MLS,Minnesota United,San Jose Earthquakes,2-0,,,1.56,4.7,5.2,Allianz Field,Ismir Pekmic
+2024-07-20,2024,MLS,LA Galaxy,Portland Timbers,3-2,,,2.05,4.1,3.15,Dignity Health Sports Park,Serhiy Boyko
+2024-08-24,2024,MLS,Minnesota United,Seattle Sounders,2-3,,,2.65,3.45,2.62,Allianz Field,
+2024-08-24,2024,MLS,New York City FC,Chicago Fire,2-2,,,1.55,4.4,5.8,Citi Field,
+2024-08-24,2024,MLS,Charlotte FC,New York Red Bulls,1-1,,,2.26,3.55,3.1,Bank of America Stadium,Drew Fischer
+2024-08-24,2024,MLS,Inter Miami,FC Cincinnati,2-0,,,1.85,3.95,3.95,Chase Stadium,
+2024-08-24,2024,MLS,DC United,FC Dallas,3-4,,,1.7,4.0,5.2,Audi Field,Serhiy Boyko
+2024-08-24,2024,MLS,CF Montreal,New England Revolution,0-5,,,2.07,3.55,3.55,Stade Saputo,
+2024-08-24,2024,MLS,Portland Timbers,St. Louis City,4-4,,,1.62,4.5,4.75,Providence Park,Ramy Touchan
+2024-08-24,2024,MLS,Nashville SC,Austin FC,0-2,,,2.22,3.4,3.3,Geodis Park,Rosendo Mendoza
+2024-08-24,2024,MLS,Real Salt Lake,San Jose Earthquakes,0-2,,,1.35,5.8,8.0,America First Field,
+2024-08-24,2024,MLS,Sporting Kansas City,Orlando City,3-0,,,2.87,3.4,2.47,Children's Mercy Park,Tim Ford
+2024-08-24,2024,MLS,LA Galaxy,Atlanta United,2-0,,,1.72,4.3,4.2,Dignity Health Sports Park,
+2024-08-24,2024,MLS,Houston Dynamo,Toronto FC,0-1,,,1.54,4.35,6.0,Shell Energy Stadium,Ted Unkel
+2024-08-28,2024,MLS,Philadelphia Union,Columbus Crew,0-1,,,2.42,3.55,2.9,Subaru Park,Ismir Pekmic
+2024-08-31,2024,MLS,New York Red Bulls,Philadelphia Union,0-2,,,1.72,4.0,4.6,Red Bull Arena,Jair Marrufo
+2024-08-31,2024,MLS,Toronto FC,DC United,1-3,,,2.22,3.45,3.25,BMO Field,Marcos de Oliveira
+2024-08-31,2024,MLS,Charlotte FC,Atlanta United,0-1,,,1.87,4.0,3.75,Bank of America Stadium,Alexis Da Silva
+2024-08-31,2024,MLS,Orlando City,Nashville SC,3-0,,,1.52,4.4,6.3,Inter&Co Stadium,Victor Rivas
+2024-08-31,2024,MLS,Columbus Crew,New York City FC,4-2,,,1.65,4.4,4.75,Lower.com Field,Ted Unkel
+2024-08-31,2024,MLS,FC Cincinnati,CF Montreal,4-1,,,1.39,5.25,7.5,TQL Stadium,Jon Freemon
+2024-09-01,2024,MLS,St. Louis City,LA Galaxy,2-1,,,2.35,3.85,2.75,Energizer Park,Joe Dickerson
+2024-08-31,2024,MLS,Portland Timbers,Seattle Sounders,1-0,,,2.32,3.45,3.0,Providence Park,Lukasz Szpala
+2024-08-31,2024,MLS,Chicago Fire,Inter Miami,1-4,,,2.55,3.6,2.62,Soldier Field,Pierre-Luc Lauziere
+2024-08-31,2024,MLS,Los Angeles FC,Houston Dynamo,0-2,,,1.7,4.15,4.6,BMO Stadium,Armando Villarreal
+2024-08-31,2024,MLS,Real Salt Lake,New England Revolution,2-0,,,1.62,4.55,4.9,America First Field,Fotis Bazakos
+2024-08-31,2024,MLS,San Jose Earthquakes,Minnesota United,1-2,,,2.3,3.9,2.87,PayPal Park,Sergii Demianchuk
+2024-08-31,2024,MLS,Austin FC,Vancouver Whitecaps,0-1,,,2.27,3.6,3.05,Q2 Stadium,Mark Allatin
+2024-08-31,2024,MLS,FC Dallas,Colorado Rapids,2-3,,,2.18,3.8,3.05,Toyota Stadium,Ricardo Montero
+2024-09-07,2024,MLS,Columbus Crew,Seattle Sounders,0-4,,,1.86,3.85,4.05,Lower.com Field,Rosendo Mendoza
+2024-09-07,2024,MLS,New York Red Bulls,Sporting Kansas City,1-1,,,1.72,4.0,4.8,Red Bull Arena,Ramy Touchan
+2024-09-07,2024,MLS,New England Revolution,St. Louis City,2-2,,,2.05,3.95,3.4,Gillette Stadium,Tim Ford
+2024-09-07,2024,MLS,Houston Dynamo,Los Angeles FC,0-0,,,1.93,3.65,3.9,Shell Energy Stadium,Guido Gonzalez Jr.
+2024-09-07,2024,MLS,Chicago Fire,DC United,1-2,,,2.22,3.7,3.05,SeatGeek Stadium,Fotis Bazakos
+2024-09-07,2024,MLS,Vancouver Whitecaps,FC Dallas,0-0,,,2.12,3.6,3.35,BC Place Stadium,Allen Chapman
+2024-09-14,2024,MLS,Orlando City,New England Revolution,3-0,,,1.45,5.0,6.5,Inter&Co Stadium,Tori Penso
+2024-09-14,2024,MLS,Toronto FC,Austin FC,2-1,,,1.95,3.7,3.8,BMO Field,Chris Penso
+2024-09-14,2024,MLS,DC United,New York City FC,1-1,,,2.47,3.55,2.75,Audi Field,Ramy Touchan
+2024-09-14,2024,MLS,CF Montreal,Charlotte FC,2-1,,,3.05,3.5,2.32,Stade Saputo,Rubiel Vazquez
+2024-09-14,2024,MLS,FC Cincinnati,Columbus Crew,0-0,,,2.3,3.85,2.92,TQL Stadium,Joe Dickerson
+2024-09-14,2024,MLS,Inter Miami,Philadelphia Union,3-1,,,1.44,5.25,6.3,Chase Stadium,Serhiy Boyko
+2024-09-14,2024,MLS,Atlanta United,Nashville SC,0-2,,,1.7,4.2,4.55,Mercedes-Benz Stadium,Armando Villarreal
+2024-09-15,2024,MLS,Seattle Sounders,Sporting Kansas City,2-0,,,1.54,4.3,6.1,Lumen Field,Drew Fischer
+2024-09-14,2024,MLS,Vancouver Whitecaps,San Jose Earthquakes,2-0,,,1.52,4.65,5.85,BC Place Stadium,Lukasz Szpala
+2024-09-14,2024,MLS,Houston Dynamo,Real Salt Lake,4-1,,,1.78,4.1,4.4,Shell Energy Stadium,Jon Freemon
+2024-09-14,2024,MLS,St. Louis City,Minnesota United,1-3,,,2.08,3.8,3.25,Energizer Park,Marcos de Oliveira
+2024-09-14,2024,MLS,Chicago Fire,New York Red Bulls,2-1,,,2.8,3.4,2.5,Soldier Field,Mark Allatin
+2024-09-14,2024,MLS,LA Galaxy,Los Angeles FC,4-2,,,2.72,3.75,2.4,Dignity Health Sports Park,Ted Unkel
+2024-09-14,2024,MLS,Colorado Rapids,Portland Timbers,2-1,,,1.86,4.05,3.95,Dick's Sporting Goods Park,Filip Dujic
+2024-09-18,2024,MLS,New England Revolution,CF Montreal,2-2,,,1.7,4.1,4.6,Gillette Stadium,Elijio Arreguin
+2024-09-18,2024,MLS,Atlanta United,Inter Miami,2-2,,,,,,Mercedes-Benz Stadium,Rosendo Mendoza
+2024-09-18,2024,MLS,Toronto FC,Columbus Crew,0-2,,,3.0,3.5,2.32,BMO Field,Guido Gonzalez Jr.
+2024-09-18,2024,MLS,New York City FC,Philadelphia Union,1-5,,,,,,Yankee Stadium,Pierre-Luc Lauziere
+2024-09-18,2024,MLS,Los Angeles FC,Austin FC,1-1,,,1.42,5.0,7.0,BMO Stadium,Allen Chapman
+2024-09-18,2024,MLS,Houston Dynamo,Vancouver Whitecaps,1-1,,,1.83,3.8,4.3,Shell Energy Stadium,Alexis Da Silva
+2024-09-18,2024,MLS,Nashville SC,Chicago Fire,1-0,,,1.78,3.95,4.45,Geodis Park,Rubiel Vazquez
+2024-09-18,2024,MLS,Sporting Kansas City,Colorado Rapids,4-1,,,2.25,3.9,2.85,Children's Mercy Park,Fotis Bazakos
+2024-09-18,2024,MLS,Portland Timbers,LA Galaxy,4-2,,,2.1,4.1,3.05,Providence Park,Tim Ford
+2024-09-18,2024,MLS,Seattle Sounders,San Jose Earthquakes,2-2,,,1.29,6.0,9.75,Lumen Field,Victor Rivas
+2024-09-18,2024,MLS,Real Salt Lake,FC Dallas,3-2,,,1.75,3.95,4.45,America First Field,Sergii Demianchuk
+2024-09-18,2024,MLS,Minnesota United,FC Cincinnati,1-2,,,2.2,3.6,3.15,Allianz Field,Drew Fischer
+2024-09-18,2024,MLS,Orlando City,Charlotte FC,2-0,,,,,,Inter&Co Stadium,Marcos de Oliveira
+2024-09-21,2024,MLS,New York City FC,Inter Miami,1-1,,,2.15,3.95,3.15,Yankee Stadium,Jon Freemon
+2024-09-21,2024,MLS,Charlotte FC,New England Revolution,4-0,,,1.8,3.9,4.2,Bank of America Stadium,Mark Allatin
+2024-09-21,2024,MLS,CF Montreal,Chicago Fire,2-0,,,2.1,3.55,3.45,Stade Saputo,Lukasz Szpala
+2024-09-21,2024,MLS,Columbus Crew,Orlando City,4-3,,,1.85,3.9,4.05,Lower.com Field,Serhiy Boyko
+2024-09-21,2024,MLS,New York Red Bulls,Atlanta United,2-2,,,1.65,4.15,5.0,Red Bull Arena,Chris Penso
+2024-09-22,2024,MLS,Philadelphia Union,DC United,4-0,,,1.9,4.0,3.7,Subaru Park,Filip Dujic
+2024-09-21,2024,MLS,Nashville SC,FC Cincinnati,2-2,,,3.0,3.45,2.35,Geodis Park,Pierre-Luc Lauziere
+2024-09-21,2024,MLS,Sporting Kansas City,Minnesota United,0-2,,,2.3,3.8,2.88,Children's Mercy Park,Ismir Pekmic
+2024-09-21,2024,MLS,Real Salt Lake,Portland Timbers,3-3,,,1.98,3.95,3.5,America First Field,Tori Penso
+2024-09-21,2024,MLS,FC Dallas,Los Angeles FC,3-1,,,2.18,3.6,3.2,Toyota Stadium,Alexis Da Silva
+2024-09-21,2024,MLS,LA Galaxy,Vancouver Whitecaps,4-2,,,1.55,4.8,5.2,Dignity Health Sports Park,Jair Marrufo
+2024-09-21,2024,MLS,San Jose Earthquakes,St. Louis City,1-2,,,2.34,3.95,2.72,PayPal Park,Ricardo Montero
+2024-09-21,2024,MLS,Austin FC,Houston Dynamo,0-1,,,2.75,3.4,2.55,Q2 Stadium,Victor Rivas
+2024-09-21,2024,MLS,Colorado Rapids,Toronto FC,2-0,,,1.5,4.6,6.25,Dick's Sporting Goods Park,Rosendo Mendoza
+2024-09-28,2024,MLS,CF Montreal,San Jose Earthquakes,3-0,,,1.82,4.0,4.0,Stade Saputo,Armando Villarreal
+2024-09-28,2024,MLS,Philadelphia Union,Atlanta United,1-1,,,1.75,4.1,4.2,Subaru Park,Fotis Bazakos
+2024-09-28,2024,MLS,New England Revolution,Nashville SC,1-0,,,2.1,3.55,3.4,Gillette Stadium,Marcos de Oliveira
+2024-09-28,2024,MLS,Inter Miami,Charlotte FC,1-1,,,1.48,4.9,6.0,Chase Stadium,Ramy Touchan
+2024-09-28,2024,MLS,FC Cincinnati,Los Angeles FC,1-2,,,1.8,4.0,4.1,TQL Stadium,Ismir Pekmic
+2024-09-28,2024,MLS,New York Red Bulls,New York City FC,1-5,,,2.1,3.65,3.45,Red Bull Arena,Tori Penso
+2024-09-28,2024,MLS,DC United,Columbus Crew,2-2,,,2.52,3.7,2.6,Audi Field,Rubiel Vazquez
+2024-09-28,2024,MLS,Austin FC,Real Salt Lake,2-2,,,2.1,3.9,3.15,Q2 Stadium,Lukasz Szpala
+2024-09-28,2024,MLS,FC Dallas,Orlando City,1-3,,,2.52,3.55,2.72,Toyota Stadium,Jair Marrufo
+2024-09-28,2024,MLS,Vancouver Whitecaps,Portland Timbers,1-1,,,2.0,4.05,3.4,BC Place Stadium,Joe Dickerson
+2024-09-28,2024,MLS,St. Louis City,Sporting Kansas City,3-1,,,1.7,4.3,4.4,Energizer Park,Guido Gonzalez Jr.
+2024-09-28,2024,MLS,Seattle Sounders,Houston Dynamo,1-0,,,1.91,3.6,4.05,Lumen Field,Allen Chapman
+2024-09-28,2024,MLS,Chicago Fire,Toronto FC,1-1,,,2.07,3.5,3.55,SeatGeek Stadium,Ricardo Montero
+2024-09-28,2024,MLS,Minnesota United,Colorado Rapids,3-0,,,1.62,4.55,4.65,Allianz Field,Lorenzo Hernandez
+2024-10-02,2024,MLS,Charlotte FC,Chicago Fire,4-3,,,1.62,4.2,5.25,Bank of America Stadium,Serhiy Boyko
+2024-10-02,2024,MLS,New York City FC,FC Cincinnati,3-2,,,1.95,3.95,3.7,Red Bull Arena,Guido Gonzalez Jr.
+2024-10-02,2024,MLS,Atlanta United,CF Montreal,1-2,,,1.62,4.5,4.85,Mercedes-Benz Stadium,Ted Unkel
+2024-10-02,2024,MLS,Orlando City,Philadelphia Union,2-1,,,1.88,4.1,3.75,Inter&Co Stadium,Armando Villarreal
+2024-10-02,2024,MLS,Toronto FC,New York Red Bulls,1-4,,,2.77,3.3,2.57,BMO Field,Filip Dujic
+2024-10-02,2024,MLS,Columbus Crew,Inter Miami,2-3,,,2.08,4.15,3.1,Lower.com Field,Drew Fischer
+2024-10-02,2024,MLS,Colorado Rapids,LA Galaxy,1-3,,,2.42,4.1,2.55,Dick's Sporting Goods Park,Pierre-Luc Lauziere
+2024-10-02,2024,MLS,Nashville SC,DC United,3-4,,,2.2,3.45,3.25,Geodis Park,Lukasz Szpala
+2024-10-02,2024,MLS,San Jose Earthquakes,FC Dallas,3-2,,,2.65,3.65,2.58,PayPal Park,Lorenzo Hernandez
+2024-10-02,2024,MLS,Portland Timbers,Austin FC,0-1,,,1.53,4.9,5.3,Providence Park,Alexis Da Silva
+2024-10-02,2024,MLS,Real Salt Lake,Minnesota United,0-0,,,2.0,3.9,3.45,America First Field,Ricardo Montero
+2024-10-02,2024,MLS,Vancouver Whitecaps,Seattle Sounders,0-3,,,2.55,3.3,2.82,BC Place Stadium,Chris Penso
+2024-10-02,2024,MLS,Houston Dynamo,New England Revolution,2-1,,,1.54,4.6,6.0,Shell Energy Stadium,Fotis Bazakos
+2024-10-02,2024,MLS,Los Angeles FC,St. Louis City,1-0,,,1.32,6.0,8.5,BMO Stadium,Victor Rivas
+2024-10-05,2024,MLS,Toronto FC,Inter Miami,0-1,,,2.15,3.75,3.2,BMO Field,Joe Dickerson
+2024-10-05,2024,MLS,Vancouver Whitecaps,Minnesota United,0-1,,,1.8,4.05,4.1,BC Place Stadium,Ramy Touchan
+2024-10-05,2024,MLS,New England Revolution,DC United,1-2,,,2.4,4.0,2.6,Gillette Stadium,Alexis Da Silva
+2024-10-05,2024,MLS,Columbus Crew,Philadelphia Union,3-2,,,1.75,4.35,4.05,Lower.com Field,Allen Chapman
+2024-10-05,2024,MLS,FC Cincinnati,Orlando City,1-3,,,2.15,3.8,3.2,TQL Stadium,Filip Dujic
+2024-10-05,2024,MLS,Atlanta United,New York Red Bulls,2-1,,,2.37,3.75,2.78,Mercedes-Benz Stadium,Ismir Pekmic
+2024-10-05,2024,MLS,Charlotte FC,CF Montreal,2-0,,,1.62,4.3,5.0,Bank of America Stadium,Victor Rivas
+2024-10-06,2024,MLS,Portland Timbers,FC Dallas,0-0,,,1.53,4.9,6.0,Providence Park,Armando Villarreal
+2024-10-06,2024,MLS,New York City FC,Nashville SC,3-1,,,1.5,4.7,6.2,Red Bull Arena,Serhiy Boyko
+2024-10-05,2024,MLS,LA Galaxy,Austin FC,2-1,,,1.47,5.2,5.75,Dignity Health Sports Park,Ted Unkel
+2024-10-05,2024,MLS,Colorado Rapids,Seattle Sounders,0-1,,,2.6,3.5,2.65,Dick's Sporting Goods Park,Tim Ford
+2024-10-05,2024,MLS,San Jose Earthquakes,Real Salt Lake,0-1,,,2.92,3.95,2.25,PayPal Park,Mark Allatin
+2024-10-05,2024,MLS,St. Louis City,Houston Dynamo,3-0,,,2.65,3.8,2.45,Energizer Park,Tori Penso
+2024-10-05,2024,MLS,Sporting Kansas City,Los Angeles FC,0-3,,,3.2,3.85,2.15,Children's Mercy Park,Marcos de Oliveira
+2024-10-12,2024,MLS,Columbus Crew,New England Revolution,4-0,,,1.38,6.0,7.3,Lower.com Field,Filip Dujic
+2024-10-13,2024,MLS,Vancouver Whitecaps,Los Angeles FC,1-2,,,3.2,3.7,2.12,BC Place Stadium,Drew Fischer
+2024-10-19,2024,MLS,Chicago Fire,Nashville SC,0-3,,,2.02,3.9,3.5,Soldier Field,Jon Freemon
+2024-10-19,2024,MLS,New York Red Bulls,Columbus Crew,2-3,,,2.1,3.75,3.3,Red Bull Arena,Guido Gonzalez Jr.
+2024-10-19,2024,MLS,CF Montreal,New York City FC,2-0,,,3.2,3.7,2.22,Stade Saputo,Allen Chapman
+2024-10-19,2024,MLS,Philadelphia Union,FC Cincinnati,1-2,,,1.95,4.05,3.5,Subaru Park,Joe Dickerson
+2024-10-19,2024,MLS,Inter Miami,New England Revolution,6-2,,,1.42,5.5,6.5,Chase Stadium,Alexis Da Silva
+2024-10-19,2024,MLS,DC United,Charlotte FC,0-3,,,1.8,3.95,4.33,Audi Field,Jair Marrufo
+2024-10-19,2024,MLS,Orlando City,Atlanta United,1-2,,,1.78,4.35,4.1,Inter&Co Stadium,Rubiel Vazquez
+2024-10-19,2024,MLS,Seattle Sounders,Portland Timbers,1-1,,,1.62,4.5,5.0,Lumen Field,Ismir Pekmic
+2024-10-19,2024,MLS,Los Angeles FC,San Jose Earthquakes,3-1,,,1.24,7.0,11.25,BMO Stadium,Pierre-Luc Lauziere
+2024-10-19,2024,MLS,Real Salt Lake,Vancouver Whitecaps,2-1,,,1.66,4.5,4.5,America First Field,Armando Villarreal
+2024-10-19,2024,MLS,FC Dallas,Sporting Kansas City,2-1,,,1.78,4.2,4.3,Toyota Stadium,Katja Koroleva
+2024-10-19,2024,MLS,Austin FC,Colorado Rapids,3-2,,,2.07,3.95,3.3,Q2 Stadium,Chris Penso
+2024-10-19,2024,MLS,Minnesota United,St. Louis City,4-1,,,1.5,4.85,6.0,Allianz Field,Lukasz Szpala
+2024-10-19,2024,MLS,Houston Dynamo,LA Galaxy,2-1,,,2.12,3.95,3.1,Shell Energy Stadium,Rosendo Mendoza
+2024-10-22,2024,MLS,CF Montreal,Atlanta United,2-2,,,2.57,3.4,2.77,Stade Saputo,Joe Dickerson
+2024-10-23,2024,MLS,Vancouver Whitecaps,Portland Timbers,5-0,,,3.2,4.0,2.1,Providence Park,Rubiel Vazquez
+2024-10-25,2024,MLS,Inter Miami,Atlanta United,2-1,,,1.33,6.25,8.2,Chase Stadium,Allen Chapman
+2024-10-27,2024,MLS,Orlando City,Charlotte FC,2-0,,,1.82,3.85,4.33,Inter&Co Stadium,Drew Fischer
+2024-10-26,2024,MLS,LA Galaxy,Colorado Rapids,5-0,,,1.44,5.25,6.5,Dignity Health Sports Park,Lukasz Szpala
+2024-10-27,2024,MLS,Los Angeles FC,Vancouver Whitecaps,2-1,,,1.55,4.5,5.6,BMO Stadium,Jair Marrufo
+2024-10-28,2024,MLS,FC Cincinnati,New York City FC,1-0,,,1.95,3.75,3.9,TQL Stadium,Serhiy Boyko
+2024-10-28,2024,MLS,Seattle Sounders,Houston Dynamo,0-0,,,1.78,3.7,4.9,Lumen Field,Ted Unkel
+2024-10-29,2024,MLS,Columbus Crew,New York Red Bulls,0-1,,,1.78,4.1,4.3,Lower.com Field,Tim Ford
+2024-10-29,2024,MLS,Real Salt Lake,Minnesota United,0-0,,,2.07,3.55,3.6,America First Field,Pierre-Luc Lauziere
+2024-11-01,2024,MLS,Charlotte FC,Orlando City,0-0,,,2.35,3.6,3.0,Bank of America Stadium,Guido Gonzalez Jr.
+2024-11-02,2024,MLS,New York City FC,FC Cincinnati,3-1,,,2.32,3.6,2.95,Citi Field,Ismir Pekmic
+2024-11-02,2024,MLS,Atlanta United,Inter Miami,2-1,,,3.4,4.1,1.98,Mercedes-Benz Stadium,Rubiel Vazquez
+2024-11-01,2024,MLS,Colorado Rapids,LA Galaxy,1-4,,,2.75,3.8,2.37,Dick's Sporting Goods Park,Victor Rivas
+2024-11-03,2024,MLS,New York Red Bulls,Columbus Crew,2-2,,,2.37,3.5,2.92,Red Bull Arena,Filip Dujic
+2024-11-03,2024,MLS,Houston Dynamo,Seattle Sounders,1-1,,,2.2,3.2,3.65,Shell Energy Stadium,Armando Villarreal
+2024-11-02,2024,MLS,Minnesota United,Real Salt Lake,1-1,,,1.87,3.75,4.2,Allianz Field,Tori Penso
+2024-11-03,2024,MLS,Vancouver Whitecaps,Los Angeles FC,3-0,,,2.48,3.7,2.7,BC Place Stadium,Rosendo Mendoza
+2024-11-09,2024,MLS,FC Cincinnati,New York City FC,0-0,,,1.85,3.8,4.15,TQL Stadium,Drew Fischer
+2024-11-09,2024,MLS,Orlando City,Charlotte FC,1-1,,,1.82,3.8,4.5,Inter&Co Stadium,Ismir Pekmic
+2024-11-08,2024,MLS,Los Angeles FC,Vancouver Whitecaps,1-0,,,1.7,4.2,4.65,BMO Stadium,Joe Dickerson
+2024-11-09,2024,MLS,Inter Miami,Atlanta United,2-3,,,1.34,5.5,8.75,Chase Stadium,Lukasz Szpala
+2024-11-23,2024,MLS,New York City FC,New York Red Bulls,0-2,,,2.14,3.5,3.45,Citi Field,Allen Chapman
+2024-11-24,2024,MLS,LA Galaxy,Minnesota United,6-2,,,1.74,3.95,4.5,Dignity Health Sports Park,Rosendo Mendoza
+2024-11-24,2024,MLS,Orlando City,Atlanta United,1-0,,,1.54,4.3,5.75,Inter&Co Stadium,Armando Villarreal
+2024-11-23,2024,MLS,Los Angeles FC,Seattle Sounders,1-2,,,1.78,3.7,4.6,BMO Stadium,Guido Gonzalez Jr.
+2024-11-30,2024,MLS,LA Galaxy,Seattle Sounders,1-0,,,1.91,3.75,3.9,Dignity Health Sports Park,Drew Fischer
+2024-11-30,2024,MLS,Orlando City,New York Red Bulls,0-1,,,1.87,3.5,4.35,Inter&Co Stadium,Rosendo Mendoza
+2024-12-07,2024,MLS,LA Galaxy,New York Red Bulls,2-1,,,1.88,3.8,3.95,Dignity Health Sports Park,Guido Gonzalez Jr.
+2025-02-22,2025,MLS,Los Angeles FC,Minnesota United,1-0,,,1.82,3.75,4.5,BMO Stadium,Guido Gonzalez Jr.
+2025-02-23,2025,MLS,Portland Timbers,Vancouver Whitecaps,1-4,,,2.7,3.4,2.65,Providence Park,Victor Rivas
+2025-02-22,2025,MLS,Austin FC,Sporting Kansas City,1-0,,,1.78,4.0,4.6,Q2 Stadium,Chris Penso
+2025-02-22,2025,MLS,Atlanta United,CF Montreal,3-2,,,1.53,4.75,7.0,Mercedes-Benz Stadium,Pierre-Luc Lauziere
+2025-02-22,2025,MLS,San Jose Earthquakes,Real Salt Lake,4-0,,,2.22,3.6,3.1,PayPal Park,Malik Badawi
+2025-02-22,2025,MLS,Seattle Sounders,Charlotte FC,2-2,,,1.7,3.8,5.75,Lumen Field,Filip Dujic
+2025-02-22,2025,MLS,Nashville SC,New England Revolution,0-0,,,2.02,3.6,3.65,Geodis Park,Marcos de Oliveira
+2025-02-22,2025,MLS,Columbus Crew,Chicago Fire,4-2,,,1.61,4.5,5.6,Lower.com Field,Fotis Bazakos
+2025-02-22,2025,MLS,Orlando City,Philadelphia Union,2-4,,,1.6,4.5,5.6,Inter&Co Stadium,Rubiel Vazquez
+2025-02-22,2025,MLS,FC Cincinnati,New York Red Bulls,1-0,,,2.0,3.6,4.2,TQL Stadium,Lukasz Szpala
+2025-02-22,2025,MLS,DC United,Toronto FC,2-2,,,1.95,3.6,4.1,Audi Field,Serhiy Boyko
+2025-02-22,2025,MLS,Inter Miami,New York City FC,2-2,,,1.55,4.8,6.5,Chase Stadium,Alexis Da Silva
+2025-02-22,2025,MLS,Houston Dynamo,FC Dallas,1-2,,,2.05,3.5,3.7,Shell Energy Stadium,Armando Villarreal
+2025-02-22,2025,MLS,St. Louis City,Colorado Rapids,0-0,,,1.93,3.95,3.6,Energizer Park,Jon Freemon
+2025-02-23,2025,MLS,LA Galaxy,San Diego FC,0-2,,,1.57,4.75,5.35,Dignity Health Sports Park,Allen Chapman
+2025-03-01,2025,MLS,Charlotte FC,Atlanta United,2-0,,,2.07,3.7,3.5,Bank of America Stadium,Rubiel Vazquez
+2025-03-01,2025,MLS,Real Salt Lake,Seattle Sounders,2-0,,,2.6,3.1,2.95,America First Field,Ricardo Fierro
+2025-03-02,2025,MLS,Vancouver Whitecaps,LA Galaxy,2-1,,,1.62,4.25,5.0,BC Place Stadium,Drew Fischer
+2025-03-01,2025,MLS,Philadelphia Union,FC Cincinnati,4-1,,,2.65,3.5,2.57,Subaru Park,Allen Chapman
+2025-03-01,2025,MLS,Portland Timbers,Austin FC,1-0,,,2.75,3.75,2.45,Providence Park,Ismir Pekmic
+2025-03-01,2025,MLS,Chicago Fire,DC United,2-2,,,2.15,3.6,3.25,Soldier Field,Marcos de Oliveira
+2025-03-01,2025,MLS,Los Angeles FC,New York City FC,1-0,,,1.71,3.9,4.9,BMO Stadium,Chris Penso
+2025-03-01,2025,MLS,San Diego FC,St. Louis City,0-0,,,2.05,3.8,3.5,Snapdragon Stadium,Lukasz Szpala
+2025-03-01,2025,MLS,Minnesota United,CF Montreal,1-0,,,1.44,4.75,7.4,Allianz Field,Sergii Demianchuk
+2025-03-01,2025,MLS,Colorado Rapids,FC Dallas,3-3,,,2.1,3.5,3.6,Dick's Sporting Goods Park,Lorenzo Hernandez
+2025-03-01,2025,MLS,New England Revolution,Columbus Crew,0-1,,,2.85,3.55,2.42,Gillette Stadium,Filip Dujic
+2025-03-01,2025,MLS,Sporting Kansas City,San Jose Earthquakes,1-2,,,1.98,3.75,3.8,Children's Mercy Park,Serhiy Boyko
+2025-03-01,2025,MLS,New York Red Bulls,Nashville SC,2-0,,,1.78,3.7,5.0,Sports Illustrated Stadium,Rosendo Mendoza
+2025-03-01,2025,MLS,Orlando City,Toronto FC,4-2,,,1.7,3.75,5.25,Inter&Co Stadium,Alexis Da Silva
+2025-03-02,2025,MLS,Houston Dynamo,Inter Miami,1-4,,,2.42,3.6,2.92,Shell Energy Stadium,Joe Dickerson
+2025-03-08,2025,MLS,Seattle Sounders,Los Angeles FC,5-2,,,2.02,3.3,4.0,Lumen Field,Drew Fischer
+2025-03-08,2025,MLS,Columbus Crew,Houston Dynamo,0-0,,,1.7,4.0,4.95,Lower.com Field,Jon Freemon
+2025-03-09,2025,MLS,Inter Miami,Charlotte FC,1-0,,,1.63,4.33,4.9,Chase Stadium,Guido Gonzalez Jr.
+2025-03-09,2025,MLS,LA Galaxy,St. Louis City,0-3,,,2.15,3.55,3.25,Dignity Health Sports Park,Jair Marrufo
+2025-03-08,2025,MLS,Vancouver Whitecaps,CF Montreal,2-0,,,1.39,5.1,8.0,BC Place Stadium,Joe Dickerson
+2025-03-08,2025,MLS,FC Cincinnati,Toronto FC,2-0,,,1.62,4.05,5.5,TQL Stadium,Ismir Pekmic
+2025-03-08,2025,MLS,New York City FC,Orlando City,2-1,,,2.42,3.6,2.95,Yankee Stadium,Pierre-Luc Lauziere
+2025-03-08,2025,MLS,Nashville SC,Portland Timbers,2-0,,,1.66,4.2,5.25,Geodis Park,Filip Dujic
+2025-03-08,2025,MLS,Atlanta United,New York Red Bulls,0-0,,,1.93,3.9,3.85,Mercedes-Benz Stadium,Tori Penso
+2025-03-08,2025,MLS,FC Dallas,Chicago Fire,1-3,,,1.7,4.5,5.0,Toyota Stadium,Sergii Demianchuk
+2025-03-08,2025,MLS,New England Revolution,Philadelphia Union,0-2,,,2.5,3.75,2.77,Gillette Stadium,Fotis Bazakos
+2025-03-08,2025,MLS,Austin FC,Colorado Rapids,0-1,,,1.75,3.95,4.6,Q2 Stadium,Marcos de Oliveira
+2025-03-08,2025,MLS,Real Salt Lake,San Diego FC,1-3,,,1.78,3.9,4.6,America First Field,Alexis Da Silva
+2025-03-08,2025,MLS,DC United,Sporting Kansas City,2-1,,,1.95,3.8,3.75,Audi Field,Rosendo Mendoza
+2025-03-08,2025,MLS,San Jose Earthquakes,Minnesota United,0-1,,,2.42,3.55,2.85,PayPal Park,Ricardo Fierro
+2025-03-15,2025,MLS,Los Angeles FC,Austin FC,0-1,,,1.8,3.55,5.25,BMO Stadium,Rubiel Vazquez
+2025-03-15,2025,MLS,New York Red Bulls,Orlando City,2-2,,,2.05,3.3,3.9,Sports Illustrated Stadium,Armando Villarreal
+2025-03-15,2025,MLS,Toronto FC,Chicago Fire,1-2,,,2.2,3.7,3.15,BMO Field,Allen Chapman
+2025-03-15,2025,MLS,Charlotte FC,FC Cincinnati,2-0,,,2.2,3.5,3.25,Bank of America Stadium,Serhiy Boyko
+2025-03-15,2025,MLS,New York City FC,New England Revolution,2-1,,,1.72,4.0,4.9,Yankee Stadium,Malik Badawi
+2025-03-15,2025,MLS,DC United,CF Montreal,0-0,,,1.5,4.75,6.75,Audi Field,Guido Gonzalez Jr.
+2025-03-16,2025,MLS,Portland Timbers,LA Galaxy,1-1,,,2.05,3.9,3.3,Providence Park,Lukasz Szpala
+2025-03-16,2025,MLS,Philadelphia Union,Nashville SC,1-3,,,1.91,3.75,3.95,Subaru Park,Pierre-Luc Lauziere
+2025-03-16,2025,MLS,Atlanta United,Inter Miami,1-2,,,2.85,4.0,2.3,Mercedes-Benz Stadium,Drew Fischer
+2025-03-15,2025,MLS,Sporting Kansas City,Minnesota United,3-3,,,2.45,3.3,2.95,Children's Mercy Park,Joe Dickerson
+2025-03-15,2025,MLS,San Diego FC,Columbus Crew,1-1,,,2.32,3.6,2.95,Snapdragon Stadium,Victor Rivas
+2025-03-15,2025,MLS,St. Louis City,Seattle Sounders,1-0,,,2.32,3.5,3.2,Energizer Park,Fotis Bazakos
+2025-03-15,2025,MLS,FC Dallas,Vancouver Whitecaps,0-1,,,2.3,3.5,3.0,Toyota Stadium,Jair Marrufo
+2025-03-15,2025,MLS,San Jose Earthquakes,Colorado Rapids,1-2,,,2.05,3.55,3.6,PayPal Park,Alexis Da Silva
+2025-03-15,2025,MLS,Houston Dynamo,Real Salt Lake,1-2,,,2.02,3.7,3.7,Shell Energy Stadium,Marcos de Oliveira
+2025-03-22,2025,MLS,FC Cincinnati,Atlanta United,2-2,,,1.8,3.9,4.2,TQL Stadium,Rosendo Mendoza
+2025-03-22,2025,MLS,Minnesota United,LA Galaxy,2-2,,,1.98,3.75,3.6,Allianz Field,Chris Penso
+2025-03-22,2025,MLS,Philadelphia Union,St. Louis City,1-0,,,2.25,3.55,3.1,Subaru Park,Ricardo Fierro
+2025-03-22,2025,MLS,New York Red Bulls,Toronto FC,2-1,,,1.75,3.55,6.0,Sports Illustrated Stadium,Jon Freemon
+2025-03-22,2025,MLS,Charlotte FC,San Jose Earthquakes,4-1,,,1.6,4.1,5.5,Bank of America Stadium,Armando Villarreal
+2025-03-22,2025,MLS,Columbus Crew,New York City FC,0-0,,,2.35,3.4,3.15,Lower.com Field,Rubiel Vazquez
+2025-03-22,2025,MLS,Orlando City,DC United,4-1,,,1.83,4.0,3.95,Inter&Co Stadium,Tori Penso
+2025-03-23,2025,MLS,Austin FC,San Diego FC,2-1,,,1.88,3.7,4.4,Q2 Stadium,Filip Dujic
+2025-03-22,2025,MLS,Vancouver Whitecaps,Chicago Fire,1-3,,,1.91,3.6,4.0,BC Place Stadium,Malik Badawi
+2025-03-22,2025,MLS,Seattle Sounders,Houston Dynamo,0-0,,,1.8,3.7,4.75,Lumen Field,Allen Chapman
+2025-03-22,2025,MLS,Colorado Rapids,Portland Timbers,0-3,,,1.79,4.1,4.3,Dick's Sporting Goods Park,Jair Marrufo
+2025-03-22,2025,MLS,Real Salt Lake,FC Dallas,0-1,,,1.98,3.8,3.95,America First Field,Serhiy Boyko
+2025-03-22,2025,MLS,Nashville SC,CF Montreal,3-0,,,1.62,4.1,5.5,Geodis Park,Lorenzo Hernandez
+2025-03-22,2025,MLS,Sporting Kansas City,Los Angeles FC,0-2,,,2.85,3.45,2.57,Children's Mercy Park,Ismir Pekmic
+2025-03-29,2025,MLS,Colorado Rapids,Charlotte FC,2-0,,,2.27,3.4,3.15,Dick's Sporting Goods Park,Allen Chapman
+2025-03-29,2025,MLS,New England Revolution,New York Red Bulls,2-1,,,3.3,3.3,2.3,Gillette Stadium,Sergii Demianchuk
+2025-03-29,2025,MLS,Toronto FC,Vancouver Whitecaps,0-0,,,2.95,3.5,2.4,BMO Field,Lukasz Szpala
+2025-03-29,2025,MLS,DC United,Columbus Crew,1-2,,,2.47,3.6,2.85,Audi Field,Chris Penso
+2025-03-29,2025,MLS,Inter Miami,Philadelphia Union,2-1,,,1.72,4.1,4.5,Chase Stadium,Rosendo Mendoza
+2025-03-29,2025,MLS,Atlanta United,New York City FC,4-3,,,1.7,4.0,4.9,Mercedes-Benz Stadium,Filip Dujic
+2025-03-30,2025,MLS,St. Louis City,Austin FC,0-1,,,2.42,3.3,3.0,Energizer Park,Serhiy Boyko
+2025-03-30,2025,MLS,Portland Timbers,Houston Dynamo,3-1,,,2.22,3.6,3.25,Providence Park,Pierre-Luc Lauziere
+2025-03-29,2025,MLS,San Jose Earthquakes,Seattle Sounders,1-1,,,3.4,3.3,2.25,PayPal Park,Guido Gonzalez Jr.
+2025-03-29,2025,MLS,Minnesota United,Real Salt Lake,2-0,,,1.7,4.1,5.0,Allianz Field,Victor Rivas
+2025-03-29,2025,MLS,FC Dallas,Sporting Kansas City,2-1,,,1.86,3.75,4.15,Toyota Stadium,Fotis Bazakos
+2025-03-29,2025,MLS,Chicago Fire,CF Montreal,1-1,,,1.7,4.0,5.0,Soldier Field,Elijio Arreguin
+2025-03-29,2025,MLS,Nashville SC,FC Cincinnati,1-2,,,2.27,3.35,3.25,Geodis Park,Drew Fischer
+2025-03-29,2025,MLS,LA Galaxy,Orlando City,1-2,,,2.58,3.8,2.57,Dignity Health Sports Park,Jon Freemon
+2025-03-29,2025,MLS,San Diego FC,Los Angeles FC,3-2,,,2.42,3.45,2.9,Snapdragon Stadium,Tori Penso
+2025-04-05,2025,MLS,Charlotte FC,Nashville SC,2-1,,,2.25,3.4,3.4,Bank of America Stadium,Lukasz Szpala
+2025-04-05,2025,MLS,Real Salt Lake,LA Galaxy,2-0,,,1.65,4.2,5.25,America First Field,Guido Gonzalez Jr.
+2025-04-05,2025,MLS,Austin FC,Portland Timbers,0-0,,,1.83,3.75,4.2,Q2 Stadium,Drew Fischer
+2025-04-05,2025,MLS,Atlanta United,FC Dallas,1-1,,,1.7,4.2,4.55,Mercedes-Benz Stadium,Ricardo Fierro
+2025-04-05,2025,MLS,New York Red Bulls,Chicago Fire,2-1,,,1.91,3.75,4.2,Sports Illustrated Stadium,Jair Marrufo
+2025-04-05,2025,MLS,Philadelphia Union,Orlando City,0-0,,,2.25,3.55,3.3,Subaru Park,Ismir Pekmic
+2025-04-05,2025,MLS,FC Cincinnati,New England Revolution,1-0,,,1.78,3.9,4.45,TQL Stadium,Pierre-Luc Lauziere
+2025-04-05,2025,MLS,Columbus Crew,CF Montreal,2-1,,,1.53,4.5,6.25,Lower.com Field,Alexis Da Silva
+2025-04-06,2025,MLS,San Jose Earthquakes,DC United,6-1,,,2.15,3.8,3.2,PayPal Park,Victor Rivas
+2025-04-06,2025,MLS,New York City FC,Minnesota United,1-2,,,2.25,3.7,3.15,Yankee Stadium,Serhiy Boyko
+2025-04-05,2025,MLS,Vancouver Whitecaps,Colorado Rapids,2-0,,,1.7,4.1,5.0,BC Place Stadium,Katja Koroleva
+2025-04-06,2025,MLS,Inter Miami,Toronto FC,1-1,,,1.4,5.1,7.5,Chase Stadium,Rubiel Vazquez
+2025-04-05,2025,MLS,Houston Dynamo,Los Angeles FC,1-0,,,2.25,3.6,3.3,Shell Energy Stadium,Filip Dujic
+2025-04-05,2025,MLS,San Diego FC,Seattle Sounders,3-0,,,2.32,3.15,3.45,Snapdragon Stadium,Malik Badawi
+2025-04-05,2025,MLS,Sporting Kansas City,St. Louis City,2-0,,,2.15,3.5,3.45,Children's Mercy Park,Tori Penso
+2025-04-12,2025,MLS,Toronto FC,Minnesota United,0-0,,,3.0,3.7,2.3,BMO Field,Malik Badawi
+2025-04-12,2025,MLS,Atlanta United,New England Revolution,0-1,,,1.53,4.75,5.75,Mercedes-Benz Stadium,Alexis Da Silva
+2025-04-12,2025,MLS,Vancouver Whitecaps,Austin FC,5-1,,,1.95,3.55,4.0,BC Place Stadium,Victor Rivas
+2025-04-12,2025,MLS,Orlando City,New York Red Bulls,0-0,,,1.82,3.8,4.5,Inter&Co Stadium,Chris Penso
+2025-04-12,2025,MLS,DC United,FC Cincinnati,0-1,,,2.27,3.65,3.05,Audi Field,Ismir Pekmic
+2025-04-12,2025,MLS,New York City FC,Philadelphia Union,1-0,,,2.05,3.6,3.7,Citi Field,Guido Gonzalez Jr.
+2025-04-12,2025,MLS,CF Montreal,Charlotte FC,0-1,,,2.42,3.35,3.05,Stade Saputo,Rubiel Vazquez
+2025-04-13,2025,MLS,Sporting Kansas City,Portland Timbers,2-4,,,2.07,3.6,3.5,Children's Mercy Park,Armando Villarreal
+2025-04-13,2025,MLS,Chicago Fire,Inter Miami,0-0,,,2.98,3.65,2.27,Soldier Field,Jon Freemon
+2025-04-13,2025,MLS,St. Louis City,Columbus Crew,1-2,,,3.2,3.4,2.32,Energizer Park,Rosendo Mendoza
+2025-04-12,2025,MLS,Colorado Rapids,San Diego FC,3-2,,,2.65,3.6,2.6,Dick's Sporting Goods Park,Serhiy Boyko
+2025-04-12,2025,MLS,Los Angeles FC,San Jose Earthquakes,2-1,,,1.7,4.2,4.6,BMO Stadium,Drew Fischer
+2025-04-12,2025,MLS,LA Galaxy,Houston Dynamo,1-1,,,2.02,3.65,3.6,Dignity Health Sports Park,Joe Dickerson
+2025-04-12,2025,MLS,FC Dallas,Seattle Sounders,0-1,,,2.82,3.25,2.62,Toyota Stadium,Filip Dujic
+2025-04-12,2025,MLS,Nashville SC,Real Salt Lake,2-1,,,1.82,3.8,4.33,Geodis Park,Jair Marrufo
+2025-04-19,2025,MLS,Austin FC,LA Galaxy,1-0,,,2.05,3.7,3.65,Q2 Stadium,Rosendo Mendoza
+2025-04-19,2025,MLS,Seattle Sounders,Nashville SC,3-0,,,1.82,3.55,4.75,Lumen Field,Ricardo Fierro
+2025-04-19,2025,MLS,Columbus Crew,Inter Miami,0-1,,,2.37,3.7,2.82,Huntington Bank Field,Tori Penso
+2025-04-19,2025,MLS,Philadelphia Union,Atlanta United,3-0,,,2.05,3.65,3.6,Subaru Park,Allen Chapman
+2025-04-19,2025,MLS,Charlotte FC,San Diego FC,3-0,,,2.22,3.5,3.2,Bank of America Stadium,Filip Dujic
+2025-04-19,2025,MLS,CF Montreal,Orlando City,0-0,,,2.85,3.3,2.57,Stade Saputo,Fotis Bazakos
+2025-04-19,2025,MLS,New England Revolution,New York City FC,2-0,,,2.4,3.4,2.95,Gillette Stadium,Marcos de Oliveira
+2025-04-19,2025,MLS,New York Red Bulls,DC United,1-2,,,2.05,3.5,3.65,Sports Illustrated Stadium,Serhiy Boyko
+2025-04-19,2025,MLS,Portland Timbers,Los Angeles FC,3-3,,,2.5,3.5,2.75,Providence Park,Guido Gonzalez Jr.
+2025-04-19,2025,MLS,Minnesota United,FC Dallas,0-0,,,1.44,4.75,7.75,Allianz Field,Abdou Ndiaye
+2025-04-19,2025,MLS,Chicago Fire,FC Cincinnati,2-3,,,2.3,3.5,3.15,Soldier Field,Lorenzo Hernandez
+2025-04-19,2025,MLS,Houston Dynamo,Colorado Rapids,2-2,,,1.87,3.65,4.33,Shell Energy Stadium,Malik Badawi
+2025-04-19,2025,MLS,San Jose Earthquakes,Sporting Kansas City,3-5,,,1.95,4.0,3.65,PayPal Park,Joe Dickerson
+2025-04-19,2025,MLS,St. Louis City,Vancouver Whitecaps,0-0,,,2.75,3.6,2.47,Energizer Park,Pierre-Luc Lauziere
+2025-04-19,2025,MLS,Real Salt Lake,Toronto FC,0-1,,,1.78,3.8,4.7,America First Field,Sergii Demianchuk
+2025-04-26,2025,MLS,FC Cincinnati,Sporting Kansas City,2-1,,,1.57,4.35,5.4,TQL Stadium,Allen Chapman
+2025-04-26,2025,MLS,Toronto FC,New York City FC,0-1,,,2.85,3.1,2.75,BMO Field,Pierre-Luc Lauziere
+2025-04-26,2025,MLS,New York Red Bulls,CF Montreal,1-0,,,1.75,3.7,5.0,Sports Illustrated Stadium,Tori Penso
+2025-04-26,2025,MLS,Philadelphia Union,DC United,3-0,,,1.65,4.2,5.0,Subaru Park,Rubiel Vazquez
+2025-04-26,2025,MLS,San Diego FC,Real Salt Lake,1-3,,,1.7,4.1,4.75,Snapdragon Stadium,Ricardo Fierro
+2025-04-26,2025,MLS,Orlando City,Atlanta United,3-0,,,1.87,3.75,4.5,Inter&Co Stadium,Marcos de Oliveira
+2025-04-26,2025,MLS,Charlotte FC,New England Revolution,0-1,,,1.88,3.7,4.3,Bank of America Stadium,Victor Rivas
+2025-04-26,2025,MLS,Columbus Crew,San Jose Earthquakes,2-1,,,1.47,4.9,6.1,Lower.com Field,Guido Gonzalez Jr.
+2025-04-27,2025,MLS,Minnesota United,Vancouver Whitecaps,1-3,,,1.65,4.0,5.5,Allianz Field,Drew Fischer
+2025-04-27,2025,MLS,Los Angeles FC,St. Louis City,2-2,,,1.52,4.5,6.25,BMO Stadium,Jair Marrufo
+2025-04-27,2025,MLS,Inter Miami,FC Dallas,3-4,,,2.25,3.45,3.35,Chase Stadium,Lukasz Szpala
+2025-04-26,2025,MLS,Colorado Rapids,Seattle Sounders,1-1,,,2.77,3.3,2.57,Dick's Sporting Goods Park,Alexis Da Silva
+2025-04-26,2025,MLS,Nashville SC,Chicago Fire,7-2,,,2.05,3.6,3.9,Geodis Park,Rosendo Mendoza
+2025-04-26,2025,MLS,Houston Dynamo,Austin FC,2-0,,,2.12,3.4,3.55,Shell Energy Stadium,Chris Penso
+2025-04-27,2025,MLS,LA Galaxy,Portland Timbers,2-4,,,2.1,3.75,3.4,Dignity Health Sports Park,Filip Dujic
+2025-05-03,2025,MLS,Atlanta United,Nashville SC,1-1,,,2.18,3.6,3.3,Mercedes-Benz Stadium,Serhiy Boyko
+2025-05-03,2025,MLS,Toronto FC,New England Revolution,0-2,,,2.42,3.25,3.1,BMO Field,Tori Penso
+2025-05-03,2025,MLS,DC United,Colorado Rapids,2-1,,,2.12,3.65,3.3,Audi Field,Jon Freemon
+2025-05-03,2025,MLS,CF Montreal,Philadelphia Union,1-2,,,2.77,3.3,2.57,Stade Saputo,Marcos de Oliveira
+2025-05-03,2025,MLS,Columbus Crew,Charlotte FC,4-2,,,1.65,4.0,5.25,Lower.com Field,Allen Chapman
+2025-05-03,2025,MLS,Inter Miami,New York Red Bulls,4-1,,,1.6,4.33,5.3,Chase Stadium,Ismir Pekmic
+2025-05-04,2025,MLS,New York City FC,FC Cincinnati,1-0,,,2.4,3.6,2.82,Citi Field,Drew Fischer
+2025-05-04,2025,MLS,Sporting Kansas City,LA Galaxy,1-0,,,2.57,3.6,2.65,Children's Mercy Park,Chris Penso
+2025-05-03,2025,MLS,San Diego FC,FC Dallas,5-0,,,1.75,3.9,4.5,Snapdragon Stadium,Joe Dickerson
+2025-05-03,2025,MLS,Vancouver Whitecaps,Real Salt Lake,2-1,,,1.75,3.85,4.75,BC Place Stadium,Malik Badawi
+2025-05-03,2025,MLS,Chicago Fire,Orlando City,0-0,,,2.87,3.45,2.5,Soldier Field,Victor Rivas
+2025-05-03,2025,MLS,Los Angeles FC,Houston Dynamo,2-0,,,1.7,3.85,5.2,BMO Stadium,Rosendo Mendoza
+2025-05-03,2025,MLS,Austin FC,Minnesota United,0-3,,,2.42,3.4,2.95,Q2 Stadium,Armando Villarreal
+2025-05-03,2025,MLS,Seattle Sounders,St. Louis City,4-1,,,1.54,4.3,6.5,Lumen Field,Lorenzo Hernandez
+2025-05-03,2025,MLS,San Jose Earthquakes,Portland Timbers,4-1,,,2.3,3.6,3.1,PayPal Park,Fotis Bazakos
+2025-05-10,2025,MLS,Chicago Fire,Atlanta United,2-1,,,2.18,3.65,3.2,Soldier Field,Lukasz Szpala
+2025-05-10,2025,MLS,Minnesota United,Inter Miami,4-1,,,2.42,3.55,2.95,Allianz Field,Filip Dujic
+2025-05-10,2025,MLS,Toronto FC,DC United,2-0,,,2.42,3.5,2.9,BMO Field,Marcos de Oliveira
+2025-05-10,2025,MLS,New York City FC,CF Montreal,0-1,,,1.88,3.75,4.1,Yankee Stadium,Chris Penso
+2025-05-10,2025,MLS,Orlando City,New England Revolution,3-3,,,1.7,4.05,4.85,Inter&Co Stadium,Rubiel Vazquez
+2025-05-10,2025,MLS,Philadelphia Union,Columbus Crew,2-2,,,2.7,3.45,2.57,Subaru Park,Malik Badawi
+2025-05-10,2025,MLS,FC Cincinnati,Austin FC,2-1,,,1.66,4.1,5.1,TQL Stadium,Tori Penso
+2025-05-10,2025,MLS,New York Red Bulls,LA Galaxy,7-0,,,1.91,3.6,4.1,Sports Illustrated Stadium,Guido Gonzalez Jr.
+2025-05-11,2025,MLS,Vancouver Whitecaps,Los Angeles FC,2-2,,,2.02,3.75,3.55,BC Place Stadium,Joe Dickerson
+2025-05-10,2025,MLS,Nashville SC,Charlotte FC,2-1,,,1.82,3.9,4.3,Geodis Park,Alexis Da Silva
+2025-05-10,2025,MLS,FC Dallas,Real Salt Lake,1-1,,,2.3,3.7,3.0,Toyota Stadium,Rosendo Ovalle
+2025-05-10,2025,MLS,Colorado Rapids,San Jose Earthquakes,0-2,,,1.82,4.0,4.0,Dick's Sporting Goods Park,Elijio Arreguin
+2025-05-10,2025,MLS,Portland Timbers,Sporting Kansas City,1-0,,,1.7,4.4,5.0,Providence Park,Ricardo Fierro
+2025-05-10,2025,MLS,Houston Dynamo,Seattle Sounders,1-3,,,3.2,3.3,2.35,Shell Energy Stadium,Victor Rivas
+2025-05-10,2025,MLS,St. Louis City,San Diego FC,1-2,,,3.0,3.9,2.2,Energizer Park,Allen Chapman
+2025-05-14,2025,MLS,CF Montreal,Columbus Crew,1-1,,,3.0,3.4,2.35,Stade Saputo,Allen Chapman
+2025-05-14,2025,MLS,Philadelphia Union,LA Galaxy,3-2,,,1.73,3.9,4.75,Subaru Park,Fotis Bazakos
+2025-05-14,2025,MLS,Toronto FC,FC Cincinnati,0-1,,,2.65,3.4,2.65,BMO Field,Jair Marrufo
+2025-05-14,2025,MLS,DC United,New York City FC,0-0,,,2.32,3.65,2.95,Audi Field,Armando Villarreal
+2025-05-14,2025,MLS,Orlando City,Charlotte FC,3-1,,,1.75,4.0,4.6,Inter&Co Stadium,Serhiy Boyko
+2025-05-14,2025,MLS,San Jose Earthquakes,Inter Miami,3-3,,,2.6,3.85,2.65,PayPal Park,Joe Dickerson
+2025-05-14,2025,MLS,Los Angeles FC,Seattle Sounders,4-0,,,1.78,3.7,4.8,BMO Stadium,Pierre-Luc Lauziere
+2025-05-14,2025,MLS,Real Salt Lake,Portland Timbers,0-0,,,2.12,3.7,3.4,America First Field,Drew Fischer
+2025-05-14,2025,MLS,San Diego FC,Colorado Rapids,2-0,,,1.55,4.5,5.5,Snapdragon Stadium,Lorenzo Hernandez
+2025-05-14,2025,MLS,Nashville SC,New York Red Bulls,2-1,,,1.95,3.9,3.75,Geodis Park,Marcos de Oliveira
+2025-05-14,2025,MLS,Austin FC,Atlanta United,1-1,,,2.01,3.8,3.6,Q2 Stadium,Malik Badawi
+2025-05-14,2025,MLS,Houston Dynamo,Minnesota United,2-0,,,2.05,3.4,3.75,Shell Energy Stadium,Jon Freemon
+2025-05-14,2025,MLS,St. Louis City,Sporting Kansas City,2-2,,,2.05,3.9,3.65,Energizer Park,Lukasz Szpala
+2025-05-17,2025,MLS,CF Montreal,Toronto FC,1-6,,,1.8,3.8,4.4,Stade Saputo,Filip Dujic
+2025-05-17,2025,MLS,New York City FC,New York Red Bulls,2-0,,,2.1,3.55,3.45,Citi Field,Allen Chapman
+2025-05-17,2025,MLS,Columbus Crew,FC Cincinnati,1-1,,,1.93,3.85,3.75,Lower.com Field,Rubiel Vazquez
+2025-05-17,2025,MLS,Charlotte FC,Chicago Fire,1-4,,,1.95,3.85,3.65,Bank of America Stadium,Ismir Pekmic
+2025-05-17,2025,MLS,New England Revolution,San Jose Earthquakes,0-0,,,1.57,4.5,5.2,Gillette Stadium,Ricardo Montero
+2025-05-17,2025,MLS,Atlanta United,Philadelphia Union,0-1,,,2.0,3.75,3.65,Mercedes-Benz Stadium,Chris Penso
+2025-05-17,2025,MLS,Portland Timbers,Seattle Sounders,1-1,,,2.75,3.6,2.47,Providence Park,Rosendo Mendoza
+2025-05-18,2025,MLS,Inter Miami,Orlando City,0-3,,,1.78,4.1,4.1,Chase Stadium,Guido Gonzalez Jr.
+2025-05-17,2025,MLS,Austin FC,Vancouver Whitecaps,0-0,,,3.0,3.45,2.4,Q2 Stadium,Alexis Da Silva
+2025-05-17,2025,MLS,FC Dallas,Houston Dynamo,0-2,,,2.26,3.25,3.4,Toyota Stadium,Tori Penso
+2025-05-17,2025,MLS,Nashville SC,DC United,0-0,,,1.55,4.2,6.0,Geodis Park,Sergii Demianchuk
+2025-05-17,2025,MLS,San Diego FC,Sporting Kansas City,0-0,,,1.47,4.85,6.25,Snapdragon Stadium,Victor Rivas
+2025-05-17,2025,MLS,Minnesota United,St. Louis City,3-0,,,1.6,4.33,5.5,Allianz Field,Ricardo Fierro
+2025-05-17,2025,MLS,Colorado Rapids,Real Salt Lake,1-0,,,2.37,3.55,3.0,Dick's Sporting Goods Park,Pierre-Luc Lauziere
+2025-05-18,2025,MLS,LA Galaxy,Los Angeles FC,2-2,,,3.7,3.7,2.0,Dignity Health Sports Park,Drew Fischer
+2025-05-24,2025,MLS,Seattle Sounders,FC Dallas,1-0,,,1.42,5.0,8.2,Lumen Field,Allen Chapman
+2025-05-24,2025,MLS,San Diego FC,LA Galaxy,2-1,,,1.75,4.1,4.35,Snapdragon Stadium,Jon Freemon
+2025-05-24,2025,MLS,CF Montreal,Los Angeles FC,2-2,,,3.55,3.55,2.1,Stade Saputo,Rubiel Vazquez
+2025-05-24,2025,MLS,Charlotte FC,Columbus Crew,3-2,,,3.1,3.9,2.15,Bank of America Stadium,Lukasz Szpala
+2025-05-24,2025,MLS,Orlando City,Portland Timbers,1-0,,,1.62,4.5,5.0,Inter&Co Stadium,Jair Marrufo
+2025-05-24,2025,MLS,Philadelphia Union,Inter Miami,3-3,,,2.5,3.8,2.6,Subaru Park,Drew Fischer
+2025-05-24,2025,MLS,Toronto FC,Nashville SC,1-2,,,3.1,3.4,2.32,BMO Field,Armando Villarreal
+2025-05-24,2025,MLS,DC United,New York Red Bulls,0-2,,,3.0,3.3,2.47,Audi Field,Malik Badawi
+2025-05-25,2025,MLS,New York City FC,Chicago Fire,3-1,,,2.1,3.8,3.4,Yankee Stadium,Rosendo Mendoza
+2025-05-25,2025,MLS,Atlanta United,FC Cincinnati,4-2,,,2.82,3.7,2.55,Mercedes-Benz Stadium,Guido Gonzalez Jr.
+2025-05-24,2025,MLS,Real Salt Lake,Vancouver Whitecaps,2-3,,,2.47,3.75,2.75,America First Field,Filip Dujic
+2025-05-24,2025,MLS,San Jose Earthquakes,Houston Dynamo,3-3,,,2.2,3.75,3.1,PayPal Park,Sergii Demianchuk
+2025-05-24,2025,MLS,Sporting Kansas City,New England Revolution,3-3,,,2.37,3.6,3.1,Children's Mercy Park,Serhiy Boyko
+2025-05-24,2025,MLS,Minnesota United,Austin FC,1-1,,,1.82,3.7,4.4,Allianz Field,Joe Dickerson
+2025-05-24,2025,MLS,Colorado Rapids,St. Louis City,1-0,,,1.95,4.0,3.55,Dick's Sporting Goods Park,Tori Penso
+2025-05-28,2025,MLS,Toronto FC,Philadelphia Union,1-2,,,3.95,3.7,1.95,BMO Field,Guido Gonzalez Jr.
+2025-05-28,2025,MLS,DC United,New England Revolution,1-1,,,2.6,3.3,2.77,Audi Field,Pierre-Luc Lauziere
+2025-05-28,2025,MLS,New York City FC,Houston Dynamo,0-3,,,1.75,3.85,5.25,Yankee Stadium,Rubiel Vazquez
+2025-05-28,2025,MLS,FC Cincinnati,FC Dallas,3-3,,,1.6,4.3,5.5,TQL Stadium,Marcos de Oliveira
+2025-05-28,2025,MLS,New York Red Bulls,Charlotte FC,4-2,,,2.25,3.5,3.2,Sports Illustrated Stadium,Drew Fischer
+2025-05-28,2025,MLS,Atlanta United,Orlando City,3-2,,,2.87,3.65,2.4,Mercedes-Benz Stadium,Filip Dujic
+2025-05-28,2025,MLS,Inter Miami,CF Montreal,4-2,,,1.45,5.25,6.8,Chase Stadium,Jon Freemon
+2025-05-28,2025,MLS,Seattle Sounders,San Diego FC,1-0,,,1.88,3.7,4.05,Lumen Field,Ismir Pekmic
+2025-05-28,2025,MLS,LA Galaxy,San Jose Earthquakes,0-1,,,2.22,3.8,3.1,Dignity Health Sports Park,Alexis Da Silva
+2025-05-28,2025,MLS,Vancouver Whitecaps,Minnesota United,0-0,,,2.27,3.5,3.2,BC Place Stadium,Allen Chapman
+2025-05-28,2025,MLS,Austin FC,Real Salt Lake,1-1,,,1.83,3.8,4.2,Q2 Stadium,Lukasz Szpala
+2025-05-28,2025,MLS,Portland Timbers,Colorado Rapids,2-1,,,1.6,4.4,5.3,Providence Park,Chris Penso
+2025-05-28,2025,MLS,Columbus Crew,Nashville SC,2-2,,,1.98,3.75,3.65,Lower.com Field,Victor Rivas
+2025-05-31,2025,MLS,St. Louis City,San Jose Earthquakes,2-1,,,1.78,4.25,4.2,Energizer Park,Ismir Pekmic
+2025-05-31,2025,MLS,Nashville SC,New York City FC,2-2,,,1.95,3.7,4.0,Geodis Park,Jon Freemon
+2025-05-31,2025,MLS,Orlando City,Chicago Fire,1-3,,,1.7,4.3,4.6,Inter&Co Stadium,Ricardo Fierro
+2025-05-31,2025,MLS,New York Red Bulls,Atlanta United,2-0,,,2.02,3.75,3.7,Sports Illustrated Stadium,Marcos de Oliveira
+2025-05-31,2025,MLS,Toronto FC,Charlotte FC,0-2,,,3.25,3.45,2.22,BMO Field,Joe Dickerson
+2025-05-31,2025,MLS,FC Cincinnati,DC United,1-2,,,1.47,4.5,7.0,TQL Stadium,Alexis Da Silva
+2025-05-31,2025,MLS,Inter Miami,Columbus Crew,5-1,,,2.07,4.2,3.1,Chase Stadium,Rosendo Mendoza
+2025-05-31,2025,MLS,CF Montreal,New England Revolution,0-3,,,2.22,3.5,3.2,Stade Saputo,Michael Venne
+2025-06-01,2025,MLS,Seattle Sounders,Minnesota United,2-3,,,1.93,3.6,4.2,Lumen Field,Lukasz Szpala
+2025-05-31,2025,MLS,Houston Dynamo,Sporting Kansas City,1-3,,,1.91,3.75,3.95,Shell Energy Stadium,Jair Marrufo
+2025-05-31,2025,MLS,San Diego FC,Austin FC,2-0,,,1.57,4.25,5.75,Snapdragon Stadium,Ricardo Montero
+2025-05-31,2025,MLS,LA Galaxy,Real Salt Lake,2-0,,,2.02,3.75,3.7,Dignity Health Sports Park,Rubiel Vazquez
+2025-05-31,2025,MLS,FC Dallas,Philadelphia Union,0-0,,,2.2,3.5,3.25,Toyota Stadium,Serhiy Boyko
+2025-06-07,2025,MLS,DC United,Chicago Fire,1-7,,,2.62,3.55,2.67,Audi Field,Lorenzo Hernandez
+2025-06-08,2025,MLS,Portland Timbers,St. Louis City,2-1,,,1.65,4.4,5.0,Providence Park,Malik Badawi
+2025-06-07,2025,MLS,Colorado Rapids,Austin FC,0-2,,,2.27,3.4,3.25,Dick's Sporting Goods Park,Allen Chapman
+2025-06-08,2025,MLS,Los Angeles FC,Sporting Kansas City,3-1,,,1.4,5.0,7.3,BMO Stadium,Ricardo Montero
+2025-06-08,2025,MLS,Vancouver Whitecaps,Seattle Sounders,3-0,,,3.4,3.3,2.27,BC Place Stadium,Ricardo Fierro
+2025-06-12,2025,MLS,New York City FC,Atlanta United,4-0,,,1.95,3.8,3.95,Yankee Stadium,Serhiy Boyko
+2025-06-14,2025,MLS,St. Louis City,LA Galaxy,3-3,,,2.3,3.65,2.95,Energizer Park,Marcos de Oliveira
+2025-06-14,2025,MLS,New England Revolution,FC Cincinnati,0-1,,,2.85,3.5,2.45,Gillette Stadium,Filip Dujic
+2025-06-14,2025,MLS,Philadelphia Union,Charlotte FC,2-1,,,2.25,3.6,3.35,Subaru Park,Ricardo Montero
+2025-06-14,2025,MLS,Columbus Crew,Vancouver Whitecaps,2-1,,,2.2,3.8,3.25,Lower.com Field,Guido Gonzalez Jr.
+2025-06-13,2025,MLS,Portland Timbers,San Jose Earthquakes,1-1,,,2.35,3.95,2.95,Providence Park,Victor Rivas
+2025-06-14,2025,MLS,Austin FC,New York Red Bulls,2-1,,,2.35,3.25,3.2,Q2 Stadium,Rosendo Mendoza
+2025-06-14,2025,MLS,Colorado Rapids,Orlando City,0-1,,,2.78,3.65,2.42,Dick's Sporting Goods Park,Ramy Touchan
+2025-06-14,2025,MLS,Chicago Fire,Nashville SC,0-2,,,2.65,3.6,2.62,Soldier Field,Alexis Da Silva
+2025-06-14,2025,MLS,Houston Dynamo,CF Montreal,1-3,,,1.87,3.75,4.75,Shell Energy Stadium,Lorenzo Hernandez
+2025-06-14,2025,MLS,Sporting Kansas City,FC Dallas,2-4,,,2.02,3.85,3.7,Children's Mercy Park,Sergii Demianchuk
+2025-06-14,2025,MLS,Minnesota United,San Diego FC,2-4,,,2.32,3.6,3.1,Allianz Field,Rubiel Vazquez
+2025-06-14,2025,MLS,Real Salt Lake,DC United,2-0,,,1.75,4.1,5.0,America First Field,Jon Freemon
+2025-06-25,2025,MLS,CF Montreal,FC Cincinnati,1-3,,,3.15,3.75,2.15,Stade Saputo,Ricardo Montero
+2025-06-25,2025,MLS,Toronto FC,New York Red Bulls,1-1,,,4.0,3.4,2.02,BMO Field,Filip Dujic
+2025-06-25,2025,MLS,Columbus Crew,Atlanta United,3-1,,,1.75,4.55,4.25,Lower.com Field,Victor Rivas
+2025-06-25,2025,MLS,New England Revolution,Nashville SC,2-3,,,2.92,3.5,2.4,Gillette Stadium,Lorenzo Hernandez
+2025-06-25,2025,MLS,Colorado Rapids,LA Galaxy,2-0,,,2.07,3.75,3.5,Dick's Sporting Goods Park,Serhiy Boyko
+2025-06-25,2025,MLS,Sporting Kansas City,Charlotte FC,2-1,,,2.5,3.7,2.65,Children's Mercy Park,Rubiel Vazquez
+2025-06-25,2025,MLS,St. Louis City,Orlando City,2-4,,,2.72,3.9,2.42,Energizer Park,Guido Gonzalez Jr.
+2025-06-25,2025,MLS,Vancouver Whitecaps,San Diego FC,3-5,,,2.25,3.5,3.2,BC Place Stadium,
+2025-06-25,2025,MLS,Minnesota United,Houston Dynamo,3-1,,,2.12,3.7,3.55,Allianz Field,Sergii Demianchuk
+2025-06-25,2025,MLS,FC Dallas,San Jose Earthquakes,2-4,,,2.55,3.85,2.6,Toyota Stadium,Tim Ford
+2025-06-25,2025,MLS,Chicago Fire,Philadelphia Union,0-1,,,1.93,4.1,3.7,Soldier Field,Greg Dopka
+2025-06-28,2025,MLS,Toronto FC,Portland Timbers,3-0,,,2.85,3.45,2.47,BMO Field,Rosendo Mendoza
+2025-06-28,2025,MLS,New York Red Bulls,Minnesota United,2-2,,,2.1,3.45,3.5,Sports Illustrated Stadium,Ricardo Montero
+2025-06-28,2025,MLS,Orlando City,FC Cincinnati,1-2,,,1.85,3.95,4.05,Inter&Co Stadium,Marcos de Oliveira
+2025-06-28,2025,MLS,DC United,Nashville SC,0-1,,,4.1,3.75,1.93,Audi Field,Ricardo Fierro
+2025-06-28,2025,MLS,CF Montreal,New York City FC,1-0,,,2.66,3.65,2.52,Stade Saputo,Victor Rivas
+2025-06-28,2025,MLS,New England Revolution,Colorado Rapids,3-3,,,1.91,3.85,4.1,Gillette Stadium,Natalie Simon
+2025-06-29,2025,MLS,Columbus Crew,Philadelphia Union,1-0,,,1.82,4.25,4.35,Lower.com Field,Filip Dujic
+2025-06-28,2025,MLS,San Jose Earthquakes,LA Galaxy,1-1,,,1.75,4.35,4.2,Stanford Stadium,Jair Marrufo
+2025-06-28,2025,MLS,Seattle Sounders,Austin FC,2-0,,,1.85,3.9,4.4,Lumen Field,Tim Ford
+2025-06-28,2025,MLS,Chicago Fire,Charlotte FC,3-2,,,2.02,4.05,3.25,Soldier Field,Serhiy Boyko
+2025-06-28,2025,MLS,FC Dallas,San Diego FC,2-3,,,3.0,3.9,2.2,Toyota Stadium,Guido Gonzalez Jr.
+2025-06-28,2025,MLS,Sporting Kansas City,Real Salt Lake,1-1,,,2.55,3.6,2.72,Children's Mercy Park,Ismir Pekmic
+2025-06-28,2025,MLS,Houston Dynamo,St. Louis City,1-0,,,1.75,4.15,4.75,Shell Energy Stadium,Alexis Da Silva
+2025-06-29,2025,MLS,Los Angeles FC,Vancouver Whitecaps,0-1,,,1.85,3.8,4.5,BMO Stadium,Jon Freemon
+2025-07-03,2025,MLS,New York City FC,Toronto FC,3-1,,,1.6,4.3,6.0,Yankee Stadium,Fotis Bazakos
+2025-07-05,2025,MLS,Charlotte FC,Orlando City,2-2,,,3.1,3.7,2.22,Bank of America Stadium,Rosendo Mendoza
+2025-07-04,2025,MLS,LA Galaxy,Vancouver Whitecaps,3-0,,,2.27,3.55,3.15,Dignity Health Sports Park,Victor Rivas
+2025-07-05,2025,MLS,CF Montreal,Inter Miami,1-4,,,3.55,4.33,1.88,Stade Saputo,Marcos de Oliveira
+2025-07-04,2025,MLS,Colorado Rapids,Sporting Kansas City,1-2,,,1.75,4.3,4.5,Dick's Sporting Goods Park,Filip Dujic
+2025-07-05,2025,MLS,FC Cincinnati,Chicago Fire,2-1,,,1.91,4.4,3.65,TQL Stadium,Pierre-Luc Lauziere
+2025-07-05,2025,MLS,DC United,Atlanta United,0-0,,,2.3,3.65,2.95,Audi Field,Guido Gonzalez Jr.
+2025-07-04,2025,MLS,FC Dallas,Minnesota United,1-2,,,2.8,3.6,2.45,Toyota Stadium,Jair Marrufo
+2025-07-06,2025,MLS,Seattle Sounders,Columbus Crew,1-1,,,1.95,3.95,3.85,Lumen Field,Ismir Pekmic
+2025-07-05,2025,MLS,San Jose Earthquakes,New York Red Bulls,1-1,,,1.85,4.05,3.8,PayPal Park,Malik Badawi
+2025-07-05,2025,MLS,Portland Timbers,New England Revolution,2-1,,,2.1,4.05,3.3,Providence Park,Jon Freemon
+2025-07-05,2025,MLS,Nashville SC,Philadelphia Union,1-0,,,1.98,3.75,3.9,Geodis Park,Rubiel Vazquez
+2025-07-05,2025,MLS,San Diego FC,Houston Dynamo,3-4,,,1.65,4.45,5.2,Snapdragon Stadium,Tim Ford
+2025-07-05,2025,MLS,Real Salt Lake,St. Louis City,3-2,,,1.65,4.6,5.0,America First Field,Allen Chapman
+2025-07-09,2025,MLS,New England Revolution,Inter Miami,1-2,,,3.25,4.15,2.1,Gillette Stadium,Fotis Bazakos
+2025-07-09,2025,MLS,Los Angeles FC,Colorado Rapids,3-0,,,1.44,5.0,7.5,BMO Stadium,Jair Marrufo
+2025-07-12,2025,MLS,Philadelphia Union,New York Red Bulls,2-0,,,1.98,3.75,4.0,Subaru Park,Marcos de Oliveira
+2025-07-12,2025,MLS,Orlando City,CF Montreal,1-1,,,1.44,5.1,7.5,Inter&Co Stadium,Ramy Touchan
+2025-07-12,2025,MLS,Toronto FC,Atlanta United,1-1,,,2.45,3.6,2.77,BMO Field,Jon Freemon
+2025-07-12,2025,MLS,Inter Miami,Nashville SC,2-1,,,1.98,4.25,3.5,Chase Stadium,Filip Dujic
+2025-07-13,2025,MLS,St. Louis City,Portland Timbers,2-1,,,2.07,3.9,3.3,Energizer Park,Ricardo Montero
+2025-07-12,2025,MLS,Chicago Fire,San Diego FC,1-2,,,2.52,4.0,2.5,Soldier Field,Victor Rivas
+2025-07-12,2025,MLS,Austin FC,New England Revolution,0-0,,,2.42,3.3,3.0,Q2 Stadium,Rosendo Mendoza
+2025-07-12,2025,MLS,Real Salt Lake,Houston Dynamo,1-0,,,1.95,3.8,3.7,America First Field,Chris Penso
+2025-07-12,2025,MLS,Los Angeles FC,FC Dallas,2-0,,,1.39,5.6,7.8,BMO Stadium,Allen Chapman
+2025-07-12,2025,MLS,Colorado Rapids,Vancouver Whitecaps,3-0,,,2.55,3.6,2.67,Dick's Sporting Goods Park,Ricardo Fierro
+2025-07-12,2025,MLS,Minnesota United,San Jose Earthquakes,4-1,,,1.88,4.1,4.0,Allianz Field,Ismir Pekmic
+2025-07-12,2025,MLS,LA Galaxy,DC United,2-1,,,1.65,4.3,5.4,Dignity Health Sports Park,Tim Ford
+2025-07-12,2025,MLS,Sporting Kansas City,Seattle Sounders,2-3,,,3.7,3.8,2.05,Children's Mercy Park,Elijio Arreguin
+2025-07-12,2025,MLS,FC Cincinnati,Columbus Crew,2-4,,,2.35,3.75,2.8,TQL Stadium,Alexis Da Silva
+2025-07-12,2025,MLS,Charlotte FC,New York City FC,2-0,,,2.2,3.7,3.1,Bank of America Stadium,Guido Gonzalez Jr.
+2025-07-16,2025,MLS,FC Cincinnati,Inter Miami,3-0,,,2.7,3.9,2.42,TQL Stadium,Lukasz Szpala
+2025-07-16,2025,MLS,New York Red Bulls,New England Revolution,5-3,,,1.9,3.8,4.2,Sports Illustrated Stadium,Serhiy Boyko
+2025-07-16,2025,MLS,Philadelphia Union,CF Montreal,2-1,,,1.44,5.0,7.9,Subaru Park,Guido Gonzalez Jr.
+2025-07-16,2025,MLS,Atlanta United,Chicago Fire,2-2,,,2.35,3.95,2.72,Mercedes-Benz Stadium,Sergii Demianchuk
+2025-07-16,2025,MLS,Charlotte FC,DC United,2-1,,,1.5,4.75,6.9,Bank of America Stadium,Chris Penso
+2025-07-16,2025,MLS,Seattle Sounders,Colorado Rapids,3-3,,,1.7,4.35,5.0,Lumen Field,Lorenzo Hernandez
+2025-07-16,2025,MLS,Minnesota United,Los Angeles FC,0-1,,,2.35,3.6,3.1,Allianz Field,Pierre-Luc Lauziere
+2025-07-16,2025,MLS,Nashville SC,Columbus Crew,3-0,,,2.05,3.7,3.55,Geodis Park,Ricardo Montero
+2025-07-16,2025,MLS,San Diego FC,Toronto FC,0-1,,,1.47,5.2,6.9,Snapdragon Stadium,Alyssa Pennington
+2025-07-16,2025,MLS,Houston Dynamo,Vancouver Whitecaps,0-3,,,2.0,3.7,3.8,Shell Energy Stadium,Rubiel Vazquez
+2025-07-16,2025,MLS,Portland Timbers,Real Salt Lake,0-1,,,2.25,3.8,2.95,Providence Park,Alexis Da Silva
+2025-07-16,2025,MLS,LA Galaxy,Austin FC,1-2,,,1.87,4.0,4.0,Dignity Health Sports Park,Ricardo Fierro
+2025-07-16,2025,MLS,San Jose Earthquakes,FC Dallas,2-2,,,1.6,4.75,5.4,PayPal Park,Ramy Touchan
+2025-07-16,2025,MLS,Orlando City,New York City FC,1-2,,,1.7,4.05,4.5,Inter&Co Stadium,Jair Marrufo
+2025-07-19,2025,MLS,New England Revolution,Orlando City,1-2,,,3.0,3.65,2.35,Gillette Stadium,Lukasz Szpala
+2025-07-19,2025,MLS,Atlanta United,Charlotte FC,2-3,,,2.27,3.7,2.95,Mercedes-Benz Stadium,Allen Chapman
+2025-07-19,2025,MLS,CF Montreal,Chicago Fire,0-2,,,2.87,3.75,2.32,Stade Saputo,Jon Freemon
+2025-07-19,2025,MLS,New York Red Bulls,Inter Miami,1-5,,,2.52,3.8,2.7,Sports Illustrated Stadium,Victor Rivas
+2025-07-19,2025,MLS,Seattle Sounders,San Jose Earthquakes,3-2,,,1.55,4.9,5.7,Lumen Field,Drew Fischer
+2025-07-19,2025,MLS,San Diego FC,Vancouver Whitecaps,1-1,,,2.05,3.7,3.55,Snapdragon Stadium,Alexis Da Silva
+2025-07-19,2025,MLS,FC Dallas,St. Louis City,3-0,,,2.25,3.85,3.05,Toyota Stadium,Marcos de Oliveira
+2025-07-19,2025,MLS,Portland Timbers,Minnesota United,1-1,,,3.1,3.6,2.32,Providence Park,Ricardo Fierro
+2025-07-19,2025,MLS,Real Salt Lake,FC Cincinnati,0-1,,,2.0,3.6,3.7,America First Field,Lorenzo Hernandez
+2025-07-19,2025,MLS,Los Angeles FC,LA Galaxy,3-3,,,1.72,4.2,5.0,BMO Stadium,Guido Gonzalez Jr.
+2025-07-19,2025,MLS,Sporting Kansas City,New York City FC,1-1,,,2.7,3.65,2.5,Children's Mercy Park,Tim Ford
+2025-07-19,2025,MLS,Houston Dynamo,Philadelphia Union,1-1,,,2.27,3.4,3.2,Shell Energy Stadium,Rosendo Mendoza
+2025-07-19,2025,MLS,Nashville SC,Toronto FC,1-0,,,1.34,5.35,11.0,Geodis Park,Serhiy Boyko
+2025-07-19,2025,MLS,Columbus Crew,DC United,2-1,,,1.47,5.1,6.7,Lower.com Field,Katja Koroleva
+2025-07-25,2025,MLS,New England Revolution,CF Montreal,1-3,,,1.78,4.25,4.5,Gillette Stadium,Chris Penso
+2025-07-26,2025,MLS,Inter Miami,FC Cincinnati,0-0,,,2.27,3.8,2.92,Chase Stadium,Tori Penso
+2025-07-25,2025,MLS,FC Dallas,New York City FC,3-4,,,2.62,3.5,2.7,Toyota Stadium,Jon Freemon
+2025-07-25,2025,MLS,Los Angeles FC,Portland Timbers,0-1,,,1.45,5.1,7.7,BMO Stadium,Armando Villarreal
+2025-07-26,2025,MLS,Atlanta United,Seattle Sounders,2-2,,,2.6,3.75,2.55,Mercedes-Benz Stadium,Ramy Touchan
+2025-07-26,2025,MLS,Philadelphia Union,Colorado Rapids,3-1,,,1.65,4.55,5.1,Subaru Park,Malik Badawi
+2025-07-26,2025,MLS,DC United,Austin FC,2-4,,,2.72,3.4,2.6,Audi Field,Rubiel Vazquez
+2025-07-26,2025,MLS,Charlotte FC,Toronto FC,2-0,,,1.57,4.75,5.9,Bank of America Stadium,Jair Marrufo
+2025-07-25,2025,MLS,San Diego FC,Nashville SC,1-0,,,2.35,3.7,2.9,Snapdragon Stadium,Drew Fischer
+2025-07-25,2025,MLS,Columbus Crew,Orlando City,1-3,,,2.2,3.7,3.15,Lower.com Field,Tim Ford
+2025-07-26,2025,MLS,St. Louis City,Minnesota United,1-2,,,2.55,3.65,2.65,Energizer Park,Victor Rivas
+2025-07-26,2025,MLS,Vancouver Whitecaps,Sporting Kansas City,3-0,,,1.39,5.8,8.4,BC Place Stadium,Lukasz Szpala
+2025-07-26,2025,MLS,Chicago Fire,New York Red Bulls,1-0,,,1.78,4.5,4.4,Soldier Field,Allen Chapman
+2025-07-26,2025,MLS,Real Salt Lake,San Jose Earthquakes,2-1,,,1.88,4.25,3.85,America First Field,Pierre-Luc Lauziere
+2025-08-09,2025,MLS,Philadelphia Union,Toronto FC,1-1,,,1.44,4.95,8.2,Subaru Park,Tori Penso
+2025-08-09,2025,MLS,CF Montreal,Atlanta United,1-1,,,2.7,3.65,2.5,Stade Saputo,Rosendo Mendoza
+2025-08-09,2025,MLS,New England Revolution,DC United,2-0,,,1.6,4.55,5.5,Gillette Stadium,Drew Fischer
+2025-08-10,2025,MLS,Minnesota United,Colorado Rapids,1-2,,,1.57,4.75,5.75,Allianz Field,Greg Dopka
+2025-08-10,2025,MLS,New York Red Bulls,Real Salt Lake,2-1,,,2.3,3.6,3.0,Sports Illustrated Stadium,Ricardo Fierro
+2025-08-10,2025,MLS,FC Cincinnati,Charlotte FC,0-1,,,1.85,4.05,4.3,TQL Stadium,Filip Dujic
+2025-08-09,2025,MLS,FC Dallas,Portland Timbers,2-0,,,2.1,3.55,3.4,Toyota Stadium,Malik Badawi
+2025-08-09,2025,MLS,San Jose Earthquakes,Vancouver Whitecaps,2-1,,,2.65,3.75,2.47,PayPal Park,Tim Ford
+2025-08-09,2025,MLS,St. Louis City,Nashville SC,3-1,,,3.2,3.8,2.15,Energizer Park,Lorenzo Hernandez
+2025-08-09,2025,MLS,Chicago Fire,Los Angeles FC,2-2,,,2.4,3.55,2.92,SeatGeek Stadium,Ricardo Montero
+2025-08-09,2025,MLS,Austin FC,Houston Dynamo,2-2,,,2.02,3.6,3.8,Q2 Stadium,Alexis Da Silva
+2025-08-09,2025,MLS,Sporting Kansas City,San Diego FC,0-2,,,3.5,4.05,1.98,Children's Mercy Park,Pierre-Luc Lauziere
+2025-08-10,2025,MLS,LA Galaxy,Seattle Sounders,0-4,,,2.45,3.65,2.75,Dignity Health Sports Park,Allen Chapman
+2025-08-10,2025,MLS,Orlando City,Inter Miami,4-1,,,2.05,4.0,3.6,Inter&Co Stadium,Armando Villarreal
+2025-08-16,2025,MLS,Charlotte FC,Real Salt Lake,1-0,,,1.93,3.8,3.85,Bank of America Stadium,Tori Penso
+2025-08-16,2025,MLS,Inter Miami,LA Galaxy,3-1,,,1.55,5.0,5.8,Chase Stadium,Drew Fischer
+2025-08-16,2025,MLS,Toronto FC,Columbus Crew,1-1,,,4.1,3.95,1.9,BMO Field,Chris Penso
+2025-08-16,2025,MLS,New York Red Bulls,Philadelphia Union,1-0,,,2.65,3.5,2.7,Sports Illustrated Stadium,Ismir Pekmic
+2025-08-16,2025,MLS,CF Montreal,DC United,1-1,,,2.05,3.65,3.55,Stade Saputo,Lorenzo Hernandez
+2025-08-16,2025,MLS,New England Revolution,Los Angeles FC,0-2,,,3.4,3.8,2.1,Gillette Stadium,Marcos de Oliveira
+2025-08-17,2025,MLS,San Jose Earthquakes,San Diego FC,1-2,,,2.02,4.0,3.3,PayPal Park,Joe Dickerson
+2025-08-17,2025,MLS,New York City FC,Nashville SC,2-1,,,2.47,3.6,2.82,Yankee Stadium,Filip Dujic
+2025-08-16,2025,MLS,Austin FC,FC Dallas,1-1,,,1.98,3.9,3.85,Q2 Stadium,Armando Villarreal
+2025-08-16,2025,MLS,Portland Timbers,FC Cincinnati,2-3,,,2.67,3.4,2.62,Providence Park,Rubiel Vazquez
+2025-08-16,2025,MLS,Chicago Fire,St. Louis City,3-2,,,1.65,4.85,4.6,SeatGeek Stadium,Jair Marrufo
+2025-08-16,2025,MLS,Minnesota United,Seattle Sounders,1-0,,,2.4,3.55,3.0,Allianz Field,Malik Badawi
+2025-08-16,2025,MLS,Colorado Rapids,Atlanta United,3-1,,,2.27,3.9,2.87,Dick's Sporting Goods Park,Victor Rivas
+2025-08-16,2025,MLS,Orlando City,Sporting Kansas City,3-1,,,1.47,5.4,6.6,Inter&Co Stadium,Ricardo Montero
+2025-08-17,2025,MLS,Vancouver Whitecaps,Houston Dynamo,1-1,,,1.7,4.2,5.0,BC Place Stadium,Jon Freemon
+2025-08-23,2025,MLS,Columbus Crew,New England Revolution,1-2,,,1.57,4.75,5.4,Lower.com Field,Sergii Demianchuk
+2025-08-23,2025,MLS,Philadelphia Union,Chicago Fire,4-0,,,1.78,4.33,4.2,Subaru Park,Rubiel Vazquez
+2025-08-23,2025,MLS,DC United,Inter Miami,1-1,,,2.72,3.35,2.67,Audi Field,Ricardo Montero
+2025-08-23,2025,MLS,FC Cincinnati,New York City FC,0-1,,,2.3,4.0,2.95,TQL Stadium,Victor Rivas
+2025-08-23,2025,MLS,CF Montreal,Austin FC,3-2,,,3.0,3.5,2.32,Stade Saputo,Allen Chapman
+2025-08-24,2025,MLS,Atlanta United,Toronto FC,0-0,,,1.78,3.95,4.35,Mercedes-Benz Stadium,Lorenzo Hernandez
+2025-08-23,2025,MLS,Vancouver Whitecaps,St. Louis City,3-2,,,1.5,5.05,6.0,BC Place Stadium,Fotis Bazakos
+2025-08-24,2025,MLS,Charlotte FC,New York Red Bulls,1-0,,,2.02,3.9,3.5,Bank of America Stadium,Armando Villarreal
+2025-08-23,2025,MLS,LA Galaxy,Colorado Rapids,3-0,,,2.57,3.9,2.57,Dignity Health Sports Park,Pierre-Luc Lauziere
+2025-08-23,2025,MLS,Nashville SC,Orlando City,5-1,,,1.73,4.33,4.5,Geodis Park,Tim Ford
+2025-08-23,2025,MLS,San Diego FC,Portland Timbers,0-0,,,1.65,4.5,4.75,Snapdragon Stadium,Rosendo Mendoza
+2025-08-23,2025,MLS,FC Dallas,Los Angeles FC,1-1,,,4.3,4.1,1.78,Toyota Stadium,Ricardo Fierro
+2025-08-23,2025,MLS,Houston Dynamo,San Jose Earthquakes,1-2,,,2.05,4.0,3.3,Shell Energy Stadium,Serhiy Boyko
+2025-08-23,2025,MLS,Real Salt Lake,Minnesota United,1-3,,,2.35,3.9,2.82,America First Field,Joe Dickerson
+2025-08-24,2025,MLS,Seattle Sounders,Sporting Kansas City,5-2,,,1.57,4.8,5.5,Lumen Field,Chris Penso
+2025-08-30,2025,MLS,Toronto FC,CF Montreal,1-1,,,1.95,3.8,3.7,BMO Field,Drew Fischer
+2025-08-30,2025,MLS,New England Revolution,Charlotte FC,1-2,,,2.1,3.8,3.35,Gillette Stadium,Rosendo Mendoza
+2025-08-30,2025,MLS,FC Cincinnati,Philadelphia Union,0-1,,,2.75,3.75,2.4,TQL Stadium,Serhiy Boyko
+2025-08-30,2025,MLS,New York City FC,DC United,1-2,,,1.6,5.0,6.1,Yankee Stadium,Alexis Da Silva
+2025-08-30,2025,MLS,New York Red Bulls,Columbus Crew,0-0,,,2.65,3.65,2.55,Sports Illustrated Stadium,Rubiel Vazquez
+2025-08-30,2025,MLS,Austin FC,San Jose Earthquakes,3-1,,,2.05,3.85,3.45,Q2 Stadium,Jon Freemon
+2025-08-30,2025,MLS,St. Louis City,Houston Dynamo,2-3,,,2.2,4.0,3.0,Energizer Park,Ricardo Montero
+2025-08-30,2025,MLS,Minnesota United,Portland Timbers,1-1,,,1.78,4.1,4.55,Allianz Field,Jair Marrufo
+2025-08-30,2025,MLS,Nashville SC,Atlanta United,0-1,,,1.65,4.4,5.3,Geodis Park,Ismir Pekmic
+2025-08-30,2025,MLS,Sporting Kansas City,Colorado Rapids,4-2,,,2.4,4.05,2.62,Children's Mercy Park,Fotis Bazakos
+2025-08-31,2025,MLS,Los Angeles FC,San Diego FC,1-2,,,1.83,4.3,4.0,BMO Stadium,Filip Dujic
+2025-09-07,2025,MLS,Sporting Kansas City,Austin FC,1-2,,,2.22,3.75,3.0,Children's Mercy Park,Serhiy Boyko
+2025-09-06,2025,MLS,Houston Dynamo,LA Galaxy,1-1,,,1.7,4.15,5.4,Shell Energy Stadium,Marcos de Oliveira
+2025-09-06,2025,MLS,St. Louis City,FC Dallas,1-1,,,2.1,4.05,3.35,Energizer Park,Allen Chapman
+2025-09-06,2025,MLS,Chicago Fire,New England Revolution,3-2,,,1.75,4.35,4.45,SeatGeek Stadium,Guido Gonzalez Jr.
+2025-09-13,2025,MLS,Atlanta United,Columbus Crew,4-5,,,3.3,3.95,2.07,Mercedes-Benz Stadium,Jon Freemon
+2025-09-13,2025,MLS,DC United,Orlando City,1-1,,,3.8,3.75,1.95,Audi Field,Chris Penso
+2025-09-13,2025,MLS,New England Revolution,Toronto FC,1-1,,,1.91,4.0,4.5,Gillette Stadium,Alexis Da Silva
+2025-09-13,2025,MLS,FC Cincinnati,Nashville SC,2-1,,,2.55,3.6,2.75,TQL Stadium,Marcos de Oliveira
+2025-09-13,2025,MLS,Charlotte FC,Inter Miami,3-0,,,3.1,3.85,2.22,Bank of America Stadium,Serhiy Boyko
+2025-09-13,2025,MLS,CF Montreal,St. Louis City,0-2,,,2.5,3.9,2.57,Stade Saputo,Ismir Pekmic
+2025-09-13,2025,MLS,San Jose Earthquakes,Los Angeles FC,2-4,,,3.2,3.95,2.1,Levi's Stadium,Rubiel Vazquez
+2025-09-13,2025,MLS,Seattle Sounders,LA Galaxy,2-2,,,1.38,5.75,8.2,Lumen Field,Rosendo Mendoza
+2025-09-13,2025,MLS,Vancouver Whitecaps,Philadelphia Union,7-0,,,1.95,3.85,3.9,BC Place Stadium,Allen Chapman
+2025-09-13,2025,MLS,San Diego FC,Minnesota United,1-3,,,1.75,4.2,4.6,Snapdragon Stadium,Tori Penso
+2025-09-13,2025,MLS,FC Dallas,Austin FC,2-0,,,2.7,3.5,2.6,Toyota Stadium,Victor Rivas
+2025-09-13,2025,MLS,Chicago Fire,New York City FC,1-3,,,2.15,3.8,3.25,Soldier Field,Pierre-Luc Lauziere
+2025-09-13,2025,MLS,Real Salt Lake,Sporting Kansas City,2-1,,,1.5,5.2,5.9,America First Field,Drew Fischer
+2025-09-13,2025,MLS,Colorado Rapids,Houston Dynamo,2-1,,,2.0,3.85,3.7,Dick's Sporting Goods Park,Filip Dujic
+2025-09-13,2025,MLS,Portland Timbers,New York Red Bulls,2-1,,,2.1,3.9,3.4,Providence Park,Joe Dickerson
+2025-09-16,2025,MLS,Inter Miami,Seattle Sounders,3-1,,,2.0,4.05,3.6,Chase Stadium,Guido Gonzalez Jr.
+2025-09-17,2025,MLS,New York City FC,Columbus Crew,3-2,,,1.95,4.0,3.7,Yankee Stadium,Serhiy Boyko
+2025-09-17,2025,MLS,Real Salt Lake,Los Angeles FC,1-4,,,3.2,3.7,2.18,America First Field,Armando Villarreal
+2025-09-20,2025,MLS,New York City FC,Charlotte FC,2-0,,,1.75,4.1,4.5,Yankee Stadium,Tim Ford
+2025-09-20,2025,MLS,Philadelphia Union,New England Revolution,1-0,,,1.55,4.65,6.1,Subaru Park,Lorenzo Hernandez
+2025-09-20,2025,MLS,Atlanta United,San Diego FC,1-1,,,2.62,3.8,2.55,Mercedes-Benz Stadium,Ricardo Montero
+2025-09-20,2025,MLS,Columbus Crew,Toronto FC,1-1,,,1.47,5.1,6.6,Lower.com Field,Elijio Arreguin
+2025-09-20,2025,MLS,CF Montreal,New York Red Bulls,0-2,,,2.9,3.6,2.37,Stade Saputo,Filip Dujic
+2025-09-20,2025,MLS,Orlando City,Nashville SC,3-2,,,2.02,3.7,3.6,Inter&Co Stadium,Pierre-Luc Lauziere
+2025-09-20,2025,MLS,Inter Miami,DC United,3-2,,,1.38,6.0,8.4,Chase Stadium,Ismir Pekmic
+2025-09-21,2025,MLS,Austin FC,Seattle Sounders,2-1,,,3.25,3.45,2.27,Q2 Stadium,Jair Marrufo
+2025-09-20,2025,MLS,FC Dallas,Colorado Rapids,3-1,,,2.12,3.95,3.2,Toyota Stadium,Drew Fischer
+2025-09-20,2025,MLS,Sporting Kansas City,Vancouver Whitecaps,0-2,,,4.25,4.1,1.76,Children's Mercy Park,Tori Penso
+2025-09-20,2025,MLS,Houston Dynamo,Portland Timbers,1-0,,,1.95,3.8,3.7,Shell Energy Stadium,Allen Chapman
+2025-09-20,2025,MLS,Minnesota United,Chicago Fire,0-3,,,2.57,3.7,2.62,Allianz Field,Marcos de Oliveira
+2025-09-20,2025,MLS,LA Galaxy,FC Cincinnati,2-3,,,2.6,3.85,2.5,Dignity Health Sports Park,Malik Badawi
+2025-09-20,2025,MLS,San Jose Earthquakes,St. Louis City,1-3,,,1.75,4.7,4.2,PayPal Park,Sergii Demianchuk
+2025-09-21,2025,MLS,Los Angeles FC,Real Salt Lake,4-1,,,1.45,5.0,6.5,BMO Stadium,Alexis Da Silva
+2025-09-24,2025,MLS,New York City FC,Inter Miami,0-4,,,2.45,3.85,2.65,Citi Field,Filip Dujic
+2025-09-24,2025,MLS,Vancouver Whitecaps,Portland Timbers,1-1,,,1.72,4.5,4.6,BC Place Stadium,Jon Freemon
+2025-09-27,2025,MLS,Toronto FC,Inter Miami,1-1,,,4.65,4.6,1.7,BMO Field,Pierre-Luc Lauziere
+2025-09-27,2025,MLS,New England Revolution,Atlanta United,2-0,,,2.45,3.75,2.72,Gillette Stadium,Nabil Bensalah
+2025-09-27,2025,MLS,Charlotte FC,CF Montreal,1-4,,,1.5,4.95,6.5,Bank of America Stadium,Ricardo Montero
+2025-09-27,2025,MLS,DC United,Philadelphia Union,0-6,,,3.85,3.85,1.9,Audi Field,Jair Marrufo
+2025-09-27,2025,MLS,New York Red Bulls,New York City FC,2-3,,,2.6,3.45,2.75,Sports Illustrated Stadium,Guido Gonzalez Jr.
+2025-09-28,2025,MLS,FC Cincinnati,Orlando City,1-1,,,2.42,3.9,2.7,TQL Stadium,Rosendo Mendoza
+2025-09-27,2025,MLS,Real Salt Lake,Austin FC,3-1,,,1.7,4.33,4.75,America First Field,Rubiel Vazquez
+2025-09-27,2025,MLS,Chicago Fire,Columbus Crew,2-0,,,2.18,4.1,3.0,Soldier Field,Tori Penso
+2025-09-27,2025,MLS,St. Louis City,Los Angeles FC,0-3,,,3.6,4.5,1.88,Energizer Park,Victor Rivas
+2025-09-27,2025,MLS,San Diego FC,San Jose Earthquakes,0-1,,,1.78,4.75,4.2,Snapdragon Stadium,Armando Villarreal
+2025-09-27,2025,MLS,Portland Timbers,FC Dallas,2-2,,,1.8,4.25,4.2,Providence Park,Chris Penso
+2025-09-27,2025,MLS,Nashville SC,Houston Dynamo,3-1,,,1.83,3.95,4.25,Geodis Park,Serhiy Boyko
+2025-09-27,2025,MLS,LA Galaxy,Sporting Kansas City,4-1,,,1.7,5.0,4.2,Dignity Health Sports Park,Fotis Bazakos
+2025-09-27,2025,MLS,Colorado Rapids,Minnesota United,1-1,,,2.02,4.0,3.4,Dick's Sporting Goods Park,Ismail Elfath
+2025-09-27,2025,MLS,Seattle Sounders,Vancouver Whitecaps,2-2,,,2.07,3.7,3.6,Lumen Field,Malik Badawi
+2025-09-30,2025,MLS,Inter Miami,Chicago Fire,3-5,,,1.62,5.0,4.85,Chase Stadium,Allen Chapman
+2025-10-04,2025,MLS,DC United,Charlotte FC,0-1,,,2.42,3.65,2.82,Audi Field,Lorenzo Hernandez
+2025-10-04,2025,MLS,CF Montreal,Nashville SC,1-1,,,3.2,3.85,2.2,Stade Saputo,Fotis Bazakos
+2025-10-04,2025,MLS,FC Dallas,LA Galaxy,2-1,,,1.6,4.85,4.9,Toyota Stadium,Serhiy Boyko
+2025-10-04,2025,MLS,Orlando City,Columbus Crew,1-1,,,1.9,4.1,3.65,Inter&Co Stadium,Victor Rivas
+2025-10-04,2025,MLS,New York Red Bulls,FC Cincinnati,0-1,,,2.62,3.9,2.52,Sports Illustrated Stadium,Alexis Da Silva
+2025-10-04,2025,MLS,Philadelphia Union,New York City FC,1-0,,,1.98,3.9,3.8,Subaru Park,Jon Freemon
+2025-10-04,2025,MLS,Inter Miami,New England Revolution,4-1,,,1.33,6.3,8.5,Chase Stadium,Ismail Elfath
+2025-10-05,2025,MLS,Vancouver Whitecaps,San Jose Earthquakes,4-1,,,1.47,5.3,6.5,BC Place Stadium,Rosendo Mendoza
+2025-10-04,2025,MLS,Seattle Sounders,Portland Timbers,1-0,,,1.8,4.1,4.55,Lumen Field,Rubiel Vazquez
+2025-10-04,2025,MLS,Chicago Fire,Toronto FC,2-2,,,1.57,4.45,6.3,Soldier Field,Tim Ford
+2025-10-04,2025,MLS,Real Salt Lake,Colorado Rapids,1-0,,,1.65,4.55,5.2,America First Field,Chris Penso
+2025-10-04,2025,MLS,Minnesota United,Sporting Kansas City,3-0,,,1.55,5.25,5.7,Allianz Field,Natalie Simon
+2025-10-04,2025,MLS,Austin FC,St. Louis City,1-3,,,1.9,4.05,3.6,Q2 Stadium,Ricardo Fierro
+2025-10-04,2025,MLS,Houston Dynamo,San Diego FC,2-4,,,2.85,3.75,2.35,Shell Energy Stadium,Drew Fischer
+2025-10-05,2025,MLS,Los Angeles FC,Atlanta United,1-0,,,1.34,6.1,8.75,BMO Stadium,Allen Chapman
+2025-10-08,2025,MLS,Los Angeles FC,Toronto FC,2-0,,,1.5,4.65,6.8,BMO Stadium,Filip Dujic
+2025-10-11,2025,MLS,Orlando City,Vancouver Whitecaps,1-2,,,2.27,3.75,3.0,Inter&Co Stadium,Serhiy Boyko
+2025-10-11,2025,MLS,Inter Miami,Atlanta United,4-0,,,1.28,7.1,10.5,Chase Stadium,Tim Ford
+2025-10-12,2025,MLS,Austin FC,Los Angeles FC,1-0,,,3.4,3.4,2.2,Q2 Stadium,Rosendo Mendoza
+2025-10-11,2025,MLS,Seattle Sounders,Real Salt Lake,1-0,,,1.73,4.33,4.8,Lumen Field,Ricardo Montero
+2025-10-11,2025,MLS,LA Galaxy,FC Dallas,2-1,,,2.75,4.1,2.35,Dignity Health Sports Park,Jair Marrufo
+2025-10-18,2025,MLS,Nashville SC,Inter Miami,2-5,,,2.52,4.0,2.5,Geodis Park,Jon Freemon
+2025-10-18,2025,MLS,FC Cincinnati,CF Montreal,3-0,,,1.6,4.85,5.2,TQL Stadium,Tim Ford
+2025-10-18,2025,MLS,New England Revolution,Chicago Fire,2-2,,,3.2,3.9,2.12,Gillette Stadium,Pierre-Luc Lauziere
+2025-10-18,2025,MLS,Charlotte FC,Philadelphia Union,2-0,,,2.47,3.7,2.67,Bank of America Stadium,Tori Penso
+2025-10-18,2025,MLS,Toronto FC,Orlando City,4-2,,,3.3,3.8,2.18,BMO Field,Fotis Bazakos
+2025-10-18,2025,MLS,New York City FC,Seattle Sounders,1-2,,,1.9,3.85,4.0,Citi Field,Chris Penso
+2025-10-18,2025,MLS,Atlanta United,DC United,1-1,,,1.7,4.45,4.8,Mercedes-Benz Stadium,Joshua Encarnacion
+2025-10-18,2025,MLS,Columbus Crew,New York Red Bulls,3-1,,,1.6,4.45,5.9,Lower.com Field,Marcos de Oliveira
+2025-10-18,2025,MLS,Vancouver Whitecaps,FC Dallas,1-2,,,1.33,6.1,9.0,BC Place Stadium,Allen Chapman
+2025-10-18,2025,MLS,Portland Timbers,San Diego FC,0-4,,,2.76,3.75,2.42,Providence Park,Victor Rivas
+2025-10-18,2025,MLS,San Jose Earthquakes,Austin FC,2-1,,,1.72,4.35,4.6,PayPal Park,Filip Dujic
+2025-10-18,2025,MLS,LA Galaxy,Minnesota United,2-1,,,2.5,3.8,2.65,Dignity Health Sports Park,Rosendo Mendoza
+2025-10-18,2025,MLS,Colorado Rapids,Los Angeles FC,2-2,,,3.8,4.5,1.83,Dick's Sporting Goods Park,Rubiel Vazquez
+2025-10-18,2025,MLS,Sporting Kansas City,Houston Dynamo,0-0,,,2.55,3.85,2.62,Children's Mercy Park,Nabil Bensalah
+2025-10-18,2025,MLS,St. Louis City,Real Salt Lake,2-2,,,2.4,4.0,2.65,Energizer Park,Armando Villarreal
+2025-10-22,2025,MLS,Portland Timbers,Real Salt Lake,3-1,,,2.18,3.65,3.2,Providence Park,Guido Gonzalez Jr.
+2025-10-22,2025,MLS,Chicago Fire,Orlando City,3-1,,,2.12,3.85,3.2,SeatGeek Stadium,Drew Fischer
+2025-10-24,2025,MLS,Inter Miami,Nashville SC,3-1,,,1.6,5.0,5.5,Chase Stadium,Filip Dujic
+2025-10-26,2025,MLS,Vancouver Whitecaps,FC Dallas,3-0,,,1.42,5.5,7.2,BC Place Stadium,Victor Rivas
+2025-10-26,2025,MLS,Philadelphia Union,Chicago Fire,2-2,,,1.98,3.9,4.0,Subaru Park,Serhiy Boyko
+2025-10-26,2025,MLS,San Diego FC,Portland Timbers,2-1,,,1.65,4.55,5.1,Snapdragon Stadium,Chris Penso
+2025-10-27,2025,MLS,FC Cincinnati,Columbus Crew,1-0,,,2.47,3.9,2.67,TQL Stadium,Rubiel Vazquez
+2025-10-28,2025,MLS,Charlotte FC,New York City FC,0-1,,,2.7,3.4,2.62,Bank of America Stadium,Jon Freemon
+2025-10-27,2025,MLS,Minnesota United,Seattle Sounders,0-0,,,3.2,3.4,2.35,Allianz Field,Alexis Da Silva
+2025-10-29,2025,MLS,Los Angeles FC,Austin FC,2-1,,,1.38,5.3,8.75,BMO Stadium,Rosendo Mendoza
+2025-11-01,2025,MLS,New York City FC,Charlotte FC,0-0,,,1.82,3.8,5.0,Yankee Stadium,Rubiel Vazquez
+2025-11-01,2025,MLS,Chicago Fire,Philadelphia Union,0-3,,,2.22,3.65,3.15,SeatGeek Stadium,Jon Freemon
+2025-11-01,2025,MLS,Nashville SC,Inter Miami,2-1,,,2.9,4.0,2.22,Geodis Park,Allen Chapman
+2025-11-01,2025,MLS,Portland Timbers,San Diego FC,2-2,,,3.05,3.8,2.18,Providence Park,Drew Fischer
+2025-11-02,2025,MLS,Columbus Crew,FC Cincinnati,4-0,,,1.95,4.1,3.85,Lower.com Field,Guido Gonzalez Jr.
+2025-11-01,2025,MLS,FC Dallas,Vancouver Whitecaps,1-1,,,4.0,4.05,1.9,Toyota Stadium,Tori Penso
+2025-11-02,2025,MLS,Austin FC,Los Angeles FC,1-4,,,3.95,3.65,2.0,Q2 Stadium,Joe Dickerson
+2025-11-03,2025,MLS,Seattle Sounders,Minnesota United,4-2,,,1.53,4.6,6.4,Lumen Field,Pierre-Luc Lauziere
+2025-11-08,2025,MLS,Minnesota United,Seattle Sounders,3-3,,,3.15,3.4,2.35,Allianz Field,Victor Rivas
+2025-11-08,2025,MLS,FC Cincinnati,Columbus Crew,2-1,,,2.65,3.65,2.55,TQL Stadium,Chris Penso
+2025-11-07,2025,MLS,Charlotte FC,New York City FC,1-3,,,2.77,3.3,2.72,Bank of America Stadium,Pierre-Luc Lauziere
+2025-11-08,2025,MLS,Inter Miami,Nashville SC,4-0,,,1.57,4.75,5.0,Chase Stadium,Rosendo Mendoza
+2025-11-09,2025,MLS,San Diego FC,Portland Timbers,4-0,,,1.48,4.55,6.7,Snapdragon Stadium,Joe Dickerson
+2025-11-23,2025,MLS,FC Cincinnati,Inter Miami,0-4,,,3.15,3.9,2.1,TQL Stadium,Drew Fischer
+2025-11-22,2025,MLS,Vancouver Whitecaps,Los Angeles FC,2-2,,,2.12,3.8,3.2,BC Place Stadium,Rubiel Vazquez
+2025-11-23,2025,MLS,Philadelphia Union,New York City FC,0-1,,,1.75,3.75,5.4,Subaru Park,Guido Gonzalez Jr.
+2025-11-24,2025,MLS,San Diego FC,Minnesota United,1-0,,,1.67,4.3,5.1,Snapdragon Stadium,Rosendo Mendoza
+2025-11-29,2025,MLS,Inter Miami,New York City FC,5-1,,,1.55,4.75,6.1,Chase Stadium,Jon Freemon
+2025-11-29,2025,MLS,San Diego FC,Vancouver Whitecaps,1-3,,,2.65,3.6,2.65,Snapdragon Stadium,Joe Dickerson
+2025-12-06,2025,MLS,Inter Miami,Vancouver Whitecaps,3-1,,,2.02,4.1,3.65,Chase Stadium,Drew Fischer

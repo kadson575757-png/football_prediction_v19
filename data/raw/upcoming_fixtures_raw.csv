@@ -1,0 +1,4 @@
+date,season,league,home_team,away_team,venue,referee,odds_home,odds_draw,odds_away,formation_home_xg90,formation_away_xg90,fatigue_home,fatigue_away
+2024-08-24,2024,Bundesliga,Bayern Munich,Bayer Leverkusen,Allianz Arena,Felix Zwayer,1.72,4.10,5.25,2.10,1.85,3,4
+2024-08-24,2024,Bundesliga,Borussia Dortmund,RB Leipzig,Signal Iduna Park,Daniel Siebert,2.35,3.40,3.00,1.60,1.70,5,3
+2024-08-25,2024,Bundesliga,Eintracht Frankfurt,Wolfsburg,Deutsche Bank Park,Christian Dingert,2.10,3.30,3.50,1.30,1.15,4,4

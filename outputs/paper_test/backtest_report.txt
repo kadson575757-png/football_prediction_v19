@@ -1,0 +1,74 @@
+# Betting Backtest Report
+
+## Summary
+
+- Total matches: 1745
+- Total bets: 638
+- No-bet count: 1107
+- Hit rate: 20.69%
+- Total profit: -33.25 units
+- ROI: -5.21%
+- Yield: -5.21%
+- Average edge: 6.59%
+
+## Calibration
+
+- Brier score: 0.5811
+- Log loss: 0.9752
+- Average predicted probability for winning picks: 39.82%
+- No overconfidence warning.
+
+## Performance By Pick Type
+
+| Group | Bets | Profit | ROI | Hit Rate |
+|---|---:|---:|---:|---:|
+| Away | 86 | -53.67 | -62.41% | 9.30% |
+| Draw | 530 | 31.85 | 6.01% | 23.02% |
+| Home | 22 | -11.43 | -51.95% | 9.09% |
+
+## Performance By League
+
+| Group | Bets | Profit | ROI | Hit Rate |
+|---|---:|---:|---:|---:|
+| Bundesliga | 122 | 4.13 | 3.39% | 22.13% |
+| La Liga | 116 | -20.29 | -17.49% | 18.97% |
+| Ligue 1 | 100 | 24.08 | 24.08% | 28.00% |
+| Premier League | 167 | -26.02 | -15.58% | 17.37% |
+| Serie A | 133 | -15.15 | -11.39% | 19.55% |
+
+## Biggest Winning Bets
+
+| Date | Match | Pick | Odds | Profit |
+|---|---|---|---:|---:|
+| 2023-12-09 | Ein Frankfurt vs Bayern Munich | Home | 9.00 | 8.00 |
+| 2024-05-12 | Juventus vs Salernitana | Draw | 8.50 | 7.50 |
+| 2024-04-06 | Paris SG vs Clermont | Draw | 8.00 | 7.00 |
+| 2023-12-16 | Man City vs Crystal Palace | Draw | 8.00 | 7.00 |
+| 2024-05-25 | Milan vs Salernitana | Draw | 8.00 | 7.00 |
+
+## Biggest Losing Bets
+
+| Date | Match | Pick | Odds | Profit |
+|---|---|---|---:|---:|
+| 2024-05-19 | Le Havre vs Marseille | Draw | 3.60 | -1.00 |
+| 2024-05-18 | Dortmund vs Darmstadt | Draw | 8.50 | -1.00 |
+| 2024-05-18 | Leverkusen vs Augsburg | Draw | 6.00 | -1.00 |
+| 2024-05-18 | Stuttgart vs M'gladbach | Draw | 6.25 | -1.00 |
+| 2024-05-16 | Sociedad vs Valencia | Draw | 3.90 | -1.00 |
+
+## Most Common No-Bet Reasons
+
+| Reason | Count |
+|---|---:|
+| xG unavailable; xG gates skipped | 1745 |
+| 1X2 hard tip locked: control model below 7/10 | 1018 |
+| No value bet: control score below 7 | 1018 |
+| No primary betting recommendation cleared all v1.9 gates | 891 |
+| DNB locked: control_ok | 472 |
+| DNB locked: prob_edge_vs_opponent, control_ok | 225 |
+| No value bet: best model edge below 3.00% | 153 |
+| Kellerduell / both teams TDI >= 2: Over 1.5 locked | 71 |
+| DNB locked: chaos_ok, control_ok | 69 |
+| DNB locked: prob_edge_vs_opponent, chaos_ok, control_ok | 44 |
+
+> Backtests are diagnostics, not guarantees. Future matches can behave differently.

@@ -1,0 +1,2 @@
+date,league,home_team,away_team,prob_home,prob_draw,prob_away,top_pick,control_score,chaos_score,odds_home,odds_draw,odds_away,edge_home,edge_draw,edge_away,value_pick,value_edge,paper_strategy,stake_units,status,result,closing_odds,closing_line_value,final_profit_units,notes
+2024-08-24,Bundesliga,Bayern Munich,Bayer Leverkusen,0.4772,0.3125,0.2103,Home,7.15,2.25,1.72,4.1,5.25,-0.0951,0.0724,0.0228,Draw,0.0724,A: Draw-only,1.0,PENDING,,,,,EXAMPLE FIXTURE - replace with real upcoming data

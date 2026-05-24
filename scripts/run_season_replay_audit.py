@@ -889,7 +889,7 @@ def run_walk_forward(
         _assert_no_leakage(prior_ml, md_date, label=f"walk_forward prior_ml md={md_label}")
 
         # Build extended features on a recent window (O(n²) performance guard)
-        recent_prior = prior_df.tail(200)
+        recent_prior = prior_df
         recent_prior = build_extended_features(
             recent_prior,
             include_elo=True, include_h2h=True, include_time_decay=True,
@@ -933,7 +933,7 @@ def run_walk_forward(
             match_counter += 1
 
             # 1. Base features from rolling form / odds (control + chaos)
-            features = build_match_features(match, prior_df, "walk_forward", league_name)
+            features = build_match_features(match, recent_prior, "walk_forward", league_name)
             features["matchday"]        = md_label
             features["cutoff_date"]     = cutoff_date
             features["train_rows"]      = len(prior_ml)
@@ -1066,7 +1066,7 @@ def run_replay(
         _assert_no_leakage(prior_df, md_date, label=f"matchday={md_label}")
 
         # Build extended features on a recent window (O(n²) performance guard)
-        recent_prior = prior_df.tail(200)
+        recent_prior = prior_df
         recent_prior = build_extended_features(
             recent_prior,
             include_elo=True, include_h2h=True, include_time_decay=True,
@@ -1083,7 +1083,7 @@ def run_replay(
             match_counter += 1
 
             # Build pre-match features (no future leakage — prior_df is fixed)
-            features = build_match_features(match, prior_df, mode, league_name)
+            features = build_match_features(match, recent_prior, mode, league_name)
             features["matchday"] = md_label
 
             # Generate recommended market recommendation

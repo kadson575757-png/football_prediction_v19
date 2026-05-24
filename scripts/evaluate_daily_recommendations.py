@@ -298,6 +298,220 @@ def _avoid_success(row: pd.Series) -> Optional[bool]:
 
 
 # ---------------------------------------------------------------------------
+# League profile summary helper  (isolated for testability)
+# ---------------------------------------------------------------------------
+
+#: Ordered tiers for league_adjusted_strength display
+_STRENGTH_TIERS = ["HIGH", "MEDIUM", "LOW", "SUPPRESSED"]
+
+
+def build_league_profile_sections(scored: pd.DataFrame) -> list[str]:
+    """Return Markdown summary lines for league-profile fields.
+
+    Works on any DataFrame that contains a ``success`` boolean column plus
+    (some or all of) the six league profile fields added by
+    ``apply_league_market_profile()``.
+
+    If none of the league profile fields are present the function returns a
+    single informational line instead of crashing.
+
+    Parameters
+    ----------
+    scored:
+        Subset of the evaluated DataFrame where ``success`` is not null —
+        i.e. the same ``scored`` slice used for the rest of the summary.
+
+    Returns
+    -------
+    list[str]
+        Markdown lines (no trailing newline needed; the caller joins them).
+    """
+    _LP_COLS = {
+        "league_adjusted_strength",
+        "league_profile",
+        "league_warning_flags",
+        "league_preferred_subtype",
+        "league_suppressed_subtype",
+    }
+    present = _LP_COLS & set(scored.columns)
+
+    lines: list[str] = []
+    lines.append("## League Profile Analysis  [diagnostic only]")
+    lines.append("")
+
+    if not present:
+        lines.append(
+            "  league profile fields not available in this report set — "
+            "re-run daily report scripts to include them."
+        )
+        lines.append("")
+        return lines
+
+    # ------------------------------------------------------------------ 6.1
+    if "league_adjusted_strength" in scored.columns:
+        lines.append("### 6.1 Success Rate by league_adjusted_strength")
+        lines.append("")
+        lines.append(f"  {'Strength':<14} {'n':>4} {'hits':>4} {'rate':>7}")
+        lines.append("  " + "-" * 38)
+        col = scored["league_adjusted_strength"].fillna("UNKNOWN").str.upper()
+        for tier in _STRENGTH_TIERS + sorted(set(col.unique()) - set(_STRENGTH_TIERS)):
+            grp = scored[col == tier]
+            if grp.empty:
+                continue
+            n    = len(grp)
+            hits = int(grp["success"].sum())
+            rate = hits / n if n else 0.0
+            lines.append(f"  {tier:<14} {n:>4} {hits:>4} {rate:7.1%}")
+        lines.append("")
+
+    # ------------------------------------------------------------------ 6.2
+    if "league_profile" in scored.columns:
+        lines.append("### 6.2 Success Rate by league_profile")
+        lines.append("")
+        lines.append(f"  {'Profile':<32} {'n':>4} {'hits':>4} {'rate':>7}")
+        lines.append("  " + "-" * 52)
+        col = scored["league_profile"].fillna("unknown")
+        for profile, grp in scored.groupby(col):
+            n    = len(grp)
+            hits = int(grp["success"].sum())
+            rate = hits / n if n else 0.0
+            lines.append(f"  {profile:<32} {n:>4} {hits:>4} {rate:7.1%}")
+        lines.append("")
+
+    # ------------------------------------------------------------------ 6.3
+    if "league_warning_flags" in scored.columns:
+        lines.append("### 6.3 Success Rate — warned vs not warned")
+        lines.append("")
+        lines.append(f"  {'Category':<24} {'n':>4} {'hits':>4} {'rate':>7}")
+        lines.append("  " + "-" * 44)
+        has_warn = (
+            scored["league_warning_flags"]
+            .fillna("")
+            .str.strip()
+            .str.len() > 0
+        )
+        for label, mask in [("has warning_flag", has_warn), ("no warning_flag", ~has_warn)]:
+            grp  = scored[mask]
+            n    = len(grp)
+            if n == 0:
+                continue
+            hits = int(grp["success"].sum())
+            rate = hits / n
+            lines.append(f"  {label:<24} {n:>4} {hits:>4} {rate:7.1%}")
+        lines.append("")
+
+    # ------------------------------------------------------------------ 6.4  preferred subtype match
+    if "league_preferred_subtype" in scored.columns and "recommended_market_subtype" in scored.columns:
+        lines.append("### 6.4 Success Rate — recommended subtype is league-preferred")
+        lines.append("")
+        lines.append(f"  {'Category':<30} {'n':>4} {'hits':>4} {'rate':>7}")
+        lines.append("  " + "-" * 50)
+
+        def _is_preferred(row: pd.Series) -> bool:
+            sub  = str(row.get("recommended_market_subtype", "") or "").strip().upper()
+            pref = str(row.get("league_preferred_subtype",   "") or "").upper()
+            if not sub or not pref:
+                return False
+            return sub in {p.strip() for p in pref.split(",")}
+
+        scored = scored.copy()
+        scored["_is_preferred"] = scored.apply(_is_preferred, axis=1)
+        for label, mask in [
+            ("subtype is preferred",     scored["_is_preferred"]),
+            ("subtype not preferred",    ~scored["_is_preferred"]),
+        ]:
+            grp  = scored[mask]
+            n    = len(grp)
+            if n == 0:
+                continue
+            hits = int(grp["success"].sum())
+            rate = hits / n
+            lines.append(f"  {label:<30} {n:>4} {hits:>4} {rate:7.1%}")
+        lines.append("")
+
+    # ------------------------------------------------------------------ 6.5  suppressed subtype match
+    if "league_suppressed_subtype" in scored.columns and "recommended_market_subtype" in scored.columns:
+        lines.append("### 6.5 Success Rate — recommended subtype is league-suppressed")
+        lines.append("")
+        lines.append(f"  {'Category':<30} {'n':>4} {'hits':>4} {'rate':>7}")
+        lines.append("  " + "-" * 50)
+
+        def _is_suppressed(row: pd.Series) -> bool:
+            sub  = str(row.get("recommended_market_subtype",  "") or "").strip().upper()
+            supp = str(row.get("league_suppressed_subtype",   "") or "").upper()
+            if not sub or not supp:
+                return False
+            return sub in {s.strip() for s in supp.split(",")}
+
+        scored["_is_suppressed"] = scored.apply(_is_suppressed, axis=1)
+        for label, mask in [
+            ("subtype is suppressed",   scored["_is_suppressed"]),
+            ("subtype not suppressed",  ~scored["_is_suppressed"]),
+        ]:
+            grp  = scored[mask]
+            n    = len(grp)
+            if n == 0:
+                continue
+            hits = int(grp["success"].sum())
+            rate = hits / n
+            lines.append(f"  {label:<30} {n:>4} {hits:>4} {rate:7.1%}")
+        lines.append("")
+
+    # ------------------------------------------------------------------ 6.6  comparison table
+    lines.append("### 6.6 Comparison Summary")
+    lines.append("")
+
+    if "league_adjusted_strength" in scored.columns:
+        lines.append("  **Adjusted Strength tiers:**")
+        col = scored["league_adjusted_strength"].fillna("UNKNOWN").str.upper()
+        for tier in _STRENGTH_TIERS:
+            grp = scored[col == tier]
+            if grp.empty:
+                continue
+            n    = len(grp)
+            hits = int(grp["success"].sum())
+            lines.append(f"    {tier:<14}: {hits}/{n}  ({hits/n:.1%})")
+        lines.append("")
+
+    if "league_warning_flags" in scored.columns:
+        lines.append("  **Warning flags:**")
+        has_warn = scored["league_warning_flags"].fillna("").str.strip().str.len() > 0
+        for label, mask in [("Warned", has_warn), ("Not warned", ~has_warn)]:
+            grp = scored[mask]
+            n   = len(grp)
+            if n == 0:
+                continue
+            hits = int(grp["success"].sum())
+            lines.append(f"    {label:<14}: {hits}/{n}  ({hits/n:.1%})")
+        lines.append("")
+
+    if "league_suppressed_subtype" in scored.columns and "recommended_market_subtype" in scored.columns:
+        lines.append("  **Suppressed vs non-suppressed subtype:**")
+        def _supp_flag(row):
+            sub  = str(row.get("recommended_market_subtype",  "") or "").strip().upper()
+            supp = str(row.get("league_suppressed_subtype",   "") or "").upper()
+            if not sub or not supp:
+                return False
+            return sub in {s.strip() for s in supp.split(",")}
+        scored["_supp2"] = scored.apply(_supp_flag, axis=1)
+        for label, mask in [("Suppressed", scored["_supp2"]), ("Not suppressed", ~scored["_supp2"])]:
+            grp = scored[mask]
+            n   = len(grp)
+            if n == 0:
+                continue
+            hits = int(grp["success"].sum())
+            lines.append(f"    {label:<14}: {hits}/{n}  ({hits/n:.1%})")
+        lines.append("")
+
+    lines.append(
+        "  *League profile sections are diagnostic only. "
+        "No betting claims are made.*"
+    )
+    lines.append("")
+    return lines
+
+
+# ---------------------------------------------------------------------------
 # Main evaluation
 # ---------------------------------------------------------------------------
 
@@ -734,6 +948,9 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
             n = len(grp); hits = int(grp["type_success"].sum())
             lines.append(f"  {bucket:<16} {n:>4} {hits:>4} {hits/n:7.1%}")
         lines.append("")
+
+    # League profile analysis sections (graceful fallback if fields absent)
+    lines.extend(build_league_profile_sections(scored))
 
     # Top misses
     misses = scored[scored["type_success"] == False].copy()
