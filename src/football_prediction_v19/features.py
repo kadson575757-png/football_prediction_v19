@@ -203,12 +203,66 @@ def _feature_row(row: pd.Series, histories: dict[str, list[dict[str, Any]]], win
     return feats
 
 
+# ---------------------------------------------------------------------------
+# Optional Phase-5 / Phase-6 features
+# ---------------------------------------------------------------------------
+
+OPTIONAL_FEATURES: list[str] = [
+    # Phase 5 — H2H
+    "h2h_btts_rate", "h2h_avg_goals", "h2h_n",
+    # Phase 5 — time-decay rolling
+    "home_td_goals_scored", "away_td_goals_scored",
+    "home_td_goals_conceded", "away_td_goals_conceded",
+    "home_td_win_rate", "away_td_win_rate",
+    # Phase 5 — opponent-adjusted xG
+    "adj_home_xg", "adj_away_xg",
+    # Phase 5 — Elo
+    "elo_diff",
+    # Phase 5 — game-state proxy
+    "home_clean_sheet_rate", "away_clean_sheet_rate",
+    "home_failed_to_score_rate", "away_failed_to_score_rate",
+    "home_lead_rate", "away_lead_rate",
+    # Phase 6 — referee
+    "ref_btts_rate", "ref_avg_goals", "ref_over25_rate", "ref_n",
+    # Phase 6 — fatigue / rest
+    "home_days_since_last", "away_days_since_last",
+    "home_short_rest", "away_short_rest",
+    "home_games_last_30_days", "away_games_last_30_days",
+    # Phase 6 — table context
+    "dead_rubber_flag",
+    "home_relegation_zone", "away_relegation_zone",
+    "home_title_race", "away_title_race",
+    "rank_diff",
+    # Phase 6 — rivalry
+    "is_derby",
+]
+
+# Boolean optional features are encoded as int (0/1) with fillna(0)
+BOOL_OPTIONAL_FEATURES: frozenset[str] = frozenset({
+    "is_derby",
+    "dead_rubber_flag",
+    "home_short_rest",
+    "away_short_rest",
+    "home_relegation_zone",
+    "away_relegation_zone",
+    "home_title_race",
+    "away_title_race",
+})
+
+
 def build_features(df: pd.DataFrame, windows: Iterable[int] = WINDOWS, min_history: int = 1) -> pd.DataFrame:
     """Build a training table without leakage.
 
     Each row uses only matches played before that row's match date.
+    Optional Phase-5/6 columns are merged in when present in *df*.
     """
     matches = clean_matches(df, completed_only=True)
+
+    # --- Detect optional features present in the input ---
+    active_optional = [c for c in OPTIONAL_FEATURES if c in matches.columns]
+    if active_optional:
+        print(f"[Features] {len(active_optional)} optional features active: {active_optional}")
+
     histories: dict[str, list[dict[str, Any]]] = defaultdict(list)
     rows: list[dict[str, Any]] = []
 
@@ -232,6 +286,24 @@ def build_features(df: pd.DataFrame, windows: Iterable[int] = WINDOWS, min_histo
     out = pd.DataFrame(rows)
     enough_history = (out["home_matches_available"] >= min_history) & (out["away_matches_available"] >= min_history)
     out = out.loc[enough_history].reset_index(drop=True)
+
+    # --- Merge optional columns not already computed by _feature_row ---
+    new_optional = [c for c in active_optional if c not in out.columns]
+    if new_optional:
+        merge_keys = ["date", "home_team", "away_team"]
+        opt_src = matches[merge_keys + new_optional].copy()
+        out = out.merge(opt_src, on=merge_keys, how="left")
+
+    # --- Impute: boolean → int(0/1), continuous → column median ---
+    for col in active_optional:
+        if col not in out.columns:
+            continue
+        if col in BOOL_OPTIONAL_FEATURES:
+            out[col] = out[col].fillna(0).astype(int)
+        else:
+            median_val = out[col].median()
+            out[col] = out[col].fillna(median_val)
+
     return out
 
 
