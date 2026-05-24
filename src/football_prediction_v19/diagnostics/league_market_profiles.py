@@ -38,6 +38,42 @@ __all__ = ["apply_league_market_profile", "LEAGUE_PROFILES"]
 #:                         a league_warning_flags entry
 
 LEAGUE_PROFILES: dict[str, dict[str, Any]] = {
+    "MLS": {
+        "profile_name": "mls_volatile",
+        "preferred_types": ["AVOID", "DOUBLE_CHANCE", "UNDER"],
+        "preferred_subtypes": ["DOUBLE_CHANCE_1X", "DOUBLE_CHANCE_X2", "UNDER_35"],
+        "suppressed_subtypes": ["BOTH_OVER25_BTTS", "BTTS"],
+        "allowed_subtypes": [],
+        "notes": (
+            "MLS low-sample/custom profile — World Cup break, travel and "
+            "rotation effects; treat goal-combo markets cautiously."
+        ),
+        "warnings_if": [
+            (
+                "recommended_market_subtype",
+                {"BOTH_OVER25_BTTS", "BTTS"},
+                "MLS low-sample/custom profile — World Cup break, travel and rotation effects; treat goal-combo markets cautiously.",
+            ),
+        ],
+    },
+    "Major League Soccer": {
+        "profile_name": "mls_volatile",
+        "preferred_types": ["AVOID", "DOUBLE_CHANCE", "UNDER"],
+        "preferred_subtypes": ["DOUBLE_CHANCE_1X", "DOUBLE_CHANCE_X2", "UNDER_35"],
+        "suppressed_subtypes": ["BOTH_OVER25_BTTS", "BTTS"],
+        "allowed_subtypes": [],
+        "notes": (
+            "MLS low-sample/custom profile — World Cup break, travel and "
+            "rotation effects; treat goal-combo markets cautiously."
+        ),
+        "warnings_if": [
+            (
+                "recommended_market_subtype",
+                {"BOTH_OVER25_BTTS", "BTTS"},
+                "MLS low-sample/custom profile — World Cup break, travel and rotation effects; treat goal-combo markets cautiously.",
+            ),
+        ],
+    },
     "La Liga": {
         "profile_name": "la_liga_control",
         "preferred_types": ["AVOID", "DOUBLE_CHANCE", "UNDER"],
@@ -157,6 +193,153 @@ LEAGUE_PROFILES: dict[str, dict[str, Any]] = {
                 "recommended_market_subtype",
                 {"OVER_25", "BOTH_OVER25_BTTS"},
                 "Ligue 1: goals subtypes have weak evidence in this league.",
+            ),
+        ],
+    },
+    "Belgian Pro League": {
+        "profile_name": "belgium_balanced_goals",
+        "preferred_types": ["AVOID", "DOUBLE_CHANCE", "UNDER"],
+        "preferred_subtypes": ["DOUBLE_CHANCE_1X", "DOUBLE_CHANCE_X2", "UNDER_35"],
+        "suppressed_subtypes": ["BOTH_OVER25_BTTS"],
+        "allowed_subtypes": ["BTTS", "OVER_25"],
+        "notes": (
+            "Belgian Pro League (Jupiler Pro League) — new/low-sample profile. "
+            "DOUBLE_CHANCE and AVOID are cautiously preferred. "
+            "Treat goal-combo markets (BOTH_OVER25_BTTS) with caution until "
+            "walk-forward evidence is collected."
+        ),
+        "warnings_if": [
+            (
+                "recommended_market_subtype",
+                {"BOTH_OVER25_BTTS"},
+                "Belgian Pro League: new/low-sample profile — "
+                "treat goal-combo markets cautiously.",
+            ),
+        ],
+    },
+    "Jupiler Pro League": {
+        "profile_name": "belgium_balanced_goals",
+        "preferred_types": ["AVOID", "DOUBLE_CHANCE", "UNDER"],
+        "preferred_subtypes": ["DOUBLE_CHANCE_1X", "DOUBLE_CHANCE_X2", "UNDER_35"],
+        "suppressed_subtypes": ["BOTH_OVER25_BTTS"],
+        "allowed_subtypes": ["BTTS", "OVER_25"],
+        "notes": (
+            "Belgian Pro League (Jupiler Pro League) — new/low-sample profile. "
+            "DOUBLE_CHANCE and AVOID are cautiously preferred. "
+            "Treat goal-combo markets (BOTH_OVER25_BTTS) with caution until "
+            "walk-forward evidence is collected."
+        ),
+        "warnings_if": [
+            (
+                "recommended_market_subtype",
+                {"BOTH_OVER25_BTTS"},
+                "Belgian Pro League: new/low-sample profile — "
+                "treat goal-combo markets cautiously.",
+            ),
+        ],
+    },
+    "Belgium": {
+        "profile_name": "belgium_balanced_goals",
+        "preferred_types": ["AVOID", "DOUBLE_CHANCE", "UNDER"],
+        "preferred_subtypes": ["DOUBLE_CHANCE_1X", "DOUBLE_CHANCE_X2", "UNDER_35"],
+        "suppressed_subtypes": ["BOTH_OVER25_BTTS"],
+        "allowed_subtypes": ["BTTS", "OVER_25"],
+        "notes": (
+            "Belgian Pro League (Jupiler Pro League) — new/low-sample profile. "
+            "DOUBLE_CHANCE and AVOID are cautiously preferred. "
+            "Treat goal-combo markets (BOTH_OVER25_BTTS) with caution until "
+            "walk-forward evidence is collected."
+        ),
+        "warnings_if": [
+            (
+                "recommended_market_subtype",
+                {"BOTH_OVER25_BTTS"},
+                "Belgian Pro League: new/low-sample profile — "
+                "treat goal-combo markets cautiously.",
+            ),
+        ],
+    },
+    "Brasileiro Serie A": {
+        "profile_name": "brazil_volatile_control",
+        "preferred_types": ["AVOID", "DOUBLE_CHANCE", "UNDER"],
+        "preferred_subtypes": ["DOUBLE_CHANCE_1X", "DOUBLE_CHANCE_X2", "UNDER_35"],
+        "suppressed_subtypes": ["BOTH_OVER25_BTTS", "BTTS"],
+        "allowed_subtypes": ["OVER_25"],
+        "notes": (
+            "Brasileiro Série A (Campeonato Brasileiro) — custom profile, "
+            "treat BTTS/Over-combo markets cautiously until walk-forward evidence "
+            "is collected."
+        ),
+        "warnings_if": [
+            (
+                "recommended_market_subtype",
+                {"BOTH_OVER25_BTTS", "BTTS"},
+                "Brasileiro Serie A: custom Brazil profile — "
+                "treat BTTS/Over-combo markets cautiously until walk-forward "
+                "evidence is collected.",
+            ),
+        ],
+    },
+    "Campeonato Brasileiro Serie A": {
+        "profile_name": "brazil_volatile_control",
+        "preferred_types": ["AVOID", "DOUBLE_CHANCE", "UNDER"],
+        "preferred_subtypes": ["DOUBLE_CHANCE_1X", "DOUBLE_CHANCE_X2", "UNDER_35"],
+        "suppressed_subtypes": ["BOTH_OVER25_BTTS", "BTTS"],
+        "allowed_subtypes": ["OVER_25"],
+        "notes": (
+            "Brasileiro Série A (Campeonato Brasileiro) — custom profile, "
+            "treat BTTS/Over-combo markets cautiously until walk-forward evidence "
+            "is collected."
+        ),
+        "warnings_if": [
+            (
+                "recommended_market_subtype",
+                {"BOTH_OVER25_BTTS", "BTTS"},
+                "Brasileiro Serie A: custom Brazil profile — "
+                "treat BTTS/Over-combo markets cautiously until walk-forward "
+                "evidence is collected.",
+            ),
+        ],
+    },
+    "Brasileiro": {
+        "profile_name": "brazil_volatile_control",
+        "preferred_types": ["AVOID", "DOUBLE_CHANCE", "UNDER"],
+        "preferred_subtypes": ["DOUBLE_CHANCE_1X", "DOUBLE_CHANCE_X2", "UNDER_35"],
+        "suppressed_subtypes": ["BOTH_OVER25_BTTS", "BTTS"],
+        "allowed_subtypes": ["OVER_25"],
+        "notes": (
+            "Brasileiro Série A (Campeonato Brasileiro) — custom profile, "
+            "treat BTTS/Over-combo markets cautiously until walk-forward evidence "
+            "is collected."
+        ),
+        "warnings_if": [
+            (
+                "recommended_market_subtype",
+                {"BOTH_OVER25_BTTS", "BTTS"},
+                "Brasileiro Serie A: custom Brazil profile — "
+                "treat BTTS/Over-combo markets cautiously until walk-forward "
+                "evidence is collected.",
+            ),
+        ],
+    },
+    "Brazil": {
+        "profile_name": "brazil_volatile_control",
+        "preferred_types": ["AVOID", "DOUBLE_CHANCE", "UNDER"],
+        "preferred_subtypes": ["DOUBLE_CHANCE_1X", "DOUBLE_CHANCE_X2", "UNDER_35"],
+        "suppressed_subtypes": ["BOTH_OVER25_BTTS", "BTTS"],
+        "allowed_subtypes": ["OVER_25"],
+        "notes": (
+            "Brasileiro Série A (Campeonato Brasileiro) — custom profile, "
+            "treat BTTS/Over-combo markets cautiously until walk-forward evidence "
+            "is collected."
+        ),
+        "warnings_if": [
+            (
+                "recommended_market_subtype",
+                {"BOTH_OVER25_BTTS", "BTTS"},
+                "Brasileiro Serie A: custom Brazil profile — "
+                "treat BTTS/Over-combo markets cautiously until walk-forward "
+                "evidence is collected.",
             ),
         ],
     },

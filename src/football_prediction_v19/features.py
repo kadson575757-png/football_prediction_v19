@@ -283,187 +283,388 @@ def build_fixture_features(
     feats["date"] = match_date
     return pd.DataFrame([feats])
 
-# ── Phase 5 Extended Features ──────────────────────────────────────────────────
+
+# ---------------------------------------------------------------------------
+# Phase-5 Feature Engineering
+# ---------------------------------------------------------------------------
 
 import math as _math
 
-def compute_opponent_adjusted_xg(df, window=10):
-    import pandas as _pd
-    if 'home_xg' not in df.columns or 'away_xg' not in df.columns:
-        print("xG columns not found, skipping opponent_adjusted_xg")
+
+def compute_opponent_adjusted_xg(
+    df: pd.DataFrame,
+    window: int = 10,
+) -> pd.DataFrame:
+    """Compute opponent-adjusted xG for each match using only prior data.
+
+    For each match, the home/away xG is scaled by the opponent's recent
+    defensive strength (mean xG conceded per game over the last *window*
+    matches), so a goal scored against a leaky defence is discounted.
+
+    New columns added:
+        ``adj_home_xg``, ``adj_away_xg``,
+        ``opponent_strength_home``, ``opponent_strength_away``.
+
+    Returns *df* unchanged (with a print warning) if xG columns are absent.
+    """
+    xg_cols = {"home_xg", "away_xg"}
+    if not xg_cols.issubset(df.columns):
+        print("xG columns not found, skipping")
         return df
-    df = df.copy()
-    df['date'] = _pd.to_datetime(df['date'])
-    adj_hxg, adj_axg, opp_str_h, opp_str_a = [], [], [], []
-    for i in range(len(df)):
-        prior = df.iloc[:i]
-        home, away = df.iloc[i]['home_team'], df.iloc[i]['away_team']
-        def mean_xg_conceded(team, pr):
-            games = pr[(pr['home_team']==team)|(pr['away_team']==team)].tail(window)
-            if len(games)==0: return 1.0
-            vals = []
-            for _, r in games.iterrows():
-                vals.append(r['away_xg'] if r['home_team']==team else r['home_xg'])
-            return float(_pd.Series(vals).mean())
-        os_h = mean_xg_conceded(away, prior)
-        os_a = mean_xg_conceded(home, prior)
-        opp_str_h.append(os_h); opp_str_a.append(os_a)
-        adj_hxg.append(df.iloc[i]['home_xg'] / (os_h + 0.01))
-        adj_axg.append(df.iloc[i]['away_xg'] / (os_a + 0.01))
-    df['adj_home_xg'] = adj_hxg
-    df['adj_away_xg'] = adj_axg
-    df['opponent_strength_home'] = opp_str_h
-    df['opponent_strength_away'] = opp_str_a
-    return df
+
+    out = df.copy()
+    out["date"] = pd.to_datetime(out["date"])
+    out = out.sort_values("date").reset_index(drop=True)
+
+    adj_home_xg:      list[float] = []
+    adj_away_xg:      list[float] = []
+    opp_str_home:     list[float] = []
+    opp_str_away:     list[float] = []
+
+    for i, row in out.iterrows():
+        cutoff = row["date"]
+        prior  = out[out["date"] < cutoff]
+
+        home_team = row["home_team"]
+        away_team = row["away_team"]
+
+        # xG conceded by away_team (as home or away) in prior window matches
+        away_as_home = prior[prior["home_team"] == away_team]["away_xg"].dropna()
+        away_as_away = prior[prior["away_team"] == away_team]["home_xg"].dropna()
+        away_conceded = pd.concat([away_as_home, away_as_away]).tail(window)
+        opp_str_h = float(away_conceded.mean()) if len(away_conceded) > 0 else np.nan
+
+        # xG conceded by home_team
+        home_as_home = prior[prior["home_team"] == home_team]["away_xg"].dropna()
+        home_as_away = prior[prior["away_team"] == home_team]["home_xg"].dropna()
+        home_conceded = pd.concat([home_as_home, home_as_away]).tail(window)
+        opp_str_a = float(home_conceded.mean()) if len(home_conceded) > 0 else np.nan
+
+        raw_h = float(row["home_xg"]) if pd.notna(row["home_xg"]) else np.nan
+        raw_a = float(row["away_xg"]) if pd.notna(row["away_xg"]) else np.nan
+
+        adj_h = raw_h / (opp_str_a + 0.01) if pd.notna(raw_h) and pd.notna(opp_str_a) else np.nan
+        adj_a = raw_a / (opp_str_h + 0.01) if pd.notna(raw_a) and pd.notna(opp_str_h) else np.nan
+
+        adj_home_xg.append(adj_h)
+        adj_away_xg.append(adj_a)
+        opp_str_home.append(opp_str_h)
+        opp_str_away.append(opp_str_a)
+
+    out["adj_home_xg"]            = adj_home_xg
+    out["adj_away_xg"]            = adj_away_xg
+    out["opponent_strength_home"] = opp_str_home
+    out["opponent_strength_away"] = opp_str_away
+    return out
 
 
-def compute_time_decay_features(df, half_life_days=60):
-    import pandas as _pd, numpy as _np
-    df = df.copy()
-    df['date'] = _pd.to_datetime(df['date'])
+def compute_time_decay_features(
+    df: pd.DataFrame,
+    half_life_days: int = 60,
+) -> pd.DataFrame:
+    """Compute exponentially time-decayed rolling features for each team.
+
+    Uses only prior data (date < current match date).  Requires at least
+    3 prior matches per team; otherwise all new columns are NaN for that row.
+
+    New columns added (home_ and away_ prefixed):
+        ``td_goals_scored``, ``td_goals_conceded``,
+        ``td_xg`` (if home_xg present), ``td_xga`` (if away_xg present),
+        ``td_win_rate``.
+    """
+    out = df.copy()
+    out["date"] = pd.to_datetime(out["date"])
+    out = out.sort_values("date").reset_index(drop=True)
+
+    has_xg = "home_xg" in out.columns and "away_xg" in out.columns
     decay = _math.log(2) / half_life_days
-    cols = {
-        'home_td_goals_scored':[], 'home_td_goals_conceded':[],
-        'home_td_xg':[], 'home_td_xga':[], 'home_td_win_rate':[],
-        'away_td_goals_scored':[], 'away_td_goals_conceded':[],
-        'away_td_xg':[], 'away_td_xga':[], 'away_td_win_rate':[]
-    }
-    def weighted_mean(values, weights):
-        if len(values)==0: return _np.nan
-        ws = _np.array(weights); vs = _np.array(values)
-        return float((vs*ws).sum() / ws.sum()) if ws.sum()>0 else _np.nan
-    def team_stats(team, prior, date):
-        g = prior[(prior['home_team']==team)|(prior['away_team']==team)].copy()
-        if len(g)<3: return [_np.nan]*5
-        days_ago = [(date - d).days for d in g['date']]
-        w = [_math.exp(-decay*d) for d in days_ago]
-        scored, conceded, xg_v, xga_v, wins = [], [], [], [], []
-        for (_, r), wi in zip(g.iterrows(), w):
-            is_home = r['home_team']==team
-            scored.append(r['home_goals'] if is_home else r['away_goals'])
-            conceded.append(r['away_goals'] if is_home else r['home_goals'])
-            wins.append(1.0 if (is_home and r['home_goals']>r['away_goals'])
-                        or (not is_home and r['away_goals']>r['home_goals']) else 0.0)
-            if 'home_xg' in r: xg_v.append(r['home_xg'] if is_home else r['away_xg'])
-            if 'away_xg' in r: xga_v.append(r['away_xg'] if is_home else r['home_xg'])
-        return [weighted_mean(scored,w), weighted_mean(conceded,w),
-                weighted_mean(xg_v,w) if xg_v else _np.nan,
-                weighted_mean(xga_v,w) if xga_v else _np.nan,
-                weighted_mean(wins,w)]
-    for i in range(len(df)):
-        prior = df.iloc[:i]
-        row = df.iloc[i]
-        hs = team_stats(row['home_team'], prior, row['date'])
-        as_ = team_stats(row['away_team'], prior, row['date'])
-        for j, k in enumerate(['home_td_goals_scored','home_td_goals_conceded',
-                                'home_td_xg','home_td_xga','home_td_win_rate']):
-            cols[k].append(hs[j])
-        for j, k in enumerate(['away_td_goals_scored','away_td_goals_conceded',
-                                'away_td_xg','away_td_xga','away_td_win_rate']):
-            cols[k].append(as_[j])
-    for k, v in cols.items():
-        df[k] = v
-    return df
+
+    def _weighted_mean(values: list[float], weights: list[float]) -> float:
+        pairs = [(v, w) for v, w in zip(values, weights) if pd.notna(v)]
+        if not pairs:
+            return np.nan
+        vs, ws = zip(*pairs)
+        return float(np.average(vs, weights=ws))
+
+    def _team_td(team: str, cutoff: pd.Timestamp) -> dict[str, float]:
+        """Return time-decay stats for *team* using matches before *cutoff*."""
+        rows_h = out[(out["home_team"] == team) & (out["date"] < cutoff)]
+        rows_a = out[(out["away_team"] == team) & (out["date"] < cutoff)]
+
+        entries: list[tuple[pd.Timestamp, float, float, float | None, float | None, float]] = []
+        for _, r in rows_h.iterrows():
+            gf = float(r["home_goals"]) if pd.notna(r.get("home_goals")) else np.nan
+            ga = float(r["away_goals"]) if pd.notna(r.get("away_goals")) else np.nan
+            xgf = float(r["home_xg"])  if has_xg and pd.notna(r.get("home_xg")) else None
+            xga = float(r["away_xg"])  if has_xg and pd.notna(r.get("away_xg")) else None
+            win = 1.0 if pd.notna(gf) and pd.notna(ga) and gf > ga else 0.0
+            entries.append((r["date"], gf, ga, xgf, xga, win))
+        for _, r in rows_a.iterrows():
+            gf = float(r["away_goals"]) if pd.notna(r.get("away_goals")) else np.nan
+            ga = float(r["home_goals"]) if pd.notna(r.get("home_goals")) else np.nan
+            xgf = float(r["away_xg"])  if has_xg and pd.notna(r.get("away_xg")) else None
+            xga = float(r["home_xg"])  if has_xg and pd.notna(r.get("home_xg")) else None
+            win = 1.0 if pd.notna(gf) and pd.notna(ga) and gf > ga else 0.0
+            entries.append((r["date"], gf, ga, xgf, xga, win))
+
+        if len(entries) < 3:
+            return {k: np.nan for k in (
+                "td_goals_scored", "td_goals_conceded",
+                "td_xg", "td_xga", "td_win_rate"
+            )}
+
+        weights = [
+            _math.exp(-decay * max((cutoff - e[0]).days, 0))
+            for e in entries
+        ]
+        gfs  = [e[1] for e in entries]
+        gas  = [e[2] for e in entries]
+        xgfs = [e[3] if e[3] is not None else np.nan for e in entries]
+        xgas = [e[4] if e[4] is not None else np.nan for e in entries]
+        wins = [e[5] for e in entries]
+
+        return {
+            "td_goals_scored":   _weighted_mean(gfs,  weights),
+            "td_goals_conceded": _weighted_mean(gas,  weights),
+            "td_xg":             _weighted_mean(xgfs, weights) if has_xg else np.nan,
+            "td_xga":            _weighted_mean(xgas, weights) if has_xg else np.nan,
+            "td_win_rate":       _weighted_mean(wins, weights),
+        }
+
+    home_rows: list[dict] = []
+    away_rows: list[dict] = []
+
+    for _, row in out.iterrows():
+        cutoff = row["date"]
+        home_rows.append(_team_td(row["home_team"], cutoff))
+        away_rows.append(_team_td(row["away_team"], cutoff))
+
+    td_cols = ["td_goals_scored", "td_goals_conceded", "td_xg", "td_xga", "td_win_rate"]
+    for col in td_cols:
+        out[f"home_{col}"] = [r[col] for r in home_rows]
+        out[f"away_{col}"] = [r[col] for r in away_rows]
+
+    return out
 
 
-def compute_h2h_features(df, window=5):
-    import pandas as _pd, numpy as _np
-    df = df.copy()
-    df['date'] = _pd.to_datetime(df['date'])
-    h2h_cols = {k:[] for k in ['h2h_home_wins','h2h_away_wins','h2h_draws',
-                                'h2h_avg_goals','h2h_btts_rate','h2h_n']}
-    for i in range(len(df)):
-        prior = df.iloc[:i]
-        home, away = df.iloc[i]['home_team'], df.iloc[i]['away_team']
-        h2h = prior[((prior['home_team']==home)&(prior['away_team']==away))|
-                    ((prior['home_team']==away)&(prior['away_team']==home))].tail(window)
+def compute_h2h_features(
+    df: pd.DataFrame,
+    window: int = 5,
+) -> pd.DataFrame:
+    """Compute head-to-head history features using only prior data.
+
+    New columns added:
+        ``h2h_home_wins``, ``h2h_away_wins``, ``h2h_draws``,
+        ``h2h_avg_goals``, ``h2h_btts_rate``, ``h2h_n``.
+
+    When ``h2h_n == 0``, all value columns are NaN.
+    """
+    out = df.copy()
+    out["date"] = pd.to_datetime(out["date"])
+    out = out.sort_values("date").reset_index(drop=True)
+
+    h2h_home_wins: list[float] = []
+    h2h_away_wins: list[float] = []
+    h2h_draws:     list[float] = []
+    h2h_avg_goals: list[float] = []
+    h2h_btts_rate: list[float] = []
+    h2h_n:         list[int]   = []
+
+    for _, row in out.iterrows():
+        cutoff    = row["date"]
+        home_team = row["home_team"]
+        away_team = row["away_team"]
+
+        prior = out[out["date"] < cutoff]
+        mask = (
+            ((prior["home_team"] == home_team) & (prior["away_team"] == away_team))
+            | ((prior["home_team"] == away_team) & (prior["away_team"] == home_team))
+        )
+        h2h = prior[mask].tail(window)
         n = len(h2h)
+        h2h_n.append(n)
+
         if n == 0:
-            for k in h2h_cols: h2h_cols[k].append(0 if k=='h2h_n' else _np.nan)
+            h2h_home_wins.append(np.nan)
+            h2h_away_wins.append(np.nan)
+            h2h_draws.append(np.nan)
+            h2h_avg_goals.append(np.nan)
+            h2h_btts_rate.append(np.nan)
             continue
-        hw = aw = dr = goals = btts = 0
-        for _, r in h2h.iterrows():
-            hg, ag = r['home_goals'], r['away_goals']
-            is_home_perspective = r['home_team']==home
-            if hg > ag: hw += (1 if is_home_perspective else 0); aw += (0 if is_home_perspective else 1)
-            elif ag > hg: aw += (1 if is_home_perspective else 0); hw += (0 if is_home_perspective else 1)
-            else: dr += 1
-            goals += hg + ag
-            btts += int(hg>=1 and ag>=1)
-        h2h_cols['h2h_home_wins'].append(hw/n)
-        h2h_cols['h2h_away_wins'].append(aw/n)
-        h2h_cols['h2h_draws'].append(dr/n)
-        h2h_cols['h2h_avg_goals'].append(goals/n)
-        h2h_cols['h2h_btts_rate'].append(btts/n)
-        h2h_cols['h2h_n'].append(n)
-    for k, v in h2h_cols.items():
-        df[k] = v
-    return df
+
+        home_wins = draws = away_wins = 0
+        total_goals = 0.0
+        btts_count  = 0
+
+        for _, m in h2h.iterrows():
+            hg = int(m["home_goals"])
+            ag = int(m["away_goals"])
+            total_goals += hg + ag
+            if hg > ag:
+                home_wins += 1
+            elif hg == ag:
+                draws += 1
+            else:
+                away_wins += 1
+            if hg >= 1 and ag >= 1:
+                btts_count += 1
+
+        h2h_home_wins.append(home_wins / n)
+        h2h_away_wins.append(away_wins / n)
+        h2h_draws.append(draws / n)
+        h2h_avg_goals.append(total_goals / n)
+        h2h_btts_rate.append(btts_count / n)
+
+    out["h2h_home_wins"] = h2h_home_wins
+    out["h2h_away_wins"] = h2h_away_wins
+    out["h2h_draws"]     = h2h_draws
+    out["h2h_avg_goals"] = h2h_avg_goals
+    out["h2h_btts_rate"] = h2h_btts_rate
+    out["h2h_n"]         = h2h_n
+    return out
 
 
-def compute_game_state_features(df, window=10):
-    import pandas as _pd, numpy as _np
-    df = df.copy()
-    df['date'] = _pd.to_datetime(df['date'])
-    out_cols = {k:[] for k in [
-        'home_lead_rate','home_comeback_rate','home_clean_sheet_rate','home_failed_to_score_rate',
-        'away_lead_rate','away_comeback_rate','away_clean_sheet_rate','away_failed_to_score_rate']}
-    def team_gs(team, prior):
-        g = prior[(prior['home_team']==team)|(prior['away_team']==team)].tail(window)
-        if len(g)<3: return [_np.nan]*4
-        lead=comeback=cs=fts=0
-        for _, r in g.iterrows():
-            ih = r['home_team']==team
-            scored = r['home_goals'] if ih else r['away_goals']
-            conceded = r['away_goals'] if ih else r['home_goals']
-            if scored > conceded: lead+=1
-            if conceded>=1 and scored>conceded: comeback+=1
-            if conceded==0: cs+=1
-            if scored==0: fts+=1
-        n=len(g)
-        return [lead/n, comeback/n, cs/n, fts/n]
-    for i in range(len(df)):
-        prior = df.iloc[:i]
-        row = df.iloc[i]
-        hs = team_gs(row['home_team'], prior)
-        as_ = team_gs(row['away_team'], prior)
-        for j,k in enumerate(['home_lead_rate','home_comeback_rate',
-                               'home_clean_sheet_rate','home_failed_to_score_rate']):
-            out_cols[k].append(hs[j])
-        for j,k in enumerate(['away_lead_rate','away_comeback_rate',
-                               'away_clean_sheet_rate','away_failed_to_score_rate']):
-            out_cols[k].append(as_[j])
-    for k,v in out_cols.items():
-        df[k] = v
-    return df
+def compute_game_state_features(
+    df: pd.DataFrame,
+    window: int = 10,
+) -> pd.DataFrame:
+    """Compute game-state proxy features from prior match outcomes.
+
+    Uses only data before each match (no leakage).
+
+    New columns added (home_ and away_ prefixed):
+        ``lead_rate``, ``comeback_rate``,
+        ``clean_sheet_rate``, ``failed_to_score_rate``.
+
+    Values are NaN when fewer than 3 prior matches are available.
+    """
+    out = df.copy()
+    out["date"] = pd.to_datetime(out["date"])
+    out = out.sort_values("date").reset_index(drop=True)
+
+    def _team_state(team: str, cutoff: pd.Timestamp) -> dict[str, float]:
+        rows_h = out[(out["home_team"] == team) & (out["date"] < cutoff)].tail(window)
+        rows_a = out[(out["away_team"] == team) & (out["date"] < cutoff)].tail(window)
+
+        entries: list[dict] = []
+        for _, r in rows_h.iterrows():
+            entries.append({
+                "gf": int(r["home_goals"]),
+                "ga": int(r["away_goals"]),
+            })
+        for _, r in rows_a.iterrows():
+            entries.append({
+                "gf": int(r["away_goals"]),
+                "ga": int(r["home_goals"]),
+            })
+
+        if len(entries) < 3:
+            return {k: np.nan for k in (
+                "lead_rate", "comeback_rate",
+                "clean_sheet_rate", "failed_to_score_rate"
+            )}
+
+        n = len(entries)
+        leads      = sum(1 for e in entries if e["gf"] > e["ga"])
+        comebacks  = sum(1 for e in entries if e["gf"] > 0 and e["ga"] > e["gf"])
+        clean      = sum(1 for e in entries if e["ga"] == 0)
+        failed     = sum(1 for e in entries if e["gf"] == 0)
+
+        return {
+            "lead_rate":            leads     / n,
+            "comeback_rate":        comebacks / n,
+            "clean_sheet_rate":     clean     / n,
+            "failed_to_score_rate": failed    / n,
+        }
+
+    gs_cols = ["lead_rate", "comeback_rate", "clean_sheet_rate", "failed_to_score_rate"]
+    home_gs: list[dict] = []
+    away_gs: list[dict] = []
+
+    for _, row in out.iterrows():
+        cutoff = row["date"]
+        home_gs.append(_team_state(row["home_team"], cutoff))
+        away_gs.append(_team_state(row["away_team"], cutoff))
+
+    for col in gs_cols:
+        out[f"home_{col}"] = [r[col] for r in home_gs]
+        out[f"away_{col}"] = [r[col] for r in away_gs]
+
+    return out
 
 
-def build_extended_features(df,
-                             include_elo=True,
-                             include_h2h=True,
-                             include_time_decay=True,
-                             include_adj_xg=True,
-                             include_game_state=True):
-    import pandas as _pd
-    df = df.copy()
-    existing = set(df.columns)
+def build_extended_features(
+    df: pd.DataFrame,
+    include_elo:        bool = True,
+    include_h2h:        bool = True,
+    include_time_decay: bool = True,
+    include_adj_xg:     bool = True,
+    include_game_state: bool = True,
+) -> pd.DataFrame:
+    """Run all Phase-5 feature engineering in the correct order.
+
+    Idempotent: never overwrites columns already present in *df*.
+    Gracefully skips any module whose required input columns are absent.
+
+    Parameters
+    ----------
+    df:
+        Match DataFrame with at minimum: date, home_team, away_team,
+        home_goals, away_goals.
+    include_elo, include_h2h, include_time_decay,
+    include_adj_xg, include_game_state:
+        Flags to enable/disable individual feature modules.
+
+    Returns
+    -------
+    pd.DataFrame with all requested new columns appended.
+    """
+    from .elo import EloRatingSystem  # lazy import avoids circular issues
+
+    existing_cols = set(df.columns)
+    out = df.copy()
+
+    def _safe_merge(new_df: pd.DataFrame) -> pd.DataFrame:
+        """Merge new columns into *out*, skipping columns that already exist."""
+        new_cols = [c for c in new_df.columns if c not in existing_cols and c not in out.columns]
+        if new_cols:
+            return out.join(new_df[new_cols], how="left")
+        return out
+
     if include_adj_xg:
-        df = compute_opponent_adjusted_xg(df)
-    if include_time_decay:
-        df = compute_time_decay_features(df)
-    if include_h2h:
-        df = compute_h2h_features(df)
-    if include_game_state:
-        df = compute_game_state_features(df)
-    if include_elo:
         try:
-            from football_prediction_v19.elo import EloRatingSystem
-            elo = EloRatingSystem()
-            df = elo.get_ratings_before_match(df)
+            enriched = compute_opponent_adjusted_xg(out)
+            out = _safe_merge(enriched)
         except Exception:
             pass
-    # Never overwrite existing columns:
-    for col in existing:
-        if col in df.columns:
-            pass  # already preserved by copy
-    return df
+
+    if include_time_decay:
+        try:
+            enriched = compute_time_decay_features(out)
+            out = _safe_merge(enriched)
+        except Exception:
+            pass
+
+    if include_h2h:
+        try:
+            enriched = compute_h2h_features(out)
+            out = _safe_merge(enriched)
+        except Exception:
+            pass
+
+    if include_game_state:
+        try:
+            enriched = compute_game_state_features(out)
+            out = _safe_merge(enriched)
+        except Exception:
+            pass
+
+    if include_elo:
+        try:
+            elo = EloRatingSystem()
+            enriched = elo.get_ratings_before_match(out)
+            out = _safe_merge(enriched)
+        except Exception:
+            pass
+
+    return out

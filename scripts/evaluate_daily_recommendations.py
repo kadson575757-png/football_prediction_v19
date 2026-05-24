@@ -105,6 +105,40 @@ def _parse_bool_success(val) -> Optional[bool]:
     return None
 
 
+def _wilson_ci(n: int, hits: int, z: float = 1.96) -> tuple[float, float]:
+    """Wilson score 95 % confidence interval for a proportion.
+
+    Parameters
+    ----------
+    n    : total observations (denominator).
+    hits : successful outcomes (numerator).
+    z    : normal quantile; 1.96 gives a two-sided 95 % CI.
+
+    Returns
+    -------
+    (lo, hi) : lower and upper bound, both clipped to [0, 1].
+               Returns (0.0, 1.0) when n == 0.
+
+    The Wilson interval is preferred over the Wald interval because it
+    has better coverage near 0 and 1 and for small samples.
+    """
+    if n <= 0:
+        return 0.0, 1.0
+    p_hat = hits / n
+    z2 = z * z
+    denom = 1.0 + z2 / n
+    centre = (p_hat + z2 / (2 * n)) / denom
+    half = z * ((p_hat * (1 - p_hat) / n + z2 / (4 * n * n)) ** 0.5) / denom
+    lo = max(0.0, centre - half)
+    hi = min(1.0, centre + half)
+    # Ensure integer arithmetic edge-cases (p=0 or p=1) land exactly on bounds
+    if hits <= 0:
+        lo = 0.0
+    if hits >= n:
+        hi = 1.0
+    return lo, hi
+
+
 def _tier_score_bucket(score) -> str:
     """Map a numeric market_tier_score (0-100) to a display bucket label."""
     try:
@@ -584,8 +618,8 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
         if not tier_ev.empty:
             lines.append("## Success Rate by Market Tier")
             lines.append("")
-            lines.append(f"  {'Tier':<14} {'n':>4} {'hits':>4} {'rate':>7}")
-            lines.append("  " + "-" * 36)
+            lines.append(f"  {'Tier':<14} {'n':>4} {'hits':>4} {'rate':>7}  {'95% CI (Wilson)'}")
+            lines.append("  " + "-" * 56)
             tier_order = ["A_TIER", "B_TIER", "C_TIER", "DOWNGRADE", "HARD_NO_GO", "OBSERVE_ONLY"]
             present_tiers = tier_ev["market_tier"].unique().tolist()
             ordered = [t for t in tier_order if t in present_tiers]
@@ -596,17 +630,20 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
                 ts_col = grp["type_success"]
                 hits = int(ts_col.sum()) if n else 0
                 rate = hits / n if n else 0.0
-                lines.append(f"  {tier:<14} {n:>4} {hits:>4} {rate:7.1%}")
+                lo, hi = _wilson_ci(n, hits)
+                ci_str = f"[{lo:.1%}, {hi:.1%}]"
+                lines.append(f"  {tier:<14} {n:>4} {hits:>4} {rate:7.1%}  {ci_str}")
             lines.append("")
 
-            # A+B combined line
+            # A+B combined line with Wilson CI
             ab = tier_ev[tier_ev["market_tier"].isin(["A_TIER", "B_TIER"])]
             if not ab.empty:
                 ab_n = len(ab)
                 ab_hits = int(ab["type_success"].sum())
+                ab_lo, ab_hi = _wilson_ci(ab_n, ab_hits)
                 lines.append(
                     f"  A_TIER + B_TIER combined: {ab_hits}/{ab_n} "
-                    f"({ab_hits/ab_n:.1%})"
+                    f"({ab_hits/ab_n:.1%})  95% CI [{ab_lo:.1%}, {ab_hi:.1%}]"
                 )
                 lines.append("")
 
@@ -617,8 +654,8 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
             tier_score_ev["_score_bucket"] = tier_score_ev["market_tier_score"].apply(_tier_score_bucket)
             lines.append("## Success Rate by Market Tier Score Bucket")
             lines.append("")
-            lines.append(f"  {'Score bucket':<14} {'n':>4} {'hits':>4} {'rate':>7}")
-            lines.append("  " + "-" * 36)
+            lines.append(f"  {'Score bucket':<14} {'n':>4} {'hits':>4} {'rate':>7}  {'95% CI (Wilson)'}")
+            lines.append("  " + "-" * 56)
             bucket_order = ["80+", "70-79", "50-69", "<50"]
             present_buckets = tier_score_ev["_score_bucket"].unique().tolist()
             ordered_buckets = [b for b in bucket_order if b in present_buckets]
@@ -628,8 +665,19 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
                 n = len(grp)
                 hits = int(grp["type_success"].sum()) if n else 0
                 rate = hits / n if n else 0.0
-                lines.append(f"  {bucket:<14} {n:>4} {hits:>4} {rate:7.1%}")
+                lo, hi = _wilson_ci(n, hits)
+                ci_str = f"[{lo:.1%}, {hi:.1%}]"
+                lines.append(f"  {bucket:<14} {n:>4} {hits:>4} {rate:7.1%}  {ci_str}")
             lines.append("")
+
+    # ---- Sektion A: Miss Cluster Analysis ------------------------------------
+    _append_miss_cluster_section(lines, out_dir)
+
+    # ---- Sektion B: Calibration Summary --------------------------------------
+    _append_calibration_section(lines, out_dir)
+
+    # ---- Sektion C: Drift Monitor --------------------------------------------
+    _append_drift_section(lines, out_dir)
 
     # OBSERVE_ONLY separately
     obs = m[m["recommended_market_type"] == "OBSERVE_ONLY"]
@@ -748,6 +796,130 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
     print("=" * 60)
     for line in lines:
         print(line)
+
+
+# ---------------------------------------------------------------------------
+# Phase-2 diagnostic section helpers
+# ---------------------------------------------------------------------------
+
+def _append_miss_cluster_section(lines: list, out_dir: Path) -> None:
+    """Sektion A: Miss Cluster Analysis — reads miss_clusters.csv if present."""
+    lines.append("## Miss Cluster Analysis")
+    lines.append("")
+    csv_path = out_dir / "miss_clusters.csv"
+    if not csv_path.exists():
+        lines.append("  (Run: python -m football_prediction_v19.diagnostics.miss_clusters)")
+        lines.append("  Output: outputs/diagnostics/miss_clusters.csv")
+        lines.append("")
+        return
+
+    try:
+        df = pd.read_csv(csv_path)
+    except Exception as exc:
+        lines.append(f"  [Error reading {csv_path.name}: {exc}]")
+        lines.append("")
+        return
+
+    if df.empty or "warning_level" not in df.columns:
+        lines.append("  No miss clusters found above threshold.")
+        lines.append("")
+        return
+
+    critical = df[df["warning_level"] == "CRITICAL"]
+    warning  = df[df["warning_level"] == "WARNING"]
+
+    lines.append(f"  CRITICAL clusters : {len(critical)}")
+    lines.append(f"  WARNING  clusters : {len(warning)}")
+    lines.append("")
+
+    if not critical.empty:
+        lines.append("  Top-5 CRITICAL clusters:")
+        lines.append(f"  {'Group':<55} {'n':>4}  {'miss_rate':>9}")
+        lines.append("  " + "-" * 72)
+        for _, row in critical.head(5).iterrows():
+            lines.append(
+                f"  {str(row.get('group_key','')):<55} "
+                f"{int(row.get('n', 0)):>4}  "
+                f"{float(row.get('miss_rate', 0)):>9.1%}"
+            )
+        lines.append("")
+
+
+def _append_calibration_section(lines: list, out_dir: Path) -> None:
+    """Sektion B: Calibration Summary — reads calibration CSV if present."""
+    lines.append("## Calibration Summary")
+    lines.append("")
+    cal_dir = out_dir / "calibration"
+    csvs = sorted(cal_dir.glob("calibration_*.csv")) if cal_dir.exists() else []
+
+    if not csvs:
+        lines.append("  Run calibration analysis to populate")
+        lines.append("  (python -m football_prediction_v19.diagnostics.calibration)")
+        lines.append("")
+        return
+
+    for csv_path in csvs:
+        try:
+            df = pd.read_csv(csv_path)
+        except Exception as exc:
+            lines.append(f"  [Error reading {csv_path.name}: {exc}]")
+            continue
+
+        if df.empty or "ece" not in df.columns:
+            continue
+
+        label = df["label"].iloc[0] if "label" in df.columns else csv_path.stem
+        ece   = df["ece"].iloc[0]
+        n_bins = len(df)
+        lines.append(f"  [{label}]  ECE = {ece:.4f}  ({n_bins} non-empty bins)")
+
+    lines.append("")
+
+
+def _append_drift_section(lines: list, out_dir: Path) -> None:
+    """Sektion C: Drift Monitor — reads drift_monitor.csv if present."""
+    lines.append("## Drift Monitor")
+    lines.append("")
+    csv_path = out_dir / "drift_monitor.csv"
+
+    if not csv_path.exists():
+        lines.append("  Run drift monitor to populate")
+        lines.append("  (python -m football_prediction_v19.diagnostics.drift)")
+        lines.append("")
+        return
+
+    try:
+        df = pd.read_csv(csv_path)
+    except Exception as exc:
+        lines.append(f"  [Error reading {csv_path.name}: {exc}]")
+        lines.append("")
+        return
+
+    if df.empty:
+        lines.append("  No drift windows available.")
+        lines.append("")
+        return
+
+    lines.append(f"  {'Window start':<13} {'Window end':<13} {'n':>4}  {'hit_rate':>8}  {'overall':>8}  Flag")
+    lines.append("  " + "-" * 68)
+
+    last4 = df.tail(4)
+    for _, row in last4.iterrows():
+        flag    = str(row.get("drift_flag", ""))
+        flag_str = "⚠️  DRIFT_WARNING" if flag == "DRIFT_WARNING" else ""
+        lines.append(
+            f"  {str(row.get('window_start', ''))[:10]:<13} "
+            f"{str(row.get('window_end', ''))[:10]:<13} "
+            f"{int(row.get('n', 0)):>4}  "
+            f"{float(row.get('hit_rate', 0)):>8.1%}  "
+            f"{float(row.get('overall_rate', 0)):>8.1%}  "
+            f"{flag_str}"
+        )
+
+    active_drifts = int((df["drift_flag"] == "DRIFT_WARNING").sum()) if "drift_flag" in df.columns else 0
+    if active_drifts:
+        lines.append(f"\n  ⚠️  {active_drifts} DRIFT_WARNING window(s) in full history.")
+    lines.append("")
 
 
 # ---------------------------------------------------------------------------

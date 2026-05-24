@@ -21,6 +21,8 @@ sys.path.insert(0, str(ROOT / "src"))
 from football_prediction_v19.features import build_fixture_features
 from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market, apply_league_market_profile, build_market_tier
 from football_prediction_v19.team_names import normalize_team_name
+from football_prediction_v19.reports.watchlist import append_watchlist_to_report
+from _watchlist import print_priority_watchlist
 
 FIXTURE_FILE = ROOT / "data" / "upcoming_d2_fixtures.csv"
 HISTORY_FILE = ROOT / "data" / "processed" / "d2_clean.csv"
@@ -557,6 +559,8 @@ print(f"\n  NO-CONFIDENCE GAMES ({len(nc_games)}/{len(results)}):")
 for r in nc_games:
     print(f"    {r['home']} vs {r['away']}  [draw={r['p_d']*100:.0f}%  ctrl={r['ctrl']:.0f}/100  conf={r['conf']}]")
 
+print_priority_watchlist(results, "2. Bundesliga", sep=SEP)
+
 print()
 print(SEP)
 print("  NOTE: Probabilities are model/market estimates. No betting claims.")
@@ -611,3 +615,4 @@ _df = _pd.DataFrame(_csv_rows)
 _csv_path = _out_dir / f"d2_{REPORT_DATE}_daily_report.csv"
 _df.to_csv(_csv_path, index=False)
 print(f"  [CSV saved] {_csv_path}")
+append_watchlist_to_report(str(_csv_path), _csv_rows)
