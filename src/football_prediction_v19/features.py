@@ -600,8 +600,9 @@ def build_extended_features(
     include_time_decay: bool = True,
     include_adj_xg:     bool = True,
     include_game_state: bool = True,
+    include_context:    bool = True,
 ) -> pd.DataFrame:
-    """Run all Phase-5 feature engineering in the correct order.
+    """Run all Phase-5 + Phase-6 feature engineering in the correct order.
 
     Idempotent: never overwrites columns already present in *df*.
     Gracefully skips any module whose required input columns are absent.
@@ -612,7 +613,7 @@ def build_extended_features(
         Match DataFrame with at minimum: date, home_team, away_team,
         home_goals, away_goals.
     include_elo, include_h2h, include_time_decay,
-    include_adj_xg, include_game_state:
+    include_adj_xg, include_game_state, include_context:
         Flags to enable/disable individual feature modules.
 
     Returns
@@ -620,6 +621,7 @@ def build_extended_features(
     pd.DataFrame with all requested new columns appended.
     """
     from .elo import EloRatingSystem  # lazy import avoids circular issues
+    from .context_features import build_context_features
 
     existing_cols = set(df.columns)
     out = df.copy()
@@ -663,6 +665,13 @@ def build_extended_features(
         try:
             elo = EloRatingSystem()
             enriched = elo.get_ratings_before_match(out)
+            out = _safe_merge(enriched)
+        except Exception:
+            pass
+
+    if include_context:
+        try:
+            enriched = build_context_features(out)
             out = _safe_merge(enriched)
         except Exception:
             pass

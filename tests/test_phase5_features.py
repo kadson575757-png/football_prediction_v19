@@ -390,6 +390,7 @@ class TestBuildExtendedFeatures:
             include_time_decay=False,
             include_adj_xg=False,
             include_game_state=False,
+            include_context=False,
         )
         new_cols = set(result.columns) - original_cols
         assert len(new_cols) == 0, (
