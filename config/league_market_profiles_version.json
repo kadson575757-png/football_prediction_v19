@@ -1,0 +1,8 @@
+{
+  "version": "1.1.0",
+  "last_updated": "2026-05-24",
+  "profiles_file": "src/football_prediction_v19/diagnostics/league_market_profiles.py",
+  "profiles_sha256": "440c618503a6c1bc627b02feeb56b5dbf3ba06d2e9f15631857f9aaab3192fbe",
+  "description": "Version manifest for league_market_profiles.py. The profiles_sha256 field is the SHA-256 digest of the file at last_updated. Run tests/test_leakage_assertions.py::TestProfilesVersion to detect untracked changes.",
+  "schema_version": 1
+}

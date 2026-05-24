@@ -92,18 +92,70 @@ LEAGUE_TO_CODE: dict[str, str] = {
     "Eredivisie": "N1",      "N1": "N1",
     "2. Bundesliga": "D2",   "D2": "D2",
     "MLS": "MLS",
+    # Belgian Pro League
+    "Belgian Pro League": "B1",  "Jupiler Pro League": "B1",
+    "Belgium": "B1",             "B1": "B1",
+    # Brazilian Série A
+    "Brasileiro Serie A": "BRA",
+    "Campeonato Brasileiro Serie A": "BRA",
+    "Brasileiro": "BRA",
+    "Brazil": "BRA",             "BRA": "BRA",
 }
 
 CODE_TO_LEAGUE: dict[str, str] = {
-    "E0": "Premier League", "I1": "Serie A", "SP1": "La Liga",
-    "D1": "Bundesliga",     "F1": "Ligue 1", "N1": "Eredivisie",
+    "E0": "Premier League", "I1": "Serie A",  "SP1": "La Liga",
+    "D1": "Bundesliga",     "F1": "Ligue 1",  "N1": "Eredivisie",
     "D2": "2. Bundesliga",  "MLS": "MLS",
+    "B1": "Belgian Pro League",
+    "BRA": "Brasileiro Serie A",
 }
 
 GOAL_LEAGUES: frozenset[str] = frozenset({"Eredivisie", "N1"})
 
 _SMALL_SAMPLE_THRESHOLD = 5   # fewer prior games → data_warning=True
 _ROLLING_N = 10               # rolling window for team stats
+
+
+# ---------------------------------------------------------------------------
+# Leakage-safety assertion
+# ---------------------------------------------------------------------------
+
+def _assert_no_leakage(
+    prior_df: pd.DataFrame,
+    cutoff_date: pd.Timestamp,
+    label: str = "",
+) -> None:
+    """Assert that *prior_df* contains NO rows with date >= *cutoff_date*.
+
+    This is a hard integrity check: any violation means future match data has
+    contaminated the training/feature window, which would invalidate all
+    diagnostic results produced from those features.
+
+    Parameters
+    ----------
+    prior_df    : DataFrame that must contain only past matches.
+    cutoff_date : The earliest date of the current matchday (exclusive upper bound).
+    label       : Optional context string for the error message.
+
+    Raises
+    ------
+    AssertionError
+        If ``prior_df`` is non-empty AND its maximum date is >= ``cutoff_date``,
+        or if any individual row has date >= ``cutoff_date``.
+    """
+    if prior_df.empty:
+        return
+    max_date = prior_df["date"].max()
+    ctx = f" [{label}]" if label else ""
+    assert max_date < cutoff_date, (
+        f"Leakage detected{ctx}: prior_df max date "
+        f"{max_date} >= cutoff {cutoff_date}"
+    )
+    leaked_count = int((prior_df["date"] >= cutoff_date).sum())
+    assert leaked_count == 0, (
+        f"Leakage detected{ctx}: {leaked_count} row(s) in prior_df "
+        f"have date >= cutoff {cutoff_date}"
+    )
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -831,6 +883,10 @@ def run_walk_forward(
             prior_df  = df[df["date"]  < md_date].copy()
             prior_ml  = ml_df[ml_df["date"] < md_date].copy()
 
+        # Hard leakage guard — prior_df and prior_ml must contain NO future dates
+        _assert_no_leakage(prior_df, md_date, label=f"walk_forward prior_df md={md_label}")
+        _assert_no_leakage(prior_ml, md_date, label=f"walk_forward prior_ml md={md_label}")
+
         if len(prior_df) < min_warmup:
             skipped_warmup += len(md_group)
             match_counter  += len(md_group)
@@ -995,6 +1051,9 @@ def run_replay(
         # Also exclude the current matchday by matchday label if column exists
         if "matchday" in df.columns and df["matchday"].notna().any():
             prior_df = df[df["matchday"] < md_label].copy()
+
+        # Hard leakage guard — must have NO future dates in prior_df
+        _assert_no_leakage(prior_df, md_date, label=f"matchday={md_label}")
 
         # Warm-up gate: skip if not enough prior data
         if len(prior_df) < min_warmup:

@@ -1006,6 +1006,64 @@ def cmd_gather_fbref(args) -> None:
     print(f"Saved: {output}")
 
 
+def cmd_poisson_eval(args) -> None:
+    """CLI handler for the poisson-eval command."""
+    import sys
+    from .models.poisson_evaluator import evaluate_poisson_walk_forward
+
+    input_path = Path(args.input)
+    if not input_path.exists():
+        print(f"[ERROR] Input file not found: {input_path}", file=sys.stderr)
+        sys.exit(1)
+
+    df = pd.read_csv(input_path)
+    df["date"] = pd.to_datetime(df["date"], errors="coerce")
+
+    # Filter on league
+    if args.league:
+        if "league" not in df.columns:
+            print("[WARN] No 'league' column found — skipping league filter.")
+        else:
+            df = df[df["league"] == args.league]
+
+    # Filter on season
+    if args.season is not None:
+        if "season" in df.columns:
+            df = df[df["season"] == args.season]
+        else:
+            print("[WARN] No 'season' column found — skipping season filter.")
+
+    if df.empty:
+        print("[WARN] No rows after filtering — nothing to evaluate.")
+        return
+
+    result_df = evaluate_poisson_walk_forward(
+        df,
+        min_warmup=args.min_warmup,
+    )
+
+    # Save output
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    result_df.to_csv(out_path, index=False)
+    print(f"  [CSV saved] {out_path}")
+
+    # Summary
+    n = len(result_df)
+    if n == 0:
+        print("  No matches evaluated (warmup period too long or dataset too small).")
+        return
+
+    home_acc  = result_df["dc_home_correct"].mean()
+    btts_acc  = result_df["dc_btts_correct"].mean()
+    u35_acc   = result_df["dc_under35_correct"].mean()
+
+    print(f"  n evaluated:              {n}")
+    print(f"  DC Home Win Accuracy:     {home_acc:.1%}")
+    print(f"  DC BTTS Accuracy:         {btts_acc:.1%}")
+    print(f"  DC Under 3.5 Accuracy:    {u35_acc:.1%}")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Football Prediction v1.9")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -1438,6 +1496,33 @@ def build_parser() -> argparse.ArgumentParser:
              "Unsupported leagues (2. Bundesliga, MLS) are always skipped.",
     )
     p.set_defaults(func=cmd_fetch_official_results)
+
+    p = sub.add_parser(
+        "poisson-eval",
+        help="Walk-forward evaluation of the Dixon-Coles Poisson model",
+    )
+    p.add_argument(
+        "--input", required=True, metavar="FILE",
+        help="Path to the processed historical matches CSV.",
+    )
+    p.add_argument(
+        "--league", default=None, metavar="LEAGUE",
+        help="Filter to a specific league name (e.g. 'La Liga').",
+    )
+    p.add_argument(
+        "--season", default=None, type=str, metavar="SEASON",
+        help="Filter to a specific season (integer, e.g. 2024).",
+    )
+    p.add_argument(
+        "--output", required=True, metavar="FILE",
+        help="Path where the evaluation CSV is saved.",
+    )
+    p.add_argument(
+        "--min-warmup", dest="min_warmup", type=int, default=100,
+        metavar="N",
+        help="Minimum prior matches required before evaluating (default: 100).",
+    )
+    p.set_defaults(func=cmd_poisson_eval)
 
     return parser
 

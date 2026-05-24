@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """LaLiga Daily Probability Report.
 
 Local diagnostic only: probability / likely-outcome report, no betting logic.
@@ -22,12 +22,14 @@ sys.path.insert(0, str(ROOT / "src"))
 from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market, apply_league_market_profile, build_market_tier
 from football_prediction_v19.features import build_fixture_features
 from football_prediction_v19.team_names import normalize_team_name
+from football_prediction_v19.reports.watchlist import append_watchlist_to_report
+from _watchlist import print_priority_watchlist
 
 FIXTURE_FILE = ROOT / "data" / "upcoming_laliga_fixtures.csv"
 HISTORY_PATTERN = str(ROOT / "data" / "processed" / "football_data_SP1_*_clean.csv")
 MODEL_FILE = ROOT / "outputs" / "model_comparison_top5" / "best_model.joblib"
 MODEL_NOTE = "best available combined Top-5 model fallback; no LaLiga/SP1-specific model found"
-REPORT_DATE = "2026-05-17"
+REPORT_DATE = "2026-05-24"
 
 NAME_CANDIDATES = {
     "Sociedad": ["Real Sociedad", "Sociedad"],
@@ -35,7 +37,7 @@ NAME_CANDIDATES = {
     "Ath Bilbao": ["Athletic Club", "Ath Bilbao"],
     "Vallecano": ["Rayo Vallecano", "Vallecano"],
     "Espanol": ["Espanyol", "Espanol"],
-    "Alaves": ["Alavés", "Alaves"],
+    "Alaves": ["AlavÃ©s", "Alaves"],
 }
 
 
@@ -476,6 +478,8 @@ else:
     print("    none")
 print()
 print(SEP)
+print_priority_watchlist(results, "La Liga", sep=SEP)
+
 print("  NOTE: Probabilities are model/market estimates. No betting claims.")
 print("  Control/Chaos are probability-confidence indicators only.")
 print("  Over2.5 / BTTS are rolling form rates (last 5 games). No edge claims.")
@@ -528,3 +532,5 @@ _df = _pd.DataFrame(_csv_rows)
 _csv_path = _out_dir / f"laliga_{REPORT_DATE}_daily_report.csv"
 _df.to_csv(_csv_path, index=False)
 print(f"  [CSV saved] {_csv_path}")
+append_watchlist_to_report(str(_csv_path), _csv_rows)
+
