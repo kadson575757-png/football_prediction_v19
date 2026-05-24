@@ -33,3 +33,7 @@ def normalize_team_name(name: str) -> str:
     if not cleaned:
         return "Unknown"
     return load_team_aliases().get(_key(cleaned), cleaned)
+
+# Alias for backward compatibility
+def fuzzy_team_key(name: str) -> str:
+    return normalize_team_name(name)
