@@ -949,6 +949,15 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
             lines.append(f"  {bucket:<16} {n:>4} {hits:>4} {hits/n:7.1%}")
         lines.append("")
 
+    # Context signal analysis (Phase 9) — graceful if columns absent
+    try:
+        from _context_signals import compute_context_signal_analysis as _csa
+        lines.append("## Context Signal Analysis")
+        lines.append("")
+        lines.extend(_csa(scored))
+    except Exception:
+        pass
+
     # League profile analysis sections (graceful fallback if fields absent)
     lines.extend(build_league_profile_sections(scored))
 

@@ -20,10 +20,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market, apply_league_market_profile, build_market_tier
-from football_prediction_v19.features import build_fixture_features
+from football_prediction_v19.features import build_fixture_features, build_extended_features
+from football_prediction_v19.context_features import build_context_features
 from football_prediction_v19.team_names import normalize_team_name
 from football_prediction_v19.reports.watchlist import append_watchlist_to_report
 from _watchlist import print_priority_watchlist
+from _context_signals import get_fixture_context_features, print_context_signals_section, context_csv_fields
 
 MODEL_FILE = ROOT / "outputs" / "model_comparison_top5" / "best_model.joblib"
 MODEL_NOTE = "best available combined Top-5 model fallback; no league-specific Serie A/F1 model found"
@@ -209,6 +211,10 @@ def load_history(pattern: str) -> pd.DataFrame:
 def run_league(config: dict, bundle: dict) -> list[dict]:
     league_name = config["name"]
     history = load_history(config["history_pattern"])
+    try:
+        history = build_extended_features(history)
+    except Exception as _exc:
+        print(f"  [context] build_extended_features skipped for {league_name}: {_exc}")
     historical_teams = set(history["home_team"]) | set(history["away_team"])
     fixtures = pd.read_csv(config["fixture_file"], parse_dates=["date"])
     fixtures["home_team"] = fixtures["home_team"].apply(lambda x: resolve_team(x, historical_teams))
@@ -242,6 +248,10 @@ def run_league(config: dict, bundle: dict) -> list[dict]:
         venue = str(fix.get("venue", "Unknown"))
         referee = str(fix.get("referee", "Unknown"))
         odds_h, odds_d, odds_a = float(fix["odds_home"]), float(fix["odds_draw"]), float(fix["odds_away"])
+        try:
+            _ctx = get_fixture_context_features(home, away, game_date, history)
+        except Exception:
+            _ctx = {}
         raw_h, raw_d, raw_a = 1 / odds_h, 1 / odds_d, 1 / odds_a
         ov = raw_h + raw_d + raw_a
         mkt_h, mkt_d, mkt_a = raw_h / ov, raw_d / ov, raw_a / ov
@@ -406,6 +416,7 @@ def run_league(config: dict, bundle: dict) -> list[dict]:
             "ctrl": ctrl, "chaos": chaos, "profile": profile,
             "favorite_strength": favorite_strength, "data_ok": data_ok, "no_conf": no_conf,
             "recommended_market": recommended_market,
+            "ctx": _ctx,
         })
 
     print()
@@ -512,6 +523,7 @@ def main() -> None:
     for r in avoid:
         print(f"    {r['league']} | {r['home']} vs {r['away']}  conf={r['conf']} ctrl={r['ctrl']:.1f} chaos={r['chaos']:.1f} profile={r['profile']['probability_profile']}")
     print_priority_watchlist(all_results, "Serie A / Ligue 1", sep=SEP)
+    print_context_signals_section(all_results, sep=SEP)
 
     print()
     print(SEP)
@@ -559,6 +571,7 @@ def main() -> None:
             "market_tier_score":          rec.get("market_tier_score", ""),
             "market_tier_reason":         rec.get("market_tier_reason", ""),
             "market_tier_flags":          rec.get("market_tier_flags", ""),
+            **context_csv_fields(r.get("ctx", {})),
         })
     import pandas as _pd
     _df = _pd.DataFrame(_csv_rows)

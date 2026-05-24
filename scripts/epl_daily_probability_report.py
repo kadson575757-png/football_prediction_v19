@@ -19,11 +19,13 @@ warnings.filterwarnings("ignore")
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from football_prediction_v19.features import build_fixture_features
+from football_prediction_v19.features import build_fixture_features, build_extended_features
+from football_prediction_v19.context_features import build_context_features
 from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market, apply_league_market_profile, build_market_tier
 from football_prediction_v19.team_names import normalize_team_name
 from football_prediction_v19.reports.watchlist import append_watchlist_to_report
 from _watchlist import print_priority_watchlist
+from _context_signals import get_fixture_context_features, print_context_signals_section, context_csv_fields
 
 FIXTURE_FILE = ROOT / "data" / "upcoming_epl_fixtures.csv"
 HISTORY_PATTERN = str(ROOT / "data" / "processed" / "football_data_E0_*_clean.csv")
@@ -197,6 +199,10 @@ history = history.drop_duplicates(subset=["date", "home_team", "away_team"]).sor
 history["home_team"] = history["home_team"].apply(normalize_team_name)
 history["away_team"] = history["away_team"].apply(normalize_team_name)
 print(f"  {len(history)} matches  |  {history['date'].min().date()} to {history['date'].max().date()}")
+try:
+    history = build_extended_features(history)
+except Exception as _exc:
+    print(f"  [context] build_extended_features skipped: {_exc}")
 
 print(f"Loading model: {MODEL_FILE}")
 bundle = joblib.load(MODEL_FILE)
@@ -235,6 +241,10 @@ for _, fix in fixtures.iterrows():
     game_time = str(fix.get("time", ""))
     venue = str(fix.get("venue", "Unknown"))
     referee = str(fix.get("referee", "Unknown"))
+    try:
+        _ctx = get_fixture_context_features(home, away, game_date, history)
+    except Exception:
+        _ctx = {}
     odds_h = float(fix["odds_home"])
     odds_d = float(fix["odds_draw"])
     odds_a = float(fix["odds_away"])
@@ -435,6 +445,7 @@ for _, fix in fixtures.iterrows():
         "odds_d": odds_d,
         "odds_a": odds_a,
         "recommended_market": recommended_market,
+        "ctx": _ctx,
     })
 
 print()
@@ -549,6 +560,7 @@ for r in nc_games:
 print()
 print(SEP)
 print_priority_watchlist(results, "EPL", sep=SEP)
+print_context_signals_section(results, sep=SEP)
 
 print("  NOTE: Probabilities are model/market estimates. No betting claims.")
 print("  Control/Chaos are probability-confidence indicators only.")
@@ -597,6 +609,7 @@ for r in results:
         "market_tier_score":          rec.get("market_tier_score", ""),
         "market_tier_reason":         rec.get("market_tier_reason", ""),
         "market_tier_flags":          rec.get("market_tier_flags", ""),
+        **context_csv_fields(r.get("ctx", {})),
     })
 import pandas as _pd
 _df = _pd.DataFrame(_csv_rows)
