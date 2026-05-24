@@ -69,6 +69,7 @@ from football_prediction_v19.diagnostics import build_market_tier  # noqa: E402
 from football_prediction_v19.features import (          # noqa: E402
     build_features as _build_features,
     build_fixture_features as _build_fixture_features,
+    build_extended_features,
 )
 from football_prediction_v19.model import (             # noqa: E402
     build_pipeline as _build_pipeline,
@@ -887,6 +888,15 @@ def run_walk_forward(
         _assert_no_leakage(prior_df, md_date, label=f"walk_forward prior_df md={md_label}")
         _assert_no_leakage(prior_ml, md_date, label=f"walk_forward prior_ml md={md_label}")
 
+        # Build extended features on a recent window (O(n²) performance guard)
+        recent_prior = prior_df.tail(200)
+        recent_prior = build_extended_features(
+            recent_prior,
+            include_elo=True, include_h2h=True, include_time_decay=True,
+            include_adj_xg=True, include_game_state=True, include_context=True,
+        )
+        _assert_no_leakage(recent_prior, md_date, "extended_features")
+
         if len(prior_df) < min_warmup:
             skipped_warmup += len(md_group)
             match_counter  += len(md_group)
@@ -1054,6 +1064,15 @@ def run_replay(
 
         # Hard leakage guard — must have NO future dates in prior_df
         _assert_no_leakage(prior_df, md_date, label=f"matchday={md_label}")
+
+        # Build extended features on a recent window (O(n²) performance guard)
+        recent_prior = prior_df.tail(200)
+        recent_prior = build_extended_features(
+            recent_prior,
+            include_elo=True, include_h2h=True, include_time_decay=True,
+            include_adj_xg=True, include_game_state=True, include_context=True,
+        )
+        _assert_no_leakage(recent_prior, md_date, "extended_features")
 
         # Warm-up gate: skip if not enough prior data
         if len(prior_df) < min_warmup:
