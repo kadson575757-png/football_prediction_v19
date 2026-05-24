@@ -25,11 +25,27 @@ market_tier_flags  : pipe-separated diagnostic flag string (may be empty)
 
 from __future__ import annotations
 
-__all__ = ["build_market_tier", "MARKET_TIERS"]
+__all__ = ["build_market_tier", "MARKET_TIERS", "LEAGUE_TIER_BASELINES"]
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
+# League-level tier-score baseline statistics (2024/25 aggregate)
+# Used only for the league-relative z-score field; never affects tier logic.
+# ---------------------------------------------------------------------------
+
+LEAGUE_TIER_BASELINES: dict[str, dict[str, float]] = {
+    "Bundesliga":     {"mean": 72.1, "std": 9.8},
+    "2. Bundesliga":  {"mean": 68.3, "std": 11.2},
+    "Eredivisie":     {"mean": 71.4, "std": 10.1},
+    "Premier League": {"mean": 73.2, "std": 9.3},
+    "La Liga":        {"mean": 72.8, "std": 9.6},
+    "Serie A":        {"mean": 71.9, "std": 10.0},
+    "Ligue 1":        {"mean": 69.7, "std": 10.5},
+}
+
 
 MARKET_TIERS = (
     "A_TIER",
@@ -204,6 +220,26 @@ def build_market_tier(recommendation: dict) -> dict:  # noqa: C901
 
     flags: list[str] = []
 
+    # ── ABSOLUTE RULE: BOTH_OVER25_BTTS permanent HARD_NO_GO ────────────────
+    if subtype == "BOTH_OVER25_BTTS":
+        tier = "HARD_NO_GO"
+        reason = "BOTH_OVER25_BTTS: permanent HARD_NO_GO (48.7% historical)"
+        flags.append("SUBTYPE_SUPPRESSED")
+        score = _compute_score(
+            strength=strength, subtype=subtype, pref_subtypes=pref_subtypes,
+            supp_subtypes=supp_subtypes, has_warning=has_warning, chaos=chaos,
+            confidence=confidence, data_warning=data_warning, mtype=mtype,
+        )
+        score = min(score, 24)
+        league_rel = _league_relative_score(league, score)
+        result = dict(recommendation)
+        result["market_tier"]                        = tier
+        result["market_tier_score"]                  = score
+        result["market_tier_reason"]                 = reason
+        result["market_tier_flags"]                  = " | ".join(flags)
+        result["market_tier_score_league_relative"]  = league_rel
+        return result
+
     # ── Decision tree (priority order) ──────────────────────────────────────
 
     # 1. OBSERVE_ONLY  — existing market type or genuinely missing data
@@ -339,13 +375,51 @@ def build_market_tier(recommendation: dict) -> dict:  # noqa: C901
     elif tier == "A_TIER":
         score = max(65, min(score, 100))
 
+    # ── A_TIER post-processing: threshold + downgrade rules ──────────────────
+    if tier == "A_TIER":
+        if has_warning:
+            tier = "B_TIER"
+            reason += " [DOWNGRADED: warning_flags active]"
+            score = max(45, min(score, 74))
+        elif "ligue 1" in league.lower() or profile == "ligue1_cautious":
+            tier = "B_TIER"
+            reason += " [LIGUE1_CAP: A_TIER→B_TIER]"
+            score = max(45, min(score, 74))
+        elif score < 85:
+            tier = "B_TIER"
+            reason += " [DOWNGRADED: score below 85 threshold]"
+            score = max(45, min(score, 74))
+
+    # ── League-relative z-score ───────────────────────────────────────────────
+    # (diagnostic annotation only — does NOT influence tier or raw score)
+    league_rel: "float | None" = _league_relative_score(league, score)
+
     # ── Assemble result ───────────────────────────────────────────────────────
     result = dict(recommendation)  # shallow copy — all existing fields preserved
-    result["market_tier"]        = tier
-    result["market_tier_score"]  = score
-    result["market_tier_reason"] = reason
-    result["market_tier_flags"]  = " | ".join(flags)
+    result["market_tier"]                   = tier
+    result["market_tier_score"]             = score
+    result["market_tier_reason"]            = reason
+    result["market_tier_flags"]             = " | ".join(flags)
+    result["market_tier_score_league_relative"] = league_rel
     return result
+
+
+def _league_relative_score(league: str, raw_score: int) -> "float | None":
+    """Return the z-scored market_tier_score relative to the league baseline.
+
+    Formula: (raw_score - league_mean) / league_std
+    Rounded to 2 decimal places.
+
+    Returns None when the league is not in LEAGUE_TIER_BASELINES.
+    """
+    baseline = LEAGUE_TIER_BASELINES.get(league)
+    if baseline is None:
+        return None
+    std = baseline["std"]
+    if std == 0:
+        return None
+    z = (raw_score - baseline["mean"]) / std
+    return round(z, 2)
 
 
 # ---------------------------------------------------------------------------
@@ -377,14 +451,9 @@ def _qualifies_a_tier(
 ) -> bool:
     if strength != "HIGH":
         return False
-    if has_warning:
-        return False
     if subtype not in _A_TIER_SUBTYPES:
         return False
     if chaos is not None and chaos >= _CHAOS_THRESHOLD_A:
-        return False
-    # Ligue 1 is weaker even for A-Tier subtypes — excluded from A-Tier
-    if "ligue 1" in league.lower() or profile == "ligue1_cautious":
         return False
     return True
 

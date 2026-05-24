@@ -25,6 +25,8 @@ sys.path.insert(0, str(ROOT / "src"))
 from football_prediction_v19.features import build_fixture_features
 from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market, apply_league_market_profile, build_market_tier
 from football_prediction_v19.team_names import normalize_team_name
+from football_prediction_v19.reports.watchlist import append_watchlist_to_report
+from _watchlist import print_priority_watchlist
 
 # ---------------------------------------------------------------------------
 # Config
@@ -558,6 +560,8 @@ for r in nc_games:
 
 print()
 print(SEP)
+print_priority_watchlist(results, "Eredivisie", sep=SEP)
+
 print("  NOTE: Probabilities are model/market estimates. No betting claims.")
 print("  Over2.5 / BTTS are rolling form rates (last 5 games). No edge claims.")
 print("  Model: Eredivisie-specific, accuracy=50.2% on held-out 2023-24 OOS data.")
@@ -611,3 +615,4 @@ _df = _pd.DataFrame(_csv_rows)
 _csv_path = _out_dir / f"eredivisie_{REPORT_DATE}_daily_report.csv"
 _df.to_csv(_csv_path, index=False)
 print(f"  [CSV saved] {_csv_path}")
+append_watchlist_to_report(str(_csv_path), _csv_rows)

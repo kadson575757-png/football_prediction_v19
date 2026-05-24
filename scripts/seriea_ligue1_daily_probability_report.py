@@ -22,6 +22,8 @@ sys.path.insert(0, str(ROOT / "src"))
 from football_prediction_v19.diagnostics import build_control_chaos_profile, build_recommended_market, apply_league_market_profile, build_market_tier
 from football_prediction_v19.features import build_fixture_features
 from football_prediction_v19.team_names import normalize_team_name
+from football_prediction_v19.reports.watchlist import append_watchlist_to_report
+from _watchlist import print_priority_watchlist
 
 MODEL_FILE = ROOT / "outputs" / "model_comparison_top5" / "best_model.joblib"
 MODEL_NOTE = "best available combined Top-5 model fallback; no league-specific Serie A/F1 model found"
@@ -509,6 +511,8 @@ def main() -> None:
     print("  Games to avoid          :")
     for r in avoid:
         print(f"    {r['league']} | {r['home']} vs {r['away']}  conf={r['conf']} ctrl={r['ctrl']:.1f} chaos={r['chaos']:.1f} profile={r['profile']['probability_profile']}")
+    print_priority_watchlist(all_results, "Serie A / Ligue 1", sep=SEP)
+
     print()
     print(SEP)
     print("  NOTE: Diagnostic probabilities only. No betting, paper-test, ledger, ROI, or value claims.")
@@ -561,6 +565,7 @@ def main() -> None:
     _csv_path = _out_dir / f"seriea_ligue1_{REPORT_DATE}_daily_report.csv"
     _df.to_csv(_csv_path, index=False)
     print(f"  [CSV saved] {_csv_path}")
+    append_watchlist_to_report(str(_csv_path), _csv_rows)
 
 
 if __name__ == "__main__":
