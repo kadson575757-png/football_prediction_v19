@@ -512,6 +512,68 @@ def build_league_profile_sections(scored: pd.DataFrame) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
+# Phase-10: Ensemble analysis section
+# ---------------------------------------------------------------------------
+
+def _append_ensemble_analysis_section(lines: list, scored) -> None:
+    """Append the ENSEMBLE ANALYSIS section to *lines*.
+
+    Gracefully omitted when ensemble columns are absent.
+    No betting, ROI, or staking logic.
+    """
+    import pandas as _pd
+
+    ensemble_note_col = "ensemble_note"
+    success_col: str | None = None
+    for col in ("type_success", "subtype_success"):
+        if col in scored.columns and scored[col].notna().any():
+            success_col = col
+            break
+
+    if ensemble_note_col not in scored.columns or success_col is None:
+        return  # columns absent — section silently omitted
+
+    lines.append("")
+    lines.append("=== ENSEMBLE ANALYSIS ===")
+    lines.append("")
+
+    def _hit_rate_ci(mask):
+        sub = scored[mask & scored[success_col].notna()]
+        n = len(sub)
+        hits = int(sub[success_col].sum()) if n else 0
+        rate = hits / n if n else 0.0
+        lo, hi = _wilson_ci(n, hits)
+        return n, hits, rate, lo, hi
+
+    # SUPER_A_TIER
+    if "market_tier" in scored.columns:
+        super_a = scored["market_tier"].astype(str).str.strip() == "SUPER_A_TIER"
+        n, hits, rate, lo, hi = _hit_rate_ci(super_a)
+        lines.append("SUPER_A_TIER:")
+        lines.append(f"  n={n}, Hit Rate: {rate:.1%} (CI: {lo:.1%}-{hi:.1%})")
+        lines.append("")
+
+    # ENSEMBLE_DISAGREEMENT (downgraded matches)
+    dis_mask = scored[ensemble_note_col].astype(str).str.strip() == "DISAGREEMENT"
+    n, hits, rate, _, _ = _hit_rate_ci(dis_mask)
+    lines.append("ENSEMBLE_DISAGREEMENT (downgraded):")
+    lines.append(f"  n={n}, Hit Rate: {rate:.1%}")
+    lines.append("")
+
+    # ENSEMBLE_SPLIT
+    split_mask = scored[ensemble_note_col].astype(str).str.strip() == "SPLIT"
+    n, hits, rate, _, _ = _hit_rate_ci(split_mask)
+    lines.append("ENSEMBLE_SPLIT:")
+    lines.append(f"  n={n}, Hit Rate: {rate:.1%}")
+    lines.append("")
+
+    lines.append(
+        "Zeigt ob Ensemble-Konsens mit höherer Erfolgsrate korreliert."
+    )
+    lines.append("")
+
+
+# ---------------------------------------------------------------------------
 # Main evaluation
 # ---------------------------------------------------------------------------
 
@@ -957,6 +1019,9 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
         lines.extend(_csa(scored))
     except Exception:
         pass
+
+    # Ensemble analysis (Phase 10) — graceful if columns absent
+    _append_ensemble_analysis_section(lines, scored)
 
     # League profile analysis sections (graceful fallback if fields absent)
     lines.extend(build_league_profile_sections(scored))

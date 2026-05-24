@@ -747,15 +747,18 @@ def _train_wf_model(
     prior_ml: pd.DataFrame,
     model_name: str = "logistic_regression",
     min_train_rows: int = 30,
-) -> tuple[Any, list[str], Optional[str]]:
-    """Train an sklearn model on *prior_ml* matches.
+) -> tuple[Any, list[str], Any, Optional[str]]:
+    """Train an sklearn model on *prior_ml* matches, plus a parallel ensemble.
 
-    Returns (fitted_model, feature_cols, error_string).
-    error_string is None on success; fitted_model is None on failure.
+    Returns (fitted_model, feature_cols, ensemble, error_string).
+    error_string is None on success; fitted_model / ensemble are None on failure.
 
     Leakage guarantee: prior_ml MUST contain only matches with
     date < current cutoff.  This function never touches the target season's
     current matchday.
+
+    The ensemble (EnsemblePredictor) runs parallel to the main model and
+    NEVER replaces it — existing probabilities are unchanged.
     """
     try:
         with warnings.catch_warnings():
@@ -763,9 +766,9 @@ def _train_wf_model(
             table = _build_features(prior_ml, min_history=1)
         table = table.dropna(subset=["result"])
         if len(table) < min_train_rows:
-            return None, [], f"only_{len(table)}_rows_after_feature_build"
+            return None, [], None, f"only_{len(table)}_rows_after_feature_build"
         if table["result"].nunique() < 2:
-            return None, [], "fewer_than_2_classes_in_training_set"
+            return None, [], None, "fewer_than_2_classes_in_training_set"
 
         cols = [c for c in _feature_columns(table) if not table[c].isna().all()]
         X_train = table[cols]
@@ -776,10 +779,21 @@ def _train_wf_model(
             warnings.simplefilter("ignore")
             model.fit(X_train, y_train)
 
-        return model, cols, None
+        # Phase-10: parallel ensemble — does NOT affect main model predictions
+        ensemble: Any = None
+        try:
+            from football_prediction_v19.models.ensemble import EnsemblePredictor
+            ensemble = EnsemblePredictor()
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                ensemble.fit(X_train, y_train)
+        except Exception:
+            ensemble = None
+
+        return model, cols, ensemble, None
 
     except Exception as exc:           # training must not crash the whole run
-        return None, [], str(exc)
+        return None, [], None, str(exc)
 
 
 def _predict_wf_probs(
@@ -787,8 +801,11 @@ def _predict_wf_probs(
     cols: list[str],
     prior_ml: pd.DataFrame,
     match_row: pd.Series,
-) -> tuple[Optional[dict[str, float]], Optional[str]]:
+) -> tuple[Optional[dict[str, float]], Any, Optional[str]]:
     """Use *model* to predict H/D/A probabilities for a single pre-match row.
+
+    Returns (probs_dict, X_aligned, error_string).
+    X_aligned is the cols-aligned feature DataFrame (used by the ensemble).
 
     build_fixture_features internally filters prior_ml to date < match_date,
     so even if prior_ml already excludes the current matchday at the caller
@@ -824,10 +841,10 @@ def _predict_wf_probs(
         if total > 0:
             h, d, a = h / total, d / total, a / total
 
-        return {"home": round(h, 4), "draw": round(d, 4), "away": round(a, 4)}, None
+        return {"home": round(h, 4), "draw": round(d, 4), "away": round(a, 4)}, X, None
 
     except Exception as exc:
-        return None, str(exc)
+        return None, None, str(exc)
 
 
 def run_walk_forward(
@@ -866,6 +883,7 @@ def run_walk_forward(
     # Season-level model cache (used only when retrain_frequency == "season")
     _season_model: Any = None
     _season_cols: list[str] = []
+    _season_ensemble: Any = None
     _season_error: Optional[str] = None
     _season_model_name_str: str = ""
     _season_initialized: bool = False
@@ -908,13 +926,13 @@ def run_walk_forward(
         # Model training
         # ------------------------------------------------------------------
         if retrain_frequency == "matchday":
-            model, cols, model_error = _train_wf_model(prior_ml, wf_model_name)
+            model, cols, ensemble, model_error = _train_wf_model(prior_ml, wf_model_name)
             model_name_str = wf_model_name if model is not None else ""
             if model is None:
                 training_failures += 1
         else:  # "season" — train once at the first eligible cutoff
             if not _season_initialized:
-                _season_model, _season_cols, _season_error = _train_wf_model(
+                _season_model, _season_cols, _season_ensemble, _season_error = _train_wf_model(
                     prior_ml, wf_model_name
                 )
                 _season_model_name_str = wf_model_name if _season_model is not None else ""
@@ -923,6 +941,7 @@ def run_walk_forward(
                     training_failures += 1
             model          = _season_model
             cols           = _season_cols
+            ensemble       = _season_ensemble
             model_error    = _season_error
             model_name_str = _season_model_name_str
 
@@ -943,8 +962,9 @@ def run_walk_forward(
             features["model_error"]     = model_error or ""
 
             # 2. If ML model is available, replace probability estimates
+            X_match: Any = None
             if model is not None:
-                ml_probs, pred_error = _predict_wf_probs(model, cols, prior_ml, match)
+                ml_probs, X_match, pred_error = _predict_wf_probs(model, cols, prior_ml, match)
                 if ml_probs is not None:
                     # Override de-vigged / form-based probs with ML probs
                     features["model_home_prob"] = ml_probs["home"]
@@ -979,6 +999,26 @@ def run_walk_forward(
             pred = apply_league_market_profile(pred, league_name)
             # Market tier diagnostic layer (report interpretation only)
             pred = build_market_tier(pred)
+
+            # 3b. Phase-10: ensemble tier override (parallel — never replaces main probs)
+            if ensemble is not None and X_match is not None:
+                try:
+                    from football_prediction_v19.diagnostics.ensemble_tier import (
+                        apply_ensemble_override,
+                    )
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore")
+                        agreement = ensemble.agreement_score(X_match)
+                    override = apply_ensemble_override(
+                        existing_tier=pred.get("market_tier", ""),
+                        existing_score=pred.get("market_tier_score", 0),
+                        agreement=agreement,
+                        ensemble_predictions={},
+                    )
+                    pred.update(override)
+                except Exception:
+                    pred.setdefault("ensemble_agreement", "")
+                    pred.setdefault("ensemble_note", "")
 
             pred_rows.append(pred)
 

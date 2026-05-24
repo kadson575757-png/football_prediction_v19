@@ -395,7 +395,7 @@ def test_wf_training_failure_recorded_no_crash():
     df = _season_df(n_matchdays=15, teams=6)
 
     def always_fail(prior_ml, model_name="logistic_regression", min_train_rows=30):
-        return None, [], "simulated_training_failure"
+        return None, [], None, "simulated_training_failure"
 
     with patch("run_season_replay_audit._train_wf_model", side_effect=always_fail):
         # Must not raise
@@ -420,7 +420,7 @@ def test_wf_single_prediction_failure_does_not_crash():
     def fail_first_then_succeed(model, cols, prior_ml, match_row):
         call_count[0] += 1
         if call_count[0] == 1:
-            return None, "simulated_prediction_failure"
+            return None, None, "simulated_prediction_failure"
         return original_predict(model, cols, prior_ml, match_row)
 
     with patch("run_season_replay_audit._predict_wf_probs", side_effect=fail_first_then_succeed):
@@ -606,10 +606,10 @@ def test_run_replay_does_not_route_diagnostic():
 # ---------------------------------------------------------------------------
 
 def test_train_wf_model_returns_none_on_small_data():
-    """_train_wf_model must return (None, [], error_str) when data < min_train_rows."""
+    """_train_wf_model must return (None, [], None, error_str) when data < min_train_rows."""
     df = _season_df(n_matchdays=2, teams=4)
     ml_df = _prepare_for_ml(df)
-    model, cols, error = _train_wf_model(ml_df, min_train_rows=200)
+    model, cols, ensemble, error = _train_wf_model(ml_df, min_train_rows=200)
     assert model is None
     assert cols == []
     assert error is not None and len(error) > 0
@@ -619,7 +619,7 @@ def test_train_wf_model_succeeds_on_sufficient_data():
     """_train_wf_model must return a fitted model with feature columns on good data."""
     df = _season_df(n_matchdays=20, teams=6)
     ml_df = _prepare_for_ml(df)
-    model, cols, error = _train_wf_model(ml_df, min_train_rows=10)
+    model, cols, ensemble, error = _train_wf_model(ml_df, min_train_rows=10)
     assert model is not None, f"Expected fitted model, got error: {error}"
     assert len(cols) > 0
     assert error is None
