@@ -50,6 +50,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import sys
 import textwrap
@@ -847,6 +848,140 @@ def _predict_wf_probs(
         return None, None, str(exc)
 
 
+def _normalize_ensemble_prediction(pred: Any) -> str:
+    """Return a stable main-direction label for an ensemble member prediction."""
+    if pred is None:
+        return ""
+    text = str(pred).strip()
+    if not text:
+        return ""
+    upper = text.upper()
+    mapping = {
+        "H": "HOME",
+        "HOME": "HOME",
+        "1": "HOME",
+        "D": "DRAW",
+        "DRAW": "DRAW",
+        "X": "DRAW",
+        "A": "AWAY",
+        "AWAY": "AWAY",
+        "2": "AWAY",
+        "OVER_25": "OVER_25",
+        "UNDER_25": "UNDER_25",
+        "BTTS": "BTTS",
+    }
+    return mapping.get(upper, upper)
+
+
+def _parse_ensemble_model_predictions(raw: Any) -> list[dict[str, str]]:
+    """Parse model prediction diagnostics from dict/list/JSON-string input."""
+    if raw is None:
+        return []
+    value = raw
+    if isinstance(raw, str):
+        text = raw.strip()
+        if not text:
+            return []
+        try:
+            value = json.loads(text)
+        except json.JSONDecodeError:
+            parts = [p.strip() for p in text.split("|") if p.strip()]
+            parsed: list[dict[str, str]] = []
+            for part in parts:
+                if ":" in part:
+                    model, pred = part.split(":", 1)
+                    parsed.append({"model": model.strip(), "prediction": pred.strip()})
+            return parsed
+
+    if isinstance(value, dict):
+        if "models" in value and isinstance(value["models"], list):
+            return _parse_ensemble_model_predictions(value["models"])
+        parsed = []
+        for model, pred in value.items():
+            if isinstance(pred, dict):
+                prediction = pred.get("prediction", pred.get("direction", pred.get("type", "")))
+            else:
+                prediction = pred
+            parsed.append({"model": str(model), "prediction": str(prediction)})
+        return parsed
+
+    if isinstance(value, list):
+        parsed = []
+        for i, item in enumerate(value, 1):
+            if isinstance(item, dict):
+                model = item.get("model", item.get("name", f"model_{i}"))
+                prediction = item.get("prediction", item.get("direction", item.get("type", "")))
+            else:
+                model = f"model_{i}"
+                prediction = item
+            parsed.append({"model": str(model), "prediction": str(prediction)})
+        return parsed
+
+    return []
+
+
+def compute_ensemble_diagnostics(raw_predictions: Any) -> dict[str, str]:
+    """Compute HIGH/MEDIUM/LOW/NONE agreement from per-model predictions."""
+    parsed = _parse_ensemble_model_predictions(raw_predictions)
+    available = [
+        {
+            "model": str(item.get("model", "")).strip() or f"model_{i}",
+            "prediction": _normalize_ensemble_prediction(item.get("prediction")),
+        }
+        for i, item in enumerate(parsed, 1)
+    ]
+    available = [item for item in available if item["prediction"]]
+
+    serialized = json.dumps(available, ensure_ascii=False)
+    n = len(available)
+    if n < 2:
+        return {
+            "ensemble_agreement": "NONE",
+            "ensemble_note": "Only one model prediction available; ensemble agreement not computed.",
+            "ensemble_model_predictions": serialized,
+        }
+
+    counts: dict[str, int] = {}
+    for item in available:
+        counts[item["prediction"]] = counts.get(item["prediction"], 0) + 1
+    top_prediction, top_count = max(counts.items(), key=lambda kv: kv[1])
+
+    if top_count == n:
+        agreement = "HIGH"
+        note = f"All {n} available models agree on {top_prediction}."
+    elif top_count > n / 2:
+        agreement = "MEDIUM"
+        note = (
+            f"Majority agreement: {top_count}/{n} models predict "
+            f"{top_prediction}; remaining models differ."
+        )
+    else:
+        agreement = "LOW"
+        details = ", ".join(f"{k}={v}" for k, v in sorted(counts.items()))
+        note = f"No clear majority across {n} models ({details})."
+
+    return {
+        "ensemble_agreement": agreement,
+        "ensemble_note": note,
+        "ensemble_model_predictions": serialized,
+    }
+
+
+def _ensemble_predictions_from_model(ensemble: Any, X_match: Any) -> list[dict[str, str]]:
+    """Extract readable per-model H/D/A predictions from an EnsemblePredictor."""
+    result = ensemble.predict_proba_all(X_match)
+    predictions: list[dict[str, str]] = []
+    for name, model in zip(getattr(ensemble, "model_names", []), getattr(ensemble, "models", [])):
+        proba = result.get(name)
+        if proba is None:
+            continue
+        idx = int(np.argmax(proba, axis=1)[0])
+        classes = list(getattr(model, "classes_", []))
+        label = classes[idx] if idx < len(classes) else idx
+        predictions.append({"model": str(name), "prediction": str(label)})
+    return predictions
+
+
 def run_walk_forward(
     df: pd.DataFrame,
     min_warmup: int,
@@ -1001,6 +1136,7 @@ def run_walk_forward(
             pred = build_market_tier(pred)
 
             # 3b. Phase-10: ensemble tier override (parallel — never replaces main probs)
+            ensemble_predictions: list[dict[str, str]] = []
             if ensemble is not None and X_match is not None:
                 try:
                     from football_prediction_v19.diagnostics.ensemble_tier import (
@@ -1009,16 +1145,25 @@ def run_walk_forward(
                     with warnings.catch_warnings():
                         warnings.simplefilter("ignore")
                         agreement = ensemble.agreement_score(X_match)
+                        ensemble_predictions = _ensemble_predictions_from_model(ensemble, X_match)
                     override = apply_ensemble_override(
                         existing_tier=pred.get("market_tier", ""),
                         existing_score=pred.get("market_tier_score", 0),
                         agreement=agreement,
-                        ensemble_predictions={},
+                        ensemble_predictions=ensemble_predictions,
                     )
                     pred.update(override)
                 except Exception:
-                    pred.setdefault("ensemble_agreement", "")
-                    pred.setdefault("ensemble_note", "")
+                    ensemble_predictions = []
+
+            if not ensemble_predictions and pred.get("likely_1x2"):
+                ensemble_predictions = [
+                    {
+                        "model": pred.get("model_name") or "main_model",
+                        "prediction": pred.get("likely_1x2"),
+                    }
+                ]
+            pred.update(compute_ensemble_diagnostics(ensemble_predictions))
 
             pred_rows.append(pred)
 
@@ -1141,6 +1286,10 @@ def run_replay(
             # Market tier diagnostic layer (report interpretation only)
             pred = build_market_tier(pred)
 
+            pred.update(compute_ensemble_diagnostics([
+                {"model": "diagnostic_replay", "prediction": pred.get("likely_1x2")}
+            ]))
+
             pred_rows.append(pred)
 
             # Evaluate against actual result
@@ -1184,6 +1333,53 @@ def _rate_line(label: str, grp: pd.DataFrame, col: str, width: int = 22) -> str:
     rate = hits / n if n > 0 else 0.0
     warn = "  ⚠ small sample" if n < 20 else ""
     return f"  {label:<{width}} {n:>5} {hits:>5} {rate:>7.1%}{warn}"
+
+
+def _append_ensemble_summary_lines(lines: list[str], eval_df: pd.DataFrame) -> None:
+    """Append replay ensemble diagnostics without changing prediction logic."""
+    if "ensemble_agreement" not in eval_df.columns:
+        lines += [
+            "## Ensemble Diagnostics",
+            "",
+            "  WARNING: ensemble_agreement column is unavailable.",
+            "",
+        ]
+        return
+
+    agreement = eval_df["ensemble_agreement"].fillna("").astype(str).str.strip()
+    if agreement.eq("").all():
+        lines += [
+            "## Ensemble Diagnostics",
+            "",
+            "  WARNING: ensemble_agreement is blank for all rows.",
+            "",
+        ]
+        return
+
+    ev = eval_df[agreement != ""]
+    success_col = "subtype_success" if "subtype_success" in ev.columns else "type_success"
+    ev = ev[ev[success_col].notna()]
+    if ev.empty:
+        lines += [
+            "## Ensemble Diagnostics",
+            "",
+            "  Ensemble agreement values are present, but no evaluatable rows are available.",
+            "",
+        ]
+        return
+
+    lines += ["## Success by Ensemble Agreement", ""]
+    lines.append(f"  {'Agreement':<12} {'n':>5} {'hits':>5} {'rate':>7}")
+    lines.append("  " + "-" * 36)
+    order = ["HIGH", "MEDIUM", "LOW", "NONE"]
+    ev = ev.copy()
+    ev["_ensemble_agreement_norm"] = ev["ensemble_agreement"].astype(str).str.strip().str.upper()
+    present = [v for v in order if v in set(ev["_ensemble_agreement_norm"])]
+    present += sorted(set(ev["_ensemble_agreement_norm"]) - set(order))
+    for label in present:
+        grp = ev[ev["_ensemble_agreement_norm"] == label]
+        lines.append(_rate_line(label, grp, success_col, 12))
+    lines.append("")
 
 
 def build_summary_markdown(
@@ -1335,6 +1531,8 @@ def build_summary_markdown(
         for conf, grp in ev.groupby("confidence"):
             lines.append(_rate_line(conf, grp, "type_success", 16))
         lines.append("")
+
+    _append_ensemble_summary_lines(lines, eval_df)
 
     # ---- By season phase ----
     if "season_phase" in eval_df.columns:
@@ -1508,6 +1706,23 @@ def _append_all_replay_summary(
         key = mtype.lower()
         row[f"{key}_n"] = n
         row[f"{key}_rate"] = round(hits / n, 4) if n > 0 else None
+
+    if "ensemble_agreement" in eval_df.columns:
+        agreement = eval_df["ensemble_agreement"].fillna("").astype(str).str.strip()
+        row["ensemble_agreement_blank_all"] = bool(agreement.eq("").all())
+        ens_ev = eval_df[(agreement != "") & eval_df["type_success"].notna()].copy()
+        if not ens_ev.empty:
+            ens_ev["_ensemble_agreement_norm"] = (
+                ens_ev["ensemble_agreement"].astype(str).str.strip().str.upper()
+            )
+            for agreement_value, grp in ens_ev.groupby("_ensemble_agreement_norm"):
+                n = len(grp)
+                hits = int(grp["type_success"].sum())
+                key = agreement_value.lower()
+                row[f"ensemble_{key}_n"] = n
+                row[f"ensemble_{key}_rate"] = round(hits / n, 4) if n > 0 else None
+    else:
+        row["ensemble_agreement_blank_all"] = True
 
     if summ_path.exists():
         existing = pd.read_csv(summ_path)

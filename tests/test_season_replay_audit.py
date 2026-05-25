@@ -35,6 +35,7 @@ from run_season_replay_audit import (  # noqa: E402
     _season_phase,
     build_match_features,
     build_summary_markdown,
+    compute_ensemble_diagnostics,
     compute_chaos_score,
     compute_control_score,
     determine_confidence,
@@ -260,6 +261,61 @@ def test_build_match_features_only_uses_prior_df(tmp_path):
     assert features["data_warning"] is True
     assert features["home_stats_n"] == 0
     assert features["away_stats_n"] == 0
+
+
+def test_ensemble_diagnostics_one_model_returns_none():
+    result = compute_ensemble_diagnostics([
+        {"model": "main_model", "prediction": "Home"},
+    ])
+    assert result["ensemble_agreement"] == "NONE"
+    assert result["ensemble_note"] == (
+        "Only one model prediction available; ensemble agreement not computed."
+    )
+    assert result["ensemble_model_predictions"]
+
+
+def test_ensemble_diagnostics_all_models_agree_high():
+    result = compute_ensemble_diagnostics([
+        {"model": "lr", "prediction": "H"},
+        {"model": "gb", "prediction": "Home"},
+        {"model": "rf", "prediction": "1"},
+    ])
+    assert result["ensemble_agreement"] == "HIGH"
+    assert "All 3 available models agree on HOME" in result["ensemble_note"]
+
+
+def test_ensemble_diagnostics_majority_returns_medium():
+    result = compute_ensemble_diagnostics([
+        {"model": "lr", "prediction": "H"},
+        {"model": "gb", "prediction": "Home"},
+        {"model": "rf", "prediction": "Away"},
+    ])
+    assert result["ensemble_agreement"] == "MEDIUM"
+    assert "Majority agreement: 2/3 models predict HOME" in result["ensemble_note"]
+
+
+def test_ensemble_diagnostics_conflict_returns_low():
+    result = compute_ensemble_diagnostics([
+        {"model": "lr", "prediction": "Home"},
+        {"model": "gb", "prediction": "Draw"},
+        {"model": "rf", "prediction": "Away"},
+    ])
+    assert result["ensemble_agreement"] == "LOW"
+    assert "No clear majority" in result["ensemble_note"]
+
+
+def test_run_replay_ensemble_agreement_never_blank_when_columns_exist():
+    df = _season_df(n_matchdays=8, teams=4)
+    pred_df, eval_df = run_replay(
+        df=df,
+        mode="diagnostic_replay",
+        min_warmup=4,
+        league_name="Eredivisie",
+    )
+    assert "ensemble_agreement" in pred_df.columns
+    assert "ensemble_agreement" in eval_df.columns
+    assert pred_df["ensemble_agreement"].astype(str).str.strip().ne("").all()
+    assert eval_df["ensemble_agreement"].astype(str).str.strip().ne("").all()
 
 
 def test_features_home_away_stats_n_increases_with_prior_data():

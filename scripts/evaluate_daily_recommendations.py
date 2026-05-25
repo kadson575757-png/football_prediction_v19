@@ -518,11 +518,10 @@ def build_league_profile_sections(scored: pd.DataFrame) -> list[str]:
 def _append_ensemble_analysis_section(lines: list, scored) -> None:
     """Append the ENSEMBLE ANALYSIS section to *lines*.
 
-    Gracefully omitted when ensemble columns are absent.
+    Warns when ensemble diagnostics are absent or unpopulated.
     No betting, ROI, or staking logic.
     """
-    import pandas as _pd
-
+    ensemble_agreement_col = "ensemble_agreement"
     ensemble_note_col = "ensemble_note"
     success_col: str | None = None
     for col in ("type_success", "subtype_success"):
@@ -530,8 +529,25 @@ def _append_ensemble_analysis_section(lines: list, scored) -> None:
             success_col = col
             break
 
-    if ensemble_note_col not in scored.columns or success_col is None:
-        return  # columns absent — section silently omitted
+    if success_col is None:
+        return
+
+    if ensemble_agreement_col not in scored.columns:
+        lines.append("")
+        lines.append("=== ENSEMBLE ANALYSIS ===")
+        lines.append("")
+        lines.append("WARNING: ensemble_agreement column is unavailable.")
+        lines.append("")
+        return
+
+    agreement_values = scored[ensemble_agreement_col].fillna("").astype(str).str.strip()
+    if agreement_values.eq("").all():
+        lines.append("")
+        lines.append("=== ENSEMBLE ANALYSIS ===")
+        lines.append("")
+        lines.append("WARNING: ensemble_agreement is blank for all rows.")
+        lines.append("")
+        return
 
     lines.append("")
     lines.append("=== ENSEMBLE ANALYSIS ===")
@@ -552,6 +568,22 @@ def _append_ensemble_analysis_section(lines: list, scored) -> None:
         lines.append("SUPER_A_TIER:")
         lines.append(f"  n={n}, Hit Rate: {rate:.1%} (CI: {lo:.1%}-{hi:.1%})")
         lines.append("")
+
+    lines.append("SUCCESS RATE BY ENSEMBLE AGREEMENT:")
+    agreement_norm = scored[ensemble_agreement_col].fillna("").astype(str).str.strip().str.upper()
+    order = ["HIGH", "MEDIUM", "LOW", "NONE"]
+    non_empty_agreements = set(agreement_norm[agreement_norm != ""])
+    present = [v for v in order if v in non_empty_agreements]
+    present += sorted(non_empty_agreements - set(order))
+    for label in present:
+        n, hits, rate, _, _ = _hit_rate_ci(agreement_norm == label)
+        lines.append(f"  {label:<8} n={n}, Hit Rate: {rate:.1%}")
+    lines.append("")
+
+    if ensemble_note_col not in scored.columns:
+        lines.append("WARNING: ensemble_note column is unavailable.")
+        lines.append("")
+        return
 
     # ENSEMBLE_DISAGREEMENT (downgraded matches)
     dis_mask = scored[ensemble_note_col].astype(str).str.strip() == "DISAGREEMENT"
