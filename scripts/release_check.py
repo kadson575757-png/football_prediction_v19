@@ -47,7 +47,7 @@ def main() -> None:
     if not run_step("doctor", [sys.executable, "-m", "football_prediction_v19.cli", "doctor"]):
         steps_ok = False
 
-    if not run_step("pytest", [sys.executable, "-m", "pytest", "--tb=short", "-q"]):
+    if not run_step("pytest", [sys.executable, "-m", "pytest", "tests", "--tb=short", "-q"]):
         steps_ok = False
 
     if not run_step("run_all smoke", [sys.executable, "scripts/run_all.py"]):
