@@ -37,6 +37,7 @@ from run_season_replay_audit import (  # noqa: E402
     _prepare_for_ml,
     _predict_wf_probs,
     _train_wf_model,
+    build_parser,
     build_summary_markdown,
     determine_likely_1x2,
     evaluate_subtype_success,
@@ -623,3 +624,101 @@ def test_train_wf_model_succeeds_on_sufficient_data():
     assert model is not None, f"Expected fitted model, got error: {error}"
     assert len(cols) > 0
     assert error is None
+
+
+def test_parser_accepts_wf_model_ensemble():
+    """The walk-forward CLI parser accepts --wf-model ensemble."""
+    parser = build_parser()
+    args = parser.parse_args([
+        "--league", "Eredivisie",
+        "--season", "2024",
+        "--mode", "walk_forward",
+        "--wf-model", "ensemble",
+    ])
+
+    assert args.wf_model == "ensemble"
+
+
+def test_parser_preserves_existing_wf_model_choices():
+    """Adding ensemble must preserve all existing one-model choices."""
+    parser = build_parser()
+    wf_action = next(action for action in parser._actions if action.dest == "wf_model")
+
+    assert set(wf_action.choices) == {
+        "logistic_regression",
+        "random_forest",
+        "gradient_boosting",
+        "ensemble",
+    }
+    assert wf_action.default == "logistic_regression"
+
+
+def test_wf_ensemble_mode_populates_model_predictions():
+    """Ensemble walk-forward rows include readable per-model direction outputs."""
+    df = _season_df(n_matchdays=18, teams=6)
+    pred_df, _ = run_walk_forward(
+        df,
+        min_warmup=10,
+        league_name="Eredivisie",
+        wf_model_name="ensemble",
+    )
+
+    assert "ensemble_model_predictions" in pred_df.columns
+    populated = pred_df["ensemble_model_predictions"].astype(str).str.strip()
+    assert populated.ne("").any()
+    sample = populated[populated.ne("")].iloc[0]
+    assert "logistic_regression=" in sample
+    assert "random_forest=" in sample
+    assert "gradient_boosting=" in sample
+    agreement_values = set(pred_df["ensemble_agreement"].dropna().astype(str))
+    assert agreement_values <= {"HIGH", "MEDIUM", "LOW", "NONE"}
+    assert not (agreement_values & {"CONSENSUS", "SPLIT", "DISAGREEMENT"})
+
+
+def test_wf_ensemble_training_uses_prior_df_only():
+    """Ensemble training receives the same strictly-prior snapshot as one-model mode."""
+    df = _season_df(n_matchdays=15, teams=6)
+    seen: list[tuple[pd.Timestamp, int, str]] = []
+    original_train = _train_wf_model
+
+    def recording_train(prior_ml, model_name="logistic_regression", min_train_rows=30):
+        assert model_name == "ensemble"
+        if len(prior_ml) > 0:
+            seen.append((pd.Timestamp(prior_ml["date"].max()), len(prior_ml), model_name))
+        return original_train(prior_ml, model_name=model_name, min_train_rows=min_train_rows)
+
+    with patch("run_season_replay_audit._train_wf_model", side_effect=recording_train):
+        run_walk_forward(
+            df,
+            min_warmup=10,
+            league_name="Eredivisie",
+            wf_model_name="ensemble",
+        )
+
+    assert seen, "Expected ensemble training calls"
+    for max_train_date, _, model_name in seen:
+        next_dates = sorted(d for d in df["date"].unique() if pd.Timestamp(d) > max_train_date)
+        assert next_dates, "Training snapshot should not include the full season"
+        assert model_name == "ensemble"
+
+
+def test_wf_existing_one_model_mode_still_works():
+    """Existing one-model walk-forward path still produces trained predictions."""
+    df = _season_df(n_matchdays=15, teams=6)
+    pred_df, _ = run_walk_forward(
+        df,
+        min_warmup=10,
+        league_name="Eredivisie",
+        wf_model_name="logistic_regression",
+    )
+
+    assert len(pred_df) > 0
+    assert pred_df["model_name"].eq("logistic_regression").any()
+    assert pred_df["model_trained_ok"].astype(bool).any()
+    assert set(pred_df["ensemble_agreement"].dropna().astype(str)) == {"NONE"}
+    assert (
+        pred_df["ensemble_note"]
+        .dropna()
+        .eq("Only one model prediction available; ensemble agreement not computed.")
+        .all()
+    )

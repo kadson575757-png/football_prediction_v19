@@ -24,6 +24,7 @@ ledger entries, ROI, or profitability claims are produced.
 from __future__ import annotations
 
 import argparse
+import sys
 import textwrap
 from pathlib import Path
 from typing import Optional
@@ -31,6 +32,12 @@ from typing import Optional
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
+
+from football_prediction_v19.diagnostics.ensemble_tier import (  # noqa: E402
+    normalize_ensemble_agreement,
+)
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -521,21 +528,23 @@ def _append_ensemble_analysis_section(lines: list, scored) -> None:
     Gracefully omitted when ensemble columns are absent.
     No betting, ROI, or staking logic.
     """
-    import pandas as _pd
-
-    ensemble_note_col = "ensemble_note"
+    ensemble_agreement_col = "ensemble_agreement"
     success_col: str | None = None
     for col in ("type_success", "subtype_success"):
         if col in scored.columns and scored[col].notna().any():
             success_col = col
             break
 
-    if ensemble_note_col not in scored.columns or success_col is None:
+    if ensemble_agreement_col not in scored.columns or success_col is None:
         return  # columns absent — section silently omitted
 
     lines.append("")
     lines.append("=== ENSEMBLE ANALYSIS ===")
     lines.append("")
+    scored = scored.copy()
+    scored["_ensemble_agreement_norm"] = scored[ensemble_agreement_col].apply(
+        normalize_ensemble_agreement
+    )
 
     def _hit_rate_ci(mask):
         sub = scored[mask & scored[success_col].notna()]
@@ -553,18 +562,12 @@ def _append_ensemble_analysis_section(lines: list, scored) -> None:
         lines.append(f"  n={n}, Hit Rate: {rate:.1%} (CI: {lo:.1%}-{hi:.1%})")
         lines.append("")
 
-    # ENSEMBLE_DISAGREEMENT (downgraded matches)
-    dis_mask = scored[ensemble_note_col].astype(str).str.strip() == "DISAGREEMENT"
-    n, hits, rate, _, _ = _hit_rate_ci(dis_mask)
-    lines.append("ENSEMBLE_DISAGREEMENT (downgraded):")
-    lines.append(f"  n={n}, Hit Rate: {rate:.1%}")
-    lines.append("")
-
-    # ENSEMBLE_SPLIT
-    split_mask = scored[ensemble_note_col].astype(str).str.strip() == "SPLIT"
-    n, hits, rate, _, _ = _hit_rate_ci(split_mask)
-    lines.append("ENSEMBLE_SPLIT:")
-    lines.append(f"  n={n}, Hit Rate: {rate:.1%}")
+    lines.append("Success by ensemble_agreement:")
+    for agreement in ("HIGH", "MEDIUM", "LOW", "NONE"):
+        mask = scored["_ensemble_agreement_norm"] == agreement
+        n, hits, rate, _, _ = _hit_rate_ci(mask)
+        if n:
+            lines.append(f"  {agreement:<6}: n={n}, Hit Rate: {rate:.1%}")
     lines.append("")
 
     lines.append(
@@ -736,6 +739,10 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
 
     # Clean up temp keys
     m = m.drop(columns=[c for c in m.columns if c.startswith("_")])
+    if "ensemble_agreement" in m.columns:
+        m["ensemble_agreement"] = m["ensemble_agreement"].apply(
+            normalize_ensemble_agreement
+        )
 
     # ---- Save detailed CSV — preserve tier fields ----
     # Column order: put market_tier fields after standard fields if present
