@@ -24,7 +24,15 @@ from football_prediction_v19.diagnostics.ensemble_tier import (  # noqa: E402
 
 OUTPUT_CSV = "tier_rule_candidate_summary.csv"
 OUTPUT_MD = "tier_rule_candidate_summary.md"
+STABILITY_CSV = "tier_rule_stability_summary.csv"
+STABILITY_MD = "tier_rule_stability_summary.md"
 ENSEMBLE_LABELS = {"HIGH", "MEDIUM", "LOW"}
+ACTIONABLE_CATEGORIES = {
+    "PROMOTE_CANDIDATE",
+    "DOWNGRADE_CANDIDATE",
+    "NO_GO_CANDIDATE",
+    "SMALL_SAMPLE_OBSERVE",
+}
 
 SUMMARY_SECTIONS: tuple[tuple[str, str, list[str]], ...] = (
     ("A", "Overall success by market_tier", ["market_tier"]),
@@ -303,6 +311,230 @@ def phase11_recommendation(table: pd.DataFrame) -> str:
     return "HOLD_CURRENT_RULES"
 
 
+def _candidate_mask(df: pd.DataFrame, row: pd.Series) -> pd.Series:
+    mask = pd.Series(True, index=df.index)
+    group_cols = str(row.get("group_cols", "")).split(" x ")
+    for col in group_cols:
+        if not col or col == "league":
+            continue
+        if col in df.columns and col in row and pd.notna(row.get(col)):
+            mask &= df[col].astype(str) == str(row.get(col))
+    return mask
+
+
+def _candidate_key(row: pd.Series) -> str:
+    group_cols = [c for c in str(row.get("group_cols", "")).split(" x ") if c]
+    parts = [
+        f"{col}={row.get(col, '')}"
+        for col in group_cols
+        if col in row and pd.notna(row.get(col))
+    ]
+    return " | ".join(parts)
+
+
+def build_stability_table(
+    df: pd.DataFrame,
+    candidate_table: pd.DataFrame,
+    *,
+    min_sample: int,
+    threshold_pp: float,
+) -> pd.DataFrame:
+    df = ensure_analysis_columns(df)
+    if df.empty or candidate_table.empty:
+        return pd.DataFrame(columns=[
+            "section_id", "section", "candidate_key", "candidate_category",
+            "market_tier", "n", "hits", "success_rate", "parent_market_tier_rate",
+            "delta_vs_parent_pp", "leagues_with_n_ge_10",
+            "leagues_beating_parent_by_threshold", "leagues_trailing_parent_by_threshold",
+            "min_league_rate", "max_league_rate", "stability_label",
+        ])
+
+    candidates = candidate_table[
+        candidate_table["candidate_category"].astype(str).isin(ACTIONABLE_CATEGORIES)
+    ].copy()
+    parent_rates = df.groupby("market_tier")["type_success_bool"].mean().to_dict()
+    rows: list[dict[str, Any]] = []
+
+    for _, cand in candidates.iterrows():
+        sub = df[_candidate_mask(df, cand)].copy()
+        n = int(len(sub))
+        hits = int(sub["type_success_bool"].sum()) if n else 0
+        rate = hits / n if n else 0.0
+        market_tier = str(cand.get("market_tier", "UNKNOWN"))
+        parent_rate = parent_rates.get(market_tier)
+        delta = None if parent_rate is None else (rate - float(parent_rate)) * 100.0
+
+        leagues_with_n = 0
+        beating = 0
+        trailing = 0
+        league_rates: list[float] = []
+        for league, lg in sub.groupby("league", dropna=False):
+            lg_n = int(len(lg))
+            if lg_n < 10:
+                continue
+            leagues_with_n += 1
+            lg_rate = float(lg["type_success_bool"].mean())
+            league_rates.append(lg_rate)
+            parent_lg = df[(df["league"] == league) & (df["market_tier"] == market_tier)]
+            if parent_lg.empty:
+                continue
+            lg_delta = (lg_rate - float(parent_lg["type_success_bool"].mean())) * 100.0
+            if lg_delta >= threshold_pp:
+                beating += 1
+            if lg_delta <= -threshold_pp:
+                trailing += 1
+
+        min_lg = min(league_rates) if league_rates else None
+        max_lg = max(league_rates) if league_rates else None
+        label = _stability_label(
+            n=n,
+            rate=rate,
+            delta=delta,
+            leagues_with_n=leagues_with_n,
+            beating=beating,
+            trailing=trailing,
+            min_sample=min_sample,
+            threshold_pp=threshold_pp,
+        )
+        rows.append({
+            "section_id": cand.get("section_id", ""),
+            "section": cand.get("section", ""),
+            "candidate_key": _candidate_key(cand),
+            "candidate_category": cand.get("candidate_category", ""),
+            "market_tier": market_tier,
+            "n": n,
+            "hits": hits,
+            "success_rate": round(rate, 4),
+            "parent_market_tier_rate": round(float(parent_rate), 4) if parent_rate is not None else None,
+            "delta_vs_parent_pp": round(delta, 2) if delta is not None else None,
+            "leagues_with_n_ge_10": leagues_with_n,
+            "leagues_beating_parent_by_threshold": beating,
+            "leagues_trailing_parent_by_threshold": trailing,
+            "min_league_rate": round(min_lg, 4) if min_lg is not None else None,
+            "max_league_rate": round(max_lg, 4) if max_lg is not None else None,
+            "stability_label": label,
+        })
+    return pd.DataFrame(rows)
+
+
+def _stability_label(
+    *,
+    n: int,
+    rate: float,
+    delta: float | None,
+    leagues_with_n: int,
+    beating: int,
+    trailing: int,
+    min_sample: int,
+    threshold_pp: float,
+) -> str:
+    strong = (
+        delta is not None
+        and (delta >= threshold_pp or delta <= -threshold_pp or rate < 0.65)
+    )
+    if n < min_sample or leagues_with_n < 2:
+        return "SMALL_SAMPLE"
+    if strong and leagues_with_n <= 2:
+        return "LEAGUE_SPECIFIC"
+    if n >= min_sample and rate < 0.65 and leagues_with_n >= 3 and trailing >= 2:
+        return "STABLE_NO_GO"
+    if beating >= 1 and trailing >= 1:
+        return "UNSTABLE"
+    if (
+        n >= min_sample
+        and delta is not None
+        and delta >= threshold_pp
+        and leagues_with_n >= 3
+        and beating >= 2
+        and trailing <= 1
+    ):
+        return "STABLE_PROMOTE"
+    if (
+        n >= min_sample
+        and delta is not None
+        and delta <= -threshold_pp
+        and leagues_with_n >= 3
+        and trailing >= 2
+        and beating <= 1
+    ):
+        return "STABLE_DOWNGRADE"
+    return "UNSTABLE" if strong else "SMALL_SAMPLE"
+
+
+def stability_recommendation(stability_table: pd.DataFrame) -> str:
+    if stability_table.empty:
+        return "HOLD_CURRENT_RULES"
+    labels = set(stability_table["stability_label"].astype(str))
+    has_promote = "STABLE_PROMOTE" in labels
+    has_down = bool({"STABLE_DOWNGRADE", "STABLE_NO_GO"} & labels)
+    if has_promote and has_down:
+        return "RECOMMEND_INVESTIGATE_PROMOTION_AND_DOWNGRADE_PATCH"
+    if has_down:
+        return "RECOMMEND_INVESTIGATE_DOWNGRADE_RULE_PATCH"
+    if has_promote:
+        return "RECOMMEND_INVESTIGATE_PROMOTION_RULE_PATCH"
+    if labels <= {"LEAGUE_SPECIFIC", "SMALL_SAMPLE"} and "LEAGUE_SPECIFIC" in labels:
+        return "RECOMMEND_LEAGUE_SPECIFIC_RULE_REVIEW"
+    return "HOLD_CURRENT_RULES"
+
+
+def build_stability_markdown(stability_table: pd.DataFrame, *, scope: str) -> str:
+    lines = [
+        "# Phase 11.2 Candidate Stability Validation",
+        "",
+        "Phase 11.2 is diagnostic only. No tier rules were changed.",
+        "",
+        f"- Decision scope used: {scope}",
+        f"- Candidate groups validated: {len(stability_table):,}",
+        "",
+    ]
+    sections = [
+        ("A", "Stability Summary", None),
+        ("B", "Stable Promote Candidates", "STABLE_PROMOTE"),
+        ("C", "Stable Downgrade Candidates", "STABLE_DOWNGRADE"),
+        ("D", "Stable No-Go Candidates", "STABLE_NO_GO"),
+        ("E", "League-Specific Candidates", "LEAGUE_SPECIFIC"),
+        ("F", "Unstable / Conflicting Candidates", "UNSTABLE"),
+        ("G", "Small-Sample Candidates", "SMALL_SAMPLE"),
+    ]
+    for section_id, title, label in sections:
+        sub = stability_table if label is None else stability_table[
+            stability_table["stability_label"] == label
+        ]
+        lines += [f"## {section_id}. {title}", ""]
+        if sub.empty:
+            lines += ["No candidates.", ""]
+            continue
+        cols = [
+            "candidate_key", "n", "hits", "success_rate", "delta_vs_parent_pp",
+            "leagues_with_n_ge_10", "leagues_beating_parent_by_threshold",
+            "leagues_trailing_parent_by_threshold", "stability_label",
+        ]
+        lines.append("| " + " | ".join(cols) + " |")
+        lines.append("| " + " | ".join(["---"] * len(cols)) + " |")
+        for _, row in sub.iterrows():
+            values = [
+                str(row.get("candidate_key", "")),
+                str(int(row.get("n", 0))),
+                str(int(row.get("hits", 0))),
+                f"{float(row.get('success_rate', 0.0)):.1%}",
+                "" if pd.isna(row.get("delta_vs_parent_pp")) else f"{float(row.get('delta_vs_parent_pp')):.1f}",
+                str(int(row.get("leagues_with_n_ge_10", 0))),
+                str(int(row.get("leagues_beating_parent_by_threshold", 0))),
+                str(int(row.get("leagues_trailing_parent_by_threshold", 0))),
+                str(row.get("stability_label", "")),
+            ]
+            lines.append("| " + " | ".join(values) + " |")
+        lines.append("")
+    lines += [
+        "## H. Recommended Next Action",
+        "",
+        stability_recommendation(stability_table),
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def _format_section(table: pd.DataFrame, section_id: str, title: str) -> list[str]:
     if table.empty or "section_id" not in table.columns:
         return [f"## {section_id}. {title}", "", "No evaluatable rows.", ""]
@@ -366,6 +598,7 @@ def run(
     small_sample: int = 20,
     threshold_pp: float = 3.0,
     scope: str = "modern-tier",
+    stability_report: bool = False,
 ) -> tuple[pd.DataFrame, str]:
     df = load_evaluation_rows(input_dir)
     decision_df = select_decision_rows(df, scope)
@@ -380,6 +613,16 @@ def run(
     table.to_csv(output_dir / OUTPUT_CSV, index=False)
     markdown = build_markdown(df, table, scope=scope)
     (output_dir / OUTPUT_MD).write_text(markdown, encoding="utf-8")
+    if stability_report:
+        stability = build_stability_table(
+            decision_df,
+            table,
+            min_sample=min_sample,
+            threshold_pp=threshold_pp,
+        )
+        stability.to_csv(output_dir / STABILITY_CSV, index=False)
+        stability_md = build_stability_markdown(stability, scope=scope)
+        (output_dir / STABILITY_MD).write_text(stability_md, encoding="utf-8")
     return table, markdown
 
 
@@ -396,6 +639,11 @@ def build_parser() -> argparse.ArgumentParser:
         default="modern-tier",
         help="Evidence cohort used for candidate detection and Phase 11 recommendation.",
     )
+    parser.add_argument(
+        "--stability-report",
+        action="store_true",
+        help="Generate Phase 11.2 candidate stability CSV and markdown reports.",
+    )
     return parser
 
 
@@ -408,6 +656,7 @@ def main(argv: list[str] | None = None) -> int:
         small_sample=args.small_sample,
         threshold_pp=args.threshold_pp,
         scope=args.scope,
+        stability_report=args.stability_report,
     )
     print(f"Wrote {len(table)} rows to {Path(args.output_dir) / OUTPUT_CSV}")
     print(f"Phase 11 recommendation: {phase11_recommendation(table)}")
