@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import sys
+import warnings
 from pathlib import Path
 
 import pandas as pd
@@ -187,6 +188,85 @@ def test_final_recommendation_section_present(tmp_path):
     _, markdown = analysis.run(input_dir=input_dir, output_dir=tmp_path / "out")
 
     assert "## Phase 11 Recommendation" in markdown
+
+
+def test_unknown_market_tier_rows_excluded_from_default_decision_scope(tmp_path):
+    rows = _rows(50, 50, market_tier="UNKNOWN", strength="HIGH")
+    rows += _rows(50, 25, market_tier="UNKNOWN", strength="LOW")
+    input_dir = _write_input(tmp_path, rows)
+
+    table, markdown = analysis.run(input_dir=input_dir, output_dir=tmp_path / "out")
+
+    assert table.empty
+    assert "Decision scope used: modern-tier" in markdown
+    assert "UNKNOWN market_tier rows: 100" in markdown
+    assert "HOLD_CURRENT_RULES" in markdown or "INCONCLUSIVE" in markdown
+
+
+def test_scope_all_includes_unknown_rows(tmp_path):
+    rows = _rows(50, 50, market_tier="UNKNOWN", strength="HIGH")
+    rows += _rows(50, 25, market_tier="UNKNOWN", strength="LOW")
+    input_dir = _write_input(tmp_path, rows)
+
+    table, markdown = analysis.run(input_dir=input_dir, output_dir=tmp_path / "out", scope="all")
+
+    assert "UNKNOWN" in set(table.get("market_tier", pd.Series(dtype=str)).dropna().astype(str))
+    assert "Decision scope used: all" in markdown
+
+
+def test_scope_ensemble_only_uses_high_medium_low_rows(tmp_path):
+    rows = _rows(10, 8, market_tier="A_TIER", ensemble_agreement="HIGH")
+    rows += _rows(10, 7, market_tier="A_TIER", ensemble_agreement="MEDIUM")
+    rows += _rows(50, 0, market_tier="A_TIER", ensemble_agreement="NONE")
+    input_dir = _write_input(tmp_path, rows)
+
+    table, markdown = analysis.run(input_dir=input_dir, output_dir=tmp_path / "out", scope="ensemble-only")
+
+    section_b = table[table["section_id"] == "B"]
+    assert set(section_b["ensemble_agreement"]) == {"HIGH", "MEDIUM"}
+    assert "Decision scope used: ensemble-only" in markdown
+
+
+def test_markdown_states_decision_scope(tmp_path):
+    input_dir = _write_input(tmp_path, _rows(25, 20, market_tier="A_TIER"))
+
+    _, markdown = analysis.run(input_dir=input_dir, output_dir=tmp_path / "out", scope="modern-tier")
+
+    assert "Decision scope used: modern-tier" in markdown
+
+
+def test_futurewarning_no_longer_appears(tmp_path):
+    input_dir = _write_input(tmp_path, _rows(10, 8, market_tier="A_TIER"))
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        analysis.run(input_dir=input_dir, output_dir=tmp_path / "out")
+
+    assert not any(item.category is FutureWarning for item in caught)
+
+
+def test_candidate_decision_changes_when_unknown_rows_are_excluded(tmp_path):
+    modern_rows = _rows(60, 45, market_tier="A_TIER", strength="HIGH")
+    modern_rows += _rows(60, 45, market_tier="A_TIER", strength="LOW")
+    unknown_rows = _rows(50, 50, market_tier="UNKNOWN", strength="HIGH")
+    unknown_rows += _rows(50, 25, market_tier="UNKNOWN", strength="LOW")
+    input_dir = _write_input(tmp_path, modern_rows + unknown_rows)
+
+    modern_table, modern_md = analysis.run(
+        input_dir=input_dir,
+        output_dir=tmp_path / "modern",
+        scope="modern-tier",
+    )
+    all_table, all_md = analysis.run(
+        input_dir=input_dir,
+        output_dir=tmp_path / "all",
+        scope="all",
+    )
+
+    assert analysis.phase11_recommendation(modern_table) == "HOLD_CURRENT_RULES"
+    assert analysis.phase11_recommendation(all_table) != "HOLD_CURRENT_RULES"
+    assert "Decision scope used: modern-tier" in modern_md
+    assert "Decision scope used: all" in all_md
 
 
 def test_script_does_not_modify_market_tier_or_probability_logic(tmp_path):

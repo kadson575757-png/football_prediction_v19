@@ -24,6 +24,7 @@ from football_prediction_v19.diagnostics.ensemble_tier import (  # noqa: E402
 
 OUTPUT_CSV = "tier_rule_candidate_summary.csv"
 OUTPUT_MD = "tier_rule_candidate_summary.md"
+ENSEMBLE_LABELS = {"HIGH", "MEDIUM", "LOW"}
 
 SUMMARY_SECTIONS: tuple[tuple[str, str, list[str]], ...] = (
     ("A", "Overall success by market_tier", ["market_tier"]),
@@ -151,6 +152,43 @@ def ensure_analysis_columns(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+class EvidenceScopes(dict):
+    @property
+    def all_rows(self) -> pd.DataFrame:
+        return self["all_rows"]
+
+    @property
+    def modern_tier_rows(self) -> pd.DataFrame:
+        return self["modern_tier_rows"]
+
+    @property
+    def ensemble_rows(self) -> pd.DataFrame:
+        return self["ensemble_rows"]
+
+
+def build_scopes(df: pd.DataFrame) -> EvidenceScopes:
+    all_rows = ensure_analysis_columns(df)
+    modern_tier_rows = all_rows[
+        all_rows["market_tier"].astype(str).str.strip().ne("")
+        & (all_rows["market_tier"] != "UNKNOWN")
+    ].copy()
+    ensemble_rows = all_rows[all_rows["ensemble_agreement"].isin(ENSEMBLE_LABELS)].copy()
+    return EvidenceScopes(
+        all_rows=all_rows,
+        modern_tier_rows=modern_tier_rows,
+        ensemble_rows=ensemble_rows,
+    )
+
+
+def select_decision_rows(df: pd.DataFrame, scope: str) -> pd.DataFrame:
+    scopes = build_scopes(df)
+    if scope == "all":
+        return scopes.all_rows
+    if scope == "ensemble-only":
+        return scopes.ensemble_rows
+    return scopes.modern_tier_rows
+
+
 def aggregate_section(df: pd.DataFrame, section_id: str, title: str, group_cols: list[str]) -> pd.DataFrame:
     columns = [
         "section_id",
@@ -204,7 +242,11 @@ def build_summary_table(df: pd.DataFrame) -> pd.DataFrame:
         aggregate_section(df, section_id, title, group_cols)
         for section_id, title, group_cols in SUMMARY_SECTIONS
     ]
-    non_empty = [table for table in tables if not table.empty]
+    non_empty = [
+        table.dropna(axis=1, how="all")
+        for table in tables
+        if not table.empty and not table.dropna(axis=1, how="all").empty
+    ]
     return pd.concat(non_empty, ignore_index=True, sort=False) if non_empty else pd.DataFrame()
 
 
@@ -262,6 +304,8 @@ def phase11_recommendation(table: pd.DataFrame) -> str:
 
 
 def _format_section(table: pd.DataFrame, section_id: str, title: str) -> list[str]:
+    if table.empty or "section_id" not in table.columns:
+        return [f"## {section_id}. {title}", "", "No evaluatable rows.", ""]
     sub = table[table["section_id"] == section_id].copy()
     lines = [f"## {section_id}. {title}", ""]
     if sub.empty:
@@ -284,14 +328,20 @@ def _format_section(table: pd.DataFrame, section_id: str, title: str) -> list[st
     return lines
 
 
-def build_markdown(df: pd.DataFrame, table: pd.DataFrame) -> str:
+def build_markdown(df: pd.DataFrame, table: pd.DataFrame, *, scope: str = "modern-tier") -> str:
+    scopes = build_scopes(df)
     recommendation = phase11_recommendation(table)
+    unknown_n = int((scopes.all_rows["market_tier"] == "UNKNOWN").sum()) if not scopes.all_rows.empty else 0
     lines = [
         "# Phase 11 Tier Rule Candidate Analysis",
         "",
         "Phase 11 is diagnostic only. No tier rules were changed.",
         "",
-        f"- Evaluatable rows: {len(df):,}",
+        f"- Total evaluatable rows: {len(scopes.all_rows):,}",
+        f"- Modern tier rows: {len(scopes.modern_tier_rows):,}",
+        f"- UNKNOWN market_tier rows: {unknown_n:,}",
+        f"- Ensemble rows: {len(scopes.ensemble_rows):,}",
+        f"- Decision scope used: {scope}",
         f"- Candidate groups: {int(table['candidate_category'].astype(str).ne('').sum()) if not table.empty else 0:,}",
         "",
     ]
@@ -315,9 +365,11 @@ def run(
     min_sample: int = 50,
     small_sample: int = 20,
     threshold_pp: float = 3.0,
+    scope: str = "modern-tier",
 ) -> tuple[pd.DataFrame, str]:
     df = load_evaluation_rows(input_dir)
-    table = build_summary_table(df)
+    decision_df = select_decision_rows(df, scope)
+    table = build_summary_table(decision_df)
     table = apply_candidate_detection(
         table,
         min_sample=min_sample,
@@ -326,7 +378,7 @@ def run(
     )
     output_dir.mkdir(parents=True, exist_ok=True)
     table.to_csv(output_dir / OUTPUT_CSV, index=False)
-    markdown = build_markdown(df, table)
+    markdown = build_markdown(df, table, scope=scope)
     (output_dir / OUTPUT_MD).write_text(markdown, encoding="utf-8")
     return table, markdown
 
@@ -338,6 +390,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-sample", type=int, default=50)
     parser.add_argument("--small-sample", type=int, default=20)
     parser.add_argument("--threshold-pp", type=float, default=3.0)
+    parser.add_argument(
+        "--scope",
+        choices=["all", "modern-tier", "ensemble-only"],
+        default="modern-tier",
+        help="Evidence cohort used for candidate detection and Phase 11 recommendation.",
+    )
     return parser
 
 
@@ -349,6 +407,7 @@ def main(argv: list[str] | None = None) -> int:
         min_sample=args.min_sample,
         small_sample=args.small_sample,
         threshold_pp=args.threshold_pp,
+        scope=args.scope,
     )
     print(f"Wrote {len(table)} rows to {Path(args.output_dir) / OUTPUT_CSV}")
     print(f"Phase 11 recommendation: {phase11_recommendation(table)}")
