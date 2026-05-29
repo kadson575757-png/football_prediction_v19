@@ -25,7 +25,11 @@ if str(_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(_ROOT / "src"))
 
 from football_prediction_v19.models.ensemble import EnsemblePredictor
-from football_prediction_v19.diagnostics.ensemble_tier import apply_ensemble_override
+from football_prediction_v19.diagnostics.ensemble_tier import (
+    apply_ensemble_override,
+    compute_ensemble_agreement,
+    normalize_ensemble_agreement,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -144,14 +148,16 @@ class TestEnsembleTierOverride:
         assert result["market_tier"] == "SUPER_A_TIER"
         assert "SUPER_A_TIER" in result["market_tier_flags"]
         assert "[ENSEMBLE_CONSENSUS]" in result["market_tier_reason"]
-        assert result["ensemble_note"] == "CONSENSUS"
+        assert result["ensemble_agreement"] == "HIGH"
+        assert "HIGH" in result["ensemble_note"]
 
     def test_disagreement_a_tier_becomes_c(self):
         """agreement==0.0 + A_TIER → C_TIER."""
         result = apply_ensemble_override("A_TIER", 80, 0.0, {})
         assert result["market_tier"] == "C_TIER"
         assert "ENSEMBLE_DISAGREEMENT" in result["market_tier_flags"]
-        assert result["ensemble_note"] == "DISAGREEMENT"
+        assert result["ensemble_agreement"] == "LOW"
+        assert "LOW" in result["ensemble_note"]
 
     def test_disagreement_b_tier_becomes_c(self):
         """agreement==0.0 + B_TIER → C_TIER."""
@@ -164,7 +170,8 @@ class TestEnsembleTierOverride:
         result = apply_ensemble_override("A_TIER", 82, 0.5, {})
         assert result["market_tier"] == "A_TIER"
         assert "ENSEMBLE_SPLIT" in result["market_tier_flags"]
-        assert result["ensemble_note"] == "SPLIT"
+        assert result["ensemble_agreement"] == "MEDIUM"
+        assert "MEDIUM" in result["ensemble_note"]
 
     def test_hard_no_go_never_upgraded(self):
         """HARD_NO_GO must be preserved regardless of agreement."""
@@ -180,13 +187,57 @@ class TestEnsembleTierOverride:
         result = apply_ensemble_override("C_TIER", 40, 1.0, {})
         assert result["market_tier"] == "C_TIER"
         assert "SUPER_A_TIER" not in result["market_tier_flags"]
-        assert result["ensemble_note"] == "CONSENSUS"
+        assert result["ensemble_agreement"] == "HIGH"
 
-    def test_ensemble_note_values_correct(self):
-        """ensemble_note must be CONSENSUS / SPLIT / DISAGREEMENT depending on agreement."""
-        assert apply_ensemble_override("B_TIER", 60, 1.0, {})["ensemble_note"] == "CONSENSUS"
-        assert apply_ensemble_override("B_TIER", 60, 0.5, {})["ensemble_note"] == "SPLIT"
-        assert apply_ensemble_override("C_TIER", 50, 0.0, {})["ensemble_note"] == "DISAGREEMENT"
+    def test_ensemble_agreement_values_correct(self):
+        """ensemble_agreement must be HIGH / MEDIUM / LOW depending on agreement."""
+        assert apply_ensemble_override("B_TIER", 60, 1.0, {})["ensemble_agreement"] == "HIGH"
+        assert apply_ensemble_override("B_TIER", 60, 0.5, {})["ensemble_agreement"] == "MEDIUM"
+        assert apply_ensemble_override("C_TIER", 50, 0.0, {})["ensemble_agreement"] == "LOW"
+
+
+class TestStandardizedEnsembleAgreement:
+
+    def test_all_models_agree_high(self):
+        agreement, note = compute_ensemble_agreement({
+            "logistic_regression": "H",
+            "random_forest": "H",
+            "gradient_boosting": "H",
+        })
+        assert agreement == "HIGH"
+        assert "All available models agree" in note
+
+    def test_majority_agreement_medium(self):
+        agreement, note = compute_ensemble_agreement({
+            "logistic_regression": "H",
+            "random_forest": "H",
+            "gradient_boosting": "D",
+        })
+        assert agreement == "MEDIUM"
+        assert "Majority agreement" in note
+
+    def test_all_different_low(self):
+        agreement, note = compute_ensemble_agreement({
+            "logistic_regression": "H",
+            "random_forest": "D",
+            "gradient_boosting": "A",
+        })
+        assert agreement == "LOW"
+        assert "No clear majority" in note
+
+    def test_one_model_none(self):
+        agreement, note = compute_ensemble_agreement({"logistic_regression": "H"})
+        assert agreement == "NONE"
+        assert note == "Only one model prediction available; ensemble agreement not computed."
+
+    def test_old_consensus_maps_to_high(self):
+        assert normalize_ensemble_agreement("CONSENSUS") == "HIGH"
+
+    def test_old_split_maps_to_medium(self):
+        assert normalize_ensemble_agreement("SPLIT") == "MEDIUM"
+
+    def test_old_disagreement_maps_to_low(self):
+        assert normalize_ensemble_agreement("DISAGREEMENT") == "LOW"
 
 
 # ===========================================================================

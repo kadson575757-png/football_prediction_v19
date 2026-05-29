@@ -67,6 +67,10 @@ sys.path.insert(0, str(ROOT / "src"))
 from football_prediction_v19.diagnostics import build_recommended_market  # noqa: E402
 from football_prediction_v19.diagnostics import apply_league_market_profile  # noqa: E402
 from football_prediction_v19.diagnostics import build_market_tier  # noqa: E402
+from football_prediction_v19.diagnostics.ensemble_tier import (  # noqa: E402
+    compute_ensemble_agreement,
+    normalize_ensemble_agreement,
+)
 from football_prediction_v19.features import (          # noqa: E402
     build_features as _build_features,
     build_fixture_features as _build_fixture_features,
@@ -102,6 +106,18 @@ LEAGUE_TO_CODE: dict[str, str] = {
     "Campeonato Brasileiro Serie A": "BRA",
     "Brasileiro": "BRA",
     "Brazil": "BRA",             "BRA": "BRA",
+    # Norway Eliteserien
+    "Norway": "NOR",
+    "Eliteserien": "NOR",
+    "Norwegian Eliteserien": "NOR",
+    "Norway Eliteserien": "NOR",
+    "NOR": "NOR",
+    # Sweden Allsvenskan
+    "Sweden": "SWE",
+    "Allsvenskan": "SWE",
+    "Swedish Allsvenskan": "SWE",
+    "Sweden Allsvenskan": "SWE",
+    "SWE": "SWE",
 }
 
 CODE_TO_LEAGUE: dict[str, str] = {
@@ -110,6 +126,8 @@ CODE_TO_LEAGUE: dict[str, str] = {
     "D2": "2. Bundesliga",  "MLS": "MLS",
     "B1": "Belgian Pro League",
     "BRA": "Brasileiro Serie A",
+    "NOR": "Norway Eliteserien",
+    "SWE": "Sweden Allsvenskan",
 }
 
 GOAL_LEAGUES: frozenset[str] = frozenset({"Eredivisie", "N1"})
@@ -189,7 +207,7 @@ def build_parser() -> argparse.ArgumentParser:
                         "'matchday' trains a fresh model at every cutoff (default). "
                         "'season' trains once at the first eligible cutoff and reuses it.")
     p.add_argument("--wf-model",
-                   choices=["logistic_regression", "random_forest", "gradient_boosting"],
+                   choices=["logistic_regression", "random_forest", "gradient_boosting", "ensemble"],
                    default="logistic_regression",
                    help="walk_forward only — sklearn classifier to use (default: logistic_regression)")
     return p
@@ -775,6 +793,16 @@ def _train_wf_model(
         X_train = table[cols]
         y_train = table["result"]
 
+        if model_name == "ensemble":
+            models: dict[str, Any] = {}
+            for base_model_name in ("logistic_regression", "random_forest", "gradient_boosting"):
+                base_model = _build_pipeline(model_name=base_model_name)
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    base_model.fit(X_train, y_train)
+                models[base_model_name] = base_model
+            return models, cols, None, None
+
         model = _build_pipeline(model_name=model_name)
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -795,6 +823,21 @@ def _train_wf_model(
 
     except Exception as exc:           # training must not crash the whole run
         return None, [], None, str(exc)
+
+
+def _direction_from_proba(proba_df: pd.DataFrame) -> str:
+    """Return H/D/A for the highest probability column in CLASS_ORDER."""
+    return str(proba_df[CLASS_ORDER].iloc[0].idxmax())
+
+
+def _serialise_ensemble_model_predictions(predictions: dict[str, str]) -> str:
+    """Readable per-model direction output for replay CSV diagnostics."""
+    ordered_names = ("logistic_regression", "random_forest", "gradient_boosting")
+    return " | ".join(
+        f"{name}={predictions[name]}"
+        for name in ordered_names
+        if predictions.get(name)
+    )
 
 
 def _predict_wf_probs(
@@ -828,10 +871,32 @@ def _predict_wf_probs(
         )
 
         X = fixture_feats.reindex(columns=cols)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            raw_proba = model.predict_proba(X)
-        proba_df = _align_proba(model, raw_proba)
+        if isinstance(model, dict):
+            model_predictions: dict[str, str] = {}
+            proba_frames: list[pd.DataFrame] = []
+            for base_model_name in ("logistic_regression", "random_forest", "gradient_boosting"):
+                base_model = model.get(base_model_name)
+                if base_model is None:
+                    continue
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    raw_base_proba = base_model.predict_proba(X)
+                base_proba_df = _align_proba(base_model, raw_base_proba)
+                proba_frames.append(base_proba_df[CLASS_ORDER])
+                model_predictions[base_model_name] = _direction_from_proba(base_proba_df)
+
+            if not proba_frames:
+                return None, X, "ensemble_has_no_models"
+            proba_df = sum(proba_frames) / len(proba_frames)
+            X.attrs["ensemble_model_predictions"] = _serialise_ensemble_model_predictions(
+                model_predictions
+            )
+            X.attrs["ensemble_model_prediction_map"] = model_predictions
+        else:
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                raw_proba = model.predict_proba(X)
+            proba_df = _align_proba(model, raw_proba)
 
         h = float(proba_df["H"].iloc[0])
         d = float(proba_df["D"].iloc[0])
@@ -845,7 +910,11 @@ def _predict_wf_probs(
         return {"home": round(h, 4), "draw": round(d, 4), "away": round(a, 4)}, X, None
 
     except Exception as exc:
-        return None, None, str(exc)
+        # Return None probs but try to return X anyway for ensemble
+        try:
+            return None, X if 'X' in locals() else None, str(exc)
+        except:
+            return None, None, str(exc)
 
 
 def _normalize_ensemble_prediction(pred: Any) -> str:
@@ -1095,11 +1164,26 @@ def run_walk_forward(
             features["model_name"]      = model_name_str
             features["model_trained_ok"] = model is not None
             features["model_error"]     = model_error or ""
+            features["ensemble_model_predictions"] = ""
+            features["ensemble_agreement"] = "NONE"
+            features["ensemble_note"] = (
+                "Only one model prediction available; ensemble agreement not computed."
+            )
 
             # 2. If ML model is available, replace probability estimates
             X_match: Any = None
             if model is not None:
                 ml_probs, X_match, pred_error = _predict_wf_probs(model, cols, prior_ml, match)
+                if X_match is not None and hasattr(X_match, "attrs"):
+                    features["ensemble_model_predictions"] = X_match.attrs.get(
+                        "ensemble_model_predictions", ""
+                    )
+                    if wf_model_name == "ensemble":
+                        agreement, note = compute_ensemble_agreement(
+                            X_match.attrs.get("ensemble_model_prediction_map", {})
+                        )
+                        features["ensemble_agreement"] = agreement
+                        features["ensemble_note"] = note
                 if ml_probs is not None:
                     # Override de-vigged / form-based probs with ML probs
                     features["model_home_prob"] = ml_probs["home"]
@@ -1136,35 +1220,8 @@ def run_walk_forward(
             pred = build_market_tier(pred)
 
             # 3b. Phase-10: ensemble tier override (parallel — never replaces main probs)
-            ensemble_predictions: list[dict[str, str]] = []
-            if ensemble is not None and X_match is not None:
-                try:
-                    from football_prediction_v19.diagnostics.ensemble_tier import (
-                        apply_ensemble_override,
-                    )
-                    with warnings.catch_warnings():
-                        warnings.simplefilter("ignore")
-                        agreement = ensemble.agreement_score(X_match)
-                        ensemble_predictions = _ensemble_predictions_from_model(ensemble, X_match)
-                    override = apply_ensemble_override(
-                        existing_tier=pred.get("market_tier", ""),
-                        existing_score=pred.get("market_tier_score", 0),
-                        agreement=agreement,
-                        ensemble_predictions=ensemble_predictions,
-                    )
-                    pred.update(override)
-                except Exception:
-                    ensemble_predictions = []
-
-            if not ensemble_predictions and pred.get("likely_1x2"):
-                ensemble_predictions = [
-                    {
-                        "model": pred.get("model_name") or "main_model",
-                        "prediction": pred.get("likely_1x2"),
-                    }
-                ]
-            pred.update(compute_ensemble_diagnostics(ensemble_predictions))
-
+            # Phase-10 ensemble diagnostics are populated by the walk-forward
+            # prediction path. Do not apply the legacy ensemble tier override here.
             pred_rows.append(pred)
 
             # 4. Evaluate against actual result
@@ -1532,7 +1589,21 @@ def build_summary_markdown(
             lines.append(_rate_line(conf, grp, "type_success", 16))
         lines.append("")
 
-    _append_ensemble_summary_lines(lines, eval_df)
+    # ---- By ensemble agreement ----
+    if "ensemble_agreement" in eval_df.columns:
+        ev = eval_df[eval_df["type_success"].notna()].copy()
+        if not ev.empty:
+            ev["_ensemble_agreement_norm"] = ev["ensemble_agreement"].apply(
+                normalize_ensemble_agreement
+            )
+            lines += ["## Success by Ensemble Agreement", ""]
+            lines.append(f"  {'Agreement':<16} {'n':>5} {'hits':>5} {'rate':>7}")
+            lines.append("  " + "-" * 38)
+            for agreement in ("HIGH", "MEDIUM", "LOW", "NONE"):
+                grp = ev[ev["_ensemble_agreement_norm"] == agreement]
+                if len(grp) > 0:
+                    lines.append(_rate_line(agreement, grp, "type_success", 16))
+            lines.append("")
 
     # ---- By season phase ----
     if "season_phase" in eval_df.columns:
@@ -1671,6 +1742,16 @@ def write_outputs(
     pred_path = out_dir / f"{slug}_{season}_predictions.csv"
     eval_path = out_dir / f"{slug}_{season}_evaluation.csv"
     summ_path = out_dir / f"{slug}_{season}_summary.md"
+
+    # Phase-10: force ensemble columns into CSV schema even when ensemble is inactive
+    for _df in (pred_df, eval_df):
+        if "ensemble_agreement" not in _df.columns:
+            _df["ensemble_agreement"] = "NONE"
+        if "ensemble_note" not in _df.columns:
+            _df["ensemble_note"] = "Only one model prediction available; ensemble agreement not computed."
+        if "ensemble_model_predictions" not in _df.columns:
+            _df["ensemble_model_predictions"] = ""
+        _df["ensemble_agreement"] = _df["ensemble_agreement"].apply(normalize_ensemble_agreement)
 
     pred_df.to_csv(pred_path, index=False)
     eval_df.to_csv(eval_path, index=False)

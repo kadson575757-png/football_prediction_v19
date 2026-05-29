@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """Post-match evaluator for Daily Probability Report recommendations.
 
 Joins pre-match recommendation CSVs with actual final scores and evaluates
@@ -24,6 +24,7 @@ ledger entries, ROI, or profitability claims are produced.
 from __future__ import annotations
 
 import argparse
+import sys
 import textwrap
 from pathlib import Path
 from typing import Optional
@@ -31,6 +32,12 @@ from typing import Optional
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "src"))
+
+from football_prediction_v19.diagnostics.ensemble_tier import (  # noqa: E402
+    normalize_ensemble_agreement,
+)
 
 # ---------------------------------------------------------------------------
 # CLI
@@ -218,7 +225,7 @@ def _subtype_success(row: pd.Series) -> Optional[bool]:
     """Evaluate success for a specific recommended_market_subtype.
 
     Each subtype has a precise, unambiguous success condition computed directly
-    from raw goals — no pre-derived columns needed.
+    from raw goals â€” no pre-derived columns needed.
 
     Subtypes that are diagnostic-only (AVOID_*, OBSERVE_*, NONE) return None.
     """
@@ -318,7 +325,7 @@ def build_league_profile_sections(scored: pd.DataFrame) -> list[str]:
     Parameters
     ----------
     scored:
-        Subset of the evaluated DataFrame where ``success`` is not null —
+        Subset of the evaluated DataFrame where ``success`` is not null â€”
         i.e. the same ``scored`` slice used for the rest of the summary.
 
     Returns
@@ -341,7 +348,7 @@ def build_league_profile_sections(scored: pd.DataFrame) -> list[str]:
 
     if not present:
         lines.append(
-            "  league profile fields not available in this report set — "
+            "  league profile fields not available in this report set â€” "
             "re-run daily report scripts to include them."
         )
         lines.append("")
@@ -380,7 +387,7 @@ def build_league_profile_sections(scored: pd.DataFrame) -> list[str]:
 
     # ------------------------------------------------------------------ 6.3
     if "league_warning_flags" in scored.columns:
-        lines.append("### 6.3 Success Rate — warned vs not warned")
+        lines.append("### 6.3 Success Rate â€” warned vs not warned")
         lines.append("")
         lines.append(f"  {'Category':<24} {'n':>4} {'hits':>4} {'rate':>7}")
         lines.append("  " + "-" * 44)
@@ -402,7 +409,7 @@ def build_league_profile_sections(scored: pd.DataFrame) -> list[str]:
 
     # ------------------------------------------------------------------ 6.4  preferred subtype match
     if "league_preferred_subtype" in scored.columns and "recommended_market_subtype" in scored.columns:
-        lines.append("### 6.4 Success Rate — recommended subtype is league-preferred")
+        lines.append("### 6.4 Success Rate â€” recommended subtype is league-preferred")
         lines.append("")
         lines.append(f"  {'Category':<30} {'n':>4} {'hits':>4} {'rate':>7}")
         lines.append("  " + "-" * 50)
@@ -431,7 +438,7 @@ def build_league_profile_sections(scored: pd.DataFrame) -> list[str]:
 
     # ------------------------------------------------------------------ 6.5  suppressed subtype match
     if "league_suppressed_subtype" in scored.columns and "recommended_market_subtype" in scored.columns:
-        lines.append("### 6.5 Success Rate — recommended subtype is league-suppressed")
+        lines.append("### 6.5 Success Rate â€” recommended subtype is league-suppressed")
         lines.append("")
         lines.append(f"  {'Category':<30} {'n':>4} {'hits':>4} {'rate':>7}")
         lines.append("  " + "-" * 50)
@@ -524,6 +531,7 @@ def _append_ensemble_analysis_section(lines: list, scored) -> None:
     ensemble_agreement_col = "ensemble_agreement"
     ensemble_note_col = "ensemble_note"
     success_col: str | None = None
+
     for col in ("type_success", "subtype_success"):
         if col in scored.columns and scored[col].notna().any():
             success_col = col
@@ -553,6 +561,11 @@ def _append_ensemble_analysis_section(lines: list, scored) -> None:
     lines.append("=== ENSEMBLE ANALYSIS ===")
     lines.append("")
 
+    scored = scored.copy()
+    scored["_ensemble_agreement_norm"] = scored[ensemble_agreement_col].apply(
+        normalize_ensemble_agreement
+    )
+
     def _hit_rate_ci(mask):
         sub = scored[mask & scored[success_col].notna()]
         n = len(sub)
@@ -561,7 +574,7 @@ def _append_ensemble_analysis_section(lines: list, scored) -> None:
         lo, hi = _wilson_ci(n, hits)
         return n, hits, rate, lo, hi
 
-    # SUPER_A_TIER
+    # SUPER_A_TIER diagnostic only. This does not activate or alter tier logic.
     if "market_tier" in scored.columns:
         super_a = scored["market_tier"].astype(str).str.strip() == "SUPER_A_TIER"
         n, hits, rate, lo, hi = _hit_rate_ci(super_a)
@@ -570,37 +583,20 @@ def _append_ensemble_analysis_section(lines: list, scored) -> None:
         lines.append("")
 
     lines.append("SUCCESS RATE BY ENSEMBLE AGREEMENT:")
-    agreement_norm = scored[ensemble_agreement_col].fillna("").astype(str).str.strip().str.upper()
-    order = ["HIGH", "MEDIUM", "LOW", "NONE"]
-    non_empty_agreements = set(agreement_norm[agreement_norm != ""])
-    present = [v for v in order if v in non_empty_agreements]
-    present += sorted(non_empty_agreements - set(order))
-    for label in present:
-        n, hits, rate, _, _ = _hit_rate_ci(agreement_norm == label)
-        lines.append(f"  {label:<8} n={n}, Hit Rate: {rate:.1%}")
+    lines.append("Success by ensemble_agreement:")
+    for agreement in ("HIGH", "MEDIUM", "LOW", "NONE"):
+        mask = scored["_ensemble_agreement_norm"] == agreement
+        n, hits, rate, _, _ = _hit_rate_ci(mask)
+        if n:
+            lines.append(f"  {agreement:<6}: n={n}, Hit Rate: {rate:.1%}")
     lines.append("")
 
     if ensemble_note_col not in scored.columns:
         lines.append("WARNING: ensemble_note column is unavailable.")
         lines.append("")
-        return
-
-    # ENSEMBLE_DISAGREEMENT (downgraded matches)
-    dis_mask = scored[ensemble_note_col].astype(str).str.strip() == "DISAGREEMENT"
-    n, hits, rate, _, _ = _hit_rate_ci(dis_mask)
-    lines.append("ENSEMBLE_DISAGREEMENT (downgraded):")
-    lines.append(f"  n={n}, Hit Rate: {rate:.1%}")
-    lines.append("")
-
-    # ENSEMBLE_SPLIT
-    split_mask = scored[ensemble_note_col].astype(str).str.strip() == "SPLIT"
-    n, hits, rate, _, _ = _hit_rate_ci(split_mask)
-    lines.append("ENSEMBLE_SPLIT:")
-    lines.append(f"  n={n}, Hit Rate: {rate:.1%}")
-    lines.append("")
 
     lines.append(
-        "Zeigt ob Ensemble-Konsens mit höherer Erfolgsrate korreliert."
+        "Zeigt ob Ensemble-Konsens mit h?herer Erfolgsrate korreliert."
     )
     lines.append("")
 
@@ -673,7 +669,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
     goals_ok = scores["home_goals"].notna() & scores["away_goals"].notna()
     if not goals_ok.all():
         bad = (~goals_ok).sum()
-        print(f"  [WARN] {bad} verified row(s) have missing/non-numeric goals — skipped.")
+        print(f"  [WARN] {bad} verified row(s) have missing/non-numeric goals â€” skipped.")
         scores = scores[goals_ok].copy()
 
     if scores.empty:
@@ -695,7 +691,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
     # Fallback: retry without league key if everything is NaN
     unmatched_mask = merged["home_goals"].isna()
     if unmatched_mask.all():
-        print("  [NOTE] League-key join returned 0 — retrying without league key")
+        print("  [NOTE] League-key join returned 0 â€” retrying without league key")
         fallback_cols = ["_home_key", "_away_key", "home_goals", "away_goals"]
         if "source_note" in scores.columns:
             fallback_cols.append("source_note")
@@ -731,7 +727,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
     # ---- BTTS_OVER sub-signals (computed directly from goals, not from derived cols) ----
     # over25_hit  : total goals > 2.5  (one sufficient condition for BTTS_OVER success)
     # btts_hit    : both teams scored  (other sufficient condition for BTTS_OVER success)
-    # btts_over_or_success : True if EITHER hit — the canonical BTTS_OVER success value
+    # btts_over_or_success : True if EITHER hit â€” the canonical BTTS_OVER success value
     # These three are all written to the detail CSV so the ambiguity is fully visible.
     m.loc[has_score, "over25_hit"] = (
         (m.loc[has_score, "home_goals"] + m.loc[has_score, "away_goals"]) > 2.5
@@ -768,8 +764,12 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
 
     # Clean up temp keys
     m = m.drop(columns=[c for c in m.columns if c.startswith("_")])
+    if "ensemble_agreement" in m.columns:
+        m["ensemble_agreement"] = m["ensemble_agreement"].apply(
+            normalize_ensemble_agreement
+        )
 
-    # ---- Save detailed CSV — preserve tier fields ----
+    # ---- Save detailed CSV â€” preserve tier fields ----
     # Column order: put market_tier fields after standard fields if present
     eval_csv = out_dir / "daily_recommendation_eval.csv"
     m.to_csv(eval_csv, index=False)
@@ -855,13 +855,13 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
             )
         elif bd["or_rate"] == bd["btts_rate"]:
             _note = (
-                f"All Over2.5 hits were also BTTS hits in this sample — "
+                f"All Over2.5 hits were also BTTS hits in this sample â€” "
                 f"OR rate equals BTTS-only rate ({bd['btts_rate']:.1%}). "
                 "Over2.5 added no independent lift here."
             )
         else:
             _note = (
-                f"OR rate ({bd['or_rate']:.1%}) vs BTTS-only ({bd['btts_rate']:.1%}) — "
+                f"OR rate ({bd['or_rate']:.1%}) vs BTTS-only ({bd['btts_rate']:.1%}) â€” "
                 "check for score overlap."
             )
         lines.append(f"  Note: {_note}")
@@ -894,7 +894,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
                 })
             lines.append("")
 
-            # BTTS_OVER split comparison — the key diagnostic
+            # BTTS_OVER split comparison â€” the key diagnostic
             btts_over_sub = sub_scored[sub_scored["recommended_market_type"] == "BTTS_OVER"]
             if not btts_over_sub.empty:
                 lines.append("  ### BTTS_OVER Split Comparison")
@@ -917,7 +917,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
                 lines.append("")
         else:
             lines.append("## Subtype Evaluation")
-            lines.append("  (No subtype column in pre-match CSVs — re-run daily reports)")
+            lines.append("  (No subtype column in pre-match CSVs â€” re-run daily reports)")
             lines.append("")
 
     # ---- Success Rate by Market Tier -----------------------------------------
@@ -1043,7 +1043,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
             lines.append(f"  {bucket:<16} {n:>4} {hits:>4} {hits/n:7.1%}")
         lines.append("")
 
-    # Context signal analysis (Phase 9) — graceful if columns absent
+    # Context signal analysis (Phase 9) â€” graceful if columns absent
     try:
         from _context_signals import compute_context_signal_analysis as _csa
         lines.append("## Context Signal Analysis")
@@ -1052,7 +1052,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
     except Exception:
         pass
 
-    # Ensemble analysis (Phase 10) — graceful if columns absent
+    # Ensemble analysis (Phase 10) â€” graceful if columns absent
     _append_ensemble_analysis_section(lines, scored)
 
     # League profile analysis sections (graceful fallback if fields absent)
@@ -1097,13 +1097,13 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
     lines.append("")
 
     if overall >= 0.70:
-        verdict = "STRONG — recommended market layer is performing well above a naive baseline."
+        verdict = "STRONG â€” recommended market layer is performing well above a naive baseline."
     elif overall >= 0.55:
-        verdict = "USEFUL — recommended market layer adds signal in most categories."
+        verdict = "USEFUL â€” recommended market layer adds signal in most categories."
     elif overall >= 0.45:
-        verdict = "MIXED — some categories work, others need refinement."
+        verdict = "MIXED â€” some categories work, others need refinement."
     else:
-        verdict = "WEAK — recommended market classifications are not yet reliable."
+        verdict = "WEAK â€” recommended market classifications are not yet reliable."
     lines.append(f"Verdict: {verdict}")
     lines.append("")
     lines.append("*This is a diagnostic-only evaluation. No betting claims.*")
@@ -1126,7 +1126,7 @@ def evaluate(reports_dir: Path, scores_path: Path, out_dir: Path) -> None:
 # ---------------------------------------------------------------------------
 
 def _append_miss_cluster_section(lines: list, out_dir: Path) -> None:
-    """Sektion A: Miss Cluster Analysis — reads miss_clusters.csv if present."""
+    """Sektion A: Miss Cluster Analysis â€” reads miss_clusters.csv if present."""
     lines.append("## Miss Cluster Analysis")
     lines.append("")
     csv_path = out_dir / "miss_clusters.csv"
@@ -1169,7 +1169,7 @@ def _append_miss_cluster_section(lines: list, out_dir: Path) -> None:
 
 
 def _append_calibration_section(lines: list, out_dir: Path) -> None:
-    """Sektion B: Calibration Summary — reads calibration CSV if present."""
+    """Sektion B: Calibration Summary â€” reads calibration CSV if present."""
     lines.append("## Calibration Summary")
     lines.append("")
     cal_dir = out_dir / "calibration"
@@ -1200,7 +1200,7 @@ def _append_calibration_section(lines: list, out_dir: Path) -> None:
 
 
 def _append_drift_section(lines: list, out_dir: Path) -> None:
-    """Sektion C: Drift Monitor — reads drift_monitor.csv if present."""
+    """Sektion C: Drift Monitor â€” reads drift_monitor.csv if present."""
     lines.append("## Drift Monitor")
     lines.append("")
     csv_path = out_dir / "drift_monitor.csv"
@@ -1229,7 +1229,7 @@ def _append_drift_section(lines: list, out_dir: Path) -> None:
     last4 = df.tail(4)
     for _, row in last4.iterrows():
         flag    = str(row.get("drift_flag", ""))
-        flag_str = "⚠️  DRIFT_WARNING" if flag == "DRIFT_WARNING" else ""
+        flag_str = "âš ï¸  DRIFT_WARNING" if flag == "DRIFT_WARNING" else ""
         lines.append(
             f"  {str(row.get('window_start', ''))[:10]:<13} "
             f"{str(row.get('window_end', ''))[:10]:<13} "
@@ -1241,7 +1241,7 @@ def _append_drift_section(lines: list, out_dir: Path) -> None:
 
     active_drifts = int((df["drift_flag"] == "DRIFT_WARNING").sum()) if "drift_flag" in df.columns else 0
     if active_drifts:
-        lines.append(f"\n  ⚠️  {active_drifts} DRIFT_WARNING window(s) in full history.")
+        lines.append(f"\n  âš ï¸  {active_drifts} DRIFT_WARNING window(s) in full history.")
     lines.append("")
 
 
