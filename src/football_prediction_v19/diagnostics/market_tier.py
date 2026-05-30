@@ -25,7 +25,12 @@ market_tier_flags  : pipe-separated diagnostic flag string (may be empty)
 
 from __future__ import annotations
 
-__all__ = ["build_market_tier", "MARKET_TIERS", "LEAGUE_TIER_BASELINES"]
+__all__ = [
+    "build_market_tier",
+    "apply_phase_11_3_defensive_tier_rules",
+    "MARKET_TIERS",
+    "LEAGUE_TIER_BASELINES",
+]
 
 # ---------------------------------------------------------------------------
 # Constants
@@ -181,6 +186,63 @@ def _compute_score(
     return max(0, min(100, score))
 
 
+def _append_reason(reason: str, addition: str) -> str:
+    reason = _str(reason)
+    return f"{reason} [{addition}]" if reason else addition
+
+
+def _append_flag(flags: object, flag: str) -> str:
+    existing = [
+        part.strip()
+        for part in _str(flags).split("|")
+        if part.strip()
+    ]
+    if flag not in existing:
+        existing.append(flag)
+    return " | ".join(existing)
+
+
+def apply_phase_11_3_defensive_tier_rules(
+    row_or_context: dict,
+    tier_result: dict,
+) -> dict:
+    """Apply Phase 11.3 defensive no-go annotations to an existing tier result.
+
+    Diagnostic/reporting layer only. This helper never changes probabilities or
+    recommended market fields, and it only upgrades existing DOWNGRADE rows to
+    HARD_NO_GO when one of the validated defensive buckets is present.
+    """
+    result = dict(tier_result)
+    tier = _upper(result.get("market_tier"))
+    ctrl_bucket = _str(row_or_context.get("ctrl_bucket"))
+    odds_bucket = _str(row_or_context.get("odds_bucket"))
+    season_phase = _str(row_or_context.get("season_phase")).lower()
+
+    phase_flags: list[str] = []
+    if tier == "DOWNGRADE":
+        if ctrl_bucket == "low (3-5)":
+            phase_flags.append("phase_11_3_downgrade_low_control_no_go")
+        if odds_bucket == "medium_fav (2.0-2.5)":
+            phase_flags.append("phase_11_3_downgrade_medium_fav_no_go")
+        if season_phase == "late":
+            phase_flags.append("phase_11_3_downgrade_late_season_no_go")
+        if phase_flags:
+            result["market_tier"] = "HARD_NO_GO"
+            result["market_tier_score"] = min(int(result.get("market_tier_score", 24) or 24), 24)
+
+    elif tier == "HARD_NO_GO":
+        if ctrl_bucket == "low (3-5)":
+            phase_flags.append("phase_11_3_hard_no_go_low_control_confirmed")
+        if odds_bucket == "medium_fav (2.0-2.5)":
+            phase_flags.append("phase_11_3_hard_no_go_medium_fav_confirmed")
+
+    for flag in phase_flags:
+        result["market_tier_flags"] = _append_flag(result.get("market_tier_flags"), flag)
+        result["market_tier_reason"] = _append_reason(result.get("market_tier_reason"), flag)
+
+    return result
+
+
 # ---------------------------------------------------------------------------
 # Main classifier
 # ---------------------------------------------------------------------------
@@ -238,7 +300,7 @@ def build_market_tier(recommendation: dict) -> dict:  # noqa: C901
         result["market_tier_reason"]                 = reason
         result["market_tier_flags"]                  = " | ".join(flags)
         result["market_tier_score_league_relative"]  = league_rel
-        return result
+        return apply_phase_11_3_defensive_tier_rules(result, result)
 
     # ── Decision tree (priority order) ──────────────────────────────────────
 
@@ -401,7 +463,7 @@ def build_market_tier(recommendation: dict) -> dict:  # noqa: C901
     result["market_tier_reason"]            = reason
     result["market_tier_flags"]             = " | ".join(flags)
     result["market_tier_score_league_relative"] = league_rel
-    return result
+    return apply_phase_11_3_defensive_tier_rules(result, result)
 
 
 def _league_relative_score(league: str, raw_score: int) -> "float | None":

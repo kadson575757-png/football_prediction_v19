@@ -1169,6 +1169,11 @@ def run_walk_forward(
             features["ensemble_note"] = (
                 "Only one model prediction available; ensemble agreement not computed."
             )
+            features["odds_bucket"] = _odds_bucket(
+                features.get("odds_home"), features.get("odds_away")
+            )
+            features["ctrl_bucket"] = _ctrl_bucket(features["control_score_10"])
+            features["season_phase"] = _season_phase(match_counter, total_matches)
 
             # 2. If ML model is available, replace probability estimates
             X_match: Any = None
@@ -1327,6 +1332,11 @@ def run_replay(
             # Build pre-match features (no future leakage — prior_df is fixed)
             features = build_match_features(match, recent_prior, mode, league_name)
             features["matchday"] = md_label
+            features["odds_bucket"] = _odds_bucket(
+                features.get("odds_home"), features.get("odds_away")
+            )
+            features["ctrl_bucket"] = _ctrl_bucket(features["control_score_10"])
+            features["season_phase"] = _season_phase(match_counter, total_matches)
 
             # Generate recommended market recommendation
             rec = build_recommended_market(features)
