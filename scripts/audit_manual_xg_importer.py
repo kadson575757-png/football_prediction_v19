@@ -128,6 +128,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "## F. Phase 12.9 Recommendation",
         rec,
         "",
+        "Use scripts/preview_manual_xg_join.py to verify join coverage before using production manual xG files.",
+        "",
     ]
     return "\n".join(lines)
 
