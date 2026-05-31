@@ -39,8 +39,8 @@ def test_processed_feature_all_null_xg_columns_gets_cleanup_policy():
     row = build_partial_xg_attribution_for_dataframe("data/processed/features_clean.csv", df)
 
     assert row["partial_xg_source_category"] == EMPTY_XG_COLUMNS_IN_PROCESSED_FEATURES
-    assert row["partial_xg_decision"] == "NEEDS_XG_COLUMN_CLEANUP_POLICY"
-    assert row["blocking"] is True
+    assert row["partial_xg_decision"] == "EMPTY_XG_PLACEHOLDER_ACCEPTED"
+    assert row["blocking"] is False
 
 
 def test_template_partial_xg_is_non_blocking():
@@ -119,7 +119,7 @@ def test_negative_xg_values_are_manual_review_blocking():
     assert row["blocking"] is True
 
 
-def test_recommendation_define_empty_xg_column_policy(tmp_path):
+def test_recommendation_ready_when_empty_xg_placeholders_are_policy_accepted(tmp_path):
     root = tmp_path / "repo"
     processed = root / "data" / "processed"
     processed.mkdir(parents=True)
@@ -127,7 +127,7 @@ def test_recommendation_define_empty_xg_column_policy(tmp_path):
 
     table, _markdown = partial_audit.run(root=root, output_dir=root / "outputs" / "diagnostics")
 
-    assert partial_audit.recommendation(table) == "DEFINE_EMPTY_XG_COLUMN_POLICY"
+    assert partial_audit.recommendation(table) == "READY_FOR_XG_IMPORTER_SKELETONS"
 
 
 def test_recommendation_ready_when_only_templates_or_samples_are_partial(tmp_path):

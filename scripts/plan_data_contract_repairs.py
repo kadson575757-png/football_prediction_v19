@@ -114,10 +114,22 @@ def recommendation(plan: pd.DataFrame) -> str:
             "XG_CONTRACT_MISSING_XG_VALUES",
         ])
         & (plan.get("xg_file_role", pd.Series("", index=plan.index)) != "TEMPLATE_OR_SAMPLE")
+        & (plan.get("xg_policy_status", pd.Series("", index=plan.index)) != "XG_PLACEHOLDER_EMPTY")
         & xg_candidate
     ]
+    real_xg_nulls = plan[
+        (plan.get("xg_policy_status", pd.Series("", index=plan.index)) == "XG_PARTIAL_NULL_VALUES")
+        & (plan.get("xg_file_role", pd.Series("", index=plan.index)) != "TEMPLATE_OR_SAMPLE")
+    ]
+    if not real_xg_nulls.empty:
+        return "ADD_MANUAL_XG_VALUES"
     if not partial_xg.empty:
-        return "FIX_PARTIAL_XG_FILES_FIRST"
+        fbref_partial = partial_xg[
+            partial_xg.get("file_name", pd.Series("", index=partial_xg.index)).astype(str).str.lower().str.contains("fbref", na=False)
+        ]
+        if not fbref_partial.empty:
+            return "DEFINE_FBREF_XG_MAPPING"
+        return "ADD_MANUAL_XG_CSV_FILES"
     has_production_xg = (
         "xg_production_ready" in plan.columns
         and plan["xg_production_ready"].astype(bool).any()
@@ -199,7 +211,7 @@ def build_markdown(plan: pd.DataFrame, rec: str) -> str:
         rec,
         "",
     ]
-    if rec == "FIX_PARTIAL_XG_FILES_FIRST":
+    if rec in {"FIX_PARTIAL_XG_FILES_FIRST", "ADD_MANUAL_XG_VALUES", "DEFINE_FBREF_XG_MAPPING"}:
         lines += [
             "Run scripts/audit_partial_xg_sources.py to identify whether partial xG is a real blocker or placeholder artifact.",
             "",

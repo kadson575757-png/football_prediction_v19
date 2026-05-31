@@ -18,6 +18,11 @@ from football_prediction_v19.xg_enrichment import (
     XG_CONTRACT_PARTIAL,
     summarize_xg_coverage,
 )
+from football_prediction_v19.xg_policy import (
+    ALLOW_EMPTY_XG_PLACEHOLDERS,
+    XG_PLACEHOLDER_EMPTY,
+    classify_xg_policy_status,
+)
 
 EMPTY_XG_COLUMNS_IN_PROCESSED_FEATURES = "EMPTY_XG_COLUMNS_IN_PROCESSED_FEATURES"
 HISTORICAL_MATCHES_MISSING_XG_PAIR = "HISTORICAL_MATCHES_MISSING_XG_PAIR"
@@ -34,6 +39,8 @@ NON_BLOCKING_NOT_XG_SOURCE = "NON_BLOCKING_NOT_XG_SOURCE"
 
 NEEDS_MANUAL_XG_VALUES = "NEEDS_MANUAL_XG_VALUES"
 NEEDS_XG_COLUMN_CLEANUP_POLICY = "NEEDS_XG_COLUMN_CLEANUP_POLICY"
+EMPTY_XG_PLACEHOLDER_ACCEPTED = "EMPTY_XG_PLACEHOLDER_ACCEPTED"
+EMPTY_XG_PLACEHOLDER_BLOCKING = "EMPTY_XG_PLACEHOLDER_BLOCKING"
 NEEDS_FBREF_MAPPING = "NEEDS_FBREF_MAPPING"
 NEEDS_UNDERSTAT_MAPPING = "NEEDS_UNDERSTAT_MAPPING"
 IGNORE_TEMPLATE_OR_SAMPLE = "IGNORE_TEMPLATE_OR_SAMPLE"
@@ -76,7 +83,7 @@ def _xg_columns_all_null(df: pd.DataFrame, xg_summary: dict[str, Any]) -> bool:
 
 def _recommended_action(category: str) -> str:
     return {
-        EMPTY_XG_COLUMNS_IN_PROCESSED_FEATURES: "define whether empty xG columns are allowed placeholders or should be omitted from processed outputs",
+        EMPTY_XG_COLUMNS_IN_PROCESSED_FEATURES: "allowed placeholder under Phase 12.8 policy; add production xG later via manual_xg_csv/importer",
         HISTORICAL_MATCHES_MISSING_XG_PAIR: "add manual xG enrichment source only if this file is intended as an xG source",
         FIXTURE_FILE_MISSING_XG_PAIR: "ignore for xG unless this fixture file is explicitly intended as an xG source",
         ODDS_FILE_NOT_XG_SOURCE: "ignore for xG enrichment; odds files are not xG sources",
@@ -90,8 +97,10 @@ def _recommended_action(category: str) -> str:
     }.get(category, "manual review required")
 
 
-def _decision_and_blocking(category: str) -> tuple[str, bool]:
+def _decision_and_blocking(category: str, policy_status: str = "") -> tuple[str, bool]:
     if category == EMPTY_XG_COLUMNS_IN_PROCESSED_FEATURES:
+        if policy_status == XG_PLACEHOLDER_EMPTY:
+            return EMPTY_XG_PLACEHOLDER_ACCEPTED, False
         return NEEDS_XG_COLUMN_CLEANUP_POLICY, True
     if category == REAL_XG_SOURCE_WITH_NULL_VALUES:
         return NEEDS_MANUAL_XG_VALUES, True
@@ -127,6 +136,7 @@ def classify_partial_xg_source(
     name = p.name.lower()
     xg_summary = xg_summary or summarize_xg_coverage(df, path=p)
     file_summary = file_summary or summarize_data_quality_by_file_type(p, df)
+    policy_status = classify_xg_policy_status(p, df, xg_summary=xg_summary, file_summary=file_summary)
     file_type = str(file_summary.get("file_type", ""))
     adapter_type = str(file_summary.get("adapter_type", ""))
     label = str(xg_summary.get("xg_contract_label", ""))
@@ -160,11 +170,17 @@ def classify_partial_xg_source(
     if category == FIXTURE_FILE_MISSING_XG_PAIR:
         decision, blocking = _fixture_decision(p)
     else:
-        decision, blocking = _decision_and_blocking(category)
+        decision, blocking = _decision_and_blocking(category, policy_status=policy_status)
     return {
         "partial_xg_source_category": category,
         "partial_xg_decision": decision,
         "blocking": blocking,
+        "xg_policy": ALLOW_EMPTY_XG_PLACEHOLDERS,
+        "xg_policy_status": policy_status,
+        "xg_usable_for_model": policy_status == "XG_PRODUCTION_READY",
+        "xg_placeholder": policy_status == XG_PLACEHOLDER_EMPTY,
+        "xg_policy_note": "Empty xG placeholders are accepted but not usable for model features." if policy_status == XG_PLACEHOLDER_EMPTY else "",
+        "policy_resolved": category == EMPTY_XG_COLUMNS_IN_PROCESSED_FEATURES and policy_status == XG_PLACEHOLDER_EMPTY,
         "recommended_action": _recommended_action(category),
     }
 

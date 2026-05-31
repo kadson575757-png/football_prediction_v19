@@ -11,6 +11,14 @@ from typing import Any
 
 import pandas as pd
 
+from football_prediction_v19.xg_policy import (
+    ALLOW_EMPTY_XG_PLACEHOLDERS,
+    classify_xg_policy_status,
+    is_xg_placeholder,
+    is_xg_usable_for_model,
+    xg_policy_note,
+)
+
 MATCH_XG_PAIR = "MATCH_XG_PAIR"
 TEAM_MATCH_XG_LONG = "TEAM_MATCH_XG_LONG"
 FBREF_XG_EXPORT = "FBREF_XG_EXPORT"
@@ -253,6 +261,12 @@ def summarize_xg_coverage(
     season: str | None = None,
 ) -> dict[str, Any]:
     summary = validate_xg_dataframe(df, path=path)
+    status = classify_xg_policy_status(path or "", df, xg_summary=summary, file_summary=None)
+    summary["xg_policy"] = ALLOW_EMPTY_XG_PLACEHOLDERS
+    summary["xg_policy_status"] = status
+    summary["xg_usable_for_model"] = is_xg_usable_for_model(status)
+    summary["xg_placeholder"] = is_xg_placeholder(status)
+    summary["xg_policy_note"] = xg_policy_note(status)
     summary["league"] = league or ""
     summary["season"] = season or ""
     return summary
