@@ -75,9 +75,9 @@ IMPORTER_REGISTRY: dict[str, dict[str, Any]] = {
     "manual_xg_csv": {
         "importer_id": "manual_xg_csv",
         "source_type": "csv",
-        "description": "Manually maintained xG enrichment CSV following the Phase 12.6 contract.",
-        "required_inputs": ["csv_path"],
-        "produces_columns": ["Date", "HomeTeam", "AwayTeam", *OPTIONAL_XG_COLUMNS],
+        "description": "Local manual xG CSV preview importer; no network calls and no xG inference.",
+        "required_inputs": ["manual_xg_csv_path"],
+        "produces_columns": ["date", "home_team", "away_team", "home_xg", "away_xg"],
         "status": "ACTIVE",
     },
     "clubelo_placeholder": {
