@@ -94,6 +94,7 @@ def recommendation(table: pd.DataFrame) -> str:
     fixture_like = table[table["file_type"] == "FIXTURE_CSV"]
     fixture_ready = table[table["fixture_ready"] == True]
     odds_xg = table[table["file_type"].isin(["ODDS_CSV", "XG_CSV"])]
+    hard_unknown = table[table["file_type"] == "UNKNOWN_CSV"]
     broken_historical = historical[
         historical["contract_quality_label"].isin(["MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA"])
     ]
@@ -109,6 +110,13 @@ def recommendation(table: pd.DataFrame) -> str:
         return "FIX_HISTORICAL_MATCH_CONTRACTS_FIRST"
     if not fixture_like.empty and not broken_fixtures.empty:
         return "FIX_FIXTURE_CONTRACTS_FIRST"
+    if not hard_unknown.empty:
+        return "CLASSIFY_UNKNOWN_CSV_FILES"
+    adapter_mapped = table[
+        table.get("adapter_type", pd.Series("UNKNOWN_ADAPTER", index=table.index)) != "UNKNOWN_ADAPTER"
+    ]
+    if not adapter_mapped.empty and table[table["xg_ready"] == True].empty:
+        return "ADD_XG_ENRICHMENT_FILES"
     if not broken_odds_xg.empty:
         return "FIX_ODDS_OR_XG_CONTRACTS_FIRST"
     active_csv_importers = [
@@ -144,6 +152,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     xg = table[table["xg_ready"] == True] if not table.empty else pd.DataFrame()
     templates = table[table["template_only"] == True] if not table.empty else pd.DataFrame()
     processed = table[table["processed_feature_ready"] == True] if not table.empty else pd.DataFrame()
+    adapters = table[table.get("adapter_type", pd.Series("", index=table.index)) != "UNKNOWN_ADAPTER"] if not table.empty else pd.DataFrame()
+    adapter_issues = adapters[adapters.get("adapter_readiness", pd.Series("", index=adapters.index)) != "ADAPTER_READY"] if not adapters.empty else pd.DataFrame()
     broken = table[
         table["contract_quality_label"].isin(["MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA", "UNKNOWN_CSV"])
     ] if not table.empty else pd.DataFrame()
@@ -191,8 +201,12 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     lines += _section_table(invalid_fixtures, ["file_name", "row_count", "missing_contract_columns", "fixture_status", "fixture_status_reason", "fixture_status_blocking"])
     lines += ["## J. Importer Registry Readiness"]
     lines += _section_table(importers, ["importer_id", "source_type", "status", "description"])
+    lines += ["## K. Adapter-Mapped CSV Files"]
+    lines += _section_table(adapters, ["file_name", "file_type", "adapter_type", "adapter_readiness", "intended_use", "replay_source", "missing_adapter_columns", "adapter_note"])
+    lines += ["### Adapter Mapping Issues"]
+    lines += _section_table(adapter_issues, ["file_name", "adapter_type", "adapter_readiness", "missing_adapter_columns", "adapter_note"])
     lines += [
-        "## K. Phase 12.4 Recommendation",
+        "## L. Phase 12.5 Recommendation",
         rec,
         "",
     ]
@@ -221,7 +235,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     table, markdown = run(root=Path(args.root), output_dir=Path(args.output_dir))
     print(f"Wrote {len(table)} rows to {Path(args.output_dir) / OUTPUT_CSV}")
-    print(markdown.split("## K. Phase 12.4 Recommendation", 1)[-1].strip().splitlines()[0])
+    print(markdown.split("## L. Phase 12.5 Recommendation", 1)[-1].strip().splitlines()[0])
     return 0
 
 

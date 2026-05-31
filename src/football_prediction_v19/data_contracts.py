@@ -13,6 +13,12 @@ from typing import Any
 
 import pandas as pd
 
+from football_prediction_v19.csv_adapter_mapping import (
+    ADAPTER_NEEDS_MAPPING,
+    ADAPTER_READY,
+    classify_unknown_csv_with_adapter,
+    summarize_adapter_mapping,
+)
 from football_prediction_v19.fixture_policy import (
     EMPTY_FIXTURE_OK,
     classify_fixture_status,
@@ -70,6 +76,8 @@ QUALITY_LABELS = (
     "READY_FOR_ODDS_ENRICHMENT",
     "READY_FOR_XG_ENRICHMENT",
     "PROCESSED_FEATURE_READY",
+    "ADAPTER_READY",
+    "ADAPTER_NEEDS_MAPPING",
 )
 
 FILE_TYPE_LABELS = (
@@ -80,6 +88,7 @@ FILE_TYPE_LABELS = (
     "TEMPLATE_CSV",
     "PROCESSED_FEATURE_CSV",
     "DIAGNOSTIC_OUTPUT_CSV",
+    "ADAPTER_MAPPED_CSV",
     "UNKNOWN_CSV",
 )
 
@@ -174,7 +183,7 @@ def classify_csv_file(path: str | Any, columns: list[Any]) -> str:
         return "XG_CSV"
     if has_full_historical:
         return "HISTORICAL_MATCH_CSV"
-    return "UNKNOWN_CSV"
+    return classify_unknown_csv_with_adapter(path_obj, columns)
 
 
 def get_contract_for_file_type(file_type: str) -> dict[str, Any]:
@@ -200,6 +209,7 @@ def get_contract_for_file_type(file_type: str) -> dict[str, Any]:
         "TEMPLATE_CSV": {"contract_type": "template"},
         "PROCESSED_FEATURE_CSV": {"contract_type": "processed_feature"},
         "DIAGNOSTIC_OUTPUT_CSV": {"contract_type": "diagnostic_output"},
+        "ADAPTER_MAPPED_CSV": {"contract_type": "adapter_mapped"},
         "UNKNOWN_CSV": {"contract_type": "unknown"},
     }
     return contracts.get(file_type, contracts["UNKNOWN_CSV"])
@@ -399,6 +409,10 @@ def validate_dataframe_for_file_type(
         if not _matching_contract(columns, XG_PAIRS):
             missing += list(XG_PAIRS[0])
         label = _quality_for_common_counts(base, missing, "READY_FOR_XG_ENRICHMENT")
+    elif file_type == "ADAPTER_MAPPED_CSV":
+        adapter = summarize_adapter_mapping(path or "", df)
+        missing = list(adapter.get("missing_adapter_columns", []))
+        label = ADAPTER_READY if adapter.get("adapter_readiness") == ADAPTER_READY else ADAPTER_NEEDS_MAPPING
     else:
         missing = _identity_missing(columns)
         label = "UNKNOWN_CSV" if base["row_count"] else "EMPTY_DATA"
@@ -447,6 +461,16 @@ def summarize_data_quality_by_file_type(
     out["xg_ready"] = out["contract_quality_label"] == "READY_FOR_XG_ENRICHMENT"
     out["template_only"] = out["contract_quality_label"] == "TEMPLATE_ONLY"
     out["processed_feature_ready"] = out["contract_quality_label"] == "PROCESSED_FEATURE_READY"
+    adapter = summarize_adapter_mapping(path, df)
+    out["adapter_type"] = adapter["adapter_type"]
+    out["adapter_readiness"] = adapter["adapter_readiness"]
+    out["intended_use"] = adapter["intended_use"]
+    out["replay_source"] = adapter["replay_source"]
+    out["missing_adapter_columns"] = adapter["missing_adapter_columns"]
+    out["available_adapter_identity_columns"] = adapter["available_identity_columns"]
+    out["available_adapter_odds_columns"] = adapter["available_odds_columns"]
+    out["available_adapter_xg_columns"] = adapter["available_xg_columns"]
+    out["adapter_note"] = adapter["adapter_note"]
     for key in (
         "missing_required_columns",
         "missing_contract_columns",
@@ -454,6 +478,10 @@ def summarize_data_quality_by_file_type(
         "available_odds_columns",
         "available_xg_columns",
         "available_context_columns",
+        "missing_adapter_columns",
+        "available_adapter_identity_columns",
+        "available_adapter_odds_columns",
+        "available_adapter_xg_columns",
     ):
         value = out.get(key, [])
         if isinstance(value, list):
