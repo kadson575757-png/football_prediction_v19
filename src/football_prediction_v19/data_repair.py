@@ -173,6 +173,24 @@ def build_repair_plan_for_dataframe(
             "MEDIUM",
         ))
 
+    elif file_type == "ADAPTER_MAPPED_CSV":
+        if str(summary.get("adapter_readiness", "")) == "ADAPTER_READY":
+            actions.append(_action(
+                p, summary, "ADAPTER_MAPPED_NO_ACTION",
+                str(summary.get("intended_use", "")),
+                "no repair required; adapter mapping defines intended use",
+                "LOW",
+                blocking=False,
+            ))
+        else:
+            actions.append(_action(
+                p, summary, "ADAPTER_MAPPING_INCOMPLETE",
+                str(summary.get("missing_adapter_columns", "")),
+                "update adapter mapping or add required identity columns",
+                "MEDIUM",
+                blocking=bool(summary.get("replay_source", False)),
+            ))
+
     elif file_type == "TEMPLATE_CSV":
         actions.append(_action(
             p, summary, "TEMPLATE_ONLY_NO_ACTION",
@@ -197,6 +215,7 @@ def build_repair_plan_for_dataframe(
         "PROCESSED_FEATURE_READY",
         "EMPTY_FIXTURE_OK",
         "TEMPLATE_ONLY",
+        "ADAPTER_READY",
     }:
         actions.append(_action(
             p, summary, "READY_NO_ACTION",

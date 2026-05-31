@@ -133,6 +133,8 @@ def build_markdown(plan: pd.DataFrame, rec: str) -> str:
     invalid_hist = plan[plan["issue_category"].astype(str).str.startswith("HISTORICAL_")] if not plan.empty else pd.DataFrame()
     unknown = plan[plan["issue_category"] == "UNKNOWN_CSV_TYPE"] if not plan.empty else pd.DataFrame()
     odds_xg = plan[plan["issue_category"].isin(["ODDS_CONTRACT_MISSING_TRIPLET", "XG_CONTRACT_MISSING_PAIR"])] if not plan.empty else pd.DataFrame()
+    adapters = plan[plan["issue_category"] == "ADAPTER_MAPPED_NO_ACTION"] if not plan.empty else pd.DataFrame()
+    adapter_issues = plan[plan["issue_category"] == "ADAPTER_MAPPING_INCOMPLETE"] if not plan.empty else pd.DataFrame()
     previews = plan[plan["preview_output_path"].astype(str).str.strip().ne("")] if "preview_output_path" in plan.columns and not plan.empty else pd.DataFrame()
     cols = ["file_name", "file_type", "issue_category", "issue_detail", "recommended_action", "risk_level", "blocking", "fixture_status", "fixture_status_reason"]
     lines = [
@@ -163,10 +165,14 @@ def build_markdown(plan: pd.DataFrame, rec: str) -> str:
     lines += _section_table(unknown, cols)
     lines += ["## I. Odds/xG Contract Issues"]
     lines += _section_table(odds_xg, cols)
-    lines += ["## J. Preview Repair Outputs"]
+    lines += ["## J. Adapter-Mapped CSV Files"]
+    lines += _section_table(adapters, cols)
+    lines += ["## K. Adapter Mapping Issues"]
+    lines += _section_table(adapter_issues, cols)
+    lines += ["## L. Preview Repair Outputs"]
     lines += _section_table(previews, ["file_name", "issue_category", "preview_output_path"])
     lines += [
-        "## K. Phase 12.4 Recommendation",
+        "## M. Phase 12.5 Recommendation",
         rec,
         "",
     ]
@@ -218,7 +224,7 @@ def main(argv: list[str] | None = None) -> int:
         write_preview=args.write_preview,
     )
     print(f"Wrote {len(plan)} rows to {Path(args.output_dir) / OUTPUT_CSV}")
-    print(markdown.split("## K. Phase 12.4 Recommendation", 1)[-1].strip().splitlines()[0])
+    print(markdown.split("## M. Phase 12.5 Recommendation", 1)[-1].strip().splitlines()[0])
     return 0
 
 
