@@ -199,6 +199,11 @@ def build_markdown(plan: pd.DataFrame, rec: str) -> str:
         rec,
         "",
     ]
+    if rec == "FIX_PARTIAL_XG_FILES_FIRST":
+        lines += [
+            "Run scripts/audit_partial_xg_sources.py to identify whether partial xG is a real blocker or placeholder artifact.",
+            "",
+        ]
     return "\n".join(lines)
 
 

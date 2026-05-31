@@ -176,6 +176,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "## G. Phase 12.6 Recommendation",
         rec,
         "",
+        "Use scripts/audit_partial_xg_sources.py for Phase 12.7 partial xG attribution.",
+        "",
     ]
     return "\n".join(lines)
 
