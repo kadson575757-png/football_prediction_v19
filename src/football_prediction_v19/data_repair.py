@@ -32,6 +32,11 @@ class RepairAction:
     blocking: bool = False
     fixture_status: str = ""
     fixture_status_reason: str = ""
+    xg_contract_label: str = ""
+    xg_supported_for_enrichment: bool = False
+    xg_production_ready: bool = False
+    xg_file_role: str = ""
+    available_xg_columns: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -77,6 +82,11 @@ def _action(
         blocking=bool(summary.get("fixture_status_blocking", False)) if blocking is None else blocking,
         fixture_status=str(summary.get("fixture_status", "")),
         fixture_status_reason=str(summary.get("fixture_status_reason", "")),
+        xg_contract_label=str(summary.get("xg_contract_label", "")),
+        xg_supported_for_enrichment=bool(summary.get("xg_supported_for_enrichment", False)),
+        xg_production_ready=bool(summary.get("xg_production_ready", False)),
+        xg_file_role=str(summary.get("xg_file_role", "")),
+        available_xg_columns=str(summary.get("available_xg_columns", "")),
     )
 
 
@@ -158,10 +168,18 @@ def build_repair_plan_for_dataframe(
         ))
 
     elif file_type == "XG_CSV" and str(summary.get("missing_contract_columns", "")).strip():
+        xg_label = str(summary.get("xg_contract_label", ""))
+        category = "XG_CONTRACT_MISSING_PAIR"
+        detail = str(summary.get("missing_contract_columns", ""))
+        action_text = "add home_xg/away_xg or xG_home/xG_away or hxg/axg"
+        if xg_label == "XG_CONTRACT_MISSING_IDENTITY":
+            category = "XG_CONTRACT_MISSING_IDENTITY"
+            detail = str(summary.get("missing_contract_columns", ""))
+            action_text = "add Date/HomeTeam/AwayTeam or date/home_team/away_team"
         actions.append(_action(
-            p, summary, "XG_CONTRACT_MISSING_PAIR",
-            str(summary.get("missing_contract_columns", "")),
-            "add home_xg/away_xg or xG_home/xG_away or hxg/axg",
+            p, summary, category,
+            detail,
+            action_text,
             "MEDIUM",
         ))
 

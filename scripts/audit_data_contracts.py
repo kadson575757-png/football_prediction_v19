@@ -235,6 +235,11 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         rec,
         "",
     ]
+    if rec == "FIX_PARTIAL_XG_FILES_FIRST":
+        lines += [
+            "Run scripts/audit_partial_xg_sources.py to attribute partial xG sources.",
+            "",
+        ]
     return "\n".join(lines)
 
 
