@@ -37,6 +37,8 @@ class RepairAction:
     xg_production_ready: bool = False
     xg_file_role: str = ""
     available_xg_columns: str = ""
+    xg_policy_status: str = ""
+    xg_placeholder: bool = False
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -87,6 +89,8 @@ def _action(
         xg_production_ready=bool(summary.get("xg_production_ready", False)),
         xg_file_role=str(summary.get("xg_file_role", "")),
         available_xg_columns=str(summary.get("available_xg_columns", "")),
+        xg_policy_status=str(summary.get("xg_policy_status", "")),
+        xg_placeholder=bool(summary.get("xg_placeholder", False)),
     )
 
 

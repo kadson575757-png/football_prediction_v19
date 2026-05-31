@@ -42,8 +42,6 @@ def recommendation(table: pd.DataFrame) -> str:
     if table.empty:
         return "INCONCLUSIVE_NO_PARTIAL_XG_FILES"
     categories = set(table["partial_xg_source_category"].astype(str))
-    if EMPTY_XG_COLUMNS_IN_PROCESSED_FEATURES in categories:
-        return "DEFINE_EMPTY_XG_COLUMN_POLICY"
     if REAL_XG_SOURCE_WITH_NULL_VALUES in categories:
         return "ADD_MANUAL_XG_VALUES"
     if FBREF_IDENTITY_MAPPING_MISSING in categories:
@@ -109,6 +107,12 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "- Do not invent xG values.",
         "- Decide whether empty xG columns are allowed placeholders or should be omitted from processed outputs.",
         "- Add production xG file later only via manual_xg_csv or a real importer.",
+        "",
+        "## G2. Empty xG Column Policy",
+        "- Active policy: ALLOW_EMPTY_XG_PLACEHOLDERS",
+        "- Empty xG placeholders are allowed but non-usable for model.",
+        "- They do not count as production-ready xG.",
+        "- They do not upgrade confidence/recommendations.",
         "",
         "## H. Phase 12.7 Recommendation",
         rec,

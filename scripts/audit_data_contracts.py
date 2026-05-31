@@ -115,7 +115,12 @@ def recommendation(table: pd.DataFrame) -> str:
             "XG_CONTRACT_MISSING_XG_VALUES",
         ])
         & (table.get("xg_file_role", pd.Series("", index=table.index)) != "TEMPLATE_OR_SAMPLE")
+        & (table.get("xg_policy_status", pd.Series("", index=table.index)) != "XG_PLACEHOLDER_EMPTY")
         & xg_candidate
+    ]
+    real_xg_nulls = table[
+        (table.get("xg_policy_status", pd.Series("", index=table.index)) == "XG_PARTIAL_NULL_VALUES")
+        & (table.get("xg_file_role", pd.Series("", index=table.index)) != "TEMPLATE_OR_SAMPLE")
     ]
     if historical_ready.empty:
         return "ADD_HISTORICAL_DATA_FILES"
@@ -136,9 +141,17 @@ def recommendation(table: pd.DataFrame) -> str:
         "xg_contract_ready" in table.columns
         and table["xg_contract_ready"].astype(bool).any()
     )
+    if not real_xg_nulls.empty:
+        return "ADD_MANUAL_XG_VALUES"
     if not adapter_mapped.empty and not has_production_xg:
         if not partial_xg.empty:
-            return "FIX_PARTIAL_XG_FILES_FIRST"
+            fbref_partial = partial_xg[
+                partial_xg.get("adapter_type", pd.Series("", index=partial_xg.index)).astype(str).str.contains("FBREF", na=False)
+                | partial_xg["file_name"].astype(str).str.lower().str.contains("fbref", na=False)
+            ]
+            if not fbref_partial.empty:
+                return "DEFINE_FBREF_XG_MAPPING"
+            return "ADD_MANUAL_XG_CSV_FILES"
         return "ADD_XG_ENRICHMENT_FILES"
     if has_production_xg and not broken_odds_xg.empty:
         return "READY_FOR_IMPORTER_IMPLEMENTATION"
@@ -210,7 +223,7 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     lines += ["## D. Odds Files Ready for Enrichment"]
     lines += _section_table(odds, ["file_name", "file_type", "row_count", "available_odds_columns", "contract_quality_label"])
     lines += ["## E. xG Files Ready for Enrichment"]
-    lines += _section_table(xg, ["file_name", "file_type", "row_count", "available_xg_columns", "contract_quality_label", "xg_schema", "xg_contract_label", "xg_file_role", "xg_contract_ready", "xg_production_ready", "xg_supported_for_enrichment"])
+    lines += _section_table(xg, ["file_name", "file_type", "row_count", "available_xg_columns", "contract_quality_label", "xg_schema", "xg_contract_label", "xg_file_role", "xg_policy_status", "xg_usable_for_model", "xg_placeholder", "xg_production_ready"])
     lines += ["## F. Template Files"]
     lines += _section_table(templates, ["file_name", "file_type", "row_count", "contract_quality_label"])
     lines += ["## G. Processed Feature Files"]
@@ -235,7 +248,7 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         rec,
         "",
     ]
-    if rec == "FIX_PARTIAL_XG_FILES_FIRST":
+    if rec in {"FIX_PARTIAL_XG_FILES_FIRST", "ADD_MANUAL_XG_VALUES", "DEFINE_FBREF_XG_MAPPING"}:
         lines += [
             "Run scripts/audit_partial_xg_sources.py to attribute partial xG sources.",
             "",

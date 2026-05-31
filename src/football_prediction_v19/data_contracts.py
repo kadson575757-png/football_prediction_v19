@@ -455,6 +455,11 @@ def validate_dataframe_for_file_type(
         result["xg_contract_ready"] = xg_summary["xg_contract_ready"]
         result["xg_production_ready"] = xg_summary["xg_production_ready"]
         result["xg_file_role"] = xg_summary["xg_file_role"]
+        result["xg_policy"] = xg_summary["xg_policy"]
+        result["xg_policy_status"] = xg_summary["xg_policy_status"]
+        result["xg_usable_for_model"] = xg_summary["xg_usable_for_model"]
+        result["xg_placeholder"] = xg_summary["xg_placeholder"]
+        result["xg_policy_note"] = xg_summary["xg_policy_note"]
         result["xg_null_count"] = xg_summary["xg_null_count"]
         result["xg_negative_count"] = xg_summary["xg_negative_count"]
         result["xg_duplicate_identity_count"] = xg_summary["duplicate_identity_count"]
@@ -487,6 +492,11 @@ def summarize_data_quality_by_file_type(
     out.setdefault("xg_contract_ready", xg_summary["xg_contract_ready"])
     out.setdefault("xg_production_ready", xg_summary["xg_production_ready"])
     out.setdefault("xg_file_role", xg_summary["xg_file_role"])
+    out.setdefault("xg_policy", xg_summary["xg_policy"])
+    out.setdefault("xg_policy_status", xg_summary["xg_policy_status"])
+    out.setdefault("xg_usable_for_model", xg_summary["xg_usable_for_model"])
+    out.setdefault("xg_placeholder", xg_summary["xg_placeholder"])
+    out.setdefault("xg_policy_note", xg_summary["xg_policy_note"])
     out.setdefault("xg_null_count", xg_summary["xg_null_count"])
     out.setdefault("xg_negative_count", xg_summary["xg_negative_count"])
     out.setdefault("xg_duplicate_identity_count", xg_summary["duplicate_identity_count"])
