@@ -98,7 +98,7 @@ def recommendation(table: pd.DataFrame) -> str:
         historical["contract_quality_label"].isin(["MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA"])
     ]
     broken_fixtures = fixture_like[
-        fixture_like["contract_quality_label"].isin(["MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA"])
+        fixture_like.get("fixture_status_blocking", pd.Series(False, index=fixture_like.index)).astype(bool)
     ]
     broken_odds_xg = odds_xg[
         odds_xg["contract_quality_label"].isin(["MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA"])
@@ -136,6 +136,10 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     total = int(len(table))
     replay = table[table["replay_ready"] == True] if not table.empty else pd.DataFrame()
     fixtures = table[table["fixture_ready"] == True] if not table.empty else pd.DataFrame()
+    fixture_like = table[table["file_type"] == "FIXTURE_CSV"] if not table.empty else pd.DataFrame()
+    empty_ok = fixture_like[fixture_like.get("fixture_status", pd.Series("", index=fixture_like.index)) == "EMPTY_FIXTURE_OK"] if not fixture_like.empty else pd.DataFrame()
+    empty_refresh = fixture_like[fixture_like.get("fixture_status", pd.Series("", index=fixture_like.index)) == "EMPTY_FIXTURE_NEEDS_REFRESH"] if not fixture_like.empty else pd.DataFrame()
+    invalid_fixtures = fixture_like[fixture_like.get("fixture_status", pd.Series("", index=fixture_like.index)) == "FIXTURE_CONTRACT_INVALID"] if not fixture_like.empty else pd.DataFrame()
     odds = table[table["odds_ready"] == True] if not table.empty else pd.DataFrame()
     xg = table[table["xg_ready"] == True] if not table.empty else pd.DataFrame()
     templates = table[table["template_only"] == True] if not table.empty else pd.DataFrame()
@@ -155,6 +159,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         f"- CSV files scanned: {total}",
         f"- Historical replay-ready files: {len(replay)}",
         f"- Fixture-ready files: {len(fixtures)}",
+        f"- Empty fixture files allowed by policy: {len(empty_ok)}",
+        f"- Empty fixture files requiring refresh: {len(empty_refresh)}",
         f"- Odds-ready files: {len(odds)}",
         f"- xG-ready files: {len(xg)}",
         f"- Template-only files: {len(templates)}",
@@ -165,7 +171,7 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     ]
     lines += _section_table(replay, ["file_name", "file_type", "row_count", "available_odds_columns", "available_xg_columns", "contract_quality_label"])
     lines += ["## C. Fixture Files Ready for Daily Reports"]
-    lines += _section_table(fixtures, ["file_name", "file_type", "row_count", "available_context_columns", "contract_quality_label"])
+    lines += _section_table(fixtures, ["file_name", "file_type", "row_count", "available_context_columns", "contract_quality_label", "fixture_status", "fixture_status_reason"])
     lines += ["## D. Odds Files Ready for Enrichment"]
     lines += _section_table(odds, ["file_name", "file_type", "row_count", "available_odds_columns", "contract_quality_label"])
     lines += ["## E. xG Files Ready for Enrichment"]
@@ -175,11 +181,18 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     lines += ["## G. Processed Feature Files"]
     lines += _section_table(processed, ["file_name", "file_type", "row_count", "available_context_columns", "contract_quality_label"])
     lines += ["## H. Files Still Requiring Contract Fixes"]
-    lines += _section_table(broken, ["file_name", "file_type", "contract_type", "missing_contract_columns", "contract_quality_label"])
-    lines += ["## I. Importer Registry Readiness"]
+    lines += _section_table(broken, ["file_name", "file_type", "contract_type", "missing_contract_columns", "contract_quality_label", "fixture_status", "fixture_status_blocking"])
+    lines += ["## I. Fixture Empty-File Policy"]
+    lines += ["### Empty fixture files allowed"]
+    lines += _section_table(empty_ok, ["file_name", "row_count", "fixture_status", "fixture_status_reason", "fixture_status_blocking"])
+    lines += ["### Empty fixture files requiring refresh"]
+    lines += _section_table(empty_refresh, ["file_name", "row_count", "fixture_status", "fixture_status_reason", "fixture_status_blocking"])
+    lines += ["### Invalid fixture contracts"]
+    lines += _section_table(invalid_fixtures, ["file_name", "row_count", "missing_contract_columns", "fixture_status", "fixture_status_reason", "fixture_status_blocking"])
+    lines += ["## J. Importer Registry Readiness"]
     lines += _section_table(importers, ["importer_id", "source_type", "status", "description"])
     lines += [
-        "## J. Phase 12.2 Recommendation",
+        "## K. Phase 12.4 Recommendation",
         rec,
         "",
     ]
@@ -208,7 +221,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     table, markdown = run(root=Path(args.root), output_dir=Path(args.output_dir))
     print(f"Wrote {len(table)} rows to {Path(args.output_dir) / OUTPUT_CSV}")
-    print(markdown.split("## J. Phase 12.2 Recommendation", 1)[-1].strip().splitlines()[0])
+    print(markdown.split("## K. Phase 12.4 Recommendation", 1)[-1].strip().splitlines()[0])
     return 0
 
 

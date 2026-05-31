@@ -13,6 +13,13 @@ from typing import Any
 
 import pandas as pd
 
+from football_prediction_v19.fixture_policy import (
+    EMPTY_FIXTURE_OK,
+    classify_fixture_status,
+    fixture_status_reason,
+    is_fixture_status_blocking,
+)
+
 REQUIRED_MATCH_COLUMNS = (
     "Date",
     "HomeTeam",
@@ -56,6 +63,7 @@ QUALITY_LABELS = (
     "READY_WITH_WARNINGS",
     "MISSING_REQUIRED_COLUMNS",
     "EMPTY_DATA",
+    "EMPTY_FIXTURE_OK",
     "INVALID_DATA",
     "TEMPLATE_ONLY",
     "READY_FOR_FIXTURES",
@@ -346,6 +354,8 @@ def validate_dataframe_for_file_type(
     file_type: str,
     league: str | None = None,
     season: str | None = None,
+    path: str | Any | None = None,
+    allow_empty_upcoming: bool = True,
 ) -> dict[str, Any]:
     """Validate a dataframe using the contract implied by ``file_type``."""
     columns = list(df.columns)
@@ -369,7 +379,16 @@ def validate_dataframe_for_file_type(
         return result
     elif file_type == "FIXTURE_CSV":
         missing = _identity_missing(columns)
-        label = _quality_for_common_counts(base, missing, "READY_FOR_FIXTURES")
+        status = classify_fixture_status(
+            path or "",
+            df,
+            file_type=file_type,
+            allow_empty_upcoming=allow_empty_upcoming,
+        )
+        if status == EMPTY_FIXTURE_OK:
+            label = EMPTY_FIXTURE_OK
+        else:
+            label = _quality_for_common_counts(base, missing, "READY_FOR_FIXTURES")
     elif file_type == "ODDS_CSV":
         missing = _identity_missing(columns)
         if not _matching_contract(columns, ODDS_TRIPLETS):
@@ -384,7 +403,7 @@ def validate_dataframe_for_file_type(
         missing = _identity_missing(columns)
         label = "UNKNOWN_CSV" if base["row_count"] else "EMPTY_DATA"
 
-    return {
+    result = {
         **base,
         "file_type": file_type,
         "contract_type": contract["contract_type"],
@@ -393,6 +412,17 @@ def validate_dataframe_for_file_type(
         "quality_label": label,
         "contract_quality_label": label,
     }
+    if file_type == "FIXTURE_CSV":
+        status = classify_fixture_status(
+            path or "",
+            df,
+            file_type=file_type,
+            allow_empty_upcoming=allow_empty_upcoming,
+        )
+        result["fixture_status"] = status
+        result["fixture_status_reason"] = fixture_status_reason(status)
+        result["fixture_status_blocking"] = is_fixture_status_blocking(status)
+    return result
 
 
 def summarize_data_quality_by_file_type(
@@ -403,13 +433,16 @@ def summarize_data_quality_by_file_type(
 ) -> dict[str, Any]:
     """Classify a CSV path and return a friendly contract-specific summary."""
     file_type = classify_csv_file(path, list(df.columns))
-    result = validate_dataframe_for_file_type(df, file_type, league=league, season=season)
+    result = validate_dataframe_for_file_type(df, file_type, league=league, season=season, path=path)
     out = result.copy()
     out["file_type"] = file_type
     out["contract_type"] = result.get("contract_type", get_contract_for_file_type(file_type)["contract_type"])
     out["contract_quality_label"] = result.get("contract_quality_label", result.get("quality_label", ""))
     out["replay_ready"] = out["contract_quality_label"] == "READY_FOR_REPLAY"
     out["fixture_ready"] = out["contract_quality_label"] == "READY_FOR_FIXTURES"
+    out.setdefault("fixture_status", "NOT_A_FIXTURE_FILE")
+    out.setdefault("fixture_status_reason", "File is not classified as a fixture CSV.")
+    out.setdefault("fixture_status_blocking", False)
     out["odds_ready"] = out["contract_quality_label"] == "READY_FOR_ODDS_ENRICHMENT"
     out["xg_ready"] = out["contract_quality_label"] == "READY_FOR_XG_ENRICHMENT"
     out["template_only"] = out["contract_quality_label"] == "TEMPLATE_ONLY"
