@@ -29,6 +29,9 @@ class RepairAction:
     auto_repair_supported: bool
     preview_output_path: str
     risk_level: str
+    blocking: bool = False
+    fixture_status: str = ""
+    fixture_status_reason: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -57,6 +60,7 @@ def _action(
     recommended_action: str,
     risk_level: str,
     auto_repair_supported: bool = False,
+    blocking: bool | None = None,
 ) -> RepairAction:
     preview = safe_preview_output_path(path)
     return RepairAction(
@@ -70,6 +74,9 @@ def _action(
         auto_repair_supported=auto_repair_supported,
         preview_output_path=str(preview),
         risk_level=risk_level,
+        blocking=bool(summary.get("fixture_status_blocking", False)) if blocking is None else blocking,
+        fixture_status=str(summary.get("fixture_status", "")),
+        fixture_status_reason=str(summary.get("fixture_status_reason", "")),
     )
 
 
@@ -116,19 +123,30 @@ def build_repair_plan_for_dataframe(
             ))
 
     elif file_type == "FIXTURE_CSV":
-        if int(summary.get("row_count") or 0) == 0:
+        fixture_status = str(summary.get("fixture_status", ""))
+        if fixture_status == "EMPTY_FIXTURE_OK":
             actions.append(_action(
                 p, summary, "EMPTY_FIXTURE_FILE",
                 "fixture file has zero rows",
-                "refresh fixture file from trusted source or leave absent until fixtures exist",
+                "no repair required; empty upcoming fixture file is allowed by policy",
                 "LOW",
+                blocking=False,
             ))
-        elif str(summary.get("missing_contract_columns", "")).strip():
+        elif fixture_status == "EMPTY_FIXTURE_NEEDS_REFRESH" or int(summary.get("row_count") or 0) == 0:
+            actions.append(_action(
+                p, summary, "EMPTY_FIXTURE_FILE",
+                "fixture file has zero rows",
+                "refresh fixture file from trusted source or remove stale empty file",
+                "LOW",
+                blocking=True,
+            ))
+        elif fixture_status == "FIXTURE_CONTRACT_INVALID" or str(summary.get("missing_contract_columns", "")).strip():
             actions.append(_action(
                 p, summary, "MANUAL_REVIEW_REQUIRED",
                 str(summary.get("missing_contract_columns", "")),
                 "add date/home_team/away_team or Date/HomeTeam/AwayTeam",
                 "MEDIUM",
+                blocking=True,
             ))
 
     elif file_type == "ODDS_CSV" and str(summary.get("missing_contract_columns", "")).strip():
@@ -177,6 +195,7 @@ def build_repair_plan_for_dataframe(
         "READY_FOR_ODDS_ENRICHMENT",
         "READY_FOR_XG_ENRICHMENT",
         "PROCESSED_FEATURE_READY",
+        "EMPTY_FIXTURE_OK",
         "TEMPLATE_ONLY",
     }:
         actions.append(_action(

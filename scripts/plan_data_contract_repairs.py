@@ -94,7 +94,12 @@ def recommendation(plan: pd.DataFrame) -> str:
         & (plan["issue_category"].astype(str).str.startswith("HISTORICAL_"))
     ].empty:
         return "FIX_HIGH_RISK_HISTORICAL_DATA_FIRST"
-    if not plan[plan["issue_category"] == "EMPTY_FIXTURE_FILE"].empty:
+    fixture_blocking = (
+        plan["blocking"].astype(bool)
+        if "blocking" in plan.columns
+        else pd.Series(True, index=plan.index)
+    )
+    if not plan[(plan["issue_category"] == "EMPTY_FIXTURE_FILE") & fixture_blocking].empty:
         return "FIX_EMPTY_FIXTURE_FILES_FIRST"
     if not plan[plan["issue_category"] == "UNKNOWN_CSV_TYPE"].empty:
         return "CLASSIFY_UNKNOWN_CSV_FILES"
@@ -119,11 +124,17 @@ def build_markdown(plan: pd.DataFrame, rec: str) -> str:
     medium = plan[plan["risk_level"] == "MEDIUM"] if not plan.empty else pd.DataFrame()
     low = plan[plan["risk_level"] == "LOW"] if not plan.empty else pd.DataFrame()
     empty_fixture = plan[plan["issue_category"] == "EMPTY_FIXTURE_FILE"] if not plan.empty else pd.DataFrame()
+    empty_fixture_allowed = empty_fixture[
+        empty_fixture.get("blocking", pd.Series(False, index=empty_fixture.index)).astype(bool) == False
+    ] if not empty_fixture.empty else pd.DataFrame()
+    empty_fixture_refresh = empty_fixture[
+        empty_fixture.get("blocking", pd.Series(False, index=empty_fixture.index)).astype(bool) == True
+    ] if not empty_fixture.empty else pd.DataFrame()
     invalid_hist = plan[plan["issue_category"].astype(str).str.startswith("HISTORICAL_")] if not plan.empty else pd.DataFrame()
     unknown = plan[plan["issue_category"] == "UNKNOWN_CSV_TYPE"] if not plan.empty else pd.DataFrame()
     odds_xg = plan[plan["issue_category"].isin(["ODDS_CONTRACT_MISSING_TRIPLET", "XG_CONTRACT_MISSING_PAIR"])] if not plan.empty else pd.DataFrame()
     previews = plan[plan["preview_output_path"].astype(str).str.strip().ne("")] if "preview_output_path" in plan.columns and not plan.empty else pd.DataFrame()
-    cols = ["file_name", "file_type", "issue_category", "issue_detail", "recommended_action", "risk_level"]
+    cols = ["file_name", "file_type", "issue_category", "issue_detail", "recommended_action", "risk_level", "blocking", "fixture_status", "fixture_status_reason"]
     lines = [
         "# Phase 12.3 Data Contract Repair Plan",
         "",
@@ -142,18 +153,20 @@ def build_markdown(plan: pd.DataFrame, rec: str) -> str:
     lines += _section_table(medium, cols)
     lines += ["## D. Low-Risk / No-Action Items"]
     lines += _section_table(low, cols)
-    lines += ["## E. Empty Fixture Files"]
-    lines += _section_table(empty_fixture, cols)
-    lines += ["## F. Invalid Historical Match Files"]
+    lines += ["## E. Empty Fixture Files Allowed by Policy"]
+    lines += _section_table(empty_fixture_allowed, cols)
+    lines += ["## F. Empty Fixture Files Requiring Refresh"]
+    lines += _section_table(empty_fixture_refresh, cols)
+    lines += ["## G. Invalid Historical Match Files"]
     lines += _section_table(invalid_hist, cols)
-    lines += ["## G. Unknown CSV Files"]
+    lines += ["## H. Unknown CSV Files"]
     lines += _section_table(unknown, cols)
-    lines += ["## H. Odds/xG Contract Issues"]
+    lines += ["## I. Odds/xG Contract Issues"]
     lines += _section_table(odds_xg, cols)
-    lines += ["## I. Preview Repair Outputs"]
+    lines += ["## J. Preview Repair Outputs"]
     lines += _section_table(previews, ["file_name", "issue_category", "preview_output_path"])
     lines += [
-        "## J. Phase 12.3 Recommendation",
+        "## K. Phase 12.4 Recommendation",
         rec,
         "",
     ]
@@ -205,7 +218,7 @@ def main(argv: list[str] | None = None) -> int:
         write_preview=args.write_preview,
     )
     print(f"Wrote {len(plan)} rows to {Path(args.output_dir) / OUTPUT_CSV}")
-    print(markdown.split("## J. Phase 12.3 Recommendation", 1)[-1].strip().splitlines()[0])
+    print(markdown.split("## K. Phase 12.4 Recommendation", 1)[-1].strip().splitlines()[0])
     return 0
 
 
