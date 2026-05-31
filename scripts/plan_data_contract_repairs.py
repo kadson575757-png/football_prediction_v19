@@ -103,7 +103,26 @@ def recommendation(plan: pd.DataFrame) -> str:
         return "FIX_EMPTY_FIXTURE_FILES_FIRST"
     if not plan[plan["issue_category"] == "UNKNOWN_CSV_TYPE"].empty:
         return "CLASSIFY_UNKNOWN_CSV_FILES"
-    if plan[plan["file_type"] == "XG_CSV"].empty:
+    xg_candidate = (
+        plan.get("available_xg_columns", pd.Series("", index=plan.index)).astype(str).str.strip().ne("")
+        | plan.get("file_name", pd.Series("", index=plan.index)).astype(str).str.lower().str.contains("xg", na=False)
+    )
+    partial_xg = plan[
+        plan.get("xg_contract_label", pd.Series("", index=plan.index)).isin([
+            "XG_CONTRACT_PARTIAL",
+            "XG_CONTRACT_MISSING_IDENTITY",
+            "XG_CONTRACT_MISSING_XG_VALUES",
+        ])
+        & (plan.get("xg_file_role", pd.Series("", index=plan.index)) != "TEMPLATE_OR_SAMPLE")
+        & xg_candidate
+    ]
+    if not partial_xg.empty:
+        return "FIX_PARTIAL_XG_FILES_FIRST"
+    has_production_xg = (
+        "xg_production_ready" in plan.columns
+        and plan["xg_production_ready"].astype(bool).any()
+    )
+    if plan[plan["file_type"] == "XG_CSV"].empty and not has_production_xg:
         return "ADD_XG_ENRICHMENT_FILES"
     return "READY_FOR_IMPORTER_SKELETONS"
 
@@ -132,7 +151,11 @@ def build_markdown(plan: pd.DataFrame, rec: str) -> str:
     ] if not empty_fixture.empty else pd.DataFrame()
     invalid_hist = plan[plan["issue_category"].astype(str).str.startswith("HISTORICAL_")] if not plan.empty else pd.DataFrame()
     unknown = plan[plan["issue_category"] == "UNKNOWN_CSV_TYPE"] if not plan.empty else pd.DataFrame()
-    odds_xg = plan[plan["issue_category"].isin(["ODDS_CONTRACT_MISSING_TRIPLET", "XG_CONTRACT_MISSING_PAIR"])] if not plan.empty else pd.DataFrame()
+    odds_xg = plan[plan["issue_category"].isin([
+        "ODDS_CONTRACT_MISSING_TRIPLET",
+        "XG_CONTRACT_MISSING_PAIR",
+        "XG_CONTRACT_MISSING_IDENTITY",
+    ])] if not plan.empty else pd.DataFrame()
     adapters = plan[plan["issue_category"] == "ADAPTER_MAPPED_NO_ACTION"] if not plan.empty else pd.DataFrame()
     adapter_issues = plan[plan["issue_category"] == "ADAPTER_MAPPING_INCOMPLETE"] if not plan.empty else pd.DataFrame()
     previews = plan[plan["preview_output_path"].astype(str).str.strip().ne("")] if "preview_output_path" in plan.columns and not plan.empty else pd.DataFrame()
