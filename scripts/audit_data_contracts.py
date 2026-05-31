@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Phase 12.1 data contract and importer readiness audit.
+"""Phase 12 data contract and importer readiness audit.
 
 Diagnostic/foundation only. No scraping, credentials, network calls, model
 probability changes, recommended-market changes, market-tier changes, betting,
@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
-from football_prediction_v19.data_contracts import summarize_data_quality  # noqa: E402
+from football_prediction_v19.data_contracts import summarize_data_quality_by_file_type  # noqa: E402
 from football_prediction_v19.importers.registry import list_importers  # noqa: E402
 
 OUTPUT_CSV = "data_contract_audit_summary.csv"
@@ -72,7 +72,7 @@ def audit_file(path: Path) -> dict[str, Any]:
             "row_count": 0,
             "quality_label": "INVALID_DATA",
         }
-    summary = summarize_data_quality(df, league=league, season=season)
+    summary = summarize_data_quality_by_file_type(path, df, league=league, season=season)
     return {
         "file_path": str(path),
         "file_name": path.name,
@@ -89,18 +89,34 @@ def build_audit_table(root: Path) -> pd.DataFrame:
 def recommendation(table: pd.DataFrame) -> str:
     if table.empty:
         return "INCONCLUSIVE_NO_DATA_FILES"
-    labels = set(table["quality_label"].dropna().astype(str))
-    if labels & {"MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA"}:
-        return "FIX_DATA_CONTRACT_ISSUES_FIRST"
-    ready = table[table["quality_label"].isin(["READY_FOR_REPLAY", "READY_WITH_WARNINGS"])]
-    if ready.empty:
+    historical = table[table["file_type"] == "HISTORICAL_MATCH_CSV"]
+    historical_ready = table[table["replay_ready"] == True]
+    fixture_like = table[table["file_type"] == "FIXTURE_CSV"]
+    fixture_ready = table[table["fixture_ready"] == True]
+    odds_xg = table[table["file_type"].isin(["ODDS_CSV", "XG_CSV"])]
+    broken_historical = historical[
+        historical["contract_quality_label"].isin(["MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA"])
+    ]
+    broken_fixtures = fixture_like[
+        fixture_like["contract_quality_label"].isin(["MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA"])
+    ]
+    broken_odds_xg = odds_xg[
+        odds_xg["contract_quality_label"].isin(["MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA"])
+    ]
+    if historical_ready.empty:
         return "ADD_HISTORICAL_DATA_FILES"
-    has_odds_or_xg = (
-        ready["available_odds_columns"].astype(str).str.strip().ne("").any()
-        or ready["available_xg_columns"].astype(str).str.strip().ne("").any()
-    )
-    if not has_odds_or_xg:
-        return "ADD_ODDS_OR_XG_COVERAGE"
+    if len(broken_historical) >= max(1, len(historical) // 2):
+        return "FIX_HISTORICAL_MATCH_CONTRACTS_FIRST"
+    if not fixture_like.empty and not broken_fixtures.empty:
+        return "FIX_FIXTURE_CONTRACTS_FIRST"
+    if not broken_odds_xg.empty:
+        return "FIX_ODDS_OR_XG_CONTRACTS_FIRST"
+    active_csv_importers = [
+        item for item in list_importers()
+        if item["source_type"] == "csv" and item["status"] == "ACTIVE"
+    ]
+    if not historical_ready.empty and (not fixture_like.empty or not fixture_ready.empty) and active_csv_importers:
+        return "READY_FOR_IMPORTER_IMPLEMENTATION"
     return "READY_FOR_IMPORTER_IMPLEMENTATION"
 
 
@@ -118,36 +134,52 @@ def _section_table(df: pd.DataFrame, columns: list[str]) -> list[str]:
 
 def build_markdown(table: pd.DataFrame, rec: str) -> str:
     total = int(len(table))
-    ready = table[table["quality_label"] == "READY_FOR_REPLAY"] if not table.empty else pd.DataFrame()
-    warnings = table[table["quality_label"] == "READY_WITH_WARNINGS"] if not table.empty else pd.DataFrame()
-    missing = table[table["quality_label"] == "MISSING_REQUIRED_COLUMNS"] if not table.empty else pd.DataFrame()
-    invalid = table[table["quality_label"].isin(["INVALID_DATA", "EMPTY_DATA"])] if not table.empty else pd.DataFrame()
+    replay = table[table["replay_ready"] == True] if not table.empty else pd.DataFrame()
+    fixtures = table[table["fixture_ready"] == True] if not table.empty else pd.DataFrame()
+    odds = table[table["odds_ready"] == True] if not table.empty else pd.DataFrame()
+    xg = table[table["xg_ready"] == True] if not table.empty else pd.DataFrame()
+    templates = table[table["template_only"] == True] if not table.empty else pd.DataFrame()
+    processed = table[table["processed_feature_ready"] == True] if not table.empty else pd.DataFrame()
+    broken = table[
+        table["contract_quality_label"].isin(["MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA", "UNKNOWN_CSV"])
+    ] if not table.empty else pd.DataFrame()
     importers = pd.DataFrame(list_importers())
     lines = [
-        "# Phase 12.1 Data Contract Audit",
+        "# Phase 12.2 Data Contract Audit",
+        "",
+        "Phase 12.1 Data Contract Audit compatibility retained.",
         "",
         "Diagnostic/foundation only. No tier rules, probability logic, recommended-market logic, betting, staking, or ROI logic changed.",
         "",
         "## A. Executive Summary",
         f"- CSV files scanned: {total}",
-        f"- READY_FOR_REPLAY files: {len(ready)}",
-        f"- READY_WITH_WARNINGS files: {len(warnings)}",
-        f"- MISSING_REQUIRED_COLUMNS files: {len(missing)}",
-        f"- INVALID/EMPTY files: {len(invalid)}",
+        f"- Historical replay-ready files: {len(replay)}",
+        f"- Fixture-ready files: {len(fixtures)}",
+        f"- Odds-ready files: {len(odds)}",
+        f"- xG-ready files: {len(xg)}",
+        f"- Template-only files: {len(templates)}",
+        f"- Processed feature files: {len(processed)}",
+        f"- Files requiring contract fixes: {len(broken)}",
         "",
-        "## B. Files Ready for Replay",
+        "## B. Historical Match Files Ready for Replay",
     ]
-    lines += _section_table(ready, ["file_name", "row_count", "available_odds_columns", "available_xg_columns", "available_context_columns"])
-    lines += ["## C. Files Ready With Warnings"]
-    lines += _section_table(warnings, ["file_name", "row_count", "available_required_columns", "available_context_columns"])
-    lines += ["## D. Files Missing Required Columns"]
-    lines += _section_table(missing, ["file_name", "row_count", "missing_required_columns"])
-    lines += ["## E. Odds / xG / Context Coverage"]
-    lines += _section_table(table, ["file_name", "available_odds_columns", "available_xg_columns", "available_context_columns", "quality_label"])
-    lines += ["## F. Importer Registry Readiness"]
+    lines += _section_table(replay, ["file_name", "file_type", "row_count", "available_odds_columns", "available_xg_columns", "contract_quality_label"])
+    lines += ["## C. Fixture Files Ready for Daily Reports"]
+    lines += _section_table(fixtures, ["file_name", "file_type", "row_count", "available_context_columns", "contract_quality_label"])
+    lines += ["## D. Odds Files Ready for Enrichment"]
+    lines += _section_table(odds, ["file_name", "file_type", "row_count", "available_odds_columns", "contract_quality_label"])
+    lines += ["## E. xG Files Ready for Enrichment"]
+    lines += _section_table(xg, ["file_name", "file_type", "row_count", "available_xg_columns", "contract_quality_label"])
+    lines += ["## F. Template Files"]
+    lines += _section_table(templates, ["file_name", "file_type", "row_count", "contract_quality_label"])
+    lines += ["## G. Processed Feature Files"]
+    lines += _section_table(processed, ["file_name", "file_type", "row_count", "available_context_columns", "contract_quality_label"])
+    lines += ["## H. Files Still Requiring Contract Fixes"]
+    lines += _section_table(broken, ["file_name", "file_type", "contract_type", "missing_contract_columns", "contract_quality_label"])
+    lines += ["## I. Importer Registry Readiness"]
     lines += _section_table(importers, ["importer_id", "source_type", "status", "description"])
     lines += [
-        "## G. Phase 12.1 Recommendation",
+        "## J. Phase 12.2 Recommendation",
         rec,
         "",
     ]
@@ -176,7 +208,7 @@ def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     table, markdown = run(root=Path(args.root), output_dir=Path(args.output_dir))
     print(f"Wrote {len(table)} rows to {Path(args.output_dir) / OUTPUT_CSV}")
-    print(markdown.split("## G. Phase 12.1 Recommendation", 1)[-1].strip().splitlines()[0])
+    print(markdown.split("## J. Phase 12.2 Recommendation", 1)[-1].strip().splitlines()[0])
     return 0
 
 
