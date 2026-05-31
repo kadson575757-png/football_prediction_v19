@@ -25,6 +25,12 @@ from football_prediction_v19.fixture_policy import (
     fixture_status_reason,
     is_fixture_status_blocking,
 )
+from football_prediction_v19.xg_enrichment import (
+    XG_CONTRACT_MISSING_IDENTITY,
+    XG_CONTRACT_MISSING_XG_VALUES,
+    XG_CONTRACT_READY,
+    summarize_xg_coverage,
+)
 
 REQUIRED_MATCH_COLUMNS = (
     "Date",
@@ -78,6 +84,7 @@ QUALITY_LABELS = (
     "PROCESSED_FEATURE_READY",
     "ADAPTER_READY",
     "ADAPTER_NEEDS_MAPPING",
+    "XG_CONTRACT_READY",
 )
 
 FILE_TYPE_LABELS = (
@@ -405,10 +412,14 @@ def validate_dataframe_for_file_type(
             missing += list(ODDS_TRIPLETS[0])
         label = _quality_for_common_counts(base, missing, "READY_FOR_ODDS_ENRICHMENT")
     elif file_type == "XG_CSV":
-        missing = _identity_missing(columns)
-        if not _matching_contract(columns, XG_PAIRS):
-            missing += list(XG_PAIRS[0])
-        label = _quality_for_common_counts(base, missing, "READY_FOR_XG_ENRICHMENT")
+        xg_summary = summarize_xg_coverage(df, path=path or "")
+        missing = list(xg_summary.get("missing_identity_columns", [])) + list(xg_summary.get("missing_xg_columns", []))
+        if xg_summary["xg_contract_label"] == XG_CONTRACT_READY:
+            label = "READY_FOR_XG_ENRICHMENT"
+        elif xg_summary["xg_contract_label"] in {XG_CONTRACT_MISSING_IDENTITY, XG_CONTRACT_MISSING_XG_VALUES}:
+            label = "MISSING_REQUIRED_COLUMNS"
+        else:
+            label = _quality_for_common_counts(base, missing, "READY_FOR_XG_ENRICHMENT")
     elif file_type == "ADAPTER_MAPPED_CSV":
         adapter = summarize_adapter_mapping(path or "", df)
         missing = list(adapter.get("missing_adapter_columns", []))
@@ -436,6 +447,17 @@ def validate_dataframe_for_file_type(
         result["fixture_status"] = status
         result["fixture_status_reason"] = fixture_status_reason(status)
         result["fixture_status_blocking"] = is_fixture_status_blocking(status)
+    if file_type in {"XG_CSV", "ADAPTER_MAPPED_CSV"}:
+        xg_summary = summarize_xg_coverage(df, path=path or "")
+        result["xg_schema"] = xg_summary["xg_schema"]
+        result["xg_contract_label"] = xg_summary["xg_contract_label"]
+        result["xg_supported_for_enrichment"] = xg_summary["supported_for_enrichment"]
+        result["xg_contract_ready"] = xg_summary["xg_contract_ready"]
+        result["xg_production_ready"] = xg_summary["xg_production_ready"]
+        result["xg_file_role"] = xg_summary["xg_file_role"]
+        result["xg_null_count"] = xg_summary["xg_null_count"]
+        result["xg_negative_count"] = xg_summary["xg_negative_count"]
+        result["xg_duplicate_identity_count"] = xg_summary["duplicate_identity_count"]
     return result
 
 
@@ -458,7 +480,20 @@ def summarize_data_quality_by_file_type(
     out.setdefault("fixture_status_reason", "File is not classified as a fixture CSV.")
     out.setdefault("fixture_status_blocking", False)
     out["odds_ready"] = out["contract_quality_label"] == "READY_FOR_ODDS_ENRICHMENT"
-    out["xg_ready"] = out["contract_quality_label"] == "READY_FOR_XG_ENRICHMENT"
+    xg_summary = summarize_xg_coverage(df, path=path)
+    out.setdefault("xg_schema", xg_summary["xg_schema"])
+    out.setdefault("xg_contract_label", xg_summary["xg_contract_label"])
+    out.setdefault("xg_supported_for_enrichment", xg_summary["supported_for_enrichment"])
+    out.setdefault("xg_contract_ready", xg_summary["xg_contract_ready"])
+    out.setdefault("xg_production_ready", xg_summary["xg_production_ready"])
+    out.setdefault("xg_file_role", xg_summary["xg_file_role"])
+    out.setdefault("xg_null_count", xg_summary["xg_null_count"])
+    out.setdefault("xg_negative_count", xg_summary["xg_negative_count"])
+    out.setdefault("xg_duplicate_identity_count", xg_summary["duplicate_identity_count"])
+    out["xg_ready"] = (
+        out["contract_quality_label"] == "READY_FOR_XG_ENRICHMENT"
+        and bool(out.get("xg_production_ready", False))
+    )
     out["template_only"] = out["contract_quality_label"] == "TEMPLATE_ONLY"
     out["processed_feature_ready"] = out["contract_quality_label"] == "PROCESSED_FEATURE_READY"
     adapter = summarize_adapter_mapping(path, df)

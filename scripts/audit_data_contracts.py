@@ -104,6 +104,19 @@ def recommendation(table: pd.DataFrame) -> str:
     broken_odds_xg = odds_xg[
         odds_xg["contract_quality_label"].isin(["MISSING_REQUIRED_COLUMNS", "INVALID_DATA", "EMPTY_DATA"])
     ]
+    xg_candidate = (
+        table.get("available_xg_columns", pd.Series("", index=table.index)).astype(str).str.strip().ne("")
+        | table["file_name"].astype(str).str.lower().str.contains("xg", na=False)
+    )
+    partial_xg = table[
+        table.get("xg_contract_label", pd.Series("", index=table.index)).isin([
+            "XG_CONTRACT_PARTIAL",
+            "XG_CONTRACT_MISSING_IDENTITY",
+            "XG_CONTRACT_MISSING_XG_VALUES",
+        ])
+        & (table.get("xg_file_role", pd.Series("", index=table.index)) != "TEMPLATE_OR_SAMPLE")
+        & xg_candidate
+    ]
     if historical_ready.empty:
         return "ADD_HISTORICAL_DATA_FILES"
     if len(broken_historical) >= max(1, len(historical) // 2):
@@ -115,8 +128,20 @@ def recommendation(table: pd.DataFrame) -> str:
     adapter_mapped = table[
         table.get("adapter_type", pd.Series("UNKNOWN_ADAPTER", index=table.index)) != "UNKNOWN_ADAPTER"
     ]
-    if not adapter_mapped.empty and table[table["xg_ready"] == True].empty:
+    has_production_xg = (
+        "xg_production_ready" in table.columns
+        and table["xg_production_ready"].astype(bool).any()
+    )
+    has_xg_contract = (
+        "xg_contract_ready" in table.columns
+        and table["xg_contract_ready"].astype(bool).any()
+    )
+    if not adapter_mapped.empty and not has_production_xg:
+        if not partial_xg.empty:
+            return "FIX_PARTIAL_XG_FILES_FIRST"
         return "ADD_XG_ENRICHMENT_FILES"
+    if has_production_xg and not broken_odds_xg.empty:
+        return "READY_FOR_IMPORTER_IMPLEMENTATION"
     if not broken_odds_xg.empty:
         return "FIX_ODDS_OR_XG_CONTRACTS_FIRST"
     active_csv_importers = [
@@ -149,7 +174,7 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     empty_refresh = fixture_like[fixture_like.get("fixture_status", pd.Series("", index=fixture_like.index)) == "EMPTY_FIXTURE_NEEDS_REFRESH"] if not fixture_like.empty else pd.DataFrame()
     invalid_fixtures = fixture_like[fixture_like.get("fixture_status", pd.Series("", index=fixture_like.index)) == "FIXTURE_CONTRACT_INVALID"] if not fixture_like.empty else pd.DataFrame()
     odds = table[table["odds_ready"] == True] if not table.empty else pd.DataFrame()
-    xg = table[table["xg_ready"] == True] if not table.empty else pd.DataFrame()
+    xg = table[table.get("xg_contract_ready", pd.Series(False, index=table.index)).astype(bool)] if not table.empty else pd.DataFrame()
     templates = table[table["template_only"] == True] if not table.empty else pd.DataFrame()
     processed = table[table["processed_feature_ready"] == True] if not table.empty else pd.DataFrame()
     adapters = table[table.get("adapter_type", pd.Series("", index=table.index)) != "UNKNOWN_ADAPTER"] if not table.empty else pd.DataFrame()
@@ -185,7 +210,7 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     lines += ["## D. Odds Files Ready for Enrichment"]
     lines += _section_table(odds, ["file_name", "file_type", "row_count", "available_odds_columns", "contract_quality_label"])
     lines += ["## E. xG Files Ready for Enrichment"]
-    lines += _section_table(xg, ["file_name", "file_type", "row_count", "available_xg_columns", "contract_quality_label"])
+    lines += _section_table(xg, ["file_name", "file_type", "row_count", "available_xg_columns", "contract_quality_label", "xg_schema", "xg_contract_label", "xg_file_role", "xg_contract_ready", "xg_production_ready", "xg_supported_for_enrichment"])
     lines += ["## F. Template Files"]
     lines += _section_table(templates, ["file_name", "file_type", "row_count", "contract_quality_label"])
     lines += ["## G. Processed Feature Files"]
