@@ -193,6 +193,7 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "Use scripts/audit_partial_xg_sources.py for Phase 12.7 partial xG attribution.",
         "Use scripts/import_manual_xg_csv.py for local manual xG import previews.",
         "Use scripts/audit_manual_xg_join_readiness.py after adding a production manual xG file.",
+        "Use scripts/audit_filled_manual_xg_acceptance.py to verify accepted manual xG files before enrichment.",
         "",
     ]
     return "\n".join(lines)
