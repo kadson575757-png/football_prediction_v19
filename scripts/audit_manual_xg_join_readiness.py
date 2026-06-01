@@ -166,6 +166,7 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "",
         "If no production xG file exists, use scripts/generate_manual_xg_template.py first.",
         "Phase 12.12 acceptance gate must pass before any manual xG file is used for enrichment.",
+        "Use scripts/demo_manual_xg_acceptance.py for a fake-data acceptance demo.",
         "",
     ]
     return "\n".join(lines)

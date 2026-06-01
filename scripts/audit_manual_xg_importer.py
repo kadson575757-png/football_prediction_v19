@@ -132,6 +132,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "",
         "Use scripts/validate_filled_manual_xg.py before treating a manual xG file as production-ready.",
         "",
+        "Use scripts/demo_manual_xg_acceptance.py for a fake-data acceptance demo.",
+        "",
         "Use scripts/preview_manual_xg_join.py to verify join coverage before using production manual xG files.",
         "",
     ]
