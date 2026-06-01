@@ -130,6 +130,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "",
         "Use scripts/generate_manual_xg_template.py to create a fillable manual xG entry template from fixtures/history.",
         "",
+        "Use scripts/validate_filled_manual_xg.py before treating a manual xG file as production-ready.",
+        "",
         "Use scripts/preview_manual_xg_join.py to verify join coverage before using production manual xG files.",
         "",
     ]
