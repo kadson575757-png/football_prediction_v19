@@ -164,6 +164,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "## H. Phase 12.10 Recommendation",
         rec,
         "",
+        "If no production xG file exists, use scripts/generate_manual_xg_template.py first.",
+        "",
     ]
     return "\n".join(lines)
 

@@ -128,6 +128,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "## F. Phase 12.9 Recommendation",
         rec,
         "",
+        "Use scripts/generate_manual_xg_template.py to create a fillable manual xG entry template from fixtures/history.",
+        "",
         "Use scripts/preview_manual_xg_join.py to verify join coverage before using production manual xG files.",
         "",
     ]
