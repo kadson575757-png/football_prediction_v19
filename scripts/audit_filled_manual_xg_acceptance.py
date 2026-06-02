@@ -176,6 +176,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "## H. Phase 12.12 Recommendation",
         rec,
         "",
+        "Use scripts/audit_manual_xg_manifest.py to declare future production manual xG files.",
+        "",
     ]
     return "\n".join(lines)
 
