@@ -34,10 +34,18 @@ Use `scripts/preview_manual_xg_join.py` to verify exact date/home/away joins. Th
 
 The files under `data/examples/` are fake demo files. Demo values are fake and not real xG. They exist only to prove that the acceptance pipeline works end-to-end.
 
-## H. Safety Rules
+## H. Production Manifest
+
+Use `data/templates/manual_xg_manifest_template.csv` as the starting point for declaring future production manual xG files. A production entry must provide a real `xg_file_path`, a real `target_file_path`, `source_type=MANUAL_XG_CSV`, `data_role=PRODUCTION`, and `is_demo=false`.
+
+Demo files do not count as production because they are marked `DEMO_ONLY` and `data_role=DEMO`. The manifest audit may evaluate demo entries for demonstration, but demo entries are never counted as accepted production manual xG.
+
+Production manifest entries must pass the Phase 12.12 acceptance gate before any future enrichment use. Manual xG is still not used by the model until a later enrichment integration phase.
+
+## I. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## I. What Still Does Not Happen Automatically
+## J. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
