@@ -42,10 +42,16 @@ Demo files do not count as production because they are marked `DEMO_ONLY` and `d
 
 Production manifest entries must pass the Phase 12.12 acceptance gate before any future enrichment use. Manual xG is still not used by the model until a later enrichment integration phase.
 
-## I. Safety Rules
+## I. Trusted xG Promotion Preview
+
+Use `scripts/promote_trusted_xg_to_manifest.py` to run the trusted xG promotion preview flow: trusted xG source CSV -> fill preview -> acceptance gate -> manifest-entry preview.
+
+The production manifest is not modified automatically. A promotion-ready preview still requires explicit user review before any future enrichment integration phase. Manual xG is still not used by the model.
+
+## J. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## J. What Still Does Not Happen Automatically
+## K. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.

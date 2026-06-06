@@ -83,6 +83,8 @@ def build_markdown(table: pd.DataFrame, summary) -> str:
         "## G. Phase 12.14 Recommendation",
         summary.recommendation,
         "",
+        "Trusted xG promotion previews can generate manifest-entry previews but do not modify the manifest automatically.",
+        "",
     ]
     return "\n".join(lines)
 
