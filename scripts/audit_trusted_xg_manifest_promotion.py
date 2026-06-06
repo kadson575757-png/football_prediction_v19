@@ -164,6 +164,7 @@ def build_markdown(table: pd.DataFrame, rec: str, sources_count: int, targets_co
     lines += [
         "## F. Manifest Entry Preview Guidance",
         "Promotion-ready rows create manifest-entry previews only. Review them before manually editing the production manifest.",
+        "Use scripts/audit_trusted_xg_intake.py before promotion to identify best source-target pairs.",
         "",
         "## G. Safety Checks",
         "- No source, target, template, or production manifest file modified.",

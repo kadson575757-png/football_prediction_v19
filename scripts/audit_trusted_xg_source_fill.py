@@ -132,6 +132,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
         "## E. Phase 13.1 Recommendation",
         rec,
         "",
+        "Use scripts/audit_trusted_xg_intake.py to discover trusted xG source files and target compatibility.",
+        "",
         "Use scripts/promote_trusted_xg_to_manifest.py after a trusted source fill preview is complete and accepted.",
         "",
     ]

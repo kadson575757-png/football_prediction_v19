@@ -48,10 +48,16 @@ Use `scripts/promote_trusted_xg_to_manifest.py` to run the trusted xG promotion 
 
 The production manifest is not modified automatically. A promotion-ready preview still requires explicit user review before any future enrichment integration phase. Manual xG is still not used by the model.
 
-## J. Safety Rules
+## J. Trusted xG Source Intake
+
+Place real trusted xG source CSVs in `data/trusted_xg_sources/`. Run `scripts/audit_trusted_xg_intake.py --write-command-list` to check schema validity, target compatibility, fill coverage, likely promotion readiness, and the next exact PowerShell commands.
+
+Use the generated `outputs/diagnostics/trusted_xg_next_commands.ps1` as a reviewable command list for template generation, trusted-source fill preview, acceptance validation, and promotion preview. Files in `data/trusted_xg_sources/` are not consumed by the model directly; model xG use still waits for a future enrichment integration after accepted non-demo production manual xG exists.
+
+## K. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## K. What Still Does Not Happen Automatically
+## L. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
