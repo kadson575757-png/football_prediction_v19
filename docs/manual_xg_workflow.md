@@ -54,10 +54,28 @@ Place real trusted xG source CSVs in `data/trusted_xg_sources/`. Run `scripts/au
 
 Use the generated `outputs/diagnostics/trusted_xg_next_commands.ps1` as a reviewable command list for template generation, trusted-source fill preview, acceptance validation, and promotion preview. Files in `data/trusted_xg_sources/` are not consumed by the model directly; model xG use still waits for a future enrichment integration after accepted non-demo production manual xG exists.
 
-## K. Safety Rules
+## K. Trusted xG Source Import
+
+Use `scripts/import_trusted_xg_source.py` when you have a trusted local export file or an explicit user-provided CSV/HTML source URL. Local export example:
+
+```powershell
+python scripts/import_trusted_xg_source.py --source "C:\path\to\trusted_xg_export.csv" --output-name trusted_xg_export.csv
+```
+
+Explicit URL example:
+
+```powershell
+python scripts/import_trusted_xg_source.py --source "https://example.com/trusted_xg_export.csv" --output-name trusted_xg_export.csv
+```
+
+There is no hidden scraping, no credentials/API-key flow, and no inferred xG values. Fetched raw files are stored separately under `data/trusted_xg_sources/raw/`; normalized trusted source CSVs are written under `data/trusted_xg_sources/`. After import, run `scripts/audit_trusted_xg_intake.py --write-command-list`.
+
+Imported trusted xG files still do not affect model behavior until a future accepted enrichment integration is explicitly implemented.
+
+## L. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## L. What Still Does Not Happen Automatically
+## M. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
