@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Phase 13.4 trusted xG source import audit."""
+"""Phase 13.5 Understat trusted xG source audit."""
 from __future__ import annotations
 
 import argparse
@@ -12,18 +12,19 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
-from football_prediction_v19.importers.trusted_xg_source_import import (  # noqa: E402
-    TRUSTED_XG_IMPORT_BLOCKED_INVALID_SCHEMA,
-    TRUSTED_XG_IMPORT_BLOCKED_INVALID_XG_VALUES,
-    TRUSTED_XG_IMPORT_BLOCKED_OUTPUT_EXISTS,
-    TRUSTED_XG_IMPORT_BLOCKED_SOURCE_NOT_FOUND,
-    TRUSTED_XG_IMPORT_READY,
-    detect_import_source_type,
-    import_trusted_xg_source,
+from football_prediction_v19.importers.understat_trusted_xg import (  # noqa: E402
+    UNDERSTAT_XG_IMPORT_BLOCKED_FETCH_DISABLED,
+    UNDERSTAT_XG_IMPORT_BLOCKED_FETCH_FAILED,
+    UNDERSTAT_XG_IMPORT_BLOCKED_INVALID_SCHEMA,
+    UNDERSTAT_XG_IMPORT_BLOCKED_INVALID_XG_VALUES,
+    UNDERSTAT_XG_IMPORT_BLOCKED_OUTPUT_EXISTS,
+    UNDERSTAT_XG_IMPORT_READY,
+    import_understat_trusted_xg_source,
 )
+from football_prediction_v19.importers.trusted_xg_source_import import detect_import_source_type  # noqa: E402
 
-OUTPUT_CSV = "trusted_xg_source_import_summary.csv"
-OUTPUT_MD = "trusted_xg_source_import_summary.md"
+OUTPUT_CSV = "understat_xg_source_audit_summary.csv"
+OUTPUT_MD = "understat_xg_source_audit_summary.md"
 
 
 def _unique(paths: list[Path]) -> list[Path]:
@@ -40,11 +41,11 @@ def _unique(paths: list[Path]) -> list[Path]:
     return out
 
 
-def discover_import_candidates(root: Path) -> list[Path]:
+def discover_understat_candidates(root: Path) -> list[Path]:
     paths: list[Path] = []
     for pattern in (
-        root / "data" / "trusted_xg_sources" / "*.csv",
-        root / "data" / "trusted_xg_sources" / "raw" / "*.csv",
+        root / "data" / "trusted_xg_sources" / "*understat*.csv",
+        root / "data" / "trusted_xg_sources" / "raw" / "*understat*.csv",
     ):
         paths.extend(sorted(pattern.parent.glob(pattern.name)) if pattern.parent.exists() else [])
     return _unique(paths)
@@ -60,12 +61,16 @@ def _serialize(table: pd.DataFrame) -> pd.DataFrame:
 
 def build_table(root: Path = ROOT, source: str | None = None) -> pd.DataFrame:
     rows: list[dict[str, object]] = []
-    candidates = discover_import_candidates(root)
     if source:
-        result = import_trusted_xg_source(source, output_name=Path(str(source)).stem + "_audit_preview.csv", overwrite=False, no_fetch=True)
+        result = import_understat_trusted_xg_source(
+            source,
+            output_name=Path(str(source)).stem + "_understat_audit_preview.csv",
+            overwrite=False,
+            no_fetch=True,
+        )
         rows.append(result.to_dict())
-    for candidate in candidates:
-        result = import_trusted_xg_source(
+    for candidate in discover_understat_candidates(root):
+        result = import_understat_trusted_xg_source(
             candidate,
             output_name=candidate.name,
             output_dir=candidate.parent,
@@ -73,8 +78,8 @@ def build_table(root: Path = ROOT, source: str | None = None) -> pd.DataFrame:
             no_fetch=True,
         )
         row = result.to_dict()
-        if result.import_label == TRUSTED_XG_IMPORT_BLOCKED_OUTPUT_EXISTS:
-            row["import_label"] = TRUSTED_XG_IMPORT_READY
+        if result.import_label == UNDERSTAT_XG_IMPORT_BLOCKED_OUTPUT_EXISTS:
+            row["import_label"] = UNDERSTAT_XG_IMPORT_READY
             row["output_path"] = str(candidate)
             row["validation_errors"] = []
         rows.append(row)
@@ -83,23 +88,21 @@ def build_table(root: Path = ROOT, source: str | None = None) -> pd.DataFrame:
 
 def recommendation(table: pd.DataFrame, source: str | None = None) -> str:
     if table.empty and not source:
-        return "ADD_TRUSTED_XG_SOURCE_FILE"
-    if source and detect_import_source_type(source) == "URL" and table.empty:
-        return "FETCH_EXPLICIT_SOURCE_URL"
+        return "ADD_UNDERSTAT_XG_SOURCE_FILE"
     if table.empty:
-        return "ADD_TRUSTED_XG_SOURCE_FILE"
+        return "ADD_UNDERSTAT_XG_SOURCE_FILE"
     labels = table["import_label"].astype(str)
-    if labels.eq(TRUSTED_XG_IMPORT_READY).any():
+    if labels.eq(UNDERSTAT_XG_IMPORT_READY).any():
         return "READY_FOR_TRUSTED_XG_INTAKE"
     if source and detect_import_source_type(source) == "URL":
-        return "FETCH_EXPLICIT_SOURCE_URL"
-    if labels.eq(TRUSTED_XG_IMPORT_BLOCKED_INVALID_XG_VALUES).any():
-        return "FIX_TRUSTED_XG_VALUES"
-    if labels.eq(TRUSTED_XG_IMPORT_BLOCKED_INVALID_SCHEMA).any():
-        return "FIX_TRUSTED_XG_IMPORT_SCHEMA"
-    if labels.eq(TRUSTED_XG_IMPORT_BLOCKED_SOURCE_NOT_FOUND).any():
-        return "FETCH_EXPLICIT_SOURCE_URL"
-    return "INCONCLUSIVE_TRUSTED_XG_IMPORT"
+        return "FETCH_EXPLICIT_UNDERSTAT_URL"
+    if labels.isin([UNDERSTAT_XG_IMPORT_BLOCKED_FETCH_DISABLED, UNDERSTAT_XG_IMPORT_BLOCKED_FETCH_FAILED]).any():
+        return "FETCH_EXPLICIT_UNDERSTAT_URL"
+    if labels.eq(UNDERSTAT_XG_IMPORT_BLOCKED_INVALID_XG_VALUES).any():
+        return "FIX_UNDERSTAT_XG_VALUES"
+    if labels.eq(UNDERSTAT_XG_IMPORT_BLOCKED_INVALID_SCHEMA).any():
+        return "FIX_UNDERSTAT_XG_SCHEMA"
+    return "INCONCLUSIVE_UNDERSTAT_XG_IMPORT"
 
 
 def _section_table(df: pd.DataFrame, columns: list[str], limit: int = 40) -> list[str]:
@@ -116,26 +119,24 @@ def _section_table(df: pd.DataFrame, columns: list[str], limit: int = 40) -> lis
 def build_markdown(table: pd.DataFrame, rec: str) -> str:
     serial = _serialize(table)
     labels = serial["import_label"].astype(str) if not serial.empty else pd.Series(dtype=str)
-    ready = serial[labels == TRUSTED_XG_IMPORT_READY] if not serial.empty else pd.DataFrame()
-    invalid_schema = serial[labels == TRUSTED_XG_IMPORT_BLOCKED_INVALID_SCHEMA] if not serial.empty else pd.DataFrame()
-    invalid_xg = serial[labels == TRUSTED_XG_IMPORT_BLOCKED_INVALID_XG_VALUES] if not serial.empty else pd.DataFrame()
-    output_exists = serial[labels == TRUSTED_XG_IMPORT_BLOCKED_OUTPUT_EXISTS] if not serial.empty else pd.DataFrame()
-    missing = serial[labels == TRUSTED_XG_IMPORT_BLOCKED_SOURCE_NOT_FOUND] if not serial.empty else pd.DataFrame()
+    ready = serial[labels == UNDERSTAT_XG_IMPORT_READY] if not serial.empty else pd.DataFrame()
+    invalid_schema = serial[labels == UNDERSTAT_XG_IMPORT_BLOCKED_INVALID_SCHEMA] if not serial.empty else pd.DataFrame()
+    invalid_xg = serial[labels == UNDERSTAT_XG_IMPORT_BLOCKED_INVALID_XG_VALUES] if not serial.empty else pd.DataFrame()
+    blocked = serial[labels.ne(UNDERSTAT_XG_IMPORT_READY)] if not serial.empty else pd.DataFrame()
     cols = ["source", "source_type", "rows_read", "rows_normalized", "detected_schema", "output_path", "import_label"]
     lines = [
-        "# Phase 13.4 Trusted xG Source Import Audit",
+        "# Phase 13.5 Understat Trusted xG Source Audit",
         "",
-        "Phase 13.4 is diagnostic/foundation only. No xG values were inferred or invented.",
+        "Phase 13.5 is diagnostic/foundation only. No xG values were inferred or invented.",
         "",
         "## A. Executive Summary",
         f"- files scanned: {len(serial)}",
         f"- import-ready files: {len(ready)}",
         f"- invalid schema files: {len(invalid_schema)}",
         f"- invalid xG value files: {len(invalid_xg)}",
-        f"- output exists / blocked files: {len(output_exists)}",
-        f"- source-not-found files: {len(missing)}",
+        f"- blocked files: {len(blocked)}",
         "",
-        "## B. Import-Ready Trusted xG Sources",
+        "## B. Import-Ready Understat xG Sources",
     ]
     lines += _section_table(ready, cols)
     lines += ["## C. Invalid Schema Sources"]
@@ -143,18 +144,15 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     lines += ["## D. Invalid xG Value Sources"]
     lines += _section_table(invalid_xg, cols + ["validation_errors"])
     lines += ["## E. Blocked / Missing Sources"]
-    blocked = serial[labels.ne(TRUSTED_XG_IMPORT_READY)] if not serial.empty else pd.DataFrame()
     lines += _section_table(blocked, cols + ["validation_errors"])
     lines += [
         "## F. Safety Checks",
-        "Understat-specific imports can be checked with scripts/audit_understat_xg_source.py.",
-        "",
-        "- No xG values inferred, invented, estimated from odds, scores, shots, or model output.",
+        "- No xG values inferred, invented, estimated from scores, odds, shots, or model output.",
         "- No hidden scraping, credentials, API keys, or model behavior changes.",
         "- Explicit URL fetches are only performed by the import CLI when the user provides the URL.",
         "- No market_tier, probability, recommended-market, betting, staking, ROI, or SUPER_A_TIER logic changed.",
         "",
-        "## G. Phase 13.4 Recommendation",
+        "## G. Phase 13.5 Recommendation",
         rec,
         "",
     ]

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Import an explicit trusted xG source export into data/trusted_xg_sources."""
+"""Import an explicit Understat xG export into trusted xG sources."""
 from __future__ import annotations
 
 import argparse
@@ -11,7 +11,6 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
 from football_prediction_v19.importers.understat_trusted_xg import import_understat_trusted_xg_source  # noqa: E402
-from football_prediction_v19.importers.trusted_xg_source_import import import_trusted_xg_source  # noqa: E402
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -27,25 +26,14 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    route_hint = f"{args.source} {args.output_name or ''}".lower()
-    if "understat" in route_hint:
-        result = import_understat_trusted_xg_source(
-            args.source,
-            output_name=args.output_name,
-            output_dir=args.output_dir,
-            raw_output_dir=args.raw_output_dir,
-            overwrite=args.overwrite,
-            no_fetch=args.no_fetch,
-        )
-    else:
-        result = import_trusted_xg_source(
-            args.source,
-            output_name=args.output_name,
-            output_dir=args.output_dir,
-            raw_output_dir=args.raw_output_dir,
-            overwrite=args.overwrite,
-            no_fetch=args.no_fetch,
-        )
+    result = import_understat_trusted_xg_source(
+        args.source,
+        output_name=args.output_name,
+        output_dir=args.output_dir,
+        raw_output_dir=args.raw_output_dir,
+        overwrite=args.overwrite,
+        no_fetch=args.no_fetch,
+    )
     print(f"source_type={result.source_type}")
     print(f"rows_read={result.rows_read}")
     print(f"rows_normalized={result.rows_normalized}")

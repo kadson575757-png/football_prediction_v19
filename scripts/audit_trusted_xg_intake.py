@@ -55,6 +55,8 @@ def build_command_list(table: pd.DataFrame) -> str:
             commands.append(command.strip())
     if not commands:
         return "\n".join([
+            "# Understat exports can use the dedicated adapter.",
+            "python scripts/import_understat_xg_source.py --source \"C:\\path\\to\\understat_xg_export.csv\" --output-name understat_xg_export.csv",
             "# Use scripts/import_trusted_xg_source.py with a local export or explicit URL.",
             "python scripts/import_trusted_xg_source.py --source \"C:\\path\\to\\trusted_xg_export.csv\" --output-name trusted_xg_export.csv",
             "# Place a real trusted xG source CSV in data/trusted_xg_sources/",

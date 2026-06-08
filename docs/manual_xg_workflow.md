@@ -72,10 +72,36 @@ There is no hidden scraping, no credentials/API-key flow, and no inferred xG val
 
 Imported trusted xG files still do not affect model behavior until a future accepted enrichment integration is explicitly implemented.
 
-## L. Safety Rules
+## L. Understat Trusted xG Source
+
+Use `scripts/import_understat_xg_source.py` when the trusted source is an Understat export. Local Understat export example:
+
+```powershell
+python scripts/import_understat_xg_source.py --source "C:\path\to\understat_xg_export.csv" --output-name understat_xg_export.csv
+```
+
+Explicit Understat URL example:
+
+```powershell
+python scripts/import_understat_xg_source.py --source "https://example.com/understat_xg_export.csv" --output-name understat_xg_export.csv
+```
+
+The Understat adapter accepts match-pair exports such as `date,home_team,away_team,home_xG,away_xG`, `date,home,away,hxg,axg`, and safely pairable long exports with `date,team,opponent,xG,xGA,venue`. It performs no hidden scraping, uses only explicit user-provided URLs, and never infers xG values.
+
+After importing an Understat source, run:
+
+```powershell
+python scripts/audit_understat_xg_source.py
+python scripts/audit_trusted_xg_intake.py --write-command-list
+python scripts/show_trusted_xg_intake_commands.py
+```
+
+Understat imports still do not affect model behavior until a future accepted enrichment integration is explicitly implemented.
+
+## M. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## M. What Still Does Not Happen Automatically
+## N. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
