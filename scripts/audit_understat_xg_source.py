@@ -70,6 +70,10 @@ def build_table(root: Path = ROOT, source: str | None = None) -> pd.DataFrame:
         )
         rows.append(result.to_dict())
     for candidate in discover_understat_candidates(root):
+        normalized = _ready_normalized_candidate(candidate)
+        if normalized is not None:
+            rows.append(normalized)
+            continue
         result = import_understat_trusted_xg_source(
             candidate,
             output_name=candidate.name,
@@ -84,6 +88,44 @@ def build_table(root: Path = ROOT, source: str | None = None) -> pd.DataFrame:
             row["validation_errors"] = []
         rows.append(row)
     return pd.DataFrame(rows)
+
+
+def _ready_normalized_candidate(path: Path) -> dict[str, object] | None:
+    try:
+        df = pd.read_csv(path, low_memory=False)
+    except Exception:
+        return None
+    required = {"date", "home_team", "away_team", "home_xg", "away_xg", "xg_source_name", "xg_import_type"}
+    if not required.issubset(df.columns):
+        return None
+    raw = df[["home_xg", "away_xg"]]
+    missing = raw.isna() | raw.astype(str).apply(lambda col: col.str.strip().eq(""))
+    numeric = raw.apply(pd.to_numeric, errors="coerce")
+    if missing.any().any() or numeric.isna().any().any() or (numeric < 0).any().any():
+        return {
+            "source": str(path),
+            "source_type": "LOCAL_FILE",
+            "raw_output_path": "",
+            "output_path": "",
+            "rows_read": len(df),
+            "rows_normalized": 0,
+            "detected_schema": "NORMALIZED_UNDERSTAT_TRUSTED_XG_SOURCE",
+            "import_label": UNDERSTAT_XG_IMPORT_BLOCKED_INVALID_XG_VALUES,
+            "validation_errors": ["INVALID_XG_VALUES"],
+            "warning_notes": [],
+        }
+    return {
+        "source": str(path),
+        "source_type": "LOCAL_FILE",
+        "raw_output_path": "",
+        "output_path": str(path),
+        "rows_read": len(df),
+        "rows_normalized": len(df),
+        "detected_schema": "NORMALIZED_UNDERSTAT_TRUSTED_XG_SOURCE",
+        "import_label": UNDERSTAT_XG_IMPORT_READY,
+        "validation_errors": [],
+        "warning_notes": ["Already normalized trusted xG source."],
+    }
 
 
 def recommendation(table: pd.DataFrame, source: str | None = None) -> str:
@@ -147,6 +189,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     lines += _section_table(blocked, cols + ["validation_errors"])
     lines += [
         "## F. Safety Checks",
+        "If no Understat source exists, use scripts/fetch_understat_xg_source.py --league Bundesliga --season 2024.",
+        "",
         "- No xG values inferred, invented, estimated from scores, odds, shots, or model output.",
         "- No hidden scraping, credentials, API keys, or model behavior changes.",
         "- Explicit URL fetches are only performed by the import CLI when the user provides the URL.",

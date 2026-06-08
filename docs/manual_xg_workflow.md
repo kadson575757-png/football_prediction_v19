@@ -98,10 +98,37 @@ python scripts/show_trusted_xg_intake_commands.py
 
 Understat imports still do not affect model behavior until a future accepted enrichment integration is explicitly implemented.
 
-## M. Safety Rules
+## M. Understat League/Season Fetch Pilot
+
+Use `scripts/fetch_understat_xg_source.py` only when you explicitly want to fetch one Understat league/season page or one explicit Understat URL.
+
+League/season example:
+
+```powershell
+python scripts/fetch_understat_xg_source.py --league Bundesliga --season 2024 --output-name understat_xg_bundesliga_2024.csv
+```
+
+Explicit URL example:
+
+```powershell
+python scripts/fetch_understat_xg_source.py --url "https://understat.com/league/Bundesliga/2024" --output-name understat_xg_custom.csv
+```
+
+After a fetch, run:
+
+```powershell
+python scripts/audit_understat_fetch.py
+python scripts/audit_understat_xg_source.py
+python scripts/audit_trusted_xg_intake.py --write-command-list
+python scripts/show_trusted_xg_intake_commands.py
+```
+
+Fetched/imported xG files still do not affect model behavior until a future accepted enrichment integration is explicitly implemented.
+
+## N. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## N. What Still Does Not Happen Automatically
+## O. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
