@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Import an explicit Understat xG export into trusted xG sources."""
+"""Fetch an explicit Understat league/season page into trusted xG sources."""
 from __future__ import annotations
 
 import argparse
@@ -10,12 +10,14 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
-from football_prediction_v19.importers.understat_trusted_xg import import_understat_trusted_xg_source  # noqa: E402
+from football_prediction_v19.importers.understat_fetch import fetch_understat_league_season  # noqa: E402
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", required=True)
+    parser.add_argument("--league", default=None)
+    parser.add_argument("--season", default=None)
+    parser.add_argument("--url", default=None)
     parser.add_argument("--output-name", default=None)
     parser.add_argument("--output-dir", default=str(ROOT / "data" / "trusted_xg_sources"))
     parser.add_argument("--raw-output-dir", default=str(ROOT / "data" / "trusted_xg_sources" / "raw"))
@@ -26,24 +28,26 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    result = import_understat_trusted_xg_source(
-        args.source,
+    result = fetch_understat_league_season(
+        league=args.league,
+        season=args.season,
+        url=args.url,
         output_name=args.output_name,
         output_dir=args.output_dir,
         raw_output_dir=args.raw_output_dir,
         overwrite=args.overwrite,
         no_fetch=args.no_fetch,
     )
-    print(f"source_type={result.source_type}")
-    print(f"rows_read={result.rows_read}")
-    print(f"rows_normalized={result.rows_normalized}")
-    print(f"output_path={result.output_path}")
+    print(f"league={result.league}")
+    print(f"season={result.season}")
+    print(f"source_url={result.source_url}")
     print(f"raw_output_path={result.raw_output_path}")
-    print(f"detected_schema={result.detected_schema}")
-    print(f"import_label={result.import_label}")
+    print(f"output_path={result.output_path}")
+    print(f"matches_found={result.matches_found}")
+    print(f"rows_normalized={result.rows_normalized}")
+    print(f"fetch_label={result.fetch_label}")
     print(f"validation_errors={' | '.join(result.validation_errors)}")
     print(f"warning_notes={' | '.join(result.warning_notes)}")
-    print("next_fetch_hint=If you want to fetch a league/season directly, use scripts/fetch_understat_xg_source.py.")
     return 0
 
 
