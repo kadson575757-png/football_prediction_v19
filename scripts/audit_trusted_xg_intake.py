@@ -55,6 +55,8 @@ def build_command_list(table: pd.DataFrame) -> str:
             commands.append(command.strip())
     if not commands:
         return "\n".join([
+            "# Use scripts/import_trusted_xg_source.py with a local export or explicit URL.",
+            "python scripts/import_trusted_xg_source.py --source \"C:\\path\\to\\trusted_xg_export.csv\" --output-name trusted_xg_export.csv",
             "# Place a real trusted xG source CSV in data/trusted_xg_sources/",
             "# Expected match-pair columns: date, home_team, away_team, home_xg, away_xg",
             "python scripts/audit_trusted_xg_intake.py --write-command-list",
