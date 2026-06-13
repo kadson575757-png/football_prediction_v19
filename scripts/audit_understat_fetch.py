@@ -138,12 +138,15 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     if not raw.empty and normalized.empty:
         lines += [
             "Raw Understat HTML exists but no parseable xG match payload was found.",
+            "If the saved HTML is base-only with no embedded match payload, use scripts/resolve_understat_xg_source.py with a local export or --allow-optional-provider.",
             "",
         ]
     lines += [
         "## E. Recommended Next Commands",
         "```powershell",
         "python scripts/fetch_understat_xg_source.py --league Bundesliga --season 2024 --output-name understat_xg_bundesliga_2024.csv",
+        "python scripts/resolve_understat_xg_source.py --league Bundesliga --season 2024 --source path/to/understat_export.csv --output-name understat_xg_bundesliga_2024.csv",
+        "python scripts/resolve_understat_xg_source.py --league Bundesliga --season 2024 --allow-optional-provider --output-name understat_xg_bundesliga_2024.csv",
         "python scripts/audit_understat_fetch.py",
         "python scripts/audit_understat_xg_source.py",
         "python scripts/audit_trusted_xg_intake.py --write-command-list",
