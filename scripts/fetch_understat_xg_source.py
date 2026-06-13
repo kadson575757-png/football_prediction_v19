@@ -46,6 +46,9 @@ def main(argv: list[str] | None = None) -> int:
     print(f"matches_found={result.matches_found}")
     print(f"rows_normalized={result.rows_normalized}")
     print(f"fetch_label={result.fetch_label}")
+    print(f"html_state={result.html_state}")
+    print(f"fallback_endpoints_checked={result.fallback_endpoints_checked}")
+    print(f"fallback_endpoint_used={result.fallback_endpoint_used}")
     print(f"validation_errors={' | '.join(result.validation_errors)}")
     print(f"warning_notes={' | '.join(result.warning_notes)}")
     return 0
