@@ -125,10 +125,24 @@ python scripts/show_trusted_xg_intake_commands.py
 
 Fetched/imported xG files still do not affect model behavior until a future accepted enrichment integration is explicitly implemented.
 
-## N. Safety Rules
+## N. Understat Fetch Wrote Raw HTML But Found No Match Data
+
+If `fetch_understat_xg_source.py` writes a raw HTML file but reports `UNDERSTAT_FETCH_BLOCKED_PARSE_FAILED`, inspect the saved file without fetching anything:
+
+```powershell
+python scripts/inspect_understat_raw_fetch.py --raw-path data/trusted_xg_sources/raw/understat_league_Bundesliga_2024.html
+```
+
+Do not commit raw runtime HTML files from `data/trusted_xg_sources/raw/`. The runtime parser fallback is diagnostic only and does not infer xG values. If Understat changes its payload format and the fallback cannot find a parseable xG payload, local export import remains supported:
+
+```powershell
+python scripts/import_understat_xg_source.py --source "C:\path\to\understat_xg_export.csv" --output-name understat_xg_export.csv
+```
+
+## O. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## O. What Still Does Not Happen Automatically
+## P. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.

@@ -13,6 +13,7 @@ if str(ROOT / "src") not in sys.path:
     sys.path.insert(0, str(ROOT / "src"))
 
 from football_prediction_v19.importers.understat_fetch import (  # noqa: E402
+    detect_understat_html_state,
     normalize_understat_matches_to_trusted_xg,
     parse_understat_matches_from_html,
 )
@@ -66,8 +67,10 @@ def _validate_normalized(path: Path) -> dict[str, object]:
 
 
 def _validate_raw(path: Path) -> dict[str, object]:
+    html_state = ""
     try:
         html = path.read_text(encoding="utf-8", errors="replace")
+        html_state = detect_understat_html_state(html)
         matches = parse_understat_matches_from_html(html)
         normalized = normalize_understat_matches_to_trusted_xg(matches)
         status = "RAW_PARSE_READY" if not normalized.empty else "RAW_NO_MATCHES"
@@ -77,7 +80,7 @@ def _validate_raw(path: Path) -> dict[str, object]:
         status = "RAW_PARSE_FAILED"
         error = str(exc)
         rows = 0
-    return {"path": str(path), "file": path.name, "kind": "raw_html", "rows": rows, "status": status, "error": error}
+    return {"path": str(path), "file": path.name, "kind": "raw_html", "rows": rows, "status": status, "html_state": html_state, "error": error}
 
 
 def build_table(root: Path = ROOT) -> pd.DataFrame:
@@ -114,7 +117,7 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     raw = table[table["kind"].eq("raw_html")] if not table.empty else pd.DataFrame()
     normalized = table[table["kind"].eq("normalized")] if not table.empty else pd.DataFrame()
     blocked = table[~table["status"].isin(["READY", "RAW_PARSE_READY"])] if not table.empty else pd.DataFrame()
-    cols = ["file", "kind", "rows", "status", "error"]
+    cols = ["file", "kind", "rows", "status", "html_state", "error"]
     lines = [
         "# Phase 13.6 Understat Fetch Audit",
         "",
@@ -132,6 +135,11 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     lines += _section_table(normalized, cols)
     lines += ["## D. Blocked / Missing Sources"]
     lines += _section_table(blocked, cols)
+    if not raw.empty and normalized.empty:
+        lines += [
+            "Raw Understat HTML exists but no parseable xG match payload was found.",
+            "",
+        ]
     lines += [
         "## E. Recommended Next Commands",
         "```powershell",
