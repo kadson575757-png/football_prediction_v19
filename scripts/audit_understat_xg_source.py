@@ -189,7 +189,8 @@ def build_markdown(table: pd.DataFrame, rec: str) -> str:
     lines += _section_table(blocked, cols + ["validation_errors"])
     lines += [
         "## F. Safety Checks",
-        "If no Understat source exists, use scripts/fetch_understat_xg_source.py --league Bundesliga --season 2024.",
+        "If no Understat source exists, use scripts/resolve_understat_xg_source.py with a local export, optional provider, or explicit fetch mode.",
+        "Example: python scripts/resolve_understat_xg_source.py --league Bundesliga --season 2024 --source path/to/understat_export.csv --output-name understat_xg_bundesliga_2024.csv",
         "",
         "- No xG values inferred, invented, estimated from scores, odds, shots, or model output.",
         "- No hidden scraping, credentials, API keys, or model behavior changes.",

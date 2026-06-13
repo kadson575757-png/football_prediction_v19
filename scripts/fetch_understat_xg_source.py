@@ -51,6 +51,14 @@ def main(argv: list[str] | None = None) -> int:
     print(f"fallback_endpoint_used={result.fallback_endpoint_used}")
     print(f"validation_errors={' | '.join(result.validation_errors)}")
     print(f"warning_notes={' | '.join(result.warning_notes)}")
+    if (
+        result.fetch_label == "UNDERSTAT_FETCH_BLOCKED_PARSE_FAILED"
+        and result.html_state == "UNDERSTAT_HTML_HAS_BASE_PAGE_ONLY"
+    ):
+        print(
+            "next_step_hint=Try scripts/resolve_understat_xg_source.py --league Bundesliga "
+            "--season 2024 --allow-optional-provider or provide --source local_export.csv."
+        )
     return 0
 
 

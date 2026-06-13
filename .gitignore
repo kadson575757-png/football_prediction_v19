@@ -6,3 +6,9 @@ outputs/*.csv
 outputs/*.xlsx
 data/raw/real_matches.csv
 data/processed/*.csv
+data/trusted_xg_sources/raw/*
+outputs/diagnostics/*.csv
+outputs/diagnostics/*.md
+outputs/diagnostics/*.ps1
+outputs/xg_*/*
+outputs/repair_preview/*

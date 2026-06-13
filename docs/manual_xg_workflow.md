@@ -139,10 +139,43 @@ Do not commit raw runtime HTML files from `data/trusted_xg_sources/raw/`. The ru
 python scripts/import_understat_xg_source.py --source "C:\path\to\understat_xg_export.csv" --output-name understat_xg_export.csv
 ```
 
-## O. Safety Rules
+## O. Understat Data Access Fallback
+
+Direct Understat league-page HTML fetches may only return a base page with no embedded `datesData`, `teamsData`, or match payload. Phase 13.7 adds a controlled fallback resolver that can use an existing normalized source, a local Understat export, a saved raw payload/HTML file, an explicitly enabled optional provider, or an explicitly enabled fetch mode. It does not infer or invent xG values.
+
+Preferred local export fallback:
+
+```powershell
+python scripts/resolve_understat_xg_source.py --league Bundesliga --season 2024 --source path/to/understat_export.csv --output-name understat_xg_bundesliga_2024.csv
+```
+
+Optional provider fallback, only if the optional package is installed and explicitly enabled:
+
+```powershell
+python scripts/resolve_understat_xg_source.py --league Bundesliga --season 2024 --allow-optional-provider --output-name understat_xg_bundesliga_2024.csv
+```
+
+Explicit fetch fallback, only when network access is explicitly requested:
+
+```powershell
+python scripts/resolve_understat_xg_source.py --league Bundesliga --season 2024 --allow-network --mode explicit_fetch --output-name understat_xg_bundesliga_2024.csv
+```
+
+After a successful resolve, run:
+
+```powershell
+python scripts/audit_understat_data_access.py
+python scripts/audit_understat_xg_source.py
+python scripts/audit_trusted_xg_intake.py --write-command-list
+python scripts/show_trusted_xg_intake_commands.py
+```
+
+Do not commit raw runtime HTML or payload files from `data/trusted_xg_sources/raw/`. Imported xG files still do not affect model behavior until a future accepted enrichment integration is explicitly implemented.
+
+## P. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## P. What Still Does Not Happen Automatically
+## Q. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
