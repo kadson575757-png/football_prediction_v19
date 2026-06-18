@@ -32,6 +32,11 @@ TRUSTED_XG_PROMOTION_BLOCKED_LOW_JOIN_COVERAGE = "TRUSTED_XG_PROMOTION_BLOCKED_L
 TRUSTED_XG_PROMOTION_BLOCKED_INVALID_SOURCE = "TRUSTED_XG_PROMOTION_BLOCKED_INVALID_SOURCE"
 TRUSTED_XG_PROMOTION_PREVIEW_ONLY = "TRUSTED_XG_PROMOTION_PREVIEW_ONLY"
 
+MANIFEST_ENTRY_PREVIEW_READY = "MANIFEST_ENTRY_PREVIEW_READY"
+MANIFEST_ENTRY_PREVIEW_ONLY = "MANIFEST_ENTRY_PREVIEW_ONLY"
+MANIFEST_ENTRY_BLOCKED_UNSAFE_PATH = "MANIFEST_ENTRY_BLOCKED_UNSAFE_PATH"
+MANIFEST_ENTRY_BLOCKED_MISSING_METADATA = "MANIFEST_ENTRY_BLOCKED_MISSING_METADATA"
+
 
 @dataclass(frozen=True)
 class TrustedXGPromotionResult:
@@ -49,6 +54,7 @@ class TrustedXGPromotionResult:
     join_coverage_pct: float
     acceptance_label: str
     promotion_label: str
+    manifest_registration_status: str
     blocking_reasons: list[str]
     warning_notes: list[str]
 
@@ -78,6 +84,7 @@ def _empty_result(
         join_coverage_pct=0.0,
         acceptance_label="",
         promotion_label=label,
+        manifest_registration_status=MANIFEST_ENTRY_PREVIEW_ONLY,
         blocking_reasons=blocking,
         warning_notes=[],
     )
@@ -99,6 +106,56 @@ def _promotion_label(acceptance_label: str, blocking: list[str], rows_missing_xg
 
 def _manifest_id(source_xg_path: str | Path, target_path: str | Path) -> str:
     return f"trusted_xg_{Path(source_xg_path).stem}_to_{Path(target_path).stem}"
+
+
+def _repo_root() -> Path:
+    return Path(__file__).resolve().parents[3]
+
+
+def _repo_relative(path: str | Path, *, root: Path | None = None) -> str:
+    root = (root or _repo_root()).resolve()
+    candidate = Path(path)
+    if not candidate.is_absolute():
+        return candidate.as_posix()
+    resolved = candidate.resolve()
+    try:
+        return resolved.relative_to(root).as_posix()
+    except ValueError as exc:
+        raise ValueError("MANIFEST_PATH_OUTSIDE_REPO_ROOT") from exc
+
+
+def _repo_relative_when_possible(path: str | Path, *, root: Path | None = None) -> str:
+    try:
+        return _repo_relative(path, root=root)
+    except ValueError:
+        return Path(path).name
+
+
+def _is_under_outputs(path_text: str) -> bool:
+    normalized = path_text.replace("\\", "/").strip().lower()
+    return normalized == "outputs" or normalized.startswith("outputs/")
+
+
+def _manifest_status(
+    manifest_xg_path: str | Path | None,
+    league: str | None,
+    season: str | int | None,
+    *,
+    root: Path | None = None,
+) -> tuple[str, str, list[str]]:
+    warnings: list[str] = []
+    if manifest_xg_path is None or str(manifest_xg_path).strip() == "":
+        warnings.append("MANIFEST_XG_PATH_OMITTED_PREVIEW_ONLY")
+        return MANIFEST_ENTRY_PREVIEW_ONLY, "", warnings
+    try:
+        rel = _repo_relative(manifest_xg_path, root=root)
+    except ValueError:
+        return MANIFEST_ENTRY_BLOCKED_UNSAFE_PATH, "", ["MANIFEST_XG_PATH_OUTSIDE_REPO_ROOT"]
+    if _is_under_outputs(rel):
+        return MANIFEST_ENTRY_PREVIEW_ONLY, rel, ["MANIFEST_XG_PATH_UNDER_OUTPUTS_PREVIEW_ONLY"]
+    if not league or not season:
+        return MANIFEST_ENTRY_BLOCKED_MISSING_METADATA, rel, ["MANIFEST_METADATA_MISSING_LEAGUE_OR_SEASON"]
+    return MANIFEST_ENTRY_PREVIEW_READY, rel, warnings
 
 
 def build_trusted_xg_promotion_preview(
@@ -174,6 +231,7 @@ def build_trusted_xg_promotion_preview(
         join_coverage_pct=join_coverage_pct,
         acceptance_label=acceptance_label,
         promotion_label=label,
+        manifest_registration_status=MANIFEST_ENTRY_PREVIEW_ONLY,
         blocking_reasons=sorted(set(blocking)),
         warning_notes=sorted(set(warnings)),
     )
@@ -183,6 +241,11 @@ def build_trusted_xg_promotion_preview(
 def write_trusted_xg_manifest_entry_preview(
     result: TrustedXGPromotionResult,
     output_dir: str | Path = "outputs/xg_promotion_preview",
+    *,
+    manifest_xg_path: str | Path | None = None,
+    league: str | None = None,
+    season: str | int | None = None,
+    source_name: str | None = None,
 ) -> Path:
     output_root = Path(output_dir)
     output_root.mkdir(parents=True, exist_ok=True)
@@ -194,18 +257,23 @@ def write_trusted_xg_manifest_entry_preview(
         raise ValueError("manifest preview must not overwrite source, template, or target")
     if output_root.resolve() not in output.parents:
         raise ValueError("manifest preview must stay under output_dir")
+    status, manifest_rel_path, manifest_warnings = _manifest_status(manifest_xg_path, league, season)
+    target_file_path = _repo_relative_when_possible(result.target_path)
+    xg_file_path = manifest_rel_path or _repo_relative_when_possible(result.filled_preview_path)
     pd.DataFrame([{
         "manifest_id": _manifest_id(result.source_xg_path, result.target_path),
-        "xg_file_path": result.filled_preview_path,
-        "target_file_path": result.target_path,
-        "league": "",
-        "season": "",
+        "xg_file_path": xg_file_path,
+        "target_file_path": target_file_path,
+        "league": league or "",
+        "season": str(season or ""),
         "source_type": "MANUAL_XG_CSV",
+        "source_name": source_name or "",
         "data_role": "PRODUCTION",
         "is_demo": "false",
         "expected_rows": result.rows_template,
         "min_join_coverage_pct": result.join_coverage_pct,
-        "notes": "Preview only. Review before manually adding to production manifest.",
+        "manifest_registration_status": status,
+        "notes": "Preview only. Review before manually adding to production manifest. " + " ".join(manifest_warnings),
     }]).to_csv(output, index=False)
     return output
 
@@ -218,6 +286,10 @@ def run_trusted_xg_manifest_promotion(
     min_join_coverage: float = 95.0,
     *,
     write_manifest_preview: bool = True,
+    manifest_xg_path: str | Path | None = None,
+    league: str | None = None,
+    season: str | int | None = None,
+    source_name: str | None = None,
 ) -> TrustedXGPromotionResult:
     _filled, result = build_trusted_xg_promotion_preview(
         source_xg_path,
@@ -227,9 +299,22 @@ def run_trusted_xg_manifest_promotion(
         min_join_coverage=min_join_coverage,
     )
     manifest_preview_path = ""
+    status, _manifest_rel_path, manifest_warnings = _manifest_status(manifest_xg_path, league, season)
     if (
         write_manifest_preview
         and result.promotion_label in {TRUSTED_XG_PROMOTION_READY, TRUSTED_XG_PROMOTION_READY_WITH_WARNINGS}
     ):
-        manifest_preview_path = str(write_trusted_xg_manifest_entry_preview(result, output_dir=output_dir))
-    return TrustedXGPromotionResult(**{**result.to_dict(), "manifest_preview_path": manifest_preview_path})
+        manifest_preview_path = str(write_trusted_xg_manifest_entry_preview(
+            result,
+            output_dir=output_dir,
+            manifest_xg_path=manifest_xg_path,
+            league=league,
+            season=season,
+            source_name=source_name,
+        ))
+    return TrustedXGPromotionResult(**{
+        **result.to_dict(),
+        "manifest_preview_path": manifest_preview_path,
+        "manifest_registration_status": status,
+        "warning_notes": sorted(set(result.warning_notes + manifest_warnings)),
+    })

@@ -80,7 +80,10 @@ def run_workflow(
         target,
         target,
         output_dir=output_root / "xg_promotion_preview",
-        write_manifest_preview=True,
+        write_manifest_preview=False,
+        league="Bundesliga",
+        season="2024",
+        source_name="Understat Bundesliga 2024",
     )
     return {
         "alias_recommendation": alias_rec,
@@ -96,6 +99,7 @@ def run_workflow(
         "fill_preview_acceptance_label": acceptance.acceptance_label,
         "acceptance_label": promotion.acceptance_label,
         "promotion_label": promotion.promotion_label,
+        "manifest_registration_status": promotion.manifest_registration_status,
         "manifest_preview_path": promotion.manifest_preview_path,
         "aligned_source_path": date_summary["output_path"],
     }

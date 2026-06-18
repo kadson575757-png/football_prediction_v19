@@ -266,10 +266,39 @@ python scripts/build_understat_bundesliga_2024_xg_acceptance_preview.py
 
 The helper writes only under `outputs/`, leaves source and target CSVs unchanged, and writes a manifest-entry preview only. The production manifest remains review-only and is not modified automatically.
 
-## S. Safety Rules
+## S. Trusted xG Manifest Preview Hardening
+
+Phase 13.11 hardens manifest-entry previews before any real production manifest edit. Data acceptance and manifest registration are separate checks: `TRUSTED_XG_PROMOTION_READY` means the data preview passed acceptance, while `manifest_registration_status` says whether the manifest row is safe to review.
+
+Use a production-candidate manifest path instead of an `outputs/` file:
+
+```powershell
+data/trusted_xg_sources/accepted/understat_bundesliga_2024_manual_xg.csv
+```
+
+Build the hardened Bundesliga 2024 manifest preview:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_manifest_preview.py
+```
+
+The preview should use repo-relative paths such as:
+
+```text
+xg_file_path=data/trusted_xg_sources/accepted/understat_bundesliga_2024_manual_xg.csv
+target_file_path=data/processed/football_data_D1_2024_clean.csv
+league=Bundesliga
+season=2024
+```
+
+`outputs/` paths are runtime preview artifacts and must not become production manifest paths. Absolute local Windows paths are also unsafe for a shared production manifest because they are machine-specific. If no reviewed `manifest_xg_path`, league, or season is supplied, the manifest entry remains incomplete or preview-only.
+
+This phase still does not materialize the accepted production xG CSV automatically and does not edit the production manifest. xG remains inactive in model features until a later explicit integration phase.
+
+## T. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## T. What Still Does Not Happen Automatically
+## U. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.

@@ -21,6 +21,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", default=str(ROOT / "outputs" / "xg_promotion_preview"))
     parser.add_argument("--min-join-coverage", type=float, default=95.0)
     parser.add_argument("--no-write-manifest-preview", action="store_true")
+    parser.add_argument("--manifest-xg-path", default=None)
+    parser.add_argument("--league", default=None)
+    parser.add_argument("--season", default=None)
+    parser.add_argument("--source-name", default=None)
     return parser
 
 
@@ -33,6 +37,10 @@ def main(argv: list[str] | None = None) -> int:
         output_dir=args.output_dir,
         min_join_coverage=args.min_join_coverage,
         write_manifest_preview=not args.no_write_manifest_preview,
+        manifest_xg_path=args.manifest_xg_path,
+        league=args.league,
+        season=args.season,
+        source_name=args.source_name,
     )
     print(f"rows_template={result.rows_template}")
     print(f"rows_filled={result.rows_filled}")
@@ -43,6 +51,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"join_coverage_pct={result.join_coverage_pct}")
     print(f"acceptance_label={result.acceptance_label}")
     print(f"promotion_label={result.promotion_label}")
+    print(f"manifest_registration_status={result.manifest_registration_status}")
     print(f"filled_preview_path={result.filled_preview_path}")
     print(f"manifest_preview_path={result.manifest_preview_path}")
     return 0
