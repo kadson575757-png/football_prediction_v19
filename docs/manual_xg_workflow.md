@@ -200,10 +200,40 @@ python scripts/resolve_understat_xg_source.py --league Bundesliga --season 2024 
 
 `soccerdata` is optional. No xG values are inferred, and model behavior remains unchanged until a future accepted enrichment integration is explicitly implemented.
 
-## Q. Safety Rules
+## Q. Understat Join Diagnostics and Alias Map
+
+An Understat source can contain the same number of rows as a football-data target file and still match poorly when team names or match dates are represented differently. For example, 306 Understat rows can match only 90 target rows if exact `date + home_team + away_team` keys diverge.
+
+Run the join diagnostics before accepting or promoting any low-coverage fill preview:
+
+```powershell
+python scripts/audit_understat_join_diagnostics.py --source data/trusted_xg_sources/understat_xg_bundesliga_2024.csv --target data/processed/football_data_D1_2024_clean.csv
+```
+
+Review the generated unmatched rows, same-date team alias candidates, and plus/minus one-day date candidates under `outputs/diagnostics/`. If aliases are needed, start from:
+
+```powershell
+data/templates/understat_team_alias_map_template.csv
+```
+
+Audit the alias map:
+
+```powershell
+python scripts/audit_understat_team_alias_map.py --alias-map data/templates/understat_team_alias_map_template.csv
+```
+
+Apply reviewed aliases only to a preview copy:
+
+```powershell
+python scripts/apply_understat_team_alias_preview.py --source data/trusted_xg_sources/understat_xg_bundesliga_2024.csv --alias-map data/templates/understat_team_alias_map_template.csv
+```
+
+Then rerun fill, validation, and promotion preview. There is no fuzzy auto-fill, no automatic alias application, and no xG values are inferred or invented.
+
+## R. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## R. What Still Does Not Happen Automatically
+## S. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
