@@ -1,0 +1,10 @@
+﻿provider,league,season,source_team,target_team,alias_status,notes
+understat,Bundesliga,2024,Bayer Leverkusen,Leverkusen,accepted,Understat full name to football-data short name
+understat,Bundesliga,2024,Borussia Dortmund,Dortmund,accepted,Understat full name to football-data short name
+understat,Bundesliga,2024,Borussia M.Gladbach,M'gladbach,accepted,Understat exact source spelling to football-data short name
+understat,Bundesliga,2024,Eintracht Frankfurt,Ein Frankfurt,accepted,Understat full name to football-data short name
+understat,Bundesliga,2024,Mainz 05,Mainz,accepted,Understat full name to football-data short name
+understat,Bundesliga,2024,RasenBallsport Leipzig,RB Leipzig,accepted,Understat full name to football-data short name
+understat,Bundesliga,2024,St. Pauli,FC St Pauli,accepted,Understat exact source spelling to football-data short name
+understat,Bundesliga,2024,St Pauli,FC St Pauli,accepted,Normalized Understat spelling without dot
+understat,Bundesliga,2024,VfB Stuttgart,Stuttgart,accepted,Understat full name to football-data short name
