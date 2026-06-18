@@ -172,10 +172,38 @@ python scripts/show_trusted_xg_intake_commands.py
 
 Do not commit raw runtime HTML or payload files from `data/trusted_xg_sources/raw/`. Imported xG files still do not affect model behavior until a future accepted enrichment integration is explicitly implemented.
 
-## P. Safety Rules
+## P. Optional Understat Provider Bootstrap
+
+The optional Understat provider uses `soccerdata` only when you explicitly install and enable it. Check availability:
+
+```powershell
+python scripts/check_understat_optional_provider.py
+```
+
+Print the install command without installing:
+
+```powershell
+python scripts/bootstrap_understat_optional_provider.py
+```
+
+Explicit install:
+
+```powershell
+python scripts/bootstrap_understat_optional_provider.py --install
+```
+
+After installation, retry resolution:
+
+```powershell
+python scripts/resolve_understat_xg_source.py --league Bundesliga --season 2024 --allow-optional-provider --output-name understat_xg_bundesliga_2024.csv
+```
+
+`soccerdata` is optional. No xG values are inferred, and model behavior remains unchanged until a future accepted enrichment integration is explicitly implemented.
+
+## Q. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## Q. What Still Does Not Happen Automatically
+## R. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.

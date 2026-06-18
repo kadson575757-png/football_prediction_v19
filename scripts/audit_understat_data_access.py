@@ -18,6 +18,10 @@ from football_prediction_v19.importers.understat_data_access import (  # noqa: E
     parse_raw_understat_payload_or_html,
     validate_understat_normalized_xg,
 )
+from football_prediction_v19.importers.understat_optional_provider import (  # noqa: E402
+    check_understat_optional_provider,
+    get_understat_optional_provider_install_command,
+)
 
 OUTPUT_CSV = "understat_data_access_summary.csv"
 OUTPUT_MD = "understat_data_access_summary.md"
@@ -75,14 +79,6 @@ def build_table(root: Path = ROOT) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def optional_provider_available() -> bool:
-    try:
-        import soccerdata  # noqa: F401
-    except Exception:
-        return False
-    return True
-
-
 def explicit_fetch_available(root: Path = ROOT) -> bool:
     return (root / "scripts" / "fetch_understat_xg_source.py").exists()
 
@@ -97,6 +93,8 @@ def recommendation(table: pd.DataFrame, provider_available: bool = False, fetch_
             return "FIX_UNDERSTAT_RAW_PARSE"
     if provider_available:
         return "TRY_UNDERSTAT_OPTIONAL_PROVIDER"
+    if table.empty:
+        return "TRY_UNDERSTAT_OPTIONAL_PROVIDER_BOOTSTRAP"
     if table.empty:
         return "TRY_UNDERSTAT_LOCAL_EXPORT"
     if fetch_available:
@@ -115,7 +113,8 @@ def _section_table(df: pd.DataFrame, columns: list[str], limit: int = 40) -> lis
     return lines
 
 
-def build_markdown(table: pd.DataFrame, rec: str, provider_available: bool, fetch_available: bool) -> str:
+def build_markdown(table: pd.DataFrame, rec: str, provider_status, fetch_available: bool) -> str:
+    provider_available = provider_status.provider_label == "UNDERSTAT_OPTIONAL_PROVIDER_AVAILABLE"
     existing = table[table["kind"].eq("existing_normalized")] if not table.empty else pd.DataFrame()
     raw = table[table["kind"].eq("raw_understat")] if not table.empty else pd.DataFrame()
     blocked = table[~table["status"].isin(["READY", "RAW_PARSE_READY"])] if not table.empty else pd.DataFrame()
@@ -130,6 +129,9 @@ def build_markdown(table: pd.DataFrame, rec: str, provider_available: bool, fetc
         f"- raw Understat files: {len(raw)}",
         f"- blocked modes/files: {len(blocked)}",
         f"- optional provider available: {provider_available}",
+        f"- soccerdata installed: {provider_status.installed}",
+        f"- provider_label: {provider_status.provider_label}",
+        f"- install_command: {get_understat_optional_provider_install_command() if not provider_available else ''}",
         f"- explicit fetch CLI available: {fetch_available}",
         "",
         "## B. Existing Normalized Understat Sources",
@@ -177,10 +179,11 @@ def run(root: Path = ROOT, output_dir: Path | None = None) -> tuple[pd.DataFrame
     output_dir = output_dir or (root / "outputs" / "diagnostics")
     output_dir.mkdir(parents=True, exist_ok=True)
     table = build_table(root)
-    provider = optional_provider_available()
+    provider_status = check_understat_optional_provider()
+    provider = provider_status.provider_label == "UNDERSTAT_OPTIONAL_PROVIDER_AVAILABLE"
     fetch = explicit_fetch_available(root)
     rec = recommendation(table, provider_available=provider, fetch_available=fetch)
-    markdown = build_markdown(table, rec, provider, fetch)
+    markdown = build_markdown(table, rec, provider_status, fetch)
     table.to_csv(output_dir / OUTPUT_CSV, index=False)
     (output_dir / OUTPUT_MD).write_text(markdown, encoding="utf-8")
     return table, markdown, rec

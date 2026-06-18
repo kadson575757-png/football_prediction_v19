@@ -23,6 +23,12 @@ from football_prediction_v19.importers.understat_fetch import (
     parse_understat_matches_from_html,
     parse_understat_matches_from_runtime_payload,
 )
+from football_prediction_v19.importers.understat_optional_provider import (
+    check_understat_optional_provider,
+    get_understat_optional_provider_install_command,
+    load_soccerdata_understat_provider,
+    normalize_soccerdata_understat_output,
+)
 from football_prediction_v19.importers.understat_trusted_xg import (
     OUTPUT_COLUMNS,
     _normalize_by_schema,
@@ -250,12 +256,14 @@ def parse_raw_understat_payload_or_html(raw_path: str | Path, league: str | None
 
 
 def import_understat_from_optional_provider(league: str, season: str | int) -> pd.DataFrame:
+    status = check_understat_optional_provider()
+    if not status.installed:
+        raise ImportError("SOCCERDATA_UNAVAILABLE")
+    if status.provider_label != "UNDERSTAT_OPTIONAL_PROVIDER_AVAILABLE":
+        raise ImportError(status.provider_label)
     try:
-        import soccerdata as sd  # type: ignore
-    except Exception as exc:
-        raise ImportError("SOCCERDATA_UNAVAILABLE") from exc
-    try:
-        provider = sd.Understat(leagues=str(league), seasons=str(season))
+        provider_class = load_soccerdata_understat_provider()
+        provider = provider_class(leagues=str(league), seasons=str(season))
         if hasattr(provider, "read_schedule"):
             raw = provider.read_schedule()
         elif hasattr(provider, "read_league_match_stats"):
@@ -266,7 +274,7 @@ def import_understat_from_optional_provider(league: str, season: str | int) -> p
         raise RuntimeError(f"SOCCERDATA_UNDERSTAT_FAILED: {exc}") from exc
     if not isinstance(raw, pd.DataFrame):
         raw = pd.DataFrame(raw)
-    normalized = _normalize_provider_frame(raw)
+    normalized = normalize_soccerdata_understat_output(raw, league=league, season=season)
     errors = validate_understat_normalized_xg(normalized)
     if errors:
         raise ValueError(" | ".join(errors))
@@ -332,6 +340,22 @@ def _normalise_modes(modes: list[str] | tuple[str, ...] | None, source: str | Pa
     return out
 
 
+def _resolve_requested_modes(
+    modes: list[str] | tuple[str, ...] | None,
+    source: str | Path | None,
+    raw_dir: str | Path,
+    allow_optional_provider: bool,
+    allow_network: bool,
+) -> list[str]:
+    requested = _normalise_modes(modes, source, raw_dir)
+    if modes is None:
+        if allow_optional_provider and "optional_provider" not in requested:
+            requested.append("optional_provider")
+        if allow_network and "explicit_fetch" not in requested:
+            requested.append("explicit_fetch")
+    return requested
+
+
 def _label_for_validation_error(errors: list[str], raw: bool = False) -> str:
     text = " | ".join(errors)
     if "FileExistsError" in text:
@@ -356,7 +380,7 @@ def resolve_understat_trusted_xg_source(
     allow_optional_provider: bool = False,
 ) -> UnderstatDataAccessResult:
     try:
-        requested_modes = _normalise_modes(modes, source, raw_dir)
+        requested_modes = _resolve_requested_modes(modes, source, raw_dir, allow_optional_provider, allow_network)
     except ValueError as exc:
         return _blocked(str(exc), [str(exc)], league=league, season=season)
     gated_modes = []
@@ -430,6 +454,7 @@ def resolve_understat_trusted_xg_source(
             except ImportError as exc:
                 errors_by_mode.append(f"optional_provider:{exc}")
                 warnings.append("optional_provider unavailable; install soccerdata separately to use this mode.")
+                warnings.append("install_command=" + get_understat_optional_provider_install_command())
             except FileExistsError as exc:
                 return _blocked(UNDERSTAT_ACCESS_BLOCKED_OUTPUT_EXISTS, [str(exc)], league=league, season=season, source_mode=mode, source="soccerdata.Understat", attempted_modes=attempted, warnings=warnings)
             except Exception as exc:

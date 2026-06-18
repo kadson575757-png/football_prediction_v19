@@ -314,7 +314,7 @@ def test_audit_understat_data_access_writes_csv_and_markdown(tmp_path):
     table, markdown, rec = access_audit.run(root=tmp_path, output_dir=output_dir)
 
     assert table.empty
-    assert rec == "TRY_UNDERSTAT_LOCAL_EXPORT"
+    assert rec == "TRY_UNDERSTAT_OPTIONAL_PROVIDER_BOOTSTRAP"
     assert (output_dir / "understat_data_access_summary.csv").exists()
     assert (output_dir / "understat_data_access_summary.md").exists()
     assert "Phase 13.7 is diagnostic/foundation only. No xG values were inferred or invented." in markdown
@@ -322,7 +322,7 @@ def test_audit_understat_data_access_writes_csv_and_markdown(tmp_path):
 
 def test_audit_recommends_try_understat_local_export_when_no_sources_exist(tmp_path):
     table = access_audit.build_table(tmp_path)
-    assert access_audit.recommendation(table, provider_available=False, fetch_available=True) == "TRY_UNDERSTAT_LOCAL_EXPORT"
+    assert access_audit.recommendation(table, provider_available=False, fetch_available=True) == "TRY_UNDERSTAT_OPTIONAL_PROVIDER_BOOTSTRAP"
 
 
 def test_gitignore_contains_raw_trusted_xg_and_diagnostics_outputs():

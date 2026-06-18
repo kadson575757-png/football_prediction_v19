@@ -14,6 +14,10 @@ from football_prediction_v19.importers.understat_data_access import (  # noqa: E
     MODES,
     resolve_understat_trusted_xg_source,
 )
+from football_prediction_v19.importers.understat_optional_provider import (  # noqa: E402
+    check_understat_optional_provider,
+    get_understat_optional_provider_install_command,
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -58,6 +62,14 @@ def main(argv: list[str] | None = None) -> int:
     print(f"output_path={result.output_path}")
     print(f"rows_normalized={result.rows_normalized}")
     print(f"access_label={result.access_label}")
+    if args.allow_optional_provider:
+        provider = check_understat_optional_provider()
+        print(f"optional_provider_available={provider.installed and provider.provider_label == 'UNDERSTAT_OPTIONAL_PROVIDER_AVAILABLE'}")
+        if provider.provider_label != "UNDERSTAT_OPTIONAL_PROVIDER_AVAILABLE":
+            print(f"install_command={get_understat_optional_provider_install_command()}")
+            print("next_step_hint=Run scripts/bootstrap_understat_optional_provider.py --install, then retry with --allow-optional-provider.")
+    elif result.access_label != "UNDERSTAT_ACCESS_READY":
+        print("next_step_hint=Use --allow-optional-provider to try the optional soccerdata provider, or provide a local Understat export.")
     print(f"validation_errors={_join(result.validation_errors)}")
     print(f"warning_notes={_join(result.warning_notes)}")
     return 0
