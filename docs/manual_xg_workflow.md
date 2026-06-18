@@ -230,10 +230,46 @@ python scripts/apply_understat_team_alias_preview.py --source data/trusted_xg_so
 
 Then rerun fill, validation, and promotion preview. There is no fuzzy auto-fill, no automatic alias application, and no xG values are inferred or invented.
 
-## R. Safety Rules
+## R. Understat Alias and Date Alignment Preview Workflow
+
+When a reviewed Understat alias map exists, apply it only to a preview copy:
+
+```powershell
+python scripts/apply_understat_team_alias_preview.py --source data/trusted_xg_sources/understat_xg_bundesliga_2024.csv --alias-map data/trusted_xg_sources/understat_team_alias_map_bundesliga_2024.csv
+```
+
+If a reviewed fixture-date mismatch remains, start from:
+
+```powershell
+data/templates/understat_date_alignment_template.csv
+```
+
+Audit the date alignment map:
+
+```powershell
+python scripts/audit_understat_date_alignment_map.py --date-map data/trusted_xg_sources/understat_date_alignment_bundesliga_2024.csv
+```
+
+Apply accepted date alignments only to a preview copy:
+
+```powershell
+python scripts/apply_understat_date_alignment_preview.py --source outputs/xg_alias_preview/understat_xg_bundesliga_2024_understat_alias_preview.csv --date-map data/trusted_xg_sources/understat_date_alignment_bundesliga_2024.csv
+```
+
+For Bundesliga 2024, the reviewed date-alignment case is `FC St Pauli` vs `Holstein Kiel`: Understat source date `2024-11-30`, football-data target date `2024-11-29`. This is a reviewed date-key alignment only; no xG value is inferred or changed.
+
+The local helper runs the full preview chain:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_xg_acceptance_preview.py
+```
+
+The helper writes only under `outputs/`, leaves source and target CSVs unchanged, and writes a manifest-entry preview only. The production manifest remains review-only and is not modified automatically.
+
+## S. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## S. What Still Does Not Happen Automatically
+## T. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
