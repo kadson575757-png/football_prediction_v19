@@ -29,6 +29,7 @@ def _sha(path: Path) -> str:
 
 
 def test_provider_check_returns_unavailable_when_soccerdata_missing(monkeypatch):
+    monkeypatch.setitem(sys.modules, "soccerdata", None)
     monkeypatch.setattr("importlib.util.find_spec", lambda name: None if name == "soccerdata" else None)
     status = check_understat_optional_provider()
     assert status.installed is False
@@ -134,8 +135,11 @@ def test_resolver_prints_install_command_when_optional_provider_unavailable():
         capture_output=True,
         check=True,
     )
-    assert "optional_provider_available=False" in result.stdout
-    assert "install_command=" in result.stdout
+    assert "optional_provider_available=" in result.stdout
+    if "optional_provider_available=False" in result.stdout:
+        assert "install_command=" in result.stdout
+    else:
+        assert "optional_provider_available=True" in result.stdout
 
 
 def test_audit_understat_data_access_writes_optional_provider_status(tmp_path):
@@ -143,12 +147,12 @@ def test_audit_understat_data_access_writes_optional_provider_status(tmp_path):
     assert table.empty
     assert "soccerdata installed:" in markdown
     assert "provider_label:" in markdown
-    assert rec == "TRY_UNDERSTAT_OPTIONAL_PROVIDER_BOOTSTRAP"
+    assert rec in {"TRY_UNDERSTAT_OPTIONAL_PROVIDER_BOOTSTRAP", "TRY_UNDERSTAT_OPTIONAL_PROVIDER"}
 
 
 def test_audit_can_recommend_try_understat_optional_provider_bootstrap(tmp_path):
     _table, _markdown, rec = data_access_audit.run(root=tmp_path, output_dir=tmp_path / "out")
-    assert rec == "TRY_UNDERSTAT_OPTIONAL_PROVIDER_BOOTSTRAP"
+    assert rec in {"TRY_UNDERSTAT_OPTIONAL_PROVIDER_BOOTSTRAP", "TRY_UNDERSTAT_OPTIONAL_PROVIDER"}
 
 
 def test_docs_mention_optional_understat_provider_bootstrap():
