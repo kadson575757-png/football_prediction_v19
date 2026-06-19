@@ -469,10 +469,36 @@ Legacy audits may still say `ADD_MANUAL_XG_VALUES` while manifest readiness and 
 
 A future explicit integration phase is required before xG can influence predictions, probabilities, market ranking, staking, or ROI logic.
 
-## Y. Safety Rules
+## Y. Team-level xG Reporting Aggregates
+
+Phase 13.17 builds team-level reporting aggregates from the match-level xG reporting preview. It produces one row per team with goals for/against, xG for/against, goal and xG differences, points, and home/away splits.
+
+Build generic team aggregates:
+
+```powershell
+python scripts/build_team_xg_reporting_aggregates.py --manifest-id trusted_xg_understat_bundesliga_2024_manual_xg --write-preview
+```
+
+Build and audit Bundesliga 2024 team aggregates:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_team_xg_reporting_aggregates.py
+```
+
+Audit team aggregate previews:
+
+```powershell
+python scripts/audit_team_xg_reporting_aggregates.py
+```
+
+These outputs are reporting/diagnostic previews only. They can support human analysis of team xG profiles, but they cannot influence model predictions, probabilities, market ranking, staking, or ROI logic until a later explicit integration phase.
+
+Legacy audits may still say `ADD_MANUAL_XG_VALUES` while manifest readiness, reporting previews, and team aggregate previews are ready. That remains expected because production target CSVs are intentionally not modified in place.
+
+## Z. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## Z. What Still Does Not Happen Automatically
+## AA. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
