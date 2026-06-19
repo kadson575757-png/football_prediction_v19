@@ -441,10 +441,38 @@ Because of this separation, `scripts/audit_xg_enrichment_contracts.py` and `scri
 
 xG can now be used for reporting and diagnostic previews only. A later explicit integration phase is required before xG can influence model features, predictions, probabilities, market tiers, or recommendations.
 
-## X. Safety Rules
+## X. xG Reporting Preview Layer
+
+Phase 13.16 builds a reporting-only match-level xG preview from the ready manifest-backed enrichment chain. It adds reporting columns such as `xg_total`, `xg_diff_home`, `xg_result_label`, `actual_result_label`, and `xg_result_matches_actual` to a runtime CSV under `outputs/xg_reporting_preview/`.
+
+Build the generic reporting preview:
+
+```powershell
+python scripts/build_xg_reporting_preview.py --manifest-id trusted_xg_understat_bundesliga_2024_manual_xg --write-preview
+```
+
+Build and audit the Bundesliga 2024 reporting preview:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_xg_reporting_preview.py
+```
+
+Audit reporting previews:
+
+```powershell
+python scripts/audit_xg_reporting_preview.py
+```
+
+This layer can support diagnostics and reporting only. It does not make xG a model feature, does not change predictions or probabilities, and does not affect market ranking, staking, ROI, or `SUPER_A_TIER`.
+
+Legacy audits may still say `ADD_MANUAL_XG_VALUES` while manifest readiness and reporting preview are ready. That is expected because the legacy audits inspect whether production target CSV files themselves contain xG values, while Phase 13.16 writes a separate runtime reporting preview and intentionally leaves production targets untouched.
+
+A future explicit integration phase is required before xG can influence predictions, probabilities, market ranking, staking, or ROI logic.
+
+## Y. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## Y. What Still Does Not Happen Automatically
+## Z. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
