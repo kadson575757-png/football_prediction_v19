@@ -295,10 +295,45 @@ season=2024
 
 This phase still does not materialize the accepted production xG CSV automatically and does not edit the production manifest. xG remains inactive in model features until a later explicit integration phase.
 
-## T. Safety Rules
+## T. Accepted Trusted xG Artifact Workflow
+
+Phase 13.12 adds a guarded accepted-artifact step. The raw trusted source, preview outputs, accepted artifact, and production manifest are separate things:
+
+- Raw trusted source: `data/trusted_xg_sources/understat_xg_bundesliga_2024.csv`
+- Preview outputs: runtime files under `outputs/`
+- Accepted artifact: reviewed CSV under `data/trusted_xg_sources/accepted/`
+- Production manifest: still review-only and never edited automatically
+
+Preview the accepted artifact materialization:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_accepted_artifact_preview.py
+```
+
+Materialize only after full validation:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_accepted_artifact_preview.py --write
+```
+
+The accepted artifact path is:
+
+```text
+data/trusted_xg_sources/accepted/understat_bundesliga_2024_manual_xg.csv
+```
+
+The materializer rejects `outputs/` paths, unsafe absolute paths, missing xG values, invalid xG values, and low join coverage. It does not modify the raw source, target, model inputs, or production manifest. xG remains inactive in model features until a later explicit integration phase.
+
+Audit accepted artifacts:
+
+```powershell
+python scripts/audit_accepted_trusted_xg_artifacts.py
+```
+
+## U. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## U. What Still Does Not Happen Automatically
+## V. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
