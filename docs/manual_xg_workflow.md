@@ -374,10 +374,40 @@ The registration script rejects `outputs/` paths, absolute local Windows product
 
 Registered xG is accepted data only. A future explicit integration phase is still required before xG can influence model features, predictions, probabilities, market tiers, or recommendations.
 
-## V. Safety Rules
+## V. Manifest-Backed xG Enrichment Preview
+
+Phase 13.14 builds a manifest-backed enrichment preview. It reads accepted production manifest entries, joins the accepted xG artifact to the registered target file by exact date/home/away keys, and writes a preview CSV only under `outputs/xg_enrichment_preview/`.
+
+Build the generic manifest-backed preview:
+
+```powershell
+python scripts/build_manifest_xg_enrichment_preview.py --manifest-id trusted_xg_understat_bundesliga_2024_manual_xg --write-preview
+```
+
+Build and audit the reviewed Bundesliga 2024 preview:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_manifest_xg_enrichment_preview.py
+```
+
+Audit preview files:
+
+```powershell
+python scripts/audit_manifest_xg_enrichment_preview.py
+```
+
+The layers remain separate:
+
+- Accepted artifact: `data/trusted_xg_sources/accepted/understat_bundesliga_2024_manual_xg.csv`
+- Production target: `data/processed/football_data_D1_2024_clean.csv`
+- Enriched preview: runtime CSV under `outputs/xg_enrichment_preview/`
+
+The enriched preview is not a model input yet. It is a review artifact proving the manifest-backed join can preserve target identity columns and add accepted `home_xg`/`away_xg` without editing the target file. A future explicit integration phase is required before xG can influence predictions, probabilities, market tiers, or recommendations.
+
+## W. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## W. What Still Does Not Happen Automatically
+## X. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
