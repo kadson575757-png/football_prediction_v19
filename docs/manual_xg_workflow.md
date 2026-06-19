@@ -404,10 +404,47 @@ The layers remain separate:
 
 The enriched preview is not a model input yet. It is a review artifact proving the manifest-backed join can preserve target identity columns and add accepted `home_xg`/`away_xg` without editing the target file. A future explicit integration phase is required before xG can influence predictions, probabilities, market tiers, or recommendations.
 
-## W. Safety Rules
+## W. Manifest-backed xG Readiness Audit
+
+Phase 13.15 adds a readiness audit for the full reviewed chain:
+
+```text
+raw trusted source -> accepted artifact -> manifest registration -> enrichment preview
+```
+
+Run the generic readiness audit:
+
+```powershell
+python scripts/audit_manifest_xg_readiness.py
+```
+
+Run the Bundesliga 2024 readiness report:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_xg_readiness_report.py
+```
+
+Readiness means the accepted artifact is registered, repo-relative, present under `data/trusted_xg_sources/accepted/`, joins to the registered target with the required coverage, and can be used for reporting/diagnostic previews. The model integration status remains:
+
+```text
+XG_MODEL_INTEGRATION_NOT_ACTIVE_BY_DESIGN
+```
+
+This creates a separate distinction:
+
+- Production target lacks xG values: the target CSV is intentionally not modified in place.
+- Accepted artifact registered in manifest: reviewed xG data exists outside the target CSV.
+- Manifest-backed enrichment preview ready: reporting/diagnostic preview can be built under `outputs/`.
+- xG model integration not active by design: xG still cannot influence predictions or markets.
+
+Because of this separation, `scripts/audit_xg_enrichment_contracts.py` and `scripts/audit_data_contracts.py` may still return `ADD_MANUAL_XG_VALUES`. Those scripts audit production target files themselves, not the manifest-backed reporting preview chain.
+
+xG can now be used for reporting and diagnostic previews only. A later explicit integration phase is required before xG can influence model features, predictions, probabilities, market tiers, or recommendations.
+
+## X. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## X. What Still Does Not Happen Automatically
+## Y. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
