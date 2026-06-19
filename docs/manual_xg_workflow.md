@@ -330,10 +330,54 @@ Audit accepted artifacts:
 python scripts/audit_accepted_trusted_xg_artifacts.py
 ```
 
-## U. Safety Rules
+## U. Accepted xG Manifest Registration
+
+Phase 13.13 registers a reviewed accepted artifact in the manual xG manifest. Registration is metadata only: it records which accepted xG CSV belongs to which target match CSV, league, season, row count, and required join coverage.
+
+The three production-facing layers remain separate:
+
+- Raw trusted source: provider export kept under `data/trusted_xg_sources/`
+- Accepted artifact: reviewed, fully accepted CSV under `data/trusted_xg_sources/accepted/`
+- Manifest registration: repo-relative manifest row that points to the accepted artifact and target file
+
+Dry-run the registration:
+
+```powershell
+python scripts/register_accepted_xg_manifest_entry.py
+```
+
+Write the reviewed Bundesliga 2024 entry only after the dry-run is clean:
+
+```powershell
+python scripts/register_accepted_xg_manifest_entry.py --write
+```
+
+Audit the registration:
+
+```powershell
+python scripts/audit_accepted_xg_manifest_registration.py
+```
+
+The reviewed entry is:
+
+```text
+manifest_id=trusted_xg_understat_bundesliga_2024_manual_xg
+xg_file_path=data/trusted_xg_sources/accepted/understat_bundesliga_2024_manual_xg.csv
+target_file_path=data/processed/football_data_D1_2024_clean.csv
+league=Bundesliga
+season=2024
+expected_rows=306
+min_join_coverage_pct=100.0
+```
+
+The registration script rejects `outputs/` paths, absolute local Windows production paths, missing league/season metadata, missing artifacts, row-count mismatches, and join coverage below the manifest requirement. It does not modify the raw Understat source, target match CSV, accepted artifact values, or model inputs.
+
+Registered xG is accepted data only. A future explicit integration phase is still required before xG can influence model features, predictions, probabilities, market tiers, or recommendations.
+
+## V. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## V. What Still Does Not Happen Automatically
+## W. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.

@@ -82,7 +82,12 @@ def test_demo_manifest_row_is_not_counted_as_production():
     demo = table[table["manifest_id"] == "demo_manual_xg_acceptance"].iloc[0]
     assert demo["is_demo"] == True
     assert demo["production_accepted"] == False
-    assert summary.accepted_production_entries == 0
+    trusted = table[table["manifest_id"] == "trusted_xg_understat_bundesliga_2024_manual_xg"]
+    if not trusted.empty:
+        assert trusted.iloc[0]["production_accepted"] == True
+        assert summary.accepted_production_entries == 1
+    else:
+        assert summary.accepted_production_entries == 0
 
 
 def test_blank_production_placeholder_is_invalid_incomplete():
