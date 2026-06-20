@@ -808,10 +808,30 @@ This phase does not make live network calls, scrape websites, fetch API data, ru
 
 This is the final bridge before single-match analysis report generation. Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
 
-## AL. Safety Rules
+## AL. Single Match Analysis Report Preview
+
+Phase 16.2 creates the first preview-only single-match analysis report from the local analysis input bundle.
+
+Build the single-match report preview:
+
+```powershell
+python scripts/build_single_match_analysis_report_preview_helper.py
+```
+
+Audit the single-match report preview:
+
+```powershell
+python scripts/audit_single_match_analysis_report_preview.py
+```
+
+This phase does not make live network calls, scrape websites, fetch API data, run model predictions, or generate betting/staking recommendations. It is the first analysis-facing preview layer and uses only the local analysis input bundle.
+
+Future phases can enrich the report with xG reporting packs, team aggregates, rolling form, and matchup context. Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
+
+## AM. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AM. What Still Does Not Happen Automatically
+## AN. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
