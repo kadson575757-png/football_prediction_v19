@@ -582,10 +582,38 @@ The reporting pack is for diagnostics and human review only. xG is still not a m
 
 Legacy audits may still say `ADD_MANUAL_XG_VALUES` while manifest readiness and the reporting pack are ready. That remains expected because legacy audits inspect whether production target CSV files themselves contain xG values, while the reporting pack intentionally uses separate runtime preview artifacts.
 
-## AC. Safety Rules
+## AC. xG Reporting Layer Closure Audit
+
+Phase 13.21 closes the reporting-only xG layer for human diagnostics. The closure audit confirms that the accepted artifact, production manifest registration, enrichment preview, manifest readiness audit, match-level reporting preview, team aggregates, rolling form, matchup preview, and reporting pack are all available as runtime preview/reporting artifacts.
+
+Run the generic closure audit:
+
+```powershell
+python scripts/audit_xg_reporting_layer_closure.py --manifest-id trusted_xg_understat_bundesliga_2024_manual_xg
+```
+
+Run the Bundesliga 2024 closure helper:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_xg_reporting_layer_closure.py
+```
+
+The expected closure status is:
+
+```text
+XG_REPORTING_LAYER_COMPLETE
+```
+
+This means xG reporting is ready for human diagnostics and review only. It does not activate xG as a model feature, does not change predictions or probabilities, does not change market ranking or recommended market logic, and does not affect betting, staking, ROI, stake sizing, or `SUPER_A_TIER`.
+
+Legacy audits may still say `ADD_MANUAL_XG_VALUES` because production target CSVs are intentionally not modified in place. The closure audit records that as acceptable and non-blocking for the reporting layer.
+
+Any future xG model integration requires a separate explicit phase with stronger validation, leakage checks, replay impact analysis, and safety review before xG can influence model behavior.
+
+## AD. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AD. What Still Does Not Happen Automatically
+## AE. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
