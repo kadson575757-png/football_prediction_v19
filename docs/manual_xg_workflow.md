@@ -828,10 +828,30 @@ This phase does not make live network calls, scrape websites, fetch API data, ru
 
 Future phases can enrich the report with xG reporting packs, team aggregates, rolling form, and matchup context. Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
 
-## AM. Safety Rules
+## AM. Single Match Analysis Context Enrichment Preview
+
+Phase 16.3 enriches the preview-only single-match report with available local context layers. Optional xG, team aggregate, rolling form, and matchup context may be missing; missing optional context is reported as a warning and is not inferred or invented.
+
+Build the context enrichment preview:
+
+```powershell
+python scripts/build_single_match_context_enrichment_preview_helper.py
+```
+
+Audit the context enrichment preview:
+
+```powershell
+python scripts/audit_single_match_context_enrichment_preview.py
+```
+
+This phase does not make live network calls, scrape websites, fetch API data, run model predictions, or generate betting/staking recommendations. Future phases can connect enriched report context to richer human-facing analysis templates.
+
+Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
+
+## AN. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AN. What Still Does Not Happen Automatically
+## AO. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
