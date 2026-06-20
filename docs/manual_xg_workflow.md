@@ -521,10 +521,38 @@ Rolling form deliberately avoids current-match leakage: each row's rolling value
 
 Legacy audits may still say `ADD_MANUAL_XG_VALUES` while manifest readiness, reporting, aggregate, and rolling previews are ready. That remains expected because production target CSVs are intentionally not modified in place.
 
-## AA. Safety Rules
+## AA. xG Matchup Reporting Preview
+
+Phase 13.19 builds match-level matchup reporting previews by joining the accepted match-level xG reporting preview with pre-match rolling xG form for the home and away teams. It writes runtime CSVs under `outputs/xg_reporting_preview/` and leaves source, target, accepted artifact, and manifest files unchanged.
+
+Build the generic matchup preview:
+
+```powershell
+python scripts/build_xg_matchup_reporting_preview.py --manifest-id trusted_xg_understat_bundesliga_2024_manual_xg --write-preview
+```
+
+Build and audit Bundesliga 2024 matchup reporting:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_xg_matchup_reporting_preview.py
+```
+
+Audit matchup previews:
+
+```powershell
+python scripts/audit_xg_matchup_reporting_preview.py
+```
+
+The matchup preview deliberately uses pre-match rolling context only. Current-match `home_xg` and `away_xg` remain reporting columns, while rolling matchup values come from each team's prior matches within the configured window.
+
+These outputs are diagnostic/reporting previews only. They cannot influence model features, predictions, probabilities, market ranking, staking, ROI, or `SUPER_A_TIER` until a later explicit integration phase.
+
+Legacy audits may still say `ADD_MANUAL_XG_VALUES` while manifest readiness, reporting, aggregate, rolling, and matchup previews are ready. That remains expected because production target CSVs are intentionally not modified in place.
+
+## AB. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AB. What Still Does Not Happen Automatically
+## AC. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
