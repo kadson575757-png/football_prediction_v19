@@ -549,10 +549,43 @@ These outputs are diagnostic/reporting previews only. They cannot influence mode
 
 Legacy audits may still say `ADD_MANUAL_XG_VALUES` while manifest readiness, reporting, aggregate, rolling, and matchup previews are ready. That remains expected because production target CSVs are intentionally not modified in place.
 
-## AB. Safety Rules
+## AB. xG Reporting Pack Preview
+
+Phase 13.20 builds a reporting pack preview that bundles the ready reporting-only xG layers into a single index and markdown summary:
+
+- match-level xG reporting preview
+- team xG reporting aggregates
+- rolling xG form reporting
+- xG matchup reporting preview
+
+Build the generic reporting pack:
+
+```powershell
+python scripts/build_xg_reporting_pack_preview.py --manifest-id trusted_xg_understat_bundesliga_2024_manual_xg --write-preview
+```
+
+Build and audit the Bundesliga 2024 reporting pack:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_xg_reporting_pack_preview.py
+```
+
+Audit reporting pack previews:
+
+```powershell
+python scripts/audit_xg_reporting_pack_preview.py
+```
+
+The pack writes only runtime artifacts under `outputs/xg_reporting_preview/`, including `xg_reporting_pack_index.csv` and `xg_reporting_pack_summary.md`. It does not modify the production target CSV, accepted xG artifact, raw Understat source, or production manifest.
+
+The reporting pack is for diagnostics and human review only. xG is still not a model feature and cannot influence predictions, probabilities, market ranking, staking, ROI, or `SUPER_A_TIER` until a later explicit integration phase.
+
+Legacy audits may still say `ADD_MANUAL_XG_VALUES` while manifest readiness and the reporting pack are ready. That remains expected because legacy audits inspect whether production target CSV files themselves contain xG values, while the reporting pack intentionally uses separate runtime preview artifacts.
+
+## AC. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AC. What Still Does Not Happen Automatically
+## AD. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
