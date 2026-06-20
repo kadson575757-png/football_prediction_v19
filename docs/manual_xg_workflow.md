@@ -788,10 +788,30 @@ This is the bridge toward analysis-ready input bundles. Future phases can implem
 
 Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
 
-## AK. Safety Rules
+## AK. Analysis Input Bundle Preview
+
+Phase 16.1 converts local importer preview output into an analysis-ready input bundle. The default input is the normalized `canonical_match` preview from `outputs/importer_preview/normalized/canonical_match_preview.csv`.
+
+Build the analysis input bundle preview:
+
+```powershell
+python scripts/build_analysis_input_bundle_preview_helper.py
+```
+
+Audit the analysis input bundle preview:
+
+```powershell
+python scripts/audit_analysis_input_bundle_preview.py
+```
+
+This phase does not make live network calls, scrape websites, fetch API data, run model predictions, or run betting/staking logic. Missing values are not inferred or invented, and importer outputs remain separate from model integration until a later explicit phase.
+
+This is the final bridge before single-match analysis report generation. Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
+
+## AL. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AL. What Still Does Not Happen Automatically
+## AM. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
