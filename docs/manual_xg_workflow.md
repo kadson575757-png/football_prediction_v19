@@ -848,10 +848,30 @@ This phase does not make live network calls, scrape websites, fetch API data, ru
 
 Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
 
-## AN. Safety Rules
+## AN. Human-Facing Single Match Analysis Report Preview
+
+Phase 16.4 converts enriched local preview context into the first human-readable match analysis report preview. Optional xG, team aggregate, rolling form, and matchup context may be missing; missing optional context is reported and is not inferred.
+
+Build the human-facing report preview:
+
+```powershell
+python scripts/build_human_match_analysis_report_preview_helper.py
+```
+
+Audit the human-facing report preview:
+
+```powershell
+python scripts/audit_human_match_analysis_report_preview.py
+```
+
+This phase does not make live network calls, scrape websites, fetch API data, run model predictions, or generate betting/staking recommendations. It is the first human-facing analysis preview layer.
+
+Future phases can enrich the report with real provider adapters, richer xG context, and eventually controlled prediction integration. Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
+
+## AO. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AO. What Still Does Not Happen Automatically
+## AP. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
