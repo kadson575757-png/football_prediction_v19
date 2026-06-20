@@ -610,10 +610,42 @@ Legacy audits may still say `ADD_MANUAL_XG_VALUES` because production target CSV
 
 Any future xG model integration requires a separate explicit phase with stronger validation, leakage checks, replay impact analysis, and safety review before xG can influence model behavior.
 
-## AD. Safety Rules
+## AD. Analysis Export Bundle Preview
+
+Phase 14.1 builds a human-analysis export bundle from the ready xG reporting layer. It copies normalized runtime preview CSVs into:
+
+```text
+outputs/analysis_export_preview/<manifest_id>/
+```
+
+The bundle includes match-level xG reporting, team xG aggregates, rolling xG form, matchup reporting, the reporting pack index, and the closure summary when available. It also writes `analysis_export_bundle_index.csv` and `analysis_export_bundle_summary.md`.
+
+Build the generic export bundle:
+
+```powershell
+python scripts/build_analysis_export_bundle_preview.py --manifest-id trusted_xg_understat_bundesliga_2024_manual_xg --write-preview
+```
+
+Build and audit the Bundesliga 2024 export bundle:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_analysis_export_bundle_preview.py
+```
+
+Audit export bundles:
+
+```powershell
+python scripts/audit_analysis_export_bundle_preview.py
+```
+
+This layer is designed for manual review, spreadsheet analysis, and future Excel/dashboard workflows. It does not modify production target CSVs, accepted xG artifacts, raw trusted sources, or the production manifest.
+
+xG remains inactive in model predictions, probabilities, market ranking, recommended market logic, staking, ROI, stake sizing, and `SUPER_A_TIER`. Any future xG model integration requires a separate explicit phase with stronger validation and impact analysis.
+
+## AE. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AE. What Still Does Not Happen Automatically
+## AF. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
