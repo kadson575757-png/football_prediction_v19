@@ -642,10 +642,42 @@ This layer is designed for manual review, spreadsheet analysis, and future Excel
 
 xG remains inactive in model predictions, probabilities, market ranking, recommended market logic, staking, ROI, stake sizing, and `SUPER_A_TIER`. Any future xG model integration requires a separate explicit phase with stronger validation and impact analysis.
 
-## AE. Safety Rules
+## AE. Analysis Excel Workbook Preview
+
+Phase 14.2 converts the Phase 14.1 analysis export bundle into a human-friendly Excel workbook preview:
+
+```text
+outputs/analysis_export_preview/<manifest_id>/analysis_export_workbook_preview.xlsx
+```
+
+Build the generic workbook preview:
+
+```powershell
+python scripts/build_analysis_excel_workbook_preview.py --manifest-id trusted_xg_understat_bundesliga_2024_manual_xg --write-preview
+```
+
+Build and audit the Bundesliga 2024 workbook preview:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_analysis_excel_workbook_preview.py
+```
+
+Audit workbook previews:
+
+```powershell
+python scripts/audit_analysis_excel_workbook_preview.py
+```
+
+The workbook contains README, bundle index, match-level, team aggregate, rolling form, matchup, reporting pack, and closure-summary sheets when available. It is intended for manual review, dashboard prototyping, and future analysis workflows.
+
+The workbook is a runtime preview artifact and should not be committed. It does not modify production target CSVs, accepted xG artifacts, raw trusted sources, or the production manifest.
+
+xG remains inactive in model predictions, probabilities, market ranking, recommended market logic, staking, ROI, stake sizing, and `SUPER_A_TIER`. Any future xG model integration requires a separate explicit phase with stronger validation and impact analysis.
+
+## AF. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AF. What Still Does Not Happen Automatically
+## AG. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
