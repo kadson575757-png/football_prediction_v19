@@ -744,10 +744,32 @@ Future phases should implement one adapter at a time against these contracts. Im
 
 Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
 
-## AI. Safety Rules
+## AI. Importer Adapter Interface Preview
+
+Phase 15.3 introduces the adapter interface and base contract for future importer providers. It defines adapter config, run context, preview result objects, and a base adapter that can validate configuration and schema-contract support without fetching or normalizing provider data.
+
+Build the adapter interface preview:
+
+```powershell
+python scripts/build_importer_adapter_interface_preview_helper.py
+```
+
+Audit the adapter interface preview:
+
+```powershell
+python scripts/audit_importer_adapter_interface_preview.py
+```
+
+This phase does not make live network calls, scrape websites, fetch API data, import provider data, or infer values. Preview adapters report zero normalized rows by design and only prove that source registry rows can be represented as adapter configurations against the canonical contracts.
+
+Future phases should implement one provider adapter at a time. Importer outputs must stay separate from model integration until a later explicit phase with stronger validation, leakage checks, replay impact analysis, and safety review.
+
+Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
+
+## AJ. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AJ. What Still Does Not Happen Automatically
+## AK. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
