@@ -495,10 +495,36 @@ These outputs are reporting/diagnostic previews only. They can support human ana
 
 Legacy audits may still say `ADD_MANUAL_XG_VALUES` while manifest readiness, reporting previews, and team aggregate previews are ready. That remains expected because production target CSVs are intentionally not modified in place.
 
-## Z. Safety Rules
+## Z. Rolling xG Form Reporting
+
+Phase 13.18 builds rolling pre-match xG form previews from the match-level xG reporting preview. It creates two team-match rows per match and computes rolling xG, goals, goal difference, points, and over/under-performance values from matches before the current match only.
+
+Build generic rolling form:
+
+```powershell
+python scripts/build_rolling_xg_form_reporting.py --manifest-id trusted_xg_understat_bundesliga_2024_manual_xg --write-preview
+```
+
+Build and audit Bundesliga 2024 rolling form:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_rolling_xg_form_reporting.py
+```
+
+Audit rolling form previews:
+
+```powershell
+python scripts/audit_rolling_xg_form_reporting.py
+```
+
+Rolling form deliberately avoids current-match leakage: each row's rolling values use only that team's prior matches within the configured window. These outputs can support human reporting and diagnostics, but they cannot influence model predictions, probabilities, market ranking, staking, or ROI logic until a later explicit integration phase.
+
+Legacy audits may still say `ADD_MANUAL_XG_VALUES` while manifest readiness, reporting, aggregate, and rolling previews are ready. That remains expected because production target CSVs are intentionally not modified in place.
+
+## AA. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AA. What Still Does Not Happen Automatically
+## AB. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
