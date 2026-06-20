@@ -888,10 +888,32 @@ This is now the usable local preview pipeline for human review. It does not make
 
 Future phases can add richer real provider adapters and controlled model integration separately. Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
 
-## AP. Safety Rules
+## AP. Human Match Analysis Preview Layer Closure Audit
+
+Phase 16.6 confirms that the local human match analysis preview pipeline is complete and ready for human review workflows.
+
+Run the full closure helper:
+
+```powershell
+python scripts/build_human_analysis_preview_layer_closure_helper.py
+```
+
+Audit the closure status directly:
+
+```powershell
+python scripts/audit_human_analysis_preview_layer_closure.py
+```
+
+The one-command preview path is: file-based importer -> analysis input bundle -> single match report -> context enrichment -> human-facing report -> closure audit.
+
+This phase does not make live network calls, scrape websites, fetch API data, run model predictions, or generate betting/staking recommendations. Future phases can add real provider adapters, richer data coverage, and controlled model integration separately.
+
+Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
+
+## AQ. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AQ. What Still Does Not Happen Automatically
+## AR. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
