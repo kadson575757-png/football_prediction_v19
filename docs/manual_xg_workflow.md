@@ -702,10 +702,52 @@ This does not include model feature activation, prediction changes, probability 
 
 Any future xG model integration requires a separate explicit phase with stronger validation, leakage checks, replay impact analysis, and safety review before xG can influence model behavior.
 
-## AG. Safety Rules
+## AG. Importer Source Registry Preview
+
+Phase 15.1 starts real importer/API/scraper preparation safely by defining a preview registry of planned external sources such as FBref, Understat, FotMob, SofaScore, WhoScored, and soccerdata.
+
+Build the importer source registry preview:
+
+```powershell
+python scripts/build_importer_source_registry_preview_helper.py
+```
+
+Audit the importer source registry preview:
+
+```powershell
+python scripts/audit_importer_source_registry_preview.py
+```
+
+This phase does not make live network calls, does not scrape websites, and does not fetch provider data. It only records future adapter capabilities, schema-contract status, and implementation status. Future phases should implement one source adapter at a time with explicit tests and safety checks.
+
+Importer work is separate from xG model integration. Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
+
+## AH. Canonical Importer Schema Contracts Preview
+
+Phase 15.2 defines canonical schema contracts for future scraper/API/provider adapters. It registers preview contracts for match rows, team match stats, player match stats, fixtures, lineups, odds snapshots, and xG source rows.
+
+Build the schema contracts preview:
+
+```powershell
+python scripts/build_importer_schema_contracts_preview_helper.py
+```
+
+Audit the schema contracts preview:
+
+```powershell
+python scripts/audit_importer_schema_contracts_preview.py
+```
+
+This phase does not make live network calls, scrape websites, fetch API data, import provider data, or infer values. It only defines the target fields, validation rules, source support, and adapter-pending status for future implementations.
+
+Future phases should implement one adapter at a time against these contracts. Importer outputs must stay separate from model integration until a later explicit phase with stronger validation, leakage checks, replay impact analysis, and safety review.
+
+Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
+
+## AI. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AH. What Still Does Not Happen Automatically
+## AJ. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
