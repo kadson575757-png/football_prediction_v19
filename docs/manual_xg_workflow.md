@@ -766,10 +766,32 @@ Future phases should implement one provider adapter at a time. Importer outputs 
 
 Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
 
-## AJ. Safety Rules
+## AJ. File-Based Importer Dry Run Preview
+
+Phase 15.4 validates local CSV files against canonical importer contracts such as `canonical_match`, `canonical_fixture`, and `canonical_xg_source`.
+
+Build the file-based importer dry-run preview:
+
+```powershell
+python scripts/build_file_based_importer_dry_run_preview_helper.py
+```
+
+Audit the file-based importer dry-run preview:
+
+```powershell
+python scripts/audit_file_based_importer_dry_run_preview.py
+```
+
+This phase reads local files only. It does not scrape websites, call provider APIs, fetch external data, infer missing values, or modify target CSVs in place. When preview output is requested, normalized CSVs are written only under `outputs/importer_preview/normalized/`.
+
+This is the bridge toward analysis-ready input bundles. Future phases can implement one provider adapter at a time or build local imported-data bundles from validated files. Importer outputs remain separate from model integration until a later explicit phase.
+
+Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
+
+## AK. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AK. What Still Does Not Happen Automatically
+## AL. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
