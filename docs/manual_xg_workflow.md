@@ -674,10 +674,38 @@ The workbook is a runtime preview artifact and should not be committed. It does 
 
 xG remains inactive in model predictions, probabilities, market ranking, recommended market logic, staking, ROI, stake sizing, and `SUPER_A_TIER`. Any future xG model integration requires a separate explicit phase with stronger validation and impact analysis.
 
-## AF. Safety Rules
+## AF. Analysis Export Layer Closure
+
+Phase 14.3 closes the analysis export usability layer for human analysis. The closure audit confirms that the analysis export bundle, Excel workbook preview, xG reporting layer closure, reporting pack, and manifest readiness are available and consistent.
+
+Run the generic export-layer closure audit:
+
+```powershell
+python scripts/audit_analysis_export_layer_closure.py --manifest-id trusted_xg_understat_bundesliga_2024_manual_xg
+```
+
+Run the Bundesliga 2024 export-layer closure helper:
+
+```powershell
+python scripts/build_understat_bundesliga_2024_analysis_export_layer_closure.py
+```
+
+The expected closure status is:
+
+```text
+ANALYSIS_EXPORT_LAYER_COMPLETE
+```
+
+This means the export layer is complete for human analysis usage: CSV export bundle, Excel workbook preview, and xG reporting closure are ready as runtime artifacts.
+
+This does not include model feature activation, prediction changes, probability changes, market ranking changes, recommended-market changes, betting, staking, ROI, stake sizing, or `SUPER_A_TIER` changes.
+
+Any future xG model integration requires a separate explicit phase with stronger validation, leakage checks, replay impact analysis, and safety review before xG can influence model behavior.
+
+## AG. Safety Rules
 
 No source CSV is modified in place. xG values are never inferred or invented. Empty xG placeholders do not increase confidence or recommendations. No betting, staking, ROI, probability, market-tier, or recommended-market logic changes are part of this workflow.
 
-## AG. What Still Does Not Happen Automatically
+## AH. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
