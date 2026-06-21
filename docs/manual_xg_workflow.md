@@ -1080,6 +1080,30 @@ This remains preview-only and is not model-integrated. Missing optional values a
 
 No production model predictions are run, no betting or staking recommendations are generated, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged.
 
+## BB. v1.9 Diagnostic Synthesis and 24-Block Report Integration Preview
+
+Phase 22.1 and 22.2 add a diagnostic-only v1.9 synthesis preview for the human 24-block report. The synthesis reads the local context bundle human input and surfaces readiness statuses for model synthesis, control, chaos, underdog, score-family, DNB, over/under, and away-favorite degradation sections.
+
+Run the diagnostic synthesis preview:
+
+```powershell
+python scripts/build_v19_diagnostic_synthesis_preview.py --cross-provider-match-key u-bundesliga-2024-001
+```
+
+Build the integrated diagnostic 24-block report:
+
+```powershell
+python scripts/build_v19_diagnostic_24_block_report_preview_helper.py
+```
+
+Audit the integrated preview:
+
+```powershell
+python scripts/audit_v19_diagnostic_24_block_report_preview.py
+```
+
+This remains preview-only. Missing values are surfaced as blocked or unavailable and are never inferred or filled. No production model predictions are run, no betting or staking recommendations are generated, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged.
+
 ## BA. Match Analysis Runner And 24-Block Report Preview
 
 Phase 21.1 and 21.2 add a user-facing preview runner that builds local Understat + FBref context, bridges it into human analysis input, and renders a 24-section human match report. The report labels unavailable data layers as preview gaps and includes Understat xG/xGA, FBref team and match stats, data quality, data gaps, safety notes, and final preview conclusion.
