@@ -977,3 +977,29 @@ Real provider pulling requires an explicit `--allow-network` flag. Tests and hel
 The provider output can be converted into the manual human match input CSV format for the existing human analysis preview pipeline. Missing values are preserved and surfaced; they are not inferred or invented.
 
 This phase does not activate xG as production model features, run model predictions, or generate betting/staking recommendations. Production model, probability, market-tier, recommended-market, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` logic remain unchanged.
+
+## AU. Provider Match Finder And Team Alias Preview
+
+Phase 18.2 selects exactly one deterministic match from normalized provider preview data. It supports selection by `provider_match_id`, home/away team names, optional `match_date`, optional league/season, and a local team alias registry.
+
+Run the local match-finder workflow:
+
+```powershell
+python scripts/build_provider_match_finder_preview_helper.py
+```
+
+Find a specific provider match:
+
+```powershell
+python scripts/find_provider_match_preview.py --provider-match-id u-bundesliga-2024-001
+```
+
+Bridge the selected provider match into the manual human match input pipeline:
+
+```powershell
+python scripts/build_manual_input_from_provider_match_finder_preview.py
+```
+
+Ambiguous or unknown matches are blocked and never guessed. Alias normalization is deterministic and local: exact, case-insensitive, punctuation/spacing-normalized, and optional local CSV/JSON aliases are supported. No live network scraping or API fetching is active in this phase.
+
+The selected match can be converted to manual input and then passed through the human match pipeline preview. Missing values are preserved and surfaced; they are not inferred or invented. No model predictions are run, no betting/staking recommendations are generated, and model/probability/market/betting/staking/ROI logic remains unchanged.
