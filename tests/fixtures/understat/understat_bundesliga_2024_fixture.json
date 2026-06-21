@@ -1,0 +1,24 @@
+{
+  "matches": [
+    {
+      "id": "u-bundesliga-2024-001",
+      "datetime": "2024-08-23 18:30:00",
+      "h": {"title": "Home FC"},
+      "a": {"title": "Away FC"},
+      "goals": {"h": "2", "a": "1"},
+      "xG": {"h": "1.82", "a": "0.94"},
+      "venue": "Home Stadium",
+      "neutral_venue": false
+    },
+    {
+      "id": "u-bundesliga-2024-002",
+      "datetime": "2024-08-24 15:30:00",
+      "h": {"title": "North FC"},
+      "a": {"title": "South FC"},
+      "goals": {"h": "1", "a": "1"},
+      "xG": {"h": "1.11", "a": "1.26"},
+      "venue": "North Stadium",
+      "neutral_venue": false
+    }
+  ]
+}
