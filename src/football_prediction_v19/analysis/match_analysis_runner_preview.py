@@ -29,10 +29,12 @@ MANIFEST_COLUMNS = [
     "understat_provider_match_id", "fbref_provider_match_id", "cross_provider_match_key",
     "match_date", "competition", "season", "home_team", "away_team",
     "match_context_bundle_status", "context_bridge_status", "human_24_block_report_status",
+    "v19_diagnostic_synthesis_status", "v19_diagnostic_gate_matrix_status",
+    "gates_evaluated", "gates_blocked", "gates_disabled", "blocked_gate_count",
     "rows_joined", "rows_written", "rows_reported", "sections_rendered",
     "missing_required_fields_count", "missing_optional_fields_count", "report_output_path",
     "match_analysis_runner_status", "recommendation", "notes", "network_calls_enabled",
-    "prediction_logic_enabled", "betting_logic_enabled",
+    "prediction_logic_enabled", "betting_logic_enabled", "staking_logic_enabled", "roi_logic_enabled",
 ]
 PROTECTED = ["data/processed", "trusted_xg_sources/accepted", "trusted_xg_sources/raw", "manual_xg_manifest"]
 
@@ -53,6 +55,8 @@ class MatchAnalysisRunnerConfig:
     fbref_normalized_input: str | Path | None = None
     match_context_bundle_path: str | Path | None = None
     context_human_input_path: str | Path | None = None
+    include_v19_diagnostic_synthesis: bool = True
+    include_v19_diagnostic_gate_matrix: bool = True
     output_dir: str | Path = "outputs/analysis_preview/match_analysis_runner"
     base_dir: str | Path = "."
 
@@ -73,6 +77,12 @@ class MatchAnalysisRunnerResult:
     match_context_bundle_status: str
     context_bridge_status: str
     human_24_block_report_status: str
+    v19_diagnostic_synthesis_status: str
+    v19_diagnostic_gate_matrix_status: str
+    gates_evaluated: int
+    gates_blocked: int
+    gates_disabled: int
+    blocked_gate_count: int
     rows_joined: int
     rows_written: int
     rows_reported: int
@@ -88,6 +98,8 @@ class MatchAnalysisRunnerResult:
     network_calls_enabled: bool
     prediction_logic_enabled: bool
     betting_logic_enabled: bool
+    staking_logic_enabled: bool
+    roi_logic_enabled: bool
 
 
 class MatchAnalysisRunnerPreviewRunner:
@@ -102,6 +114,8 @@ class MatchAnalysisRunnerPreviewRunner:
         from scripts.build_match_context_bundle_preview import build_match_context_bundle_preview
         from scripts.build_context_bundle_human_input_bridge_preview import build_context_bundle_human_input_bridge_preview
         from scripts.build_human_24_block_report_preview import build_human_24_block_report_preview
+        from scripts.build_v19_diagnostic_gate_matrix_preview import build_v19_diagnostic_gate_matrix_preview
+        from scripts.build_v19_diagnostic_synthesis_preview import build_v19_diagnostic_synthesis_preview
 
         bundle = build_match_context_bundle_preview(
             understat_normalized_input=self.config.understat_normalized_input,
@@ -138,7 +152,47 @@ class MatchAnalysisRunnerPreviewRunner:
         ) if not self.config.context_human_input_path else {"context_bridge_status": CONTEXT_BUNDLE_HUMAN_INPUT_BRIDGE_PREVIEW_READY, "human_input_output_path": self.config.context_human_input_path, "rows_written": 1}
         if bridge.get("context_bridge_status") != CONTEXT_BUNDLE_HUMAN_INPUT_BRIDGE_PREVIEW_READY:
             return self._blocked(_map_bridge_status(str(bridge.get("context_bridge_status", ""))), match_context_bundle_status=str(bundle.get("context_bundle_status", "")), context_bridge_status=str(bridge.get("context_bridge_status", "")))
-        report = build_human_24_block_report_preview(context_human_input_path=bridge.get("human_input_output_path"), output_dir=self.base / "outputs" / "analysis_preview" / "human_24_block_report", base_dir=self.base, build_missing=False)
+        synthesis: dict[str, object] = {}
+        gate_matrix: dict[str, object] = {}
+        if self.config.include_v19_diagnostic_synthesis:
+            synthesis = build_v19_diagnostic_synthesis_preview(
+                context_human_input_path=bridge.get("human_input_output_path"),
+                cross_provider_match_key=self.config.cross_provider_match_key or self.config.provider_match_id,
+                understat_provider_match_id=self.config.understat_provider_match_id,
+                fbref_provider_match_id=self.config.fbref_provider_match_id,
+                home_team=self.config.home_team,
+                away_team=self.config.away_team,
+                match_date=self.config.match_date,
+                competition=self.config.competition,
+                season=self.config.season,
+                output_dir=self.base / "outputs" / "analysis_preview" / "v19_diagnostic_synthesis",
+                base_dir=self.base,
+                build_missing=False,
+            )
+        if self.config.include_v19_diagnostic_gate_matrix:
+            gate_matrix = build_v19_diagnostic_gate_matrix_preview(
+                v19_diagnostic_synthesis_path=synthesis.get("output_path") if synthesis else None,
+                context_human_input_path=bridge.get("human_input_output_path"),
+                cross_provider_match_key=self.config.cross_provider_match_key or self.config.provider_match_id,
+                understat_provider_match_id=self.config.understat_provider_match_id,
+                fbref_provider_match_id=self.config.fbref_provider_match_id,
+                home_team=self.config.home_team,
+                away_team=self.config.away_team,
+                match_date=self.config.match_date,
+                competition=self.config.competition,
+                season=self.config.season,
+                output_dir=self.base / "outputs" / "analysis_preview" / "v19_diagnostic_gate_matrix",
+                base_dir=self.base,
+                build_missing=not synthesis,
+            )
+        report = build_human_24_block_report_preview(
+            context_human_input_path=bridge.get("human_input_output_path"),
+            v19_diagnostic_synthesis_path=synthesis.get("output_path") if synthesis else None,
+            v19_diagnostic_gate_matrix_path=gate_matrix.get("gate_matrix_output_path") if gate_matrix else None,
+            output_dir=self.base / "outputs" / "analysis_preview" / "human_24_block_report",
+            base_dir=self.base,
+            build_missing=False,
+        )
         if report.get("human_24_block_report_status") != HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY:
             return self._blocked(MATCH_ANALYSIS_RUNNER_BLOCKED_REPORT, match_context_bundle_status=str(bundle.get("context_bundle_status", "")), context_bridge_status=str(bridge.get("context_bridge_status", "")), human_24_block_report_status=str(report.get("human_24_block_report_status", "")))
         human = pd.read_csv(bridge["human_input_output_path"], low_memory=False).iloc[0]
@@ -161,6 +215,12 @@ class MatchAnalysisRunnerPreviewRunner:
             str(bundle.get("context_bundle_status", "")),
             str(bridge.get("context_bridge_status", "")),
             str(report.get("human_24_block_report_status", "")),
+            str(synthesis.get("v19_diagnostic_synthesis_status", "")),
+            str(gate_matrix.get("v19_diagnostic_gate_matrix_status", "")),
+            int(gate_matrix.get("gates_evaluated", 0) or 0),
+            int(gate_matrix.get("gates_blocked", 0) or 0),
+            int(gate_matrix.get("gates_disabled", 0) or 0),
+            int(gate_matrix.get("blocked_gate_count", 0) or 0),
             int(bundle.get("rows_joined", 0)),
             int(bridge.get("rows_written", 0)),
             int(report.get("rows_reported", 0)),
@@ -176,13 +236,15 @@ class MatchAnalysisRunnerPreviewRunner:
             False,
             False,
             False,
+            False,
+            False,
         )
         pd.DataFrame([{column: getattr(result, column) for column in MANIFEST_COLUMNS}], columns=MANIFEST_COLUMNS).to_csv(manifest_path, index=False)
         summary_path.write_text(f"# Match Analysis Runner Preview\n\n- match_analysis_runner_status: {result.match_analysis_runner_status}\n- sections_rendered: {result.sections_rendered}\n", encoding="utf-8")
         return result
 
     def _blocked(self, status: str, *, match_context_bundle_status: str = "", context_bridge_status: str = "", human_24_block_report_status: str = "") -> MatchAnalysisRunnerResult:
-        return MatchAnalysisRunnerResult("match_analysis_runner_preview", "", "", "", "", "", "", "", "", "", "", match_context_bundle_status, context_bridge_status, human_24_block_report_status, 0, 0, 0, 0, 0, 0, "", "", "", status, status, _notes(0), False, False, False)
+        return MatchAnalysisRunnerResult("match_analysis_runner_preview", "", "", "", "", "", "", "", "", "", "", match_context_bundle_status, context_bridge_status, human_24_block_report_status, "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", status, status, _notes(0), False, False, False, False, False)
 
 
 def _map_bundle_status(status: str) -> str:
