@@ -1003,3 +1003,29 @@ python scripts/build_manual_input_from_provider_match_finder_preview.py
 Ambiguous or unknown matches are blocked and never guessed. Alias normalization is deterministic and local: exact, case-insensitive, punctuation/spacing-normalized, and optional local CSV/JSON aliases are supported. No live network scraping or API fetching is active in this phase.
 
 The selected match can be converted to manual input and then passed through the human match pipeline preview. Missing values are preserved and surfaced; they are not inferred or invented. No model predictions are run, no betting/staking recommendations are generated, and model/probability/market/betting/staking/ROI logic remains unchanged.
+
+## AV. Provider-to-Human Match Analysis Bundle Preview
+
+Phase 18.3 adds the first one-command provider-to-human report preview. It orchestrates the existing preview layers in order: Understat provider pull preview -> provider match finder -> manual input bridge -> manual input validation -> human match pipeline -> human-facing report.
+
+Run the bundle preview:
+
+```powershell
+python scripts/build_provider_to_human_analysis_bundle_preview_helper.py
+```
+
+Build a bundle for a specific provider match:
+
+```powershell
+python scripts/build_provider_to_human_analysis_bundle_preview.py --provider-match-id u-bundesliga-2024-001
+```
+
+Audit the bundle preview:
+
+```powershell
+python scripts/audit_provider_to_human_analysis_bundle_preview.py
+```
+
+The bundle supports provider match id selection, home/away team selection, local alias registry selection, and optional date filtering. Ambiguous matches are blocked rather than guessed. Missing optional context is reported and is not inferred or invented.
+
+No live network scraping or API fetching is active by default. No model predictions are run, no betting/staking recommendations are generated, and model/probability/market/betting/staking/ROI logic remains unchanged.
