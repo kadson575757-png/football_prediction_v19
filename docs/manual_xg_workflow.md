@@ -1063,3 +1063,11 @@ Phase 19.1 and 19.2 add FBref team and match context as a second provider previe
 Raw, normalized, manifest, selected-match, and audit artifacts are written only under `outputs/provider_pull_preview/fbref` or `outputs/diagnostics`. The FBref match finder supports `provider_match_id`, `understat_provider_match_id` or cross-provider key, team names, aliases, date, competition, and season. Unknown or ambiguous matches are blocked rather than guessed.
 
 Missing optional FBref stats are reported in preview warnings and are not inferred or filled. This layer is preview-only and not model-integrated: no production predictions run, no xG/model features are activated, and no betting, staking, ROI, probability, market-tier, recommended-market, or `SUPER_A_TIER` logic changes are made.
+
+## AY. Match Context Bundle Preview
+
+Phase 19.3 and 19.4 join deterministic Understat preview context with FBref preview team and match stats into one match-context bundle under `outputs/analysis_preview/match_context_bundle`. The bundle can match by provider IDs, cross-provider key, team names, alias registry entries, date, competition, and season.
+
+Understat xG/xGA values and FBref team statistics are copied into a preview artifact only. Unknown or ambiguous joins are blocked, and missing optional values are surfaced in warnings rather than inferred or filled.
+
+This bundle is diagnostic/reporting only. No production model predictions are run, no xG or FBref statistics are activated as model features, no betting/staking recommendations are generated, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged.
