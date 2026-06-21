@@ -1055,3 +1055,11 @@ python scripts/build_provider_to_human_bundle_from_understat_real_snapshot_previ
 Raw live snapshots are written only under `outputs/provider_pull_preview/understat/real_snapshot/raw`; normalized preview output is written only under `outputs/provider_pull_preview/understat/real_snapshot/normalized`. Tests use mocked or local snapshots only. Missing values are surfaced, not inferred or invented.
 
 No production model predictions are run, no betting/staking recommendations are generated, and model/probability/market/betting/staking/ROI logic remains unchanged.
+
+## AX. FBref Provider Pull and Match Finder Preview
+
+Phase 19.1 and 19.2 add FBref team and match context as a second provider preview. Default mode is offline and deterministic: helpers and audits use a local fixture or local snapshot, while live FBref access requires explicit `--allow-network`. Tests use mocked fetchers or local snapshots only.
+
+Raw, normalized, manifest, selected-match, and audit artifacts are written only under `outputs/provider_pull_preview/fbref` or `outputs/diagnostics`. The FBref match finder supports `provider_match_id`, `understat_provider_match_id` or cross-provider key, team names, aliases, date, competition, and season. Unknown or ambiguous matches are blocked rather than guessed.
+
+Missing optional FBref stats are reported in preview warnings and are not inferred or filled. This layer is preview-only and not model-integrated: no production predictions run, no xG/model features are activated, and no betting, staking, ROI, probability, market-tier, recommended-market, or `SUPER_A_TIER` logic changes are made.
