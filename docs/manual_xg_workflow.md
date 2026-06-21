@@ -1071,3 +1071,11 @@ Phase 19.3 and 19.4 join deterministic Understat preview context with FBref prev
 Understat xG/xGA values and FBref team statistics are copied into a preview artifact only. Unknown or ambiguous joins are blocked, and missing optional values are surfaced in warnings rather than inferred or filled.
 
 This bundle is diagnostic/reporting only. No production model predictions are run, no xG or FBref statistics are activated as model features, no betting/staking recommendations are generated, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged.
+
+## AZ. Context Bundle To Human Report Preview
+
+Phase 20.1 and 20.2 bridge the joined Understat + FBref match context bundle into a richer human-readable report. The bridge writes a preview human input artifact, and the report renders match identity, data quality, Understat xG/xGA, FBref team and match stats, shot profile, possession and passing, progression, defensive actions, and data gaps.
+
+This remains preview-only and is not model-integrated. Missing optional values are shown as unavailable or not provided, never inferred or filled.
+
+No production model predictions are run, no betting or staking recommendations are generated, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged.
