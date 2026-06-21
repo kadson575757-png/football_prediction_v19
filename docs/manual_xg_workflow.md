@@ -1079,3 +1079,11 @@ Phase 20.1 and 20.2 bridge the joined Understat + FBref match context bundle int
 This remains preview-only and is not model-integrated. Missing optional values are shown as unavailable or not provided, never inferred or filled.
 
 No production model predictions are run, no betting or staking recommendations are generated, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged.
+
+## BA. Match Analysis Runner And 24-Block Report Preview
+
+Phase 21.1 and 21.2 add a user-facing preview runner that builds local Understat + FBref context, bridges it into human analysis input, and renders a 24-section human match report. The report labels unavailable data layers as preview gaps and includes Understat xG/xGA, FBref team and match stats, data quality, data gaps, safety notes, and final preview conclusion.
+
+This remains preview-only and is not model-integrated. Missing optional values are surfaced as not provided or unavailable, never inferred or filled. Model synthesis, control model, chaos score, underdog score, and score family sections are explicitly marked as not executed in this preview layer.
+
+No production model predictions are run, no betting or staking recommendations are generated, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged.
