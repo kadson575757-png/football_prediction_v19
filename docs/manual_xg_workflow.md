@@ -917,3 +917,63 @@ No source CSV is modified in place. xG values are never inferred or invented. Em
 ## AR. What Still Does Not Happen Automatically
 
 The model does not use manual xG yet. Manual xG is not automatically downloaded, scraped, inferred, joined into model features, or used to change recommendations.
+
+## AS. Manual Human Match Input Pack Preview
+
+Phase 17.1 adds a local CSV template and example for human-provided match inputs. It is a preview-only input pack for the existing human match analysis preview pipeline.
+
+Build the manual input pack preview:
+
+```powershell
+python scripts/build_manual_human_match_input_pack_preview_helper.py
+```
+
+Validate a local manual input CSV:
+
+```powershell
+python scripts/validate_manual_human_match_input.py --input outputs/analysis_preview/manual_input/manual_human_match_input_example.csv
+```
+
+Run the human match pipeline from a manual input CSV:
+
+```powershell
+python scripts/build_human_match_pipeline_from_manual_input_preview.py --input outputs/analysis_preview/manual_input/manual_human_match_input_example.csv
+```
+
+Audit the manual input pack preview:
+
+```powershell
+python scripts/audit_manual_human_match_input_pack_preview.py
+```
+
+Required match identity fields must be filled by the user. Optional context fields may remain empty and are never inferred or invented. This phase does not make live network calls, scrape websites, fetch API data, run model predictions, or generate betting/staking recommendations.
+
+Model predictions, probabilities, market ranking, recommended-market logic, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` remain unchanged.
+
+## AT. Controlled Understat xG Provider Pull Preview
+
+Phase 18.1 introduces the first automatic provider pull layer. Understat is supported in controlled preview mode because xG and xGA are central analysis inputs, but network access is disabled by default.
+
+Build the offline Understat provider pull preview from the local fixture:
+
+```powershell
+python scripts/build_understat_provider_pull_preview_helper.py
+```
+
+Audit the provider pull preview:
+
+```powershell
+python scripts/audit_understat_provider_pull_preview.py
+```
+
+Bridge normalized Understat preview output into the manual human match input pipeline:
+
+```powershell
+python scripts/build_manual_input_from_understat_provider_pull_preview.py
+```
+
+Real provider pulling requires an explicit `--allow-network` flag. Tests and helper paths use only local fixtures and make no live provider calls. Raw snapshots are stored under `outputs/provider_pull_preview/understat/raw`, normalized preview output under `outputs/provider_pull_preview/understat/normalized`, and manifests under `outputs/provider_pull_preview/understat`.
+
+The provider output can be converted into the manual human match input CSV format for the existing human analysis preview pipeline. Missing values are preserved and surfaced; they are not inferred or invented.
+
+This phase does not activate xG as production model features, run model predictions, or generate betting/staking recommendations. Production model, probability, market-tier, recommended-market, betting, staking, ROI, stake sizing, and `SUPER_A_TIER` logic remain unchanged.
