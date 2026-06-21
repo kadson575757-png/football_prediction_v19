@@ -1029,3 +1029,29 @@ python scripts/audit_provider_to_human_analysis_bundle_preview.py
 The bundle supports provider match id selection, home/away team selection, local alias registry selection, and optional date filtering. Ambiguous matches are blocked rather than guessed. Missing optional context is reported and is not inferred or invented.
 
 No live network scraping or API fetching is active by default. No model predictions are run, no betting/staking recommendations are generated, and model/probability/market/betting/staking/ROI logic remains unchanged.
+
+## AW. Real Understat Snapshot Pull Smoke Preview
+
+Phase 18.4 adds the controlled opt-in transition from fixture provider preview to a real Understat snapshot smoke path. Default mode remains offline and deterministic; a live pull requires explicit `--allow-network`.
+
+Run the offline smoke helper:
+
+```powershell
+python scripts/build_understat_real_snapshot_smoke_preview_helper.py
+```
+
+Run a local snapshot smoke build:
+
+```powershell
+python scripts/build_understat_real_snapshot_smoke_preview.py --league Bundesliga --season 2024 --local-snapshot tests/fixtures/understat/understat_bundesliga_2024_fixture.json
+```
+
+Bridge real-snapshot normalized output into the provider-to-human preview:
+
+```powershell
+python scripts/build_provider_to_human_bundle_from_understat_real_snapshot_preview.py --normalized-input outputs/provider_pull_preview/understat/real_snapshot/normalized/understat_real_snapshot_normalized.csv --provider-match-id u-bundesliga-2024-001
+```
+
+Raw live snapshots are written only under `outputs/provider_pull_preview/understat/real_snapshot/raw`; normalized preview output is written only under `outputs/provider_pull_preview/understat/real_snapshot/normalized`. Tests use mocked or local snapshots only. Missing values are surfaced, not inferred or invented.
+
+No production model predictions are run, no betting/staking recommendations are generated, and model/probability/market/betting/staking/ROI logic remains unchanged.
