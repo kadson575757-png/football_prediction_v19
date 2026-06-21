@@ -1,0 +1,8 @@
+canonical_team_name,alias,provider,league,season,notes
+Home FC,home fc,understat,Bundesliga,2024,case-insensitive fixture alias
+Home FC,Home-F.C.,understat,Bundesliga,2024,punctuation variation
+Away FC,Away Football Club,understat,Bundesliga,2024,common long alias
+North FC,NORTH  FC,understat,Bundesliga,2024,spacing variation
+South FC,South-F.C.,understat,Bundesliga,2024,punctuation variation
+Bayern Munich,FC Bayern,understat,Bundesliga,2024,reference alias
+Borussia Dortmund,BVB,understat,Bundesliga,2024,reference alias
