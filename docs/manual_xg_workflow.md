@@ -1188,3 +1188,13 @@ This layer surfaces 1X2 opening/current/closing odds, optional O/U, DNB, handica
 The market movement diagnostic is diagnostic-only. It does not generate final betting tips, stake sizing, units, financial return tracking, SUPER_A_TIER promotion, production model features, or probability changes.
 
 The 24-block report includes market movement status in the existing data-quality, safety, score-family, and final conclusion sections. The export bundle includes `odds_market_movement_input_review.csv` and `market_movement_diagnostic_review.csv`. The Excel workbook now includes `Odds Market Input` and `Market Movement Diagnostic` sheets in addition to the existing review sheets.
+
+## Phase 27.1 + 27.2 Lineups / Injuries / Suspensions Diagnostic Preview
+
+Phase 27 adds preview-only team availability evidence for human review. The one-command match analysis preview now builds local deterministic lineups / availability input and an availability diagnostic when no manual availability CSV is supplied.
+
+This layer surfaces projected or confirmed lineup status, formations, goalkeeper status, defensive-line availability, main-scorer status, injuries, suspensions, doubtful players, and key absence counts. Missing availability values are reported exactly as missing; they are not inferred, invented, or silently filled.
+
+The availability diagnostic is diagnostic-only. It does not generate final betting tips, stake sizing, units, financial return tracking, SUPER_A_TIER promotion, production model features, or probability changes.
+
+The 24-block report includes availability status in the existing data-quality, lineups, injuries / suspensions, safety, and final conclusion sections. The one-command preview now includes both market and availability diagnostics. The export bundle includes `lineups_availability_input_review.csv` and `availability_diagnostic_review.csv`. The Excel workbook now includes `Lineups Availability` and `Availability Diagnostic` sheets in addition to the existing market and review sheets.
