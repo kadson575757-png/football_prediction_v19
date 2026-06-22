@@ -1153,6 +1153,25 @@ python scripts/audit_match_analysis_export_excel_preview.py
 
 The workbook includes README, match identity, context human input, v1.9 diagnostic synthesis, v1.9 gate matrix, 24-block report sections, safety flags, and export manifest sheets. It is preview-only: production prediction logic is not executed, betting/staking/ROI remain disabled, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged.
 
+## BE. Real Match Analysis One-Command Preview
+
+Phase 25.1 and 25.2 add the first one-command preview analysis workflow. The command runs the local preview pipeline, then prints the final review artifact paths for the 24-block report, v1.9 diagnostic synthesis, v1.9 diagnostic gate matrix, export bundle, Excel workbook, and run artifact index.
+
+Run the deterministic preview command:
+
+```powershell
+python scripts/run_match_analysis_preview.py --cross-provider-match-key u-bundesliga-2024-001
+```
+
+Run the helper and audit:
+
+```powershell
+python scripts/build_real_match_analysis_command_preview_helper.py
+python scripts/audit_real_match_analysis_command_preview.py
+```
+
+This command is preview-only. Production prediction logic is not executed, betting/staking/ROI remain disabled, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged. Missing optional values remain visible in the generated review artifacts rather than being inferred or filled.
+
 ## BA. Match Analysis Runner And 24-Block Report Preview
 
 Phase 21.1 and 21.2 add a user-facing preview runner that builds local Understat + FBref context, bridges it into human analysis input, and renders a 24-section human match report. The report labels unavailable data layers as preview gaps and includes Understat xG/xGA, FBref team and match stats, data quality, data gaps, safety notes, and final preview conclusion.
