@@ -30,6 +30,8 @@ MANIFEST_COLUMNS = [
     "match_date", "competition", "season", "home_team", "away_team",
     "match_context_bundle_status", "context_bridge_status", "human_24_block_report_status",
     "v19_diagnostic_synthesis_status", "v19_diagnostic_gate_matrix_status",
+    "odds_market_movement_input_status", "market_movement_diagnostic_status",
+    "market_evidence_status", "market_movement_timing_flag",
     "gates_evaluated", "gates_blocked", "gates_disabled", "blocked_gate_count",
     "rows_joined", "rows_written", "rows_reported", "sections_rendered",
     "missing_required_fields_count", "missing_optional_fields_count", "report_output_path",
@@ -79,6 +81,10 @@ class MatchAnalysisRunnerResult:
     human_24_block_report_status: str
     v19_diagnostic_synthesis_status: str
     v19_diagnostic_gate_matrix_status: str
+    odds_market_movement_input_status: str
+    market_movement_diagnostic_status: str
+    market_evidence_status: str
+    market_movement_timing_flag: str
     gates_evaluated: int
     gates_blocked: int
     gates_disabled: int
@@ -114,6 +120,8 @@ class MatchAnalysisRunnerPreviewRunner:
         from scripts.build_match_context_bundle_preview import build_match_context_bundle_preview
         from scripts.build_context_bundle_human_input_bridge_preview import build_context_bundle_human_input_bridge_preview
         from scripts.build_human_24_block_report_preview import build_human_24_block_report_preview
+        from scripts.build_market_movement_diagnostic_preview import build_market_movement_diagnostic_preview
+        from scripts.build_odds_market_movement_input_preview import build_odds_market_movement_input_preview
         from scripts.build_v19_diagnostic_gate_matrix_preview import build_v19_diagnostic_gate_matrix_preview
         from scripts.build_v19_diagnostic_synthesis_preview import build_v19_diagnostic_synthesis_preview
 
@@ -185,10 +193,31 @@ class MatchAnalysisRunnerPreviewRunner:
                 base_dir=self.base,
                 build_missing=not synthesis,
             )
+        odds = build_odds_market_movement_input_preview(
+            cross_provider_match_key=self.config.cross_provider_match_key or self.config.provider_match_id,
+            understat_provider_match_id=self.config.understat_provider_match_id,
+            fbref_provider_match_id=self.config.fbref_provider_match_id,
+            home_team=self.config.home_team,
+            away_team=self.config.away_team,
+            match_date=self.config.match_date,
+            competition=self.config.competition,
+            season=self.config.season,
+            output_dir=self.base / "outputs" / "analysis_preview" / "odds_market_movement_input",
+            base_dir=self.base,
+        )
+        market = build_market_movement_diagnostic_preview(
+            cross_provider_match_key=self.config.cross_provider_match_key or self.config.provider_match_id,
+            odds_market_movement_input_path=odds.get("output_path"),
+            v19_diagnostic_synthesis_path=synthesis.get("output_path") if synthesis else None,
+            v19_diagnostic_gate_matrix_path=gate_matrix.get("gate_matrix_output_path") if gate_matrix else None,
+            output_dir=self.base / "outputs" / "analysis_preview" / "market_movement_diagnostic",
+            base_dir=self.base,
+        )
         report = build_human_24_block_report_preview(
             context_human_input_path=bridge.get("human_input_output_path"),
             v19_diagnostic_synthesis_path=synthesis.get("output_path") if synthesis else None,
             v19_diagnostic_gate_matrix_path=gate_matrix.get("gate_matrix_output_path") if gate_matrix else None,
+            market_movement_diagnostic_path=market.get("output_path"),
             output_dir=self.base / "outputs" / "analysis_preview" / "human_24_block_report",
             base_dir=self.base,
             build_missing=False,
@@ -217,6 +246,10 @@ class MatchAnalysisRunnerPreviewRunner:
             str(report.get("human_24_block_report_status", "")),
             str(synthesis.get("v19_diagnostic_synthesis_status", "")),
             str(gate_matrix.get("v19_diagnostic_gate_matrix_status", "")),
+            str(odds.get("odds_market_movement_input_status", "")),
+            str(market.get("market_movement_diagnostic_status", "")),
+            str(market.get("market_evidence_status", "")),
+            str(market.get("market_movement_timing_flag", "")),
             int(gate_matrix.get("gates_evaluated", 0) or 0),
             int(gate_matrix.get("gates_blocked", 0) or 0),
             int(gate_matrix.get("gates_disabled", 0) or 0),
@@ -244,7 +277,7 @@ class MatchAnalysisRunnerPreviewRunner:
         return result
 
     def _blocked(self, status: str, *, match_context_bundle_status: str = "", context_bridge_status: str = "", human_24_block_report_status: str = "") -> MatchAnalysisRunnerResult:
-        return MatchAnalysisRunnerResult("match_analysis_runner_preview", "", "", "", "", "", "", "", "", "", "", match_context_bundle_status, context_bridge_status, human_24_block_report_status, "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", status, status, _notes(0), False, False, False, False, False)
+        return MatchAnalysisRunnerResult("match_analysis_runner_preview", "", "", "", "", "", "", "", "", "", "", match_context_bundle_status, context_bridge_status, human_24_block_report_status, "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", status, status, _notes(0), False, False, False, False, False)
 
 
 def _map_bundle_status(status: str) -> str:

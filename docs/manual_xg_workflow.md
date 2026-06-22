@@ -1179,3 +1179,12 @@ Phase 21.1 and 21.2 add a user-facing preview runner that builds local Understat
 This remains preview-only and is not model-integrated. Missing optional values are surfaced as not provided or unavailable, never inferred or filled. Model synthesis, control model, chaos score, underdog score, and score family sections are explicitly marked as not executed in this preview layer.
 
 No production model predictions are run, no betting or staking recommendations are generated, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged.
+## Phase 26.1 + 26.2 Odds / Market Movement Diagnostic Preview
+
+Phase 26 adds a preview-only odds and market movement layer for human review. The one-command match analysis preview now builds a local deterministic odds input and a market movement diagnostic when no manual odds CSV is supplied.
+
+This layer surfaces 1X2 opening/current/closing odds, optional O/U, DNB, handicap evidence, movement direction, movement magnitude, timing status, and missing market fields. Missing odds are reported exactly as missing; they are not inferred, invented, or silently filled.
+
+The market movement diagnostic is diagnostic-only. It does not generate final betting tips, stake sizing, units, financial return tracking, SUPER_A_TIER promotion, production model features, or probability changes.
+
+The 24-block report includes market movement status in the existing data-quality, safety, score-family, and final conclusion sections. The export bundle includes `odds_market_movement_input_review.csv` and `market_movement_diagnostic_review.csv`. The Excel workbook now includes `Odds Market Input` and `Market Movement Diagnostic` sheets in addition to the existing review sheets.
