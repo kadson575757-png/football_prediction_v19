@@ -30,6 +30,7 @@ MANIFEST_COLUMNS = [
     "v19_diagnostic_synthesis_status", "v19_diagnostic_gate_matrix_status",
     "odds_market_movement_input_status", "market_movement_diagnostic_status",
     "lineups_availability_input_status", "availability_diagnostic_status",
+    "player_impact_rolling_form_input_status", "player_form_diagnostic_status",
     "human_24_block_report_status", "export_bundle_status", "excel_export_status",
     "command_status", "rows_joined", "rows_written", "rows_diagnosed",
     "rows_reported", "gates_evaluated", "gates_blocked", "gates_disabled",
@@ -82,6 +83,8 @@ class RealMatchAnalysisCommandResult:
     market_movement_diagnostic_status: str
     lineups_availability_input_status: str
     availability_diagnostic_status: str
+    player_impact_rolling_form_input_status: str
+    player_form_diagnostic_status: str
     human_24_block_report_status: str
     export_bundle_status: str
     excel_export_status: str
@@ -182,6 +185,7 @@ class RealMatchAnalysisCommandRunner:
             str(runner.get("v19_diagnostic_synthesis_status", "")), str(runner.get("v19_diagnostic_gate_matrix_status", "")),
             str(runner.get("odds_market_movement_input_status", "")), str(runner.get("market_movement_diagnostic_status", "")),
             str(runner.get("lineups_availability_input_status", "")), str(runner.get("availability_diagnostic_status", "")),
+            str(runner.get("player_impact_rolling_form_input_status", "")), str(runner.get("player_form_diagnostic_status", "")),
             str(runner.get("human_24_block_report_status", "")), str(bundle.get("export_bundle_status", "")),
             str(excel.get("excel_export_status", "")), REAL_MATCH_ANALYSIS_COMMAND_PREVIEW_READY,
             int(runner.get("rows_joined", 0) or 0), int(runner.get("rows_written", 0) or 0),
@@ -214,7 +218,8 @@ class RealMatchAnalysisCommandRunner:
             str(runner.get("context_bridge_status", "")), str(runner.get("v19_diagnostic_synthesis_status", "")),
             str(runner.get("v19_diagnostic_gate_matrix_status", "")), str(runner.get("odds_market_movement_input_status", "")),
             str(runner.get("market_movement_diagnostic_status", "")), str(runner.get("lineups_availability_input_status", "")),
-            str(runner.get("availability_diagnostic_status", "")), str(runner.get("human_24_block_report_status", "")),
+            str(runner.get("availability_diagnostic_status", "")), str(runner.get("player_impact_rolling_form_input_status", "")),
+            str(runner.get("player_form_diagnostic_status", "")), str(runner.get("human_24_block_report_status", "")),
             str(bundle.get("export_bundle_status", "")), str(excel.get("excel_export_status", "")),
             status, int(runner.get("rows_joined", 0) or 0), int(runner.get("rows_written", 0) or 0),
             0, int(runner.get("rows_reported", 0) or 0), int(runner.get("gates_evaluated", 0) or 0),
@@ -237,6 +242,8 @@ def _artifact_rows(out: Path, runner: dict[str, object], bundle: dict[str, objec
         ("market_movement_diagnostic", runner.get("market_movement_diagnostic_status", ""), out.parents[0] / "market_movement_diagnostic" / "market_movement_diagnostic.csv"),
         ("lineups_availability_input", runner.get("lineups_availability_input_status", ""), out.parents[0] / "lineups_availability_input" / "lineups_availability_input.csv"),
         ("availability_diagnostic", runner.get("availability_diagnostic_status", ""), out.parents[0] / "availability_diagnostic" / "availability_diagnostic.csv"),
+        ("player_impact_rolling_form_input", runner.get("player_impact_rolling_form_input_status", ""), out.parents[0] / "player_impact_rolling_form_input" / "player_impact_rolling_form_input.csv"),
+        ("player_form_diagnostic", runner.get("player_form_diagnostic_status", ""), out.parents[0] / "player_form_diagnostic" / "player_form_diagnostic.csv"),
         ("human_24_block_report", runner.get("human_24_block_report_status", ""), runner.get("report_output_path", "")),
         ("export_bundle_manifest", bundle.get("export_bundle_status", ""), Path(str(bundle.get("manifest_path", "")))),
         ("excel_workbook", excel.get("excel_export_status", ""), Path(str(excel.get("workbook_output_path", "")))),

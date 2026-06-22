@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
+from pandas.errors import EmptyDataError
 
 from football_prediction_v19.analysis.lineups_availability_input_preview import LINEUPS_AVAILABILITY_INPUT_PREVIEW_READY
 
@@ -95,7 +96,10 @@ class AvailabilityDiagnosticRunner:
             if availability.get("lineups_availability_input_status") != LINEUPS_AVAILABILITY_INPUT_PREVIEW_READY:
                 return self._blocked(AVAILABILITY_DIAGNOSTIC_BLOCKED_MISSING_AVAILABILITY_INPUT)
             source = Path(str(availability.get("output_path", "")))
-        frame = pd.read_csv(source, low_memory=False)
+        try:
+            frame = pd.read_csv(source, low_memory=False)
+        except EmptyDataError:
+            return self._blocked(AVAILABILITY_DIAGNOSTIC_BLOCKED_MISSING_AVAILABILITY_INPUT)
         selected = _select(frame, self.config.cross_provider_match_key)
         if selected.empty:
             return self._blocked(AVAILABILITY_DIAGNOSTIC_BLOCKED_UNKNOWN_MATCH)

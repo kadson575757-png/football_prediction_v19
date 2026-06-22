@@ -33,6 +33,8 @@ REQUIRED_FILES = {
     "Market Movement Diagnostic": "market_movement_diagnostic_review.csv",
     "Lineups Availability": "lineups_availability_input_review.csv",
     "Availability Diagnostic": "availability_diagnostic_review.csv",
+    "Player Impact Form": "player_impact_rolling_form_input_review.csv",
+    "Player Form Diagnostic": "player_form_diagnostic_review.csv",
     "24 Block Report Sections": "report_sections_review.csv",
     "Safety Flags": "export_safety_flags.csv",
     "Export Manifest": "match_analysis_export_bundle_manifest.csv",
