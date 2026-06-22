@@ -1128,6 +1128,31 @@ python scripts/audit_v19_diagnostic_gate_matrix_24_block_preview.py
 
 This remains diagnostic/reporting only. The v1.9 gates are evaluated for readiness and blocker visibility, not final betting decisions. Production prediction logic is not executed, betting/staking/ROI remain disabled, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged. Missing data blocks or downgrades diagnostic gate readiness and is surfaced in sections 18-24 of the 24-block report.
 
+## BD. Match Analysis Export Bundle and Excel Workbook Preview
+
+Phase 24.1 and 24.2 add a user-facing export bundle and Excel workbook preview for human review. The export bundle gathers the preview match context, context-human input, v1.9 diagnostic synthesis, v1.9 gate matrix, 24-block report sections, safety flags, and runner manifest under `outputs/analysis_preview/match_analysis_export_bundle`.
+
+Run the export bundle preview:
+
+```powershell
+python scripts/build_match_analysis_export_bundle_preview.py --cross-provider-match-key u-bundesliga-2024-001
+```
+
+Build the Excel workbook preview:
+
+```powershell
+python scripts/build_match_analysis_excel_export_preview.py --export-bundle-dir outputs/analysis_preview/match_analysis_export_bundle
+```
+
+Run the combined helper and audit:
+
+```powershell
+python scripts/build_match_analysis_export_excel_preview_helper.py
+python scripts/audit_match_analysis_export_excel_preview.py
+```
+
+The workbook includes README, match identity, context human input, v1.9 diagnostic synthesis, v1.9 gate matrix, 24-block report sections, safety flags, and export manifest sheets. It is preview-only: production prediction logic is not executed, betting/staking/ROI remain disabled, and model, probability, market-tier, recommended-market, betting, staking, ROI, and `SUPER_A_TIER` logic remain unchanged.
+
 ## BA. Match Analysis Runner And 24-Block Report Preview
 
 Phase 21.1 and 21.2 add a user-facing preview runner that builds local Understat + FBref context, bridges it into human analysis input, and renders a 24-section human match report. The report labels unavailable data layers as preview gaps and includes Understat xG/xGA, FBref team and match stats, data quality, data gaps, safety notes, and final preview conclusion.
