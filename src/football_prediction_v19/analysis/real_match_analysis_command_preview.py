@@ -28,6 +28,7 @@ MANIFEST_COLUMNS = [
     "home_team", "away_team", "understat_provider_match_id", "fbref_provider_match_id",
     "cross_provider_match_key", "match_context_bundle_status", "context_bridge_status",
     "v19_diagnostic_synthesis_status", "v19_diagnostic_gate_matrix_status",
+    "odds_market_movement_input_status", "market_movement_diagnostic_status",
     "human_24_block_report_status", "export_bundle_status", "excel_export_status",
     "command_status", "rows_joined", "rows_written", "rows_diagnosed",
     "rows_reported", "gates_evaluated", "gates_blocked", "gates_disabled",
@@ -76,6 +77,8 @@ class RealMatchAnalysisCommandResult:
     context_bridge_status: str
     v19_diagnostic_synthesis_status: str
     v19_diagnostic_gate_matrix_status: str
+    odds_market_movement_input_status: str
+    market_movement_diagnostic_status: str
     human_24_block_report_status: str
     export_bundle_status: str
     excel_export_status: str
@@ -174,6 +177,7 @@ class RealMatchAnalysisCommandRunner:
             str(runner.get("fbref_provider_match_id", "")), str(runner.get("cross_provider_match_key", "")),
             str(runner.get("match_context_bundle_status", "")), str(runner.get("context_bridge_status", "")),
             str(runner.get("v19_diagnostic_synthesis_status", "")), str(runner.get("v19_diagnostic_gate_matrix_status", "")),
+            str(runner.get("odds_market_movement_input_status", "")), str(runner.get("market_movement_diagnostic_status", "")),
             str(runner.get("human_24_block_report_status", "")), str(bundle.get("export_bundle_status", "")),
             str(excel.get("excel_export_status", "")), REAL_MATCH_ANALYSIS_COMMAND_PREVIEW_READY,
             int(runner.get("rows_joined", 0) or 0), int(runner.get("rows_written", 0) or 0),
@@ -204,7 +208,8 @@ class RealMatchAnalysisCommandRunner:
             str(runner.get("understat_provider_match_id", "")), str(runner.get("fbref_provider_match_id", "")),
             str(runner.get("cross_provider_match_key", "")), str(runner.get("match_context_bundle_status", "")),
             str(runner.get("context_bridge_status", "")), str(runner.get("v19_diagnostic_synthesis_status", "")),
-            str(runner.get("v19_diagnostic_gate_matrix_status", "")), str(runner.get("human_24_block_report_status", "")),
+            str(runner.get("v19_diagnostic_gate_matrix_status", "")), str(runner.get("odds_market_movement_input_status", "")),
+            str(runner.get("market_movement_diagnostic_status", "")), str(runner.get("human_24_block_report_status", "")),
             str(bundle.get("export_bundle_status", "")), str(excel.get("excel_export_status", "")),
             status, int(runner.get("rows_joined", 0) or 0), int(runner.get("rows_written", 0) or 0),
             0, int(runner.get("rows_reported", 0) or 0), int(runner.get("gates_evaluated", 0) or 0),
@@ -223,6 +228,8 @@ def _artifact_rows(out: Path, runner: dict[str, object], bundle: dict[str, objec
         ("context_human_input", runner.get("context_bridge_status", ""), out.parents[0] / "context_bundle_human_input" / "context_bundle_human_input.csv"),
         ("v19_diagnostic_synthesis", runner.get("v19_diagnostic_synthesis_status", ""), out.parents[0] / "v19_diagnostic_synthesis" / "v19_diagnostic_synthesis.csv"),
         ("v19_diagnostic_gate_matrix", runner.get("v19_diagnostic_gate_matrix_status", ""), out.parents[0] / "v19_diagnostic_gate_matrix" / "v19_diagnostic_gate_matrix.csv"),
+        ("odds_market_movement_input", runner.get("odds_market_movement_input_status", ""), out.parents[0] / "odds_market_movement_input" / "odds_market_movement_input.csv"),
+        ("market_movement_diagnostic", runner.get("market_movement_diagnostic_status", ""), out.parents[0] / "market_movement_diagnostic" / "market_movement_diagnostic.csv"),
         ("human_24_block_report", runner.get("human_24_block_report_status", ""), runner.get("report_output_path", "")),
         ("export_bundle_manifest", bundle.get("export_bundle_status", ""), Path(str(bundle.get("manifest_path", "")))),
         ("excel_workbook", excel.get("excel_export_status", ""), Path(str(excel.get("workbook_output_path", "")))),

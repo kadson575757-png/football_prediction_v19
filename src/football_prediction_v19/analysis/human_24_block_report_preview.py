@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
+from pandas.errors import EmptyDataError
 
 HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY = "HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY"
 HUMAN_24_BLOCK_MATCH_REPORT_BLOCKED_MISSING_INPUT = "HUMAN_24_BLOCK_MATCH_REPORT_BLOCKED_MISSING_INPUT"
@@ -31,6 +32,8 @@ MANIFEST_COLUMNS = [
     "human_24_block_report_run_id", "context_human_input_path", "report_output_path",
     "v19_diagnostic_synthesis_path", "v19_diagnostic_synthesis_status",
     "v19_diagnostic_gate_matrix_path", "v19_diagnostic_gate_matrix_status",
+    "market_movement_diagnostic_path", "market_movement_diagnostic_status",
+    "market_evidence_status", "market_movement_timing_flag",
     "gates_evaluated", "gates_blocked", "gates_disabled", "blocked_gate_count",
     "rows_input", "rows_reported", "sections_rendered", "required_sections_rendered",
     "missing_required_fields_count", "missing_optional_fields_count",
@@ -46,6 +49,7 @@ class Human24BlockReportConfig:
     context_human_input_path: str | Path | None = None
     v19_diagnostic_synthesis_path: str | Path | None = None
     v19_diagnostic_gate_matrix_path: str | Path | None = None
+    market_movement_diagnostic_path: str | Path | None = None
     output_dir: str | Path = "outputs/analysis_preview/human_24_block_report"
     base_dir: str | Path = "."
 
@@ -60,6 +64,10 @@ class Human24BlockReportResult:
     v19_diagnostic_synthesis_status: str
     v19_diagnostic_gate_matrix_path: str
     v19_diagnostic_gate_matrix_status: str
+    market_movement_diagnostic_path: str
+    market_movement_diagnostic_status: str
+    market_evidence_status: str
+    market_movement_timing_flag: str
     gates_evaluated: int
     gates_blocked: int
     gates_disabled: int
@@ -92,7 +100,8 @@ class Human24BlockReportRenderer:
         source = _resolve(self.config.context_human_input_path, self.base) or self.base / "outputs" / "analysis_preview" / "context_bundle_human_input" / "context_bundle_human_input.csv"
         diag_source = _resolve(self.config.v19_diagnostic_synthesis_path, self.base)
         gate_source = _resolve(self.config.v19_diagnostic_gate_matrix_path, self.base)
-        if _unsafe(source) or (diag_source is not None and _unsafe(diag_source)) or (gate_source is not None and _unsafe(gate_source)):
+        market_source = _resolve(self.config.market_movement_diagnostic_path, self.base)
+        if _unsafe(source) or (diag_source is not None and _unsafe(diag_source)) or (gate_source is not None and _unsafe(gate_source)) or (market_source is not None and _unsafe(market_source)):
             return self._blocked(HUMAN_24_BLOCK_MATCH_REPORT_BLOCKED_UNSAFE_PATH, source=source), ""
         if not source.exists():
             return self._blocked(HUMAN_24_BLOCK_MATCH_REPORT_BLOCKED_MISSING_INPUT, source=source), ""
@@ -107,7 +116,8 @@ class Human24BlockReportRenderer:
         missing_optional = len([p for p in str(row.get("missing_optional_fields", "")).split(" | ") if p])
         diagnostic = _load_diagnostic(diag_source, row)
         gate_summary = _load_gate_matrix(gate_source, row)
-        report = _render(row, diagnostic, gate_summary)
+        market_summary = _load_market_movement(market_source, row)
+        report = _render(row, diagnostic, gate_summary, market_summary)
         rendered = sum(1 for section in REQUIRED_SECTIONS if f"## {section}" in report)
         out.mkdir(parents=True, exist_ok=True)
         report_path = out / "human_24_block_match_report_preview.md"
@@ -122,6 +132,10 @@ class Human24BlockReportRenderer:
             v19_diagnostic_synthesis_status=str(diagnostic.get("v19_diagnostic_synthesis_status", "not executed in this preview layer")),
             v19_diagnostic_gate_matrix_path=str(gate_source.resolve()) if gate_source and gate_source.exists() else "",
             v19_diagnostic_gate_matrix_status=str(gate_summary.get("v19_diagnostic_gate_matrix_status", "not executed in this preview layer")),
+            market_movement_diagnostic_path=str(market_source.resolve()) if market_source and market_source.exists() else "",
+            market_movement_diagnostic_status=str(market_summary.get("market_movement_diagnostic_status", "not executed in this preview layer")),
+            market_evidence_status=str(market_summary.get("market_evidence_status", "not executed in this preview layer")),
+            market_movement_timing_flag=str(market_summary.get("market_movement_timing_flag", "not executed in this preview layer")),
             gates_evaluated=int(gate_summary.get("gates_evaluated", 0) or 0),
             gates_blocked=int(gate_summary.get("gates_blocked", 0) or 0),
             gates_disabled=int(gate_summary.get("gates_disabled", 0) or 0),
@@ -145,10 +159,10 @@ class Human24BlockReportRenderer:
         return result, report
 
     def _blocked(self, status: str, *, source: Path | None = None, rows_input: int = 0, missing_required: int = 0, notes: str = "") -> Human24BlockReportResult:
-        return Human24BlockReportResult("human_24_block_report_preview", str(source or self.config.context_human_input_path or ""), "", "", "", "", "", "", 0, 0, 0, 0, rows_input, 0, 0, 0, missing_required, 0, status, status, notes or _notes(0), False, False, False, False, False)
+        return Human24BlockReportResult("human_24_block_report_preview", str(source or self.config.context_human_input_path or ""), "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, rows_input, 0, 0, 0, missing_required, 0, status, status, notes or _notes(0), False, False, False, False, False)
 
 
-def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_summary: dict[str, object] | None = None) -> str:
+def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_summary: dict[str, object] | None = None, market_summary: dict[str, object] | None = None) -> str:
     def v(column: str) -> str:
         value = row.get(column, "")
         if pd.isna(value) or str(value).strip() == "":
@@ -159,6 +173,7 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
     not_executed = "not executed in this preview layer"
     diagnostic = diagnostic or {}
     gate_summary = gate_summary or {}
+    market_summary = market_summary or {}
 
     def d(column: str) -> str:
         value = diagnostic.get(column, "")
@@ -172,12 +187,18 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
             return "Gate matrix not executed in this preview layer."
         return str(value)
 
+    def m(column: str) -> str:
+        value = market_summary.get(column, "")
+        if pd.isna(value) or str(value).strip() == "":
+            return not_executed
+        return str(value)
+
     disabled_text = "Betting output is disabled in this diagnostic preview layer. Position sizing and financial return tracking are disabled."
     gate_disabled_text = "Betting output is disabled in this diagnostic gate preview layer. Position sizing and financial return tracking are disabled."
     bodies = {
         "Screen / Data Checklist": f"Local preview context loaded. Missing optional fields: {v('missing_optional_fields')}.",
         "Match Identity": f"{v('home_team')} vs {v('away_team')} on {v('match_date')} ({v('competition')} {v('season')}).",
-        "Data Quality": f"Understat: {v('understat_data_quality_status')}; FBref: {v('fbref_data_quality_status')}; context: {v('context_data_quality_status')}.",
+        "Data Quality": f"Understat: {v('understat_data_quality_status')}; FBref: {v('fbref_data_quality_status')}; context: {v('context_data_quality_status')}. Market movement diagnostic: {m('market_evidence_status')} ({m('market_movement_timing_flag')}).",
         "Understat xG/xGA Snapshot": f"Home xG {v('home_xg')} / Away xG {v('away_xg')}; Home xGA {v('home_xga')} / Away xGA {v('away_xga')}.",
         "FBref Team / Match Stats Snapshot": f"Possession {v('home_possession')} - {v('away_possession')}; shots {v('home_shots')} - {v('away_shots')}.",
         "Shot Profile": f"Shots on target {v('home_shots_on_target')} - {v('away_shots_on_target')}.",
@@ -191,14 +212,14 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
         "Injuries / Suspensions Status": unavailable,
         "Recent Form Status": unavailable,
         "H2H Status": unavailable,
-        "Contradictions / Data Gaps": f"Preview gaps are surfaced, not filled: {v('missing_optional_fields')}.",
+        "Contradictions / Data Gaps": f"Preview gaps are surfaced, not filled: {v('missing_optional_fields')}. Missing market fields: {m('missing_market_fields')}.",
         "v1.9 Model Synthesis Status": f"{d('v19_model_synthesis_status')}. {g('model')}. Production prediction logic is disabled by design.",
         "Control Model Status": f"{d('control_model_status')}. {g('control')}",
         "Chaos Score Status": f"{d('chaos_score_status')}. {g('chaos')}",
         "Underdog Win Score Status": f"{d('underdog_win_score_status')}. {g('underdog')}",
-        "No-Bet / Safety List": f"{d('no_bet_safety_status')}. {g('safety')} {disabled_text} {gate_disabled_text}",
-        "Score Family Status": f"{d('score_family_status')}; DNB gate: {d('dnb_gate_status')}; over/under gate: {d('over_under_gate_status')}; away favorite degradation: {d('away_favorite_degradation_status')}. {g('score_family')}",
-        "Final Preview Conclusion": f"{HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY}. v1.9 synthesis status: {d('v19_diagnostic_synthesis_status')}. Gate matrix status: {gate_summary.get('v19_diagnostic_gate_matrix_status', not_executed)}. Gates evaluated: {gate_summary.get('gates_evaluated', 0)}; blocked gates: {gate_summary.get('gates_blocked', 0)}; disabled gates: {gate_summary.get('gates_disabled', 0)}. Diagnostic only; no production model output is activated.",
+        "No-Bet / Safety List": f"{d('no_bet_safety_status')}. {g('safety')} Market safety: {m('no_bet_market_safety_status')}. {disabled_text} {gate_disabled_text}",
+        "Score Family Status": f"{d('score_family_status')}; DNB gate: {d('dnb_gate_status')}; over/under gate: {d('over_under_gate_status')}; away favorite degradation: {d('away_favorite_degradation_status')}. Market gates: odds={m('odds_availability_gate_status')}; DNB={m('dnb_market_availability_status')}; over/under={m('over_under_market_availability_status')}. {g('score_family')}",
+        "Final Preview Conclusion": f"{HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY}. v1.9 synthesis status: {d('v19_diagnostic_synthesis_status')}. Gate matrix status: {gate_summary.get('v19_diagnostic_gate_matrix_status', not_executed)}. Market movement diagnostic status: {m('market_movement_diagnostic_status')}. Gates evaluated: {gate_summary.get('gates_evaluated', 0)}; blocked gates: {gate_summary.get('gates_blocked', 0)}; disabled gates: {gate_summary.get('gates_disabled', 0)}. Diagnostic only; no production model output is activated.",
     }
     lines = ["# 24-Block Human Match Report Preview", ""]
     for section in REQUIRED_SECTIONS:
@@ -225,7 +246,10 @@ def _resolve(path: str | Path | None, base: Path) -> Path | None:
 def _load_diagnostic(path: Path | None, row: pd.Series) -> dict[str, object]:
     if path is None or not path.exists():
         return {}
-    frame = pd.read_csv(path, low_memory=False)
+    try:
+        frame = pd.read_csv(path, low_memory=False)
+    except EmptyDataError:
+        return {}
     if frame.empty:
         return {}
     selected = frame.copy()
@@ -243,7 +267,10 @@ def _load_diagnostic(path: Path | None, row: pd.Series) -> dict[str, object]:
 def _load_gate_matrix(path: Path | None, row: pd.Series) -> dict[str, object]:
     if path is None or not path.exists():
         return {}
-    frame = pd.read_csv(path, low_memory=False)
+    try:
+        frame = pd.read_csv(path, low_memory=False)
+    except EmptyDataError:
+        return {}
     if frame.empty:
         return {}
     selected = frame.copy()
@@ -276,6 +303,30 @@ def _load_gate_matrix(path: Path | None, row: pd.Series) -> dict[str, object]:
         subset = selected[selected["gate_id"].isin(gate_ids)] if "gate_id" in selected.columns else pd.DataFrame()
         summary[f"{key}_summary"] = _format_gate_summary(subset)
     return summary
+
+
+def _load_market_movement(path: Path | None, row: pd.Series) -> dict[str, object]:
+    if path is None or not path.exists():
+        return {}
+    try:
+        frame = pd.read_csv(path, low_memory=False)
+    except EmptyDataError:
+        return {}
+    if frame.empty:
+        return {}
+    selected = frame.copy()
+    for column in ["cross_provider_match_key", "understat_provider_match_id", "fbref_provider_match_id"]:
+        value = row.get(column, "")
+        if column in selected.columns and not _blank(value):
+            narrowed = selected[selected[column].astype(str).str.lower() == str(value).lower()]
+            if len(narrowed) == 1:
+                selected = narrowed
+                break
+    if len(selected) != 1:
+        return {}
+    data = selected.iloc[0].to_dict()
+    data["market_movement_diagnostic_status"] = "MARKET_MOVEMENT_DIAGNOSTIC_PREVIEW_READY"
+    return data
 
 
 def _format_gate_summary(frame: pd.DataFrame) -> str:

@@ -29,6 +29,8 @@ REQUIRED_FILES = {
     "Context Human Input": "context_human_input_review.csv",
     "v19 Diagnostic Synthesis": "v19_diagnostic_synthesis_review.csv",
     "v19 Gate Matrix": "v19_diagnostic_gate_matrix_review.csv",
+    "Odds Market Input": "odds_market_movement_input_review.csv",
+    "Market Movement Diagnostic": "market_movement_diagnostic_review.csv",
     "24 Block Report Sections": "report_sections_review.csv",
     "Safety Flags": "export_safety_flags.csv",
     "Export Manifest": "match_analysis_export_bundle_manifest.csv",

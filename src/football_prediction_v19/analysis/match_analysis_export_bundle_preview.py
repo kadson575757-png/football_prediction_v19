@@ -21,6 +21,7 @@ MATCH_ANALYSIS_EXPORT_BUNDLE_NETWORK_DISABLED_BY_DESIGN = "MATCH_ANALYSIS_EXPORT
 MANIFEST_COLUMNS = [
     "export_bundle_run_id", "match_analysis_runner_status", "context_bridge_status",
     "v19_diagnostic_synthesis_status", "v19_diagnostic_gate_matrix_status",
+    "odds_market_movement_input_status", "market_movement_diagnostic_status",
     "human_24_block_report_status", "match_date", "competition", "season",
     "home_team", "away_team", "understat_provider_match_id",
     "fbref_provider_match_id", "cross_provider_match_key", "rows_context",
@@ -34,6 +35,7 @@ PROTECTED = ["data/processed", "trusted_xg_sources/accepted", "trusted_xg_source
 EXPECTED_FILES = [
     "match_identity.csv", "context_human_input_review.csv",
     "v19_diagnostic_synthesis_review.csv", "v19_diagnostic_gate_matrix_review.csv",
+    "odds_market_movement_input_review.csv", "market_movement_diagnostic_review.csv",
     "report_sections_review.csv", "export_safety_flags.csv",
 ]
 
@@ -52,6 +54,8 @@ class MatchAnalysisExportBundleConfig:
     context_human_input_path: str | Path | None = None
     v19_diagnostic_synthesis_path: str | Path | None = None
     v19_diagnostic_gate_matrix_path: str | Path | None = None
+    odds_market_movement_input_path: str | Path | None = None
+    market_movement_diagnostic_path: str | Path | None = None
     human_24_block_report_path: str | Path | None = None
     output_dir: str | Path = "outputs/analysis_preview/match_analysis_export_bundle"
     base_dir: str | Path = "."
@@ -67,6 +71,8 @@ class MatchAnalysisExportBundleResult:
     context_bridge_status: str
     v19_diagnostic_synthesis_status: str
     v19_diagnostic_gate_matrix_status: str
+    odds_market_movement_input_status: str
+    market_movement_diagnostic_status: str
     human_24_block_report_status: str
     match_date: str
     competition: str
@@ -107,7 +113,7 @@ class MatchAnalysisExportBundleRunner:
         paths = self._resolve_or_build()
         if paths.get("blocked"):
             return self._blocked(str(paths["blocked"]))
-        required_paths = [paths.get(k) for k in ["runner_manifest", "context", "synthesis", "gate_matrix", "report"]]
+        required_paths = [paths.get(k) for k in ["runner_manifest", "context", "synthesis", "gate_matrix", "odds", "market", "report"]]
         if any(not p or not Path(str(p)).exists() for p in required_paths):
             return self._blocked(MATCH_ANALYSIS_EXPORT_BUNDLE_BLOCKED_MISSING_INPUT)
 
@@ -120,6 +126,8 @@ class MatchAnalysisExportBundleRunner:
         context_row = context_selected.iloc[0]
         synthesis = pd.read_csv(paths["synthesis"], low_memory=False)
         gate_matrix = pd.read_csv(paths["gate_matrix"], low_memory=False)
+        odds_input = pd.read_csv(paths["odds"], low_memory=False)
+        market_diag = pd.read_csv(paths["market"], low_memory=False)
         runner_manifest = pd.read_csv(paths["runner_manifest"], low_memory=False)
 
         out.mkdir(parents=True, exist_ok=True)
@@ -137,6 +145,8 @@ class MatchAnalysisExportBundleRunner:
         context_selected.to_csv(out / "context_human_input_review.csv", index=False)
         synthesis.to_csv(out / "v19_diagnostic_synthesis_review.csv", index=False)
         gate_matrix.to_csv(out / "v19_diagnostic_gate_matrix_review.csv", index=False)
+        odds_input.to_csv(out / "odds_market_movement_input_review.csv", index=False)
+        market_diag.to_csv(out / "market_movement_diagnostic_review.csv", index=False)
         _report_sections(Path(str(paths["report"]))).to_csv(out / "report_sections_review.csv", index=False)
         _safety_flags().to_csv(out / "export_safety_flags.csv", index=False)
 
@@ -156,6 +166,8 @@ class MatchAnalysisExportBundleRunner:
             str(runner_row.get("context_bridge_status", "")),
             str(runner_row.get("v19_diagnostic_synthesis_status", "")),
             str(runner_row.get("v19_diagnostic_gate_matrix_status", "")),
+            str(runner_row.get("odds_market_movement_input_status", "")),
+            str(runner_row.get("market_movement_diagnostic_status", "")),
             str(runner_row.get("human_24_block_report_status", "")),
             str(context_row.get("match_date", "")), str(context_row.get("competition", "")),
             str(context_row.get("season", "")), str(context_row.get("home_team", "")),
@@ -186,8 +198,10 @@ class MatchAnalysisExportBundleRunner:
         context = _resolve(self.config.context_human_input_path, self.base)
         synthesis = _resolve(self.config.v19_diagnostic_synthesis_path, self.base)
         gate_matrix = _resolve(self.config.v19_diagnostic_gate_matrix_path, self.base)
+        odds = _resolve(self.config.odds_market_movement_input_path, self.base)
+        market = _resolve(self.config.market_movement_diagnostic_path, self.base)
         report = _resolve(self.config.human_24_block_report_path, self.base)
-        if not all([runner_manifest, context, synthesis, gate_matrix, report]):
+        if not all([runner_manifest, context, synthesis, gate_matrix, odds, market, report]):
             from scripts.build_match_analysis_runner_preview import build_match_analysis_runner_preview
 
             runner = build_match_analysis_runner_preview(
@@ -212,10 +226,12 @@ class MatchAnalysisExportBundleRunner:
             context = self.base / "outputs" / "analysis_preview" / "context_bundle_human_input" / "context_bundle_human_input.csv"
             synthesis = self.base / "outputs" / "analysis_preview" / "v19_diagnostic_synthesis" / "v19_diagnostic_synthesis.csv"
             gate_matrix = self.base / "outputs" / "analysis_preview" / "v19_diagnostic_gate_matrix" / "v19_diagnostic_gate_matrix.csv"
-        return {"runner_manifest": runner_manifest, "context": context, "synthesis": synthesis, "gate_matrix": gate_matrix, "report": report}
+            odds = self.base / "outputs" / "analysis_preview" / "odds_market_movement_input" / "odds_market_movement_input.csv"
+            market = self.base / "outputs" / "analysis_preview" / "market_movement_diagnostic" / "market_movement_diagnostic.csv"
+        return {"runner_manifest": runner_manifest, "context": context, "synthesis": synthesis, "gate_matrix": gate_matrix, "odds": odds, "market": market, "report": report}
 
     def _blocked(self, status: str) -> MatchAnalysisExportBundleResult:
-        return MatchAnalysisExportBundleResult("match_analysis_export_bundle_preview", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, status, status, _notes(), False, False, False, False, False)
+        return MatchAnalysisExportBundleResult("match_analysis_export_bundle_preview", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, status, status, _notes(), False, False, False, False, False)
 
 
 def _select(frame: pd.DataFrame, config: MatchAnalysisExportBundleConfig) -> pd.DataFrame:
@@ -274,7 +290,7 @@ def _resolve(path: str | Path | None, base: Path) -> Path | None:
 
 
 def _has_unsafe_inputs(config: MatchAnalysisExportBundleConfig) -> bool:
-    for value in [config.match_analysis_runner_manifest_path, config.context_human_input_path, config.v19_diagnostic_synthesis_path, config.v19_diagnostic_gate_matrix_path, config.human_24_block_report_path]:
+    for value in [config.match_analysis_runner_manifest_path, config.context_human_input_path, config.v19_diagnostic_synthesis_path, config.v19_diagnostic_gate_matrix_path, config.odds_market_movement_input_path, config.market_movement_diagnostic_path, config.human_24_block_report_path]:
         if value and _unsafe(value):
             return True
     return False
