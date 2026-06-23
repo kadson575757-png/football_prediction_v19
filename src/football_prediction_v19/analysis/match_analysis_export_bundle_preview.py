@@ -24,6 +24,7 @@ MANIFEST_COLUMNS = [
     "v19_diagnostic_synthesis_status", "v19_diagnostic_gate_matrix_status",
     "odds_market_movement_input_status", "market_movement_diagnostic_status",
     "lineups_availability_input_status", "availability_diagnostic_status",
+    "player_impact_rolling_form_input_status", "player_form_diagnostic_status",
     "human_24_block_report_status", "match_date", "competition", "season",
     "home_team", "away_team", "understat_provider_match_id",
     "fbref_provider_match_id", "cross_provider_match_key", "rows_context",
@@ -39,6 +40,7 @@ EXPECTED_FILES = [
     "v19_diagnostic_synthesis_review.csv", "v19_diagnostic_gate_matrix_review.csv",
     "odds_market_movement_input_review.csv", "market_movement_diagnostic_review.csv",
     "lineups_availability_input_review.csv", "availability_diagnostic_review.csv",
+    "player_impact_rolling_form_input_review.csv", "player_form_diagnostic_review.csv",
     "report_sections_review.csv", "export_safety_flags.csv",
 ]
 
@@ -61,6 +63,8 @@ class MatchAnalysisExportBundleConfig:
     market_movement_diagnostic_path: str | Path | None = None
     lineups_availability_input_path: str | Path | None = None
     availability_diagnostic_path: str | Path | None = None
+    player_impact_rolling_form_input_path: str | Path | None = None
+    player_form_diagnostic_path: str | Path | None = None
     human_24_block_report_path: str | Path | None = None
     output_dir: str | Path = "outputs/analysis_preview/match_analysis_export_bundle"
     base_dir: str | Path = "."
@@ -80,6 +84,8 @@ class MatchAnalysisExportBundleResult:
     market_movement_diagnostic_status: str
     lineups_availability_input_status: str
     availability_diagnostic_status: str
+    player_impact_rolling_form_input_status: str
+    player_form_diagnostic_status: str
     human_24_block_report_status: str
     match_date: str
     competition: str
@@ -120,7 +126,7 @@ class MatchAnalysisExportBundleRunner:
         paths = self._resolve_or_build()
         if paths.get("blocked"):
             return self._blocked(str(paths["blocked"]))
-        required_paths = [paths.get(k) for k in ["runner_manifest", "context", "synthesis", "gate_matrix", "odds", "market", "lineups", "availability", "report"]]
+        required_paths = [paths.get(k) for k in ["runner_manifest", "context", "synthesis", "gate_matrix", "odds", "market", "lineups", "availability", "player_form_input", "player_form", "report"]]
         if any(not p or not Path(str(p)).exists() for p in required_paths):
             return self._blocked(MATCH_ANALYSIS_EXPORT_BUNDLE_BLOCKED_MISSING_INPUT)
 
@@ -139,6 +145,8 @@ class MatchAnalysisExportBundleRunner:
         market_diag = _read_csv(paths["market"])
         lineups_input = _read_csv(paths["lineups"])
         availability_diag = _read_csv(paths["availability"])
+        player_form_input = _read_csv(paths["player_form_input"])
+        player_form_diag = _read_csv(paths["player_form"])
         runner_manifest = _read_csv(paths["runner_manifest"])
 
         out.mkdir(parents=True, exist_ok=True)
@@ -160,6 +168,8 @@ class MatchAnalysisExportBundleRunner:
         market_diag.to_csv(out / "market_movement_diagnostic_review.csv", index=False)
         lineups_input.to_csv(out / "lineups_availability_input_review.csv", index=False)
         availability_diag.to_csv(out / "availability_diagnostic_review.csv", index=False)
+        player_form_input.to_csv(out / "player_impact_rolling_form_input_review.csv", index=False)
+        player_form_diag.to_csv(out / "player_form_diagnostic_review.csv", index=False)
         _report_sections(Path(str(paths["report"]))).to_csv(out / "report_sections_review.csv", index=False)
         _safety_flags().to_csv(out / "export_safety_flags.csv", index=False)
 
@@ -183,6 +193,8 @@ class MatchAnalysisExportBundleRunner:
             str(runner_row.get("market_movement_diagnostic_status", "")),
             str(runner_row.get("lineups_availability_input_status", "")),
             str(runner_row.get("availability_diagnostic_status", "")),
+            str(runner_row.get("player_impact_rolling_form_input_status", "")),
+            str(runner_row.get("player_form_diagnostic_status", "")),
             str(runner_row.get("human_24_block_report_status", "")),
             str(context_row.get("match_date", "")), str(context_row.get("competition", "")),
             str(context_row.get("season", "")), str(context_row.get("home_team", "")),
@@ -217,8 +229,10 @@ class MatchAnalysisExportBundleRunner:
         market = _resolve(self.config.market_movement_diagnostic_path, self.base)
         lineups = _resolve(self.config.lineups_availability_input_path, self.base)
         availability = _resolve(self.config.availability_diagnostic_path, self.base)
+        player_form_input = _resolve(self.config.player_impact_rolling_form_input_path, self.base)
+        player_form = _resolve(self.config.player_form_diagnostic_path, self.base)
         report = _resolve(self.config.human_24_block_report_path, self.base)
-        if not all([runner_manifest, context, synthesis, gate_matrix, odds, market, lineups, availability, report]):
+        if not all([runner_manifest, context, synthesis, gate_matrix, odds, market, lineups, availability, player_form_input, player_form, report]):
             from scripts.build_match_analysis_runner_preview import build_match_analysis_runner_preview
 
             runner = build_match_analysis_runner_preview(
@@ -247,10 +261,12 @@ class MatchAnalysisExportBundleRunner:
             market = self.base / "outputs" / "analysis_preview" / "market_movement_diagnostic" / "market_movement_diagnostic.csv"
             lineups = self.base / "outputs" / "analysis_preview" / "lineups_availability_input" / "lineups_availability_input.csv"
             availability = self.base / "outputs" / "analysis_preview" / "availability_diagnostic" / "availability_diagnostic.csv"
-        return {"runner_manifest": runner_manifest, "context": context, "synthesis": synthesis, "gate_matrix": gate_matrix, "odds": odds, "market": market, "lineups": lineups, "availability": availability, "report": report}
+            player_form_input = self.base / "outputs" / "analysis_preview" / "player_impact_rolling_form_input" / "player_impact_rolling_form_input.csv"
+            player_form = self.base / "outputs" / "analysis_preview" / "player_form_diagnostic" / "player_form_diagnostic.csv"
+        return {"runner_manifest": runner_manifest, "context": context, "synthesis": synthesis, "gate_matrix": gate_matrix, "odds": odds, "market": market, "lineups": lineups, "availability": availability, "player_form_input": player_form_input, "player_form": player_form, "report": report}
 
     def _blocked(self, status: str) -> MatchAnalysisExportBundleResult:
-        return MatchAnalysisExportBundleResult("match_analysis_export_bundle_preview", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, status, status, _notes(), False, False, False, False, False)
+        return MatchAnalysisExportBundleResult("match_analysis_export_bundle_preview", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, status, status, _notes(), False, False, False, False, False)
 
 
 def _select(frame: pd.DataFrame, config: MatchAnalysisExportBundleConfig) -> pd.DataFrame:
@@ -316,7 +332,7 @@ def _resolve(path: str | Path | None, base: Path) -> Path | None:
 
 
 def _has_unsafe_inputs(config: MatchAnalysisExportBundleConfig) -> bool:
-    for value in [config.match_analysis_runner_manifest_path, config.context_human_input_path, config.v19_diagnostic_synthesis_path, config.v19_diagnostic_gate_matrix_path, config.odds_market_movement_input_path, config.market_movement_diagnostic_path, config.lineups_availability_input_path, config.availability_diagnostic_path, config.human_24_block_report_path]:
+    for value in [config.match_analysis_runner_manifest_path, config.context_human_input_path, config.v19_diagnostic_synthesis_path, config.v19_diagnostic_gate_matrix_path, config.odds_market_movement_input_path, config.market_movement_diagnostic_path, config.lineups_availability_input_path, config.availability_diagnostic_path, config.player_impact_rolling_form_input_path, config.player_form_diagnostic_path, config.human_24_block_report_path]:
         if value and _unsafe(value):
             return True
     return False

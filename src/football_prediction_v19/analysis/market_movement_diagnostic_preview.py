@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pandas as pd
+from pandas.errors import EmptyDataError
 
 from football_prediction_v19.analysis.odds_market_movement_input_preview import ODDS_MARKET_MOVEMENT_INPUT_PREVIEW_READY
 
@@ -96,7 +97,10 @@ class MarketMovementDiagnosticRunner:
             if odds.get("odds_market_movement_input_status") != ODDS_MARKET_MOVEMENT_INPUT_PREVIEW_READY:
                 return self._blocked(MARKET_MOVEMENT_DIAGNOSTIC_BLOCKED_MISSING_ODDS_INPUT)
             odds_path = Path(str(odds.get("output_path", "")))
-        frame = pd.read_csv(odds_path, low_memory=False)
+        try:
+            frame = pd.read_csv(odds_path, low_memory=False)
+        except EmptyDataError:
+            return self._blocked(MARKET_MOVEMENT_DIAGNOSTIC_BLOCKED_MISSING_ODDS_INPUT)
         selected = _select(frame, self.config.cross_provider_match_key)
         if selected.empty:
             return self._blocked(MARKET_MOVEMENT_DIAGNOSTIC_BLOCKED_UNKNOWN_MATCH)

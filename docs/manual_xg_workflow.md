@@ -1198,3 +1198,13 @@ This layer surfaces projected or confirmed lineup status, formations, goalkeeper
 The availability diagnostic is diagnostic-only. It does not generate final betting tips, stake sizing, units, financial return tracking, SUPER_A_TIER promotion, production model features, or probability changes.
 
 The 24-block report includes availability status in the existing data-quality, lineups, injuries / suspensions, safety, and final conclusion sections. The one-command preview now includes both market and availability diagnostics. The export bundle includes `lineups_availability_input_review.csv` and `availability_diagnostic_review.csv`. The Excel workbook now includes `Lineups Availability` and `Availability Diagnostic` sheets in addition to the existing market and review sheets.
+
+## Phase 28.1 + 28.2 Player Impact / Rolling Form Diagnostic Preview
+
+Phase 28 adds preview-only player impact and rolling form evidence for human review. The one-command match analysis preview now builds local deterministic player/form input and a player/form diagnostic when no manual player/form CSV is supplied.
+
+This layer surfaces player xG / xA evidence, big chances, key attacking contributors, defensive contribution context, recent team form, recent xG / xGA form, conversion notes, and main creator / scorer status. Missing player or form values are reported exactly as missing; they are not inferred, invented, or silently filled.
+
+The player/form diagnostic is diagnostic-only. It does not generate final betting tips, stake sizing, units, financial return tracking, SUPER_A_TIER promotion, production model features, or probability changes.
+
+The 24-block report includes player/form status in the existing data-quality, player xG / xA, recent form, data gaps, safety, and final conclusion sections. The one-command preview now includes market, availability, and player/form diagnostics. The export bundle includes `player_impact_rolling_form_input_review.csv` and `player_form_diagnostic_review.csv`. The Excel workbook now includes `Player Impact Form` and `Player Form Diagnostic` sheets in addition to the existing market and availability sheets.
