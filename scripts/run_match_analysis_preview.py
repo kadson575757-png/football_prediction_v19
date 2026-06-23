@@ -51,6 +51,7 @@ def main(argv: list[str] | None = None) -> int:
         "odds_market_movement_input_status", "market_movement_diagnostic_status",
         "lineups_availability_input_status", "availability_diagnostic_status",
         "player_impact_rolling_form_input_status", "player_form_diagnostic_status",
+        "tactical_set_piece_fatigue_input_status", "tactical_matchup_diagnostic_status",
         "human_24_block_report_status", "export_bundle_status", "excel_export_status",
         "home_team", "away_team", "match_date", "gates_evaluated", "gates_blocked",
         "gates_disabled", "sections_rendered", "required_sections_rendered",

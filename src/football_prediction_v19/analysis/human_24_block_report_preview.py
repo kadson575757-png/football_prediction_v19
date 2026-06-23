@@ -38,6 +38,8 @@ MANIFEST_COLUMNS = [
     "availability_evidence_status",
     "player_form_diagnostic_path", "player_form_diagnostic_status",
     "player_form_evidence_status",
+    "tactical_matchup_diagnostic_path", "tactical_matchup_diagnostic_status",
+    "tactical_evidence_status",
     "gates_evaluated", "gates_blocked", "gates_disabled", "blocked_gate_count",
     "rows_input", "rows_reported", "sections_rendered", "required_sections_rendered",
     "missing_required_fields_count", "missing_optional_fields_count",
@@ -56,6 +58,7 @@ class Human24BlockReportConfig:
     market_movement_diagnostic_path: str | Path | None = None
     availability_diagnostic_path: str | Path | None = None
     player_form_diagnostic_path: str | Path | None = None
+    tactical_matchup_diagnostic_path: str | Path | None = None
     output_dir: str | Path = "outputs/analysis_preview/human_24_block_report"
     base_dir: str | Path = "."
 
@@ -80,6 +83,9 @@ class Human24BlockReportResult:
     player_form_diagnostic_path: str
     player_form_diagnostic_status: str
     player_form_evidence_status: str
+    tactical_matchup_diagnostic_path: str
+    tactical_matchup_diagnostic_status: str
+    tactical_evidence_status: str
     gates_evaluated: int
     gates_blocked: int
     gates_disabled: int
@@ -115,7 +121,8 @@ class Human24BlockReportRenderer:
         market_source = _resolve(self.config.market_movement_diagnostic_path, self.base)
         availability_source = _resolve(self.config.availability_diagnostic_path, self.base)
         player_form_source = _resolve(self.config.player_form_diagnostic_path, self.base)
-        if _unsafe(source) or (diag_source is not None and _unsafe(diag_source)) or (gate_source is not None and _unsafe(gate_source)) or (market_source is not None and _unsafe(market_source)) or (availability_source is not None and _unsafe(availability_source)) or (player_form_source is not None and _unsafe(player_form_source)):
+        tactical_source = _resolve(self.config.tactical_matchup_diagnostic_path, self.base)
+        if _unsafe(source) or (diag_source is not None and _unsafe(diag_source)) or (gate_source is not None and _unsafe(gate_source)) or (market_source is not None and _unsafe(market_source)) or (availability_source is not None and _unsafe(availability_source)) or (player_form_source is not None and _unsafe(player_form_source)) or (tactical_source is not None and _unsafe(tactical_source)):
             return self._blocked(HUMAN_24_BLOCK_MATCH_REPORT_BLOCKED_UNSAFE_PATH, source=source), ""
         if not source.exists():
             return self._blocked(HUMAN_24_BLOCK_MATCH_REPORT_BLOCKED_MISSING_INPUT, source=source), ""
@@ -133,7 +140,8 @@ class Human24BlockReportRenderer:
         market_summary = _load_market_movement(market_source, row)
         availability_summary = _load_availability(availability_source, row)
         player_form_summary = _load_player_form(player_form_source, row)
-        report = _render(row, diagnostic, gate_summary, market_summary, availability_summary, player_form_summary)
+        tactical_summary = _load_tactical(tactical_source, row)
+        report = _render(row, diagnostic, gate_summary, market_summary, availability_summary, player_form_summary, tactical_summary)
         rendered = sum(1 for section in REQUIRED_SECTIONS if f"## {section}" in report)
         out.mkdir(parents=True, exist_ok=True)
         report_path = out / "human_24_block_match_report_preview.md"
@@ -158,6 +166,9 @@ class Human24BlockReportRenderer:
             player_form_diagnostic_path=str(player_form_source.resolve()) if player_form_source and player_form_source.exists() else "",
             player_form_diagnostic_status=str(player_form_summary.get("player_form_diagnostic_status", "not executed in this preview layer")),
             player_form_evidence_status=str(player_form_summary.get("player_form_evidence_status", "not executed in this preview layer")),
+            tactical_matchup_diagnostic_path=str(tactical_source.resolve()) if tactical_source and tactical_source.exists() else "",
+            tactical_matchup_diagnostic_status=str(tactical_summary.get("tactical_matchup_diagnostic_status", "not executed in this preview layer")),
+            tactical_evidence_status=str(tactical_summary.get("tactical_evidence_status", "not executed in this preview layer")),
             gates_evaluated=int(gate_summary.get("gates_evaluated", 0) or 0),
             gates_blocked=int(gate_summary.get("gates_blocked", 0) or 0),
             gates_disabled=int(gate_summary.get("gates_disabled", 0) or 0),
@@ -181,10 +192,10 @@ class Human24BlockReportRenderer:
         return result, report
 
     def _blocked(self, status: str, *, source: Path | None = None, rows_input: int = 0, missing_required: int = 0, notes: str = "") -> Human24BlockReportResult:
-        return Human24BlockReportResult("human_24_block_report_preview", str(source or self.config.context_human_input_path or ""), "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, rows_input, 0, 0, 0, missing_required, 0, status, status, notes or _notes(0), False, False, False, False, False)
+        return Human24BlockReportResult("human_24_block_report_preview", str(source or self.config.context_human_input_path or ""), "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, rows_input, 0, 0, 0, missing_required, 0, status, status, notes or _notes(0), False, False, False, False, False)
 
 
-def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_summary: dict[str, object] | None = None, market_summary: dict[str, object] | None = None, availability_summary: dict[str, object] | None = None, player_form_summary: dict[str, object] | None = None) -> str:
+def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_summary: dict[str, object] | None = None, market_summary: dict[str, object] | None = None, availability_summary: dict[str, object] | None = None, player_form_summary: dict[str, object] | None = None, tactical_summary: dict[str, object] | None = None) -> str:
     def v(column: str) -> str:
         value = row.get(column, "")
         if pd.isna(value) or str(value).strip() == "":
@@ -198,6 +209,7 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
     market_summary = market_summary or {}
     availability_summary = availability_summary or {}
     player_form_summary = player_form_summary or {}
+    tactical_summary = tactical_summary or {}
 
     def d(column: str) -> str:
         value = diagnostic.get(column, "")
@@ -229,33 +241,39 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
             return not_executed
         return str(value)
 
+    def t(column: str) -> str:
+        value = tactical_summary.get(column, "")
+        if pd.isna(value) or str(value).strip() == "":
+            return not_executed
+        return str(value)
+
     disabled_text = "Betting output is disabled in this diagnostic preview layer. Position sizing and financial return tracking are disabled."
     gate_disabled_text = "Betting output is disabled in this diagnostic gate preview layer. Position sizing and financial return tracking are disabled."
     bodies = {
         "Screen / Data Checklist": f"Local preview context loaded. Missing optional fields: {v('missing_optional_fields')}.",
         "Match Identity": f"{v('home_team')} vs {v('away_team')} on {v('match_date')} ({v('competition')} {v('season')}).",
-        "Data Quality": f"Understat: {v('understat_data_quality_status')}; FBref: {v('fbref_data_quality_status')}; context: {v('context_data_quality_status')}. Market movement diagnostic: {m('market_evidence_status')} ({m('market_movement_timing_flag')}). Availability diagnostic: {a('availability_evidence_status')}. Player/form diagnostic: {p('player_form_evidence_status')}.",
+        "Data Quality": f"Understat: {v('understat_data_quality_status')}; FBref: {v('fbref_data_quality_status')}; context: {v('context_data_quality_status')}. Market movement diagnostic: {m('market_evidence_status')} ({m('market_movement_timing_flag')}). Availability diagnostic: {a('availability_evidence_status')}. Player/form diagnostic: {p('player_form_evidence_status')}. Tactical diagnostic: {t('tactical_evidence_status')}.",
         "Understat xG/xGA Snapshot": f"Home xG {v('home_xg')} / Away xG {v('away_xg')}; Home xGA {v('home_xga')} / Away xGA {v('away_xga')}.",
         "FBref Team / Match Stats Snapshot": f"Possession {v('home_possession')} - {v('away_possession')}; shots {v('home_shots')} - {v('away_shots')}.",
         "Shot Profile": f"Shots on target {v('home_shots_on_target')} - {v('away_shots_on_target')}.",
-        "Possession Profile": f"Possession split {v('home_possession')} - {v('away_possession')}.",
+        "Possession Profile": f"Possession split {v('home_possession')} - {v('away_possession')}. Tactical matchup status: {t('tactical_matchup_diagnostic_status')}; score gate: {t('tactical_matchup_score_gate_status')}.",
         "Passing Profile": f"Pass completion {v('home_pass_completion_pct')} - {v('away_pass_completion_pct')}.",
         "Progression Profile": f"Progressive passes {v('home_progressive_passes')} - {v('away_progressive_passes')}; carries {v('home_progressive_carries')} - {v('away_progressive_carries')}.",
-        "Defensive Actions Profile": f"Tackles {v('home_tackles')} - {v('away_tackles')}; interceptions {v('home_interceptions')} - {v('away_interceptions')}; blocks {v('home_blocks')} - {v('away_blocks')}.",
+        "Defensive Actions Profile": f"Tackles {v('home_tackles')} - {v('away_tackles')}; interceptions {v('home_interceptions')} - {v('away_interceptions')}; blocks {v('home_blocks')} - {v('away_blocks')}. Transition gate: {t('transition_matchup_gate_status')}.",
         "Home / Away Split Status": unavailable,
         "Player xG / xA Status": f"Player/form diagnostic status: {p('player_form_diagnostic_status')}. xG/xA gate: {p('player_xg_xa_gate_status')}; big chance gate: {p('big_chance_gate_status')}. Home note: {p('home_player_form_note')}. Away note: {p('away_player_form_note')}.",
         "Lineups Status": f"Availability diagnostic status: {a('availability_diagnostic_status')}. Lineup gate: {a('lineup_confirmation_gate_status')}; formation gate: {a('formation_availability_gate_status')}. Home note: {a('home_availability_note')}. Away note: {a('away_availability_note')}.",
         "Injuries / Suspensions Status": f"Injuries and suspensions gate: {a('injuries_suspensions_gate_status')}; goalkeeper gate: {a('goalkeeper_availability_gate_status')}; key absence gate: {a('key_absence_gate_status')}.",
-        "Recent Form Status": f"Rolling form gate: {p('rolling_form_gate_status')}; conversion signal gate: {p('conversion_signal_gate_status')}; creator gate: {p('main_creator_availability_gate_status')}; scorer gate: {p('main_scorer_availability_gate_status')}.",
+        "Recent Form Status": f"Rolling form gate: {p('rolling_form_gate_status')}; conversion signal gate: {p('conversion_signal_gate_status')}; creator gate: {p('main_creator_availability_gate_status')}; scorer gate: {p('main_scorer_availability_gate_status')}. Fatigue gate: {t('fatigue_modifier_gate_status')}.",
         "H2H Status": unavailable,
-        "Contradictions / Data Gaps": f"Preview gaps are surfaced, not filled: {v('missing_optional_fields')}. Missing market fields: {m('missing_market_fields')}. Missing availability fields: {a('missing_availability_fields')}. Missing player/form fields: {p('missing_player_form_fields')}.",
+        "Contradictions / Data Gaps": f"Preview gaps are surfaced, not filled: {v('missing_optional_fields')}. Missing market fields: {m('missing_market_fields')}. Missing availability fields: {a('missing_availability_fields')}. Missing player/form fields: {p('missing_player_form_fields')}. Missing tactical fields: {t('missing_tactical_fields')}.",
         "v1.9 Model Synthesis Status": f"{d('v19_model_synthesis_status')}. {g('model')}. Production prediction logic is disabled by design.",
-        "Control Model Status": f"{d('control_model_status')}. {g('control')}",
-        "Chaos Score Status": f"{d('chaos_score_status')}. {g('chaos')}",
+        "Control Model Status": f"{d('control_model_status')}. {g('control')} Tactical matchup note: {t('tactical_matchup_note')}.",
+        "Chaos Score Status": f"{d('chaos_score_status')}. {g('chaos')} xG-zone correction gate: {t('xg_zone_correction_gate_status')}.",
         "Underdog Win Score Status": f"{d('underdog_win_score_status')}. {g('underdog')}",
-        "No-Bet / Safety List": f"{d('no_bet_safety_status')}. {g('safety')} Market safety: {m('no_bet_market_safety_status')}. Availability safety: {a('no_bet_availability_safety_status')}. Player/form safety: {p('no_bet_player_form_safety_status')}. {disabled_text} {gate_disabled_text}",
-        "Score Family Status": f"{d('score_family_status')}; DNB gate: {d('dnb_gate_status')}; over/under gate: {d('over_under_gate_status')}; away favorite degradation: {d('away_favorite_degradation_status')}. Market gates: odds={m('odds_availability_gate_status')}; DNB={m('dnb_market_availability_status')}; over/under={m('over_under_market_availability_status')}. {g('score_family')}",
-        "Final Preview Conclusion": f"{HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY}. v1.9 synthesis status: {d('v19_diagnostic_synthesis_status')}. Gate matrix status: {gate_summary.get('v19_diagnostic_gate_matrix_status', not_executed)}. Market movement diagnostic status: {m('market_movement_diagnostic_status')}. Availability diagnostic status: {a('availability_diagnostic_status')}. Player/form diagnostic status: {p('player_form_diagnostic_status')}. Gates evaluated: {gate_summary.get('gates_evaluated', 0)}; blocked gates: {gate_summary.get('gates_blocked', 0)}; disabled gates: {gate_summary.get('gates_disabled', 0)}. Diagnostic only; no production model output is activated.",
+        "No-Bet / Safety List": f"{d('no_bet_safety_status')}. {g('safety')} Market safety: {m('no_bet_market_safety_status')}. Availability safety: {a('no_bet_availability_safety_status')}. Player/form safety: {p('no_bet_player_form_safety_status')}. Tactical safety: {t('no_bet_tactical_safety_status')}. {disabled_text} {gate_disabled_text}",
+        "Score Family Status": f"{d('score_family_status')}; DNB gate: {d('dnb_gate_status')}; over/under gate: {d('over_under_gate_status')}; away favorite degradation: {d('away_favorite_degradation_status')}. Market gates: odds={m('odds_availability_gate_status')}; DNB={m('dnb_market_availability_status')}; over/under={m('over_under_market_availability_status')}. Set-piece ratio gate: {t('set_piece_xg_ratio_gate_status')}. Formation gate: {t('formation_matchup_gate_status')}. {g('score_family')}",
+        "Final Preview Conclusion": f"{HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY}. v1.9 synthesis status: {d('v19_diagnostic_synthesis_status')}. Gate matrix status: {gate_summary.get('v19_diagnostic_gate_matrix_status', not_executed)}. Market movement diagnostic status: {m('market_movement_diagnostic_status')}. Availability diagnostic status: {a('availability_diagnostic_status')}. Player/form diagnostic status: {p('player_form_diagnostic_status')}. Tactical diagnostic status: {t('tactical_matchup_diagnostic_status')}. Gates evaluated: {gate_summary.get('gates_evaluated', 0)}; blocked gates: {gate_summary.get('gates_blocked', 0)}; disabled gates: {gate_summary.get('gates_disabled', 0)}. Diagnostic only; no production model output is activated.",
     }
     lines = ["# 24-Block Human Match Report Preview", ""]
     for section in REQUIRED_SECTIONS:
@@ -406,6 +424,28 @@ def _load_player_form(path: Path | None, row: pd.Series) -> dict[str, object]:
         return {}
     data = selected.iloc[0].to_dict()
     data["player_form_diagnostic_status"] = "PLAYER_FORM_DIAGNOSTIC_PREVIEW_READY"
+    return data
+
+
+def _load_tactical(path: Path | None, row: pd.Series) -> dict[str, object]:
+    if path is None or not path.exists():
+        return {}
+    try:
+        frame = pd.read_csv(path, low_memory=False)
+    except EmptyDataError:
+        return {}
+    if frame.empty:
+        return {}
+    selected = frame.copy()
+    key = row.get("cross_provider_match_key", "")
+    if "cross_provider_match_key" in selected.columns and not _blank(key):
+        narrowed = selected[selected["cross_provider_match_key"].astype(str).str.lower() == str(key).lower()]
+        if len(narrowed) == 1:
+            selected = narrowed
+    if len(selected) != 1:
+        return {}
+    data = selected.iloc[0].to_dict()
+    data["tactical_matchup_diagnostic_status"] = "TACTICAL_MATCHUP_DIAGNOSTIC_PREVIEW_READY"
     return data
 
 
