@@ -36,6 +36,8 @@ MANIFEST_COLUMNS = [
     "availability_evidence_status",
     "player_impact_rolling_form_input_status", "player_form_diagnostic_status",
     "player_form_evidence_status",
+    "tactical_set_piece_fatigue_input_status", "tactical_matchup_diagnostic_status",
+    "tactical_evidence_status",
     "gates_evaluated", "gates_blocked", "gates_disabled", "blocked_gate_count",
     "rows_joined", "rows_written", "rows_reported", "sections_rendered",
     "missing_required_fields_count", "missing_optional_fields_count", "report_output_path",
@@ -95,6 +97,9 @@ class MatchAnalysisRunnerResult:
     player_impact_rolling_form_input_status: str
     player_form_diagnostic_status: str
     player_form_evidence_status: str
+    tactical_set_piece_fatigue_input_status: str
+    tactical_matchup_diagnostic_status: str
+    tactical_evidence_status: str
     gates_evaluated: int
     gates_blocked: int
     gates_disabled: int
@@ -134,6 +139,8 @@ class MatchAnalysisRunnerPreviewRunner:
         from scripts.build_lineups_availability_input_preview import build_lineups_availability_input_preview
         from scripts.build_player_form_diagnostic_preview import build_player_form_diagnostic_preview
         from scripts.build_player_impact_rolling_form_input_preview import build_player_impact_rolling_form_input_preview
+        from scripts.build_tactical_matchup_diagnostic_preview import build_tactical_matchup_diagnostic_preview
+        from scripts.build_tactical_set_piece_fatigue_input_preview import build_tactical_set_piece_fatigue_input_preview
         from scripts.build_market_movement_diagnostic_preview import build_market_movement_diagnostic_preview
         from scripts.build_odds_market_movement_input_preview import build_odds_market_movement_input_preview
         from scripts.build_v19_diagnostic_gate_matrix_preview import build_v19_diagnostic_gate_matrix_preview
@@ -267,6 +274,26 @@ class MatchAnalysisRunnerPreviewRunner:
             output_dir=self.base / "outputs" / "analysis_preview" / "player_form_diagnostic",
             base_dir=self.base,
         )
+        tactical_input = build_tactical_set_piece_fatigue_input_preview(
+            cross_provider_match_key=self.config.cross_provider_match_key or self.config.provider_match_id,
+            understat_provider_match_id=self.config.understat_provider_match_id,
+            fbref_provider_match_id=self.config.fbref_provider_match_id,
+            home_team=self.config.home_team,
+            away_team=self.config.away_team,
+            match_date=self.config.match_date,
+            competition=self.config.competition,
+            season=self.config.season,
+            output_dir=self.base / "outputs" / "analysis_preview" / "tactical_set_piece_fatigue_input",
+            base_dir=self.base,
+        )
+        tactical = build_tactical_matchup_diagnostic_preview(
+            cross_provider_match_key=self.config.cross_provider_match_key or self.config.provider_match_id,
+            tactical_set_piece_fatigue_input_path=tactical_input.get("output_path"),
+            v19_diagnostic_synthesis_path=synthesis.get("output_path") if synthesis else None,
+            v19_diagnostic_gate_matrix_path=gate_matrix.get("gate_matrix_output_path") if gate_matrix else None,
+            output_dir=self.base / "outputs" / "analysis_preview" / "tactical_matchup_diagnostic",
+            base_dir=self.base,
+        )
         report = build_human_24_block_report_preview(
             context_human_input_path=bridge.get("human_input_output_path"),
             v19_diagnostic_synthesis_path=synthesis.get("output_path") if synthesis else None,
@@ -274,6 +301,7 @@ class MatchAnalysisRunnerPreviewRunner:
             market_movement_diagnostic_path=market.get("output_path"),
             availability_diagnostic_path=availability.get("output_path"),
             player_form_diagnostic_path=player_form.get("output_path"),
+            tactical_matchup_diagnostic_path=tactical.get("output_path"),
             output_dir=self.base / "outputs" / "analysis_preview" / "human_24_block_report",
             base_dir=self.base,
             build_missing=False,
@@ -312,6 +340,9 @@ class MatchAnalysisRunnerPreviewRunner:
             str(player_form_input.get("player_impact_rolling_form_input_status", "")),
             str(player_form.get("player_form_diagnostic_status", "")),
             str(player_form.get("player_form_evidence_status", "")),
+            str(tactical_input.get("tactical_set_piece_fatigue_input_status", "")),
+            str(tactical.get("tactical_matchup_diagnostic_status", "")),
+            str(tactical.get("tactical_evidence_status", "")),
             int(gate_matrix.get("gates_evaluated", 0) or 0),
             int(gate_matrix.get("gates_blocked", 0) or 0),
             int(gate_matrix.get("gates_disabled", 0) or 0),
@@ -339,7 +370,7 @@ class MatchAnalysisRunnerPreviewRunner:
         return result
 
     def _blocked(self, status: str, *, match_context_bundle_status: str = "", context_bridge_status: str = "", human_24_block_report_status: str = "") -> MatchAnalysisRunnerResult:
-        return MatchAnalysisRunnerResult("match_analysis_runner_preview", "", "", "", "", "", "", "", "", "", "", match_context_bundle_status, context_bridge_status, human_24_block_report_status, "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", status, status, _notes(0), False, False, False, False, False)
+        return MatchAnalysisRunnerResult("match_analysis_runner_preview", "", "", "", "", "", "", "", "", "", "", match_context_bundle_status, context_bridge_status, human_24_block_report_status, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", status, status, _notes(0), False, False, False, False, False)
 
 
 def _map_bundle_status(status: str) -> str:

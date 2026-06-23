@@ -35,6 +35,8 @@ REQUIRED_FILES = {
     "Availability Diagnostic": "availability_diagnostic_review.csv",
     "Player Impact Form": "player_impact_rolling_form_input_review.csv",
     "Player Form Diagnostic": "player_form_diagnostic_review.csv",
+    "Tactical Set Piece Fatigue": "tactical_set_piece_fatigue_input_review.csv",
+    "Tactical Diagnostic": "tactical_matchup_diagnostic_review.csv",
     "24 Block Report Sections": "report_sections_review.csv",
     "Safety Flags": "export_safety_flags.csv",
     "Export Manifest": "match_analysis_export_bundle_manifest.csv",
