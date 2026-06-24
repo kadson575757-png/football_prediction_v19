@@ -29,9 +29,9 @@ def build_parser() -> argparse.ArgumentParser:
 def run_match_analysis_preview(**kwargs: object) -> dict[str, object]:
     real_match_intake = kwargs.pop("real_match_intake", None)
     if real_match_intake:
-        from scripts.build_real_match_input_pack_preview import build_real_match_input_pack_preview
+        from scripts.build_real_match_analysis_runner_preview import build_real_match_analysis_runner_preview
 
-        return build_real_match_input_pack_preview(real_match_intake_path=real_match_intake, base_dir=kwargs.get("base_dir", ROOT))
+        return build_real_match_analysis_runner_preview(real_match_intake_path=real_match_intake, base_dir=kwargs.get("base_dir", ROOT))
     result = RealMatchAnalysisCommandRunner(RealMatchAnalysisCommandConfig(**kwargs)).run()
     return result.__dict__
 
@@ -54,6 +54,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     for key in [
         "command_status", "match_context_bundle_status", "context_bridge_status",
+        "real_match_analysis_runner_status",
         "real_match_input_pack_status", "real_match_intake_schema_status",
         "real_match_intake_validation_status", "manual_evidence_overlay_status",
         "v19_diagnostic_synthesis_status", "v19_diagnostic_gate_matrix_status",

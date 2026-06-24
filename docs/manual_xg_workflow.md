@@ -1230,3 +1230,21 @@ Optional evidence fields stay blank when missing. The validation and overlay lay
 The manual evidence overlay splits a validated real-match intake row into the existing market, availability, player/form, and tactical preview input formats. The one-command preview can now accept `--real-match-intake <path>` to run the preview chain from manual evidence while the default deterministic `u-bundesliga-2024-001` behavior remains available.
 
 This remains diagnostic-preview-only. No final betting tips are generated, no staking, units, ROI, financial return tracking, `SUPER_A_TIER` promotion, production model features, or probability logic are activated. Export bundles and Excel workbooks remain review artifacts only.
+
+## Phases 31-33 Final Real Match Analysis Preview
+
+Phases 31-33 complete the preview bridge for first manually supplied real match analysis. Build a filled local sample pack with:
+
+```powershell
+python scripts/build_filled_real_match_intake_pack_preview.py
+```
+
+Run the real-match preview workflow from a manually filled intake CSV:
+
+```powershell
+python scripts/run_match_analysis_preview.py --real-match-intake outputs/analysis_preview/filled_real_match_intake_pack/filled_real_match_intake.csv
+```
+
+The workflow validates intake, builds manual evidence overlays, runs market, availability, player/form, tactical, v1.9 synthesis, v1.9 gate matrix, 24-block report, export bundle, Excel workbook, artifact acceptance, and final readiness checks. The output artifacts include a user-facing real match report, the full 24-block report, Excel workbook, export bundle, artifact index, and final readiness audit.
+
+Missing optional values stay visible and are not inferred or invented. This is still diagnostic-preview-only: no final betting tips, no staking, no units, no ROI, no financial return tracking, and no `SUPER_A_TIER` promotion are generated. First real analysis is now possible by manually filling the intake CSV and running the preview command above.

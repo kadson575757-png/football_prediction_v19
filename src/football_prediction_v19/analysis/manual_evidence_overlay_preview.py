@@ -121,8 +121,8 @@ def _identity(row: pd.Series) -> dict[str, object]:
 def _odds(row: pd.Series) -> dict[str, object]:
     data = _identity(row)
     data.update({
-        "market_snapshot_source": row.get("market_source_note", "manual_evidence_overlay"),
-        "market_snapshot_timestamp": row.get("market_snapshot_timestamp", ""),
+        "market_snapshot_source": _value(row, "market_source_note", "manual_evidence_overlay"),
+        "market_snapshot_timestamp": _value(row, "market_snapshot_timestamp", "manual_preview_timestamp_missing"),
         "home_open_odds": row.get("home_open_odds", ""), "draw_open_odds": row.get("draw_open_odds", ""),
         "away_open_odds": row.get("away_open_odds", ""), "home_current_odds": row.get("home_current_odds", ""),
         "draw_current_odds": row.get("draw_current_odds", ""), "away_current_odds": row.get("away_current_odds", ""),
@@ -135,8 +135,8 @@ def _odds(row: pd.Series) -> dict[str, object]:
 def _availability(row: pd.Series) -> dict[str, object]:
     data = _identity(row)
     data.update({
-        "availability_snapshot_source": row.get("availability_source_note", "manual_evidence_overlay"),
-        "availability_snapshot_timestamp": row.get("market_snapshot_timestamp", ""),
+        "availability_snapshot_source": _value(row, "availability_source_note", "manual_evidence_overlay"),
+        "availability_snapshot_timestamp": _value(row, "market_snapshot_timestamp", "manual_preview_timestamp_missing"),
         "home_lineup_status": row.get("home_lineup_confirmed", ""),
         "away_lineup_status": row.get("away_lineup_confirmed", ""),
         "home_formation": row.get("home_formation", ""), "away_formation": row.get("away_formation", ""),
@@ -158,8 +158,8 @@ def _availability(row: pd.Series) -> dict[str, object]:
 def _player(row: pd.Series) -> dict[str, object]:
     data = _identity(row)
     data.update({
-        "player_form_snapshot_source": row.get("player_form_source_note", "manual_evidence_overlay"),
-        "player_form_snapshot_timestamp": row.get("market_snapshot_timestamp", ""),
+        "player_form_snapshot_source": _value(row, "player_form_source_note", "manual_evidence_overlay"),
+        "player_form_snapshot_timestamp": _value(row, "market_snapshot_timestamp", "manual_preview_timestamp_missing"),
         "home_top_xg_player": row.get("home_main_scorer", ""), "away_top_xg_player": row.get("away_main_scorer", ""),
         "home_top_xg_value": row.get("home_player_xg_total", ""), "away_top_xg_value": row.get("away_player_xg_total", ""),
         "home_top_xa_player": row.get("home_main_creator", ""), "away_top_xa_player": row.get("away_main_creator", ""),
@@ -186,8 +186,8 @@ def _player(row: pd.Series) -> dict[str, object]:
 def _tactical(row: pd.Series) -> dict[str, object]:
     data = _identity(row)
     data.update({
-        "tactical_snapshot_source": row.get("tactical_source_note", "manual_evidence_overlay"),
-        "tactical_snapshot_timestamp": row.get("market_snapshot_timestamp", ""),
+        "tactical_snapshot_source": _value(row, "tactical_source_note", "manual_evidence_overlay"),
+        "tactical_snapshot_timestamp": _value(row, "market_snapshot_timestamp", "manual_preview_timestamp_missing"),
     })
     for column in [
         "home_set_piece_xg_for", "away_set_piece_xg_for", "home_set_piece_xg_against",
@@ -217,6 +217,11 @@ def _overlay_summary(row: pd.Series) -> dict[str, object]:
 
 def _status(data: dict[str, object], optional: list[str]) -> str:
     return "DIAGNOSTIC_READY_WITH_MISSING_OPTIONAL_FIELDS" if any(_blank(data.get(c, "")) for c in optional) else "DIAGNOSTIC_READY"
+
+
+def _value(row: pd.Series, column: str, fallback: object) -> object:
+    value = row.get(column, "")
+    return fallback if _blank(value) else value
 
 
 def _resolve(path: str | Path | None, base: Path) -> Path | None:
