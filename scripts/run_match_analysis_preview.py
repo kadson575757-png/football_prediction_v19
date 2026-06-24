@@ -19,6 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     for arg in ["cross-provider-match-key", "understat-provider-match-id", "fbref-provider-match-id", "home-team", "away-team", "match-date", "competition", "season"]:
         parser.add_argument(f"--{arg}", default=None)
+    parser.add_argument("--real-match-intake", default=None)
     parser.add_argument("--output-dir", default=str(ROOT / "outputs" / "analysis_preview" / "real_match_analysis_command"))
     parser.add_argument("--workbook-filename", default="match_analysis_preview_workbook.xlsx")
     parser.add_argument("--base-dir", default=str(ROOT))
@@ -26,6 +27,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def run_match_analysis_preview(**kwargs: object) -> dict[str, object]:
+    real_match_intake = kwargs.pop("real_match_intake", None)
+    if real_match_intake:
+        from scripts.build_real_match_input_pack_preview import build_real_match_input_pack_preview
+
+        return build_real_match_input_pack_preview(real_match_intake_path=real_match_intake, base_dir=kwargs.get("base_dir", ROOT))
     result = RealMatchAnalysisCommandRunner(RealMatchAnalysisCommandConfig(**kwargs)).run()
     return result.__dict__
 
@@ -41,12 +47,15 @@ def main(argv: list[str] | None = None) -> int:
         match_date=args.match_date,
         competition=args.competition,
         season=args.season,
+        real_match_intake=args.real_match_intake,
         output_dir=args.output_dir,
         workbook_filename=args.workbook_filename,
         base_dir=args.base_dir,
     )
     for key in [
         "command_status", "match_context_bundle_status", "context_bridge_status",
+        "real_match_input_pack_status", "real_match_intake_schema_status",
+        "real_match_intake_validation_status", "manual_evidence_overlay_status",
         "v19_diagnostic_synthesis_status", "v19_diagnostic_gate_matrix_status",
         "odds_market_movement_input_status", "market_movement_diagnostic_status",
         "lineups_availability_input_status", "availability_diagnostic_status",

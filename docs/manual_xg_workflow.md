@@ -1208,3 +1208,25 @@ This layer surfaces player xG / xA evidence, big chances, key attacking contribu
 The player/form diagnostic is diagnostic-only. It does not generate final betting tips, stake sizing, units, financial return tracking, SUPER_A_TIER promotion, production model features, or probability changes.
 
 The 24-block report includes player/form status in the existing data-quality, player xG / xA, recent form, data gaps, safety, and final conclusion sections. The one-command preview now includes market, availability, and player/form diagnostics. The export bundle includes `player_impact_rolling_form_input_review.csv` and `player_form_diagnostic_review.csv`. The Excel workbook now includes `Player Impact Form` and `Player Form Diagnostic` sheets in addition to the existing market and availability sheets.
+
+## Phase 29.1 + 29.2 Tactical / Set Piece / Fatigue Diagnostic Preview
+
+Phase 29 adds preview-only tactical, set-piece, fatigue, and xG-zone correction evidence for human review. The one-command match analysis preview now builds local deterministic tactical input and a tactical matchup diagnostic when no manual tactical CSV is supplied.
+
+This layer surfaces set-piece xG for / against, set-piece xG ratio, tactical matchup score, formation matchup notes, pressing / transition notes, defensive-line risk, rest days, travel/fatigue notes, Do/So fatigue modifier, and xG-zone correction status. Missing tactical, set-piece, fatigue, or xG-zone values are reported exactly as missing; they are not inferred, invented, or silently filled.
+
+The tactical diagnostic is diagnostic-only. It does not generate final betting tips, stake sizing, units, financial return tracking, SUPER_A_TIER promotion, production model features, or probability changes.
+
+The 24-block report includes tactical status in the existing data-quality, tactical/profile, set-piece, fatigue, pattern-breaker, safety, and final conclusion sections. The one-command preview now includes market, availability, player/form, and tactical diagnostics. The export bundle includes `tactical_set_piece_fatigue_input_review.csv` and `tactical_matchup_diagnostic_review.csv`. The Excel workbook now includes `Tactical Set Piece Fatigue` and `Tactical Diagnostic` sheets in addition to the existing market, availability, and player/form sheets.
+
+## Phase 30.1 + 30.2 Real Match Intake / Manual Evidence Overlay Preview
+
+Phase 30 adds the bridge from the deterministic dummy fixture toward one real manually supplied match row. The real-match intake template captures match identity, provider IDs, team xG/xGA, odds, availability, player/form, tactical/set-piece/fatigue evidence, analyst notes, source-quality flags, and safety flags in one CSV.
+
+Required fields are `match_date`, `competition`, `season`, `home_team`, and `away_team`. `cross_provider_match_key` may be supplied manually, or a deterministic manual key can be generated during validation when manual key generation is enabled.
+
+Optional evidence fields stay blank when missing. The validation and overlay layers surface missing values and do not infer, invent, or silently fill xG, market, availability, player/form, tactical, fatigue, or xG-zone values.
+
+The manual evidence overlay splits a validated real-match intake row into the existing market, availability, player/form, and tactical preview input formats. The one-command preview can now accept `--real-match-intake <path>` to run the preview chain from manual evidence while the default deterministic `u-bundesliga-2024-001` behavior remains available.
+
+This remains diagnostic-preview-only. No final betting tips are generated, no staking, units, ROI, financial return tracking, `SUPER_A_TIER` promotion, production model features, or probability logic are activated. Export bundles and Excel workbooks remain review artifacts only.
