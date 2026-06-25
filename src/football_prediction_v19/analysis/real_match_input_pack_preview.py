@@ -43,6 +43,9 @@ class RealMatchInputPackResult:
     exported_files_count: int
     sections_rendered: int
     required_sections_rendered: int
+    home_team: str
+    away_team: str
+    match_date: str
     artifact_index_path: str
     manifest_path: str
     summary_path: str
@@ -92,13 +95,24 @@ class RealMatchInputPackBuilder:
         overlay = build_manual_evidence_overlay_preview(
             input_path=intake_path,
             manual_key_generation_enabled=self.config.manual_key_generation_enabled,
+            output_dir=self.base / "outputs" / "analysis_preview" / "manual_evidence_overlay",
             base_dir=self.base,
         )
         if overlay.get("manual_evidence_overlay_status") != "MANUAL_EVIDENCE_OVERLAY_PREVIEW_READY":
             return self._blocked(REAL_MATCH_INPUT_PACK_BLOCKED_OVERLAY_FAILED, schema, validation, overlay)
 
         key = _first_key(validation.get("output_path"))
-        context = build_context_bundle_human_input_bridge_preview(cross_provider_match_key="u-bundesliga-2024-001", output_dir=self.base / "outputs" / "analysis_preview" / "context_bundle_human_input", base_dir=self.base)
+        if self.config.real_match_intake_path:
+            context = _build_manual_context_from_validation(
+                validation_path=validation.get("output_path"),
+                output_dir=self.base / "outputs" / "analysis_preview" / "context_bundle_human_input",
+            )
+        else:
+            context = build_context_bundle_human_input_bridge_preview(
+                cross_provider_match_key="u-bundesliga-2024-001",
+                output_dir=self.base / "outputs" / "analysis_preview" / "context_bundle_human_input",
+                base_dir=self.base,
+            )
         synthesis = build_v19_diagnostic_synthesis_preview(context_human_input_path=context.get("human_input_output_path"), output_dir=self.base / "outputs" / "analysis_preview" / "v19_diagnostic_synthesis", base_dir=self.base)
         gate = build_v19_diagnostic_gate_matrix_preview(v19_diagnostic_synthesis_path=synthesis.get("output_path"), context_human_input_path=context.get("human_input_output_path"), output_dir=self.base / "outputs" / "analysis_preview" / "v19_diagnostic_gate_matrix", base_dir=self.base)
 
@@ -152,6 +166,9 @@ class RealMatchInputPackBuilder:
             int(bundle.get("exported_files_count", 0) or 0),
             int(report.get("sections_rendered", 0) or 0),
             int(report.get("required_sections_rendered", 0) or 0),
+            str(context.get("home_team", "")),
+            str(context.get("away_team", "")),
+            str(context.get("match_date", "")),
             str((out / "real_match_input_pack_artifact_index.csv").resolve()),
             str((out / "real_match_input_pack_manifest.csv").resolve()),
             str((out / "real_match_input_pack_summary.md").resolve()),
@@ -162,7 +179,84 @@ class RealMatchInputPackBuilder:
         return result
 
     def _blocked(self, status: str, schema: dict[str, object] | None = None, validation: dict[str, object] | None = None, overlay: dict[str, object] | None = None) -> RealMatchInputPackResult:
-        return RealMatchInputPackResult(status, str((schema or {}).get("real_match_intake_schema_status", "")), str((validation or {}).get("real_match_intake_validation_status", "")), str((overlay or {}).get("manual_evidence_overlay_status", "")), "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, "", "", "", status, False, False, False, False, False)
+        return RealMatchInputPackResult(status, str((schema or {}).get("real_match_intake_schema_status", "")), str((validation or {}).get("real_match_intake_validation_status", "")), str((overlay or {}).get("manual_evidence_overlay_status", "")), "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, 0, "", "", "", "", "", "", status, False, False, False, False, False)
+
+
+
+
+def _build_manual_context_from_validation(validation_path: object, output_dir: Path) -> dict[str, object]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    frame = pd.read_csv(validation_path, low_memory=False).copy()
+
+    if "analysis_input_id" not in frame.columns:
+        frame["analysis_input_id"] = frame.get("cross_provider_match_key", "manual_real_match_input")
+    frame["analysis_input_id"] = frame["analysis_input_id"].fillna("").astype(str)
+    if "cross_provider_match_key" in frame.columns:
+        frame.loc[frame["analysis_input_id"].str.strip().eq(""), "analysis_input_id"] = frame["cross_provider_match_key"]
+
+    required_context_columns = [
+        "analysis_input_id",
+        "match_date",
+        "competition",
+        "season",
+        "home_team",
+        "away_team",
+        "understat_provider_match_id",
+        "fbref_provider_match_id",
+        "cross_provider_match_key",
+        "missing_required_fields",
+        "missing_optional_fields",
+    ]
+    for column in required_context_columns:
+        if column not in frame.columns:
+            frame[column] = ""
+
+    if "context_bundle_id" not in frame.columns:
+        frame["context_bundle_id"] = "manual_real_match_context_preview"
+    frame["context_bundle_id"] = frame["context_bundle_id"].fillna("").astype(str)
+    if "cross_provider_match_key" in frame.columns:
+        frame.loc[frame["context_bundle_id"].str.strip().eq(""), "context_bundle_id"] = frame["cross_provider_match_key"].astype(str)
+    if "analysis_input_status" not in frame.columns:
+        frame["analysis_input_status"] = "REAL_MATCH_MANUAL_CONTEXT_PREVIEW_ROW"
+    if "context_data_quality_status" not in frame.columns:
+        frame["context_data_quality_status"] = "MANUAL_REAL_MATCH_CONTEXT_FROM_INTAKE"
+    if "understat_data_quality_status" not in frame.columns:
+        frame["understat_data_quality_status"] = "MANUAL_OR_NOT_PROVIDED"
+    if "fbref_data_quality_status" not in frame.columns:
+        frame["fbref_data_quality_status"] = "MANUAL_OR_NOT_PROVIDED"
+    if "recommendation" not in frame.columns:
+        frame["recommendation"] = "CONTEXT_BUNDLE_HUMAN_INPUT_BRIDGE_PREVIEW_READY"
+    if "notes" not in frame.columns:
+        frame["notes"] = "Manual real-match intake context; no provider ID required."
+    for flag in ["network_calls_enabled", "prediction_logic_enabled", "betting_logic_enabled", "staking_logic_enabled", "roi_logic_enabled"]:
+        if flag not in frame.columns:
+            frame[flag] = False
+
+    manual_to_human_columns = {
+        "home_team_xg_for": "home_xg",
+        "away_team_xg_for": "away_xg",
+        "home_team_xg_against": "home_xga",
+        "away_team_xg_against": "away_xga",
+    }
+    for source_column, target_column in manual_to_human_columns.items():
+        if target_column not in frame.columns:
+            frame[target_column] = frame[source_column] if source_column in frame.columns else ""
+
+    output_path = output_dir / "context_bundle_human_input.csv"
+    frame.to_csv(output_path, index=False)
+    return {
+        "context_bridge_status": "CONTEXT_BUNDLE_HUMAN_INPUT_BRIDGE_PREVIEW_READY",
+        "human_input_output_path": str(output_path.resolve()),
+        "rows_output": len(frame),
+        "home_team": str(frame.iloc[0].get("home_team", "")) if not frame.empty else "",
+        "away_team": str(frame.iloc[0].get("away_team", "")) if not frame.empty else "",
+        "match_date": str(frame.iloc[0].get("match_date", "")) if not frame.empty else "",
+        "network_calls_enabled": False,
+        "prediction_logic_enabled": False,
+        "betting_logic_enabled": False,
+        "staking_logic_enabled": False,
+        "roi_logic_enabled": False,
+    }
 
 
 def _safe_output(output_dir: str | Path, base: Path) -> Path:

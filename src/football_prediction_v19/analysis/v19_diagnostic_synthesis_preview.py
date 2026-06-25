@@ -45,7 +45,7 @@ MANIFEST_COLUMNS = [
     "v19_diagnostic_synthesis_status", "recommendation", "notes", "network_calls_enabled",
     "prediction_logic_enabled", "betting_logic_enabled", "staking_logic_enabled", "roi_logic_enabled",
 ]
-REQUIRED_COLUMNS = ["analysis_input_id", "match_date", "competition", "season", "home_team", "away_team", "understat_provider_match_id", "fbref_provider_match_id"]
+REQUIRED_COLUMNS = ["analysis_input_id", "match_date", "competition", "season", "home_team", "away_team"]
 PROTECTED = ["data/processed", "trusted_xg_sources/accepted", "trusted_xg_sources/raw", "manual_xg_manifest"]
 
 
@@ -188,6 +188,8 @@ def _safe_output(output_dir: str | Path, base: Path) -> Path | None:
 
 def _resolve(path: str | Path | None, base: Path) -> Path | None:
     if path is None:
+        return None
+    if str(path).strip() == "":
         return None
     p = Path(path)
     return (base / p).resolve() if not p.is_absolute() else p.resolve()

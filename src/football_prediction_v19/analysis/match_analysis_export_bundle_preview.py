@@ -129,11 +129,19 @@ class MatchAnalysisExportBundleRunner:
         out = _safe_output(self.config.output_dir, self.base)
         if out is None or _has_unsafe_inputs(self.config):
             return self._blocked(MATCH_ANALYSIS_EXPORT_BUNDLE_BLOCKED_UNSAFE_PATH)
+        explicit_context = _resolve(self.config.context_human_input_path, self.base)
+        if explicit_context is not None and _valid_csv_file(explicit_context):
+            context = _read_csv(explicit_context)
+            context_selected = _select(context, self.config)
+            if context_selected.empty:
+                return self._blocked(MATCH_ANALYSIS_EXPORT_BUNDLE_BLOCKED_UNKNOWN_MATCH)
+            if len(context_selected) > 1:
+                return self._blocked(MATCH_ANALYSIS_EXPORT_BUNDLE_BLOCKED_AMBIGUOUS_MATCH)
         paths = self._resolve_or_build()
         if paths.get("blocked"):
             return self._blocked(str(paths["blocked"]))
         required_paths = [paths.get(k) for k in ["runner_manifest", "context", "synthesis", "gate_matrix", "odds", "market", "lineups", "availability", "player_form_input", "player_form", "tactical_input", "tactical", "report"]]
-        if any(not p or not Path(str(p)).exists() for p in required_paths):
+        if any(not _valid_existing_file(Path(str(p))) for p in required_paths):
             return self._blocked(MATCH_ANALYSIS_EXPORT_BUNDLE_BLOCKED_MISSING_INPUT)
 
         context = _read_csv(paths["context"])
@@ -313,9 +321,30 @@ def _report_sections(path: Path) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def _read_csv(path: object) -> pd.DataFrame:
+def _valid_existing_file(path: Path | None) -> bool:
+    if path is None:
+        return False
     try:
-        return pd.read_csv(path, low_memory=False)
+        return path.exists() and path.is_file()
+    except OSError:
+        return False
+
+
+def _valid_csv_file(path: Path | None) -> bool:
+    if path is None:
+        return False
+    try:
+        return path.exists() and path.is_file() and path.suffix.lower() == ".csv"
+    except OSError:
+        return False
+
+
+def _read_csv(path: object) -> pd.DataFrame:
+    csv_path = Path(str(path)) if path is not None else None
+    if not _valid_csv_file(csv_path):
+        return pd.DataFrame()
+    try:
+        return pd.read_csv(csv_path, low_memory=False)
     except EmptyDataError:
         return pd.DataFrame()
 
@@ -342,6 +371,8 @@ def _safe_output(output_dir: str | Path, base: Path) -> Path | None:
 
 def _resolve(path: str | Path | None, base: Path) -> Path | None:
     if path is None:
+        return None
+    if str(path).strip() == "":
         return None
     p = Path(path)
     return (base / p).resolve() if not p.is_absolute() else p.resolve()
