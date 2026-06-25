@@ -1,0 +1,2 @@
+network_calls_enabled,prediction_logic_enabled,betting_logic_enabled,staking_logic_enabled,roi_logic_enabled,safe_output_note
+false,false,false,false,false,"Preview-only export; no production prediction, betting output, position sizing, or financial return tracking."

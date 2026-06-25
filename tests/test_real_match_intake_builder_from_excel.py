@@ -68,6 +68,48 @@ def _write_evidence(input_dir: Path, *, partial: bool = False) -> None:
     players.to_excel(input_dir / "team-players-serie-a.xlsx", index=False)
 
 
+def _write_untagged_evidence(input_dir: Path) -> None:
+    input_dir.mkdir(parents=True, exist_ok=True)
+    away_players = pd.DataFrame([
+        {"player": "Gianluca Scamacca", "goals": 10, "assists": 1, "xG": 8.87, "xA": 1.36},
+        {"player": "Nikola Krstovic", "goals": 10, "assists": 5, "xG": 15.67, "xA": 3.23},
+        {"player": "Mario Pasalic", "goals": 3, "assists": 4, "xG": 3.45, "xA": 6.25},
+    ])
+    home_players = pd.DataFrame([
+        {"player": "Pedro", "goals": 5, "assists": 2, "xG": 2.25, "xA": 2.81},
+        {"player": "Gustav Isaksen", "goals": 5, "assists": 1, "xG": 5.41, "xA": 0.88},
+        {"player": "Danilo Cataldi", "goals": 3, "assists": 3, "xG": 2.71, "xA": 2.05},
+    ])
+    away_breakdown = pd.DataFrame([
+        {"statistic": "Open play", "xG": 53.17, "xGA": 35.65},
+        {"statistic": "From corner", "xG": 11.70, "xGA": 9.96},
+        {"statistic": "Set piece", "xG": 3.19, "xGA": 4.76},
+        {"statistic": "Direct Freekick", "xG": 0.47, "xGA": 0.64},
+        {"statistic": "Penalty", "xG": 2.28, "xGA": 3.05},
+    ])
+    away_formations = pd.DataFrame([
+        {"statistic": "3-4-2-1", "min": 3095, "xG": 61.03, "xGA": 49.02},
+        {"statistic": "4-3-3", "min": 83, "xG": 1.61, "xGA": 1.17},
+    ])
+    home_breakdown = pd.DataFrame([
+        {"statistic": "Open play", "xG": 33.61, "xGA": 36.67},
+        {"statistic": "From corner", "xG": 3.90, "xGA": 5.87},
+        {"statistic": "Set piece", "xG": 6.09, "xGA": 2.38},
+        {"statistic": "Direct Freekick", "xG": 0.77, "xGA": 0.72},
+        {"statistic": "Penalty", "xG": 3.81, "xGA": 3.81},
+    ])
+    home_formations = pd.DataFrame([
+        {"statistic": "4-3-3", "min": 3347, "xG": 41.95, "xGA": 44.56},
+        {"statistic": "4-2-3-1", "min": 198, "xG": 5.00, "xGA": 3.67},
+    ])
+    away_players.to_excel(input_dir / "team-players-away.xlsx", index=False)
+    home_players.to_excel(input_dir / "team-players-home.xlsx", index=False)
+    away_breakdown.to_excel(input_dir / "team-statistics-away-breakdown.xlsx", index=False)
+    away_formations.to_excel(input_dir / "team-statistics-away-formations.xlsx", index=False)
+    home_breakdown.to_excel(input_dir / "team-statistics-home-breakdown.xlsx", index=False)
+    home_formations.to_excel(input_dir / "team-statistics-home-formations.xlsx", index=False)
+
+
 def test_excel_evidence_files_are_detected_and_mapped(tmp_path: Path) -> None:
     evidence = tmp_path / "data" / "manual" / "evidence"
     _write_evidence(evidence)
@@ -100,6 +142,41 @@ def test_excel_evidence_files_are_detected_and_mapped(tmp_path: Path) -> None:
     assert row["network_calls_enabled"] is False or str(row["network_calls_enabled"]).lower() == "false"
     assert Path(str(result["summary_csv_path"])).exists()
     assert Path(str(result["summary_md_path"])).exists()
+
+
+def test_untagged_excel_exports_map_multiple_fields_and_diagnose_columns(tmp_path: Path) -> None:
+    evidence = tmp_path / "data" / "manual" / "evidence"
+    _write_untagged_evidence(evidence)
+    output = tmp_path / "data" / "manual" / "real_match_intake.csv"
+    result = build_real_match_intake_from_excel(
+        input_dir=evidence,
+        output=output,
+        home_team="Lazio",
+        away_team="Atalanta",
+        competition="Serie A",
+        season="2025/26",
+        match_date="2026-02-14",
+        base_dir=tmp_path,
+    )
+
+    assert result["real_match_intake_excel_builder_status"] == "REAL_MATCH_INTAKE_EXCEL_BUILDER_READY"
+    assert int(result["input_files_detected"]) == 6
+    assert int(result["fields_mapped_count"]) > 1
+    row = pd.read_csv(output, keep_default_na=False).iloc[0]
+    assert row["home_team"] == "Lazio"
+    assert row["away_team"] == "Atalanta"
+    assert float(row["home_team_xg_for"]) == 48.18
+    assert float(row["away_team_xg_for"]) == 70.81
+    assert row["home_formation"] == "4-3-3"
+    assert row["away_formation"] == "3-4-2-1"
+    assert "Pedro" in row["home_main_scorer"]
+    assert "Nikola Krstovic" in row["away_main_creator"]
+    summary_md = Path(str(result["summary_md_path"])).read_text(encoding="utf-8")
+    assert "## C. Columns Found Per File" in summary_md
+    assert "## D. Rows Sampled" in summary_md
+    assert "## G. Ambiguous Fields" in summary_md
+    assert "team_identity_inferred_from_export_order" in summary_md
+    assert "## H. Evidence Notes Created" in summary_md
 
 
 def test_missing_optional_excel_columns_do_not_crash_and_require_review(tmp_path: Path) -> None:
