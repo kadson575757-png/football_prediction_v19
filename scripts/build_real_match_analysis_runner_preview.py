@@ -21,9 +21,15 @@ def build_real_match_analysis_runner_preview(**kwargs: object) -> dict[str, obje
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--real-match-intake", required=True)
+    parser.add_argument("--manual-evidence-completion", default=None)
     parser.add_argument("--output-dir", default="outputs/analysis_preview/real_match_analysis_runner")
     args = parser.parse_args()
-    summary = build_real_match_analysis_runner_preview(real_match_intake_path=args.real_match_intake, output_dir=args.output_dir, base_dir=ROOT)
+    summary = build_real_match_analysis_runner_preview(
+        real_match_intake_path=args.real_match_intake,
+        manual_evidence_completion_path=args.manual_evidence_completion,
+        output_dir=args.output_dir,
+        base_dir=ROOT,
+    )
     for key, value in summary.items():
         print(f"{key}={str(value).lower() if isinstance(value, bool) else value}")
     return 0

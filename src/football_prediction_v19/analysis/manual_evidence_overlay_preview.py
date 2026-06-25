@@ -129,6 +129,12 @@ def _odds(row: pd.Series) -> dict[str, object]:
         "home_closing_odds": row.get("home_closing_odds", ""), "draw_closing_odds": row.get("draw_closing_odds", ""),
         "away_closing_odds": row.get("away_closing_odds", ""),
     })
+    for column in [
+        "over_line", "over_open_odds", "under_open_odds", "over_current_odds",
+        "under_current_odds", "dnb_home_odds", "dnb_away_odds", "handicap_line",
+        "handicap_home_odds", "handicap_away_odds",
+    ]:
+        data[column] = row.get(column, "")
     return data
 
 
@@ -137,20 +143,23 @@ def _availability(row: pd.Series) -> dict[str, object]:
     data.update({
         "availability_snapshot_source": _value(row, "availability_source_note", "manual_evidence_overlay"),
         "availability_snapshot_timestamp": _value(row, "market_snapshot_timestamp", "manual_preview_timestamp_missing"),
-        "home_lineup_status": row.get("home_lineup_confirmed", ""),
-        "away_lineup_status": row.get("away_lineup_confirmed", ""),
+        "home_lineup_status": _value(row, "home_lineup_confirmed", row.get("home_lineup_status", "")),
+        "away_lineup_status": _value(row, "away_lineup_confirmed", row.get("away_lineup_status", "")),
         "home_formation": row.get("home_formation", ""), "away_formation": row.get("away_formation", ""),
         "home_goalkeeper_status": row.get("home_goalkeeper_status", ""),
         "away_goalkeeper_status": row.get("away_goalkeeper_status", ""),
-        "home_defensive_line_status": "", "away_defensive_line_status": "",
+        "home_defensive_line_status": row.get("home_defensive_line_status", ""),
+        "away_defensive_line_status": row.get("away_defensive_line_status", ""),
         "home_main_scorer_status": "AVAILABLE" if not _blank(row.get("home_main_scorer", "")) else "",
         "away_main_scorer_status": "AVAILABLE" if not _blank(row.get("away_main_scorer", "")) else "",
         "home_missing_players": row.get("home_missing_players", ""),
         "away_missing_players": row.get("away_missing_players", ""),
-        "home_suspended_players": "", "away_suspended_players": "",
-        "home_doubtful_players": "", "away_doubtful_players": "",
-        "home_key_absence_count": row.get("home_key_absences", ""),
-        "away_key_absence_count": row.get("away_key_absences", ""),
+        "home_suspended_players": row.get("home_suspended_players", ""),
+        "away_suspended_players": row.get("away_suspended_players", ""),
+        "home_doubtful_players": row.get("home_doubtful_players", ""),
+        "away_doubtful_players": row.get("away_doubtful_players", ""),
+        "home_key_absence_count": _value(row, "home_key_absences", row.get("home_key_absence_count", "")),
+        "away_key_absence_count": _value(row, "away_key_absences", row.get("away_key_absence_count", "")),
     })
     return data
 
@@ -164,15 +173,20 @@ def _player(row: pd.Series) -> dict[str, object]:
         "home_top_xg_value": row.get("home_player_xg_total", ""), "away_top_xg_value": row.get("away_player_xg_total", ""),
         "home_top_xa_player": row.get("home_main_creator", ""), "away_top_xa_player": row.get("away_main_creator", ""),
         "home_top_xa_value": row.get("home_player_xa_total", ""), "away_top_xa_value": row.get("away_player_xa_total", ""),
-        "home_big_chances_for": row.get("home_big_chances", ""), "away_big_chances_for": row.get("away_big_chances", ""),
-        "home_big_chances_against": "", "away_big_chances_against": "",
-        "home_recent_matches": "", "away_recent_matches": "",
-        "home_recent_goals_for": "", "away_recent_goals_for": "",
-        "home_recent_goals_against": "", "away_recent_goals_against": "",
+        "home_big_chances_for": _value(row, "home_big_chances", row.get("home_big_chances_for", "")),
+        "away_big_chances_for": _value(row, "away_big_chances", row.get("away_big_chances_for", "")),
+        "home_big_chances_against": row.get("home_big_chances_against", ""),
+        "away_big_chances_against": row.get("away_big_chances_against", ""),
+        "home_recent_matches": row.get("home_recent_matches", ""),
+        "away_recent_matches": row.get("away_recent_matches", ""),
+        "home_recent_goals_for": row.get("home_recent_goals_for", ""),
+        "away_recent_goals_for": row.get("away_recent_goals_for", ""),
+        "home_recent_goals_against": row.get("home_recent_goals_against", ""),
+        "away_recent_goals_against": row.get("away_recent_goals_against", ""),
         "home_recent_xg_for": row.get("home_recent_xg_for", ""), "away_recent_xg_for": row.get("away_recent_xg_for", ""),
         "home_recent_xg_against": row.get("home_recent_xg_against", ""), "away_recent_xg_against": row.get("away_recent_xg_against", ""),
-        "home_recent_conversion_note": row.get("home_conversion_signal", ""),
-        "away_recent_conversion_note": row.get("away_conversion_signal", ""),
+        "home_recent_conversion_note": _value(row, "home_conversion_signal", row.get("home_recent_conversion_note", "")),
+        "away_recent_conversion_note": _value(row, "away_conversion_signal", row.get("away_recent_conversion_note", "")),
         "home_main_creator_status": "AVAILABLE" if not _blank(row.get("home_main_creator", "")) else "",
         "away_main_creator_status": "AVAILABLE" if not _blank(row.get("away_main_creator", "")) else "",
         "home_main_scorer_status": "AVAILABLE" if not _blank(row.get("home_main_scorer", "")) else "",
