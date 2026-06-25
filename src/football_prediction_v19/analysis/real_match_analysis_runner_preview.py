@@ -18,6 +18,7 @@ PROTECTED = ["data/processed", "trusted_xg_sources/accepted", "trusted_xg_source
 @dataclass(frozen=True)
 class RealMatchAnalysisRunnerConfig:
     real_match_intake_path: str | Path | None = None
+    manual_evidence_completion_path: str | Path | None = None
     output_dir: str | Path = "outputs/analysis_preview/real_match_analysis_runner"
     base_dir: str | Path = "."
 
@@ -27,6 +28,10 @@ class RealMatchAnalysisRunnerResult:
     real_match_analysis_runner_status: str
     real_match_input_pack_status: str
     real_match_intake_validation_status: str
+    manual_evidence_completion_status: str
+    fields_completed_count: int
+    remaining_missing_fields_count: int
+    completed_evidence_groups: str
     manual_evidence_overlay_status: str
     odds_market_movement_input_status: str
     market_movement_diagnostic_status: str
@@ -70,7 +75,11 @@ class RealMatchAnalysisRunner:
             return self._blocked(REAL_MATCH_ANALYSIS_RUNNER_BLOCKED_UNSAFE_PATH)
         from scripts.build_real_match_input_pack_preview import build_real_match_input_pack_preview
 
-        pack = build_real_match_input_pack_preview(real_match_intake_path=self.config.real_match_intake_path, base_dir=self.base)
+        pack = build_real_match_input_pack_preview(
+            real_match_intake_path=self.config.real_match_intake_path,
+            manual_evidence_completion_path=self.config.manual_evidence_completion_path,
+            base_dir=self.base,
+        )
         status = str(pack.get("real_match_input_pack_status", ""))
         if status == "REAL_MATCH_INPUT_PACK_BLOCKED_VALIDATION_FAILED":
             return self._blocked(REAL_MATCH_ANALYSIS_RUNNER_BLOCKED_VALIDATION_FAILED, pack)
@@ -87,6 +96,10 @@ class RealMatchAnalysisRunner:
             REAL_MATCH_ANALYSIS_RUNNER_PREVIEW_READY,
             str(pack.get("real_match_input_pack_status", "")),
             str(pack.get("real_match_intake_validation_status", "")),
+            str(pack.get("manual_evidence_completion_status", "")),
+            int(pack.get("fields_completed_count", 0) or 0),
+            int(pack.get("remaining_missing_fields_count", 0) or 0),
+            str(pack.get("completed_evidence_groups", "")),
             str(pack.get("manual_evidence_overlay_status", "")),
             str(pack.get("odds_market_movement_input_status", "")),
             str(pack.get("market_movement_diagnostic_status", "")),
@@ -120,6 +133,10 @@ class RealMatchAnalysisRunner:
         summary.write_text("\n".join([
             "# Real Match Analysis Runner Preview", "",
             f"- real_match_analysis_runner_status: {result.real_match_analysis_runner_status}",
+            f"- manual_evidence_completion_status: {result.manual_evidence_completion_status}",
+            f"- fields_completed_count: {result.fields_completed_count}",
+            f"- remaining_missing_fields_count: {result.remaining_missing_fields_count}",
+            f"- completed_evidence_groups: {result.completed_evidence_groups or 'none'}",
             f"- sheets_written: {result.sheets_written}",
             f"- exported_files_count: {result.exported_files_count}",
             "- Keine finale Wettempfehlung - Preview/Diagnostic only",
@@ -129,7 +146,7 @@ class RealMatchAnalysisRunner:
 
     def _blocked(self, status: str, pack: dict[str, object] | None = None) -> RealMatchAnalysisRunnerResult:
         pack = pack or {}
-        return RealMatchAnalysisRunnerResult(status, str(pack.get("real_match_input_pack_status", "")), str(pack.get("real_match_intake_validation_status", "")), str(pack.get("manual_evidence_overlay_status", "")), str(pack.get("odds_market_movement_input_status", "")), str(pack.get("market_movement_diagnostic_status", "")), str(pack.get("lineups_availability_input_status", "")), str(pack.get("availability_diagnostic_status", "")), str(pack.get("player_impact_rolling_form_input_status", "")), str(pack.get("player_form_diagnostic_status", "")), str(pack.get("tactical_set_piece_fatigue_input_status", "")), str(pack.get("tactical_matchup_diagnostic_status", "")), "", "", str(pack.get("human_24_block_report_status", "")), str(pack.get("export_bundle_status", "")), str(pack.get("excel_export_status", "")), 0, 0, 0, 0, False, str(pack.get("home_team", "")), str(pack.get("away_team", "")), str(pack.get("match_date", "")), "", "", "", status, False, False, False, False, False)
+        return RealMatchAnalysisRunnerResult(status, str(pack.get("real_match_input_pack_status", "")), str(pack.get("real_match_intake_validation_status", "")), str(pack.get("manual_evidence_completion_status", "")), int(pack.get("fields_completed_count", 0) or 0), int(pack.get("remaining_missing_fields_count", 0) or 0), str(pack.get("completed_evidence_groups", "")), str(pack.get("manual_evidence_overlay_status", "")), str(pack.get("odds_market_movement_input_status", "")), str(pack.get("market_movement_diagnostic_status", "")), str(pack.get("lineups_availability_input_status", "")), str(pack.get("availability_diagnostic_status", "")), str(pack.get("player_impact_rolling_form_input_status", "")), str(pack.get("player_form_diagnostic_status", "")), str(pack.get("tactical_set_piece_fatigue_input_status", "")), str(pack.get("tactical_matchup_diagnostic_status", "")), "", "", str(pack.get("human_24_block_report_status", "")), str(pack.get("export_bundle_status", "")), str(pack.get("excel_export_status", "")), 0, 0, 0, 0, False, str(pack.get("home_team", "")), str(pack.get("away_team", "")), str(pack.get("match_date", "")), "", "", "", status, False, False, False, False, False)
 
 
 def _safe_output(output_dir: str | Path, base: Path) -> Path:

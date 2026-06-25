@@ -1,0 +1,2 @@
+home_team,away_team,competition,season,match_date,cross_provider_match_key,home_current_odds,draw_current_odds,away_current_odds,home_possession,away_possession,home_shots,away_shots,home_shots_on_target,away_shots_on_target,home_lineup_status,away_lineup_status,h2h_summary,tactical_matchup_score
+Lazio,Atalanta,Serie A,2025/26,2026-02-14,manual-serie-a-2025-26-lazio-atalanta-2026-02-14,3.60,3.25,2.15,50,50,18,12,5,5,CONFIRMED,CONFIRMED,Lazio and Atalanta recent matchup evidence manually supplied for diagnostic preview.,6.5

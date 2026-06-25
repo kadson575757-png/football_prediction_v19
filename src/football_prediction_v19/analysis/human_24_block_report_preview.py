@@ -360,6 +360,13 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
         f"while {set_piece_edge_team} set-piece edge keeps the matchup from becoming one-dimensional. Missing market odds, "
         "lineup/availability confirmation, shot/possession detail, recent-form context and H2H inputs prevent a controlled v1.9 1X2, DNB or score-family decision."
     )
+    completion_summary = (
+        f"Manual evidence completion status: {v('manual_evidence_completion_status')}; "
+        f"completion file used: {v('manual_evidence_completion_file_used')}; "
+        f"fields_completed_count: {v('fields_completed_count')}; "
+        f"remaining_missing_fields_count: {v('remaining_missing_fields_count')}; "
+        f"completed evidence groups: {v('completed_evidence_groups')}."
+    )
     strength_table = "\n".join([
         "| Evidence Layer | Status | Edge | Impact on analysis | Gate effect |",
         "| --- | --- | --- | --- | --- |",
@@ -389,9 +396,9 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
     disabled_text = "Betting output is disabled in this diagnostic preview layer. Position sizing and financial return tracking are disabled."
     gate_disabled_text = "Betting output is disabled in this diagnostic gate preview layer. Position sizing and financial return tracking are disabled."
     bodies = {
-        "Screen / Data Checklist": f"Local preview context loaded. Missing optional fields: {v('missing_optional_fields')}. Excel evidence files referenced: {evidence_file_count()}. Categories observed: team_statistics via xG/tactical notes; team_players via player-form notes. Team identity status: {identity_review}",
+        "Screen / Data Checklist": f"Local preview context loaded. Missing optional fields: {v('missing_optional_fields')}. Excel evidence files referenced: {evidence_file_count()}. Categories observed: team_statistics via xG/tactical notes; team_players via player-form notes. Team identity status: {identity_review}. {completion_summary}",
         "Match Identity": f"{v('home_team')} vs {v('away_team')} on {v('match_date')} ({v('competition')} {v('season')}).",
-        "Data Quality": f"Understat: {v('understat_data_quality_status')}; FBref: {v('fbref_data_quality_status')}; context: {v('context_data_quality_status')}. Market movement diagnostic: {m('market_evidence_status')} ({m('market_movement_timing_flag')}). Availability diagnostic: {a('availability_evidence_status')}. Player/form diagnostic: {p('player_form_evidence_status')}. Tactical diagnostic: {t('tactical_evidence_status')}.\n\n{evidence_read}\n\nEvidence Strength / Weakness Table:\n\n{strength_table}",
+        "Data Quality": f"Understat: {v('understat_data_quality_status')}; FBref: {v('fbref_data_quality_status')}; context: {v('context_data_quality_status')}. Market movement diagnostic: {m('market_evidence_status')} ({m('market_movement_timing_flag')}). Availability diagnostic: {a('availability_evidence_status')}. Player/form diagnostic: {p('player_form_evidence_status')}. Tactical diagnostic: {t('tactical_evidence_status')}. {completion_summary}\n\n{evidence_read}\n\nEvidence Strength / Weakness Table:\n\n{strength_table}",
         "Understat xG/xGA Snapshot": f"Team-xG/xGA synthesis from current evidence:\n\n{xg_table}\n\n{better_higher('home_xg', 'away_xg', 'xG advantage')} {better_lower('home_xga', 'away_xga', 'xGA advantage')}",
         "FBref Team / Match Stats Snapshot": f"Possession {v('home_possession')} - {v('away_possession')}; shots {v('home_shots')} - {v('away_shots')}.",
         "Shot Profile": f"Shots on target {v('home_shots_on_target')} - {v('away_shots_on_target')}.",
