@@ -102,19 +102,24 @@ def build_real_match_intake_from_excel(
         "input_files": [str(item.path) for item in evidence],
         "sheets": [],
         "columns_by_file": {},
+        "samples_by_file": {},
         "mapped_fields": set(),
         "ambiguous_fields": set(),
+        "evidence_notes": [],
     }
 
+    role_positions = _role_positions(evidence)
     for item in evidence:
         diagnostics["columns_by_file"][str(item.path)] = {}
+        diagnostics["samples_by_file"][str(item.path)] = {}
         for sheet_name, frame in item.sheets.items():
             diagnostics["sheets"].append(f"{item.path.name}:{sheet_name}")
             diagnostics["columns_by_file"][str(item.path)][sheet_name] = list(frame.columns)
+            diagnostics["samples_by_file"][str(item.path)][sheet_name] = _sample_rows(frame)
         if item.role == "team_statistics":
-            _map_team_statistics(row, item.sheets.values(), diagnostics)
+            _map_team_statistics(row, item, diagnostics, role_positions.get(item.path, ""))
         elif item.role == "team_players":
-            _map_team_players(row, item.sheets.values(), diagnostics)
+            _map_team_players(row, item, diagnostics, role_positions.get(item.path, ""))
 
     _apply_context_defaults(row, home_team, away_team, competition, season, match_date, country, venue_name, timezone, neutral_venue)
     if not row["cross_provider_match_key"] and all(row.get(c) for c in ["competition", "season", "home_team", "away_team", "match_date"]):
@@ -197,31 +202,51 @@ def _load_evidence(input_dir: Path) -> list[ExcelEvidence]:
     return evidence
 
 
-def _map_team_statistics(row: dict[str, object], frames: Iterable[pd.DataFrame], diagnostics: dict[str, object]) -> None:
-    for frame in frames:
+def _role_positions(evidence: list[ExcelEvidence]) -> dict[Path, str]:
+    positions = {}
+    for role in ["team_statistics", "team_players"]:
+        items = [item for item in evidence if item.role == role]
+        midpoint = len(items) // 2
+        for index, item in enumerate(items):
+            if len(items) >= 2 and len(items) % 2 == 0:
+                positions[item.path] = "away" if index < midpoint else "home"
+            else:
+                positions[item.path] = ""
+    return positions
+
+
+def _map_team_statistics(row: dict[str, object], item: ExcelEvidence, diagnostics: dict[str, object], inferred_prefix: str = "") -> None:
+    for frame in item.sheets.values():
         if frame.empty:
             continue
         home = _team_row(frame, str(row.get("home_team", "")))
         away = _team_row(frame, str(row.get("away_team", "")))
+        inferred_from_order = home is None and away is None and bool(inferred_prefix)
+        if home is None and away is None and inferred_prefix:
+            diagnostics["ambiguous_fields"].add(f"{item.path.name}:team_identity_inferred_from_export_order")
+            home = frame.iloc[0] if inferred_prefix == "home" else None
+            away = frame.iloc[0] if inferred_prefix == "away" else None
         for prefix, team_row in [("home", home), ("away", away)]:
             if team_row is None:
                 continue
-            _assign(row, f"{prefix}_team_xg_for", _first_value(team_row, ["xg_for", "xg", "expected_goals_for", "team_xg_for"]), diagnostics)
-            _assign(row, f"{prefix}_team_xg_against", _first_value(team_row, ["xg_against", "xga", "expected_goals_against", "team_xg_against"]), diagnostics)
-            _assign(row, f"{prefix}_venue_xg_for", _first_value(team_row, ["venue_xg_for", "home_xg_for", "away_xg_for"]), diagnostics)
-            _assign(row, f"{prefix}_venue_xg_against", _first_value(team_row, ["venue_xg_against", "home_xg_against", "away_xg_against"]), diagnostics)
-            _assign(row, f"{prefix}_recent_xg_for", _first_value(team_row, ["recent_xg_for", "last5_xg_for", "last_5_xg_for"]), diagnostics)
-            _assign(row, f"{prefix}_recent_xg_against", _first_value(team_row, ["recent_xg_against", "recent_xga", "last5_xga"]), diagnostics)
-            _assign(row, f"{prefix}_formation", _first_value(team_row, ["formation", "default_formation"]), diagnostics)
-            _assign(row, f"{prefix}_tactical_profile", _first_value(team_row, ["tactical_profile", "team_style", "style"]), diagnostics)
-            _assign(row, f"{prefix}_set_piece_xg_for", _first_value(team_row, ["set_piece_xg_for", "sp_xg_for"]), diagnostics)
-            _assign(row, f"{prefix}_set_piece_xg_against", _first_value(team_row, ["set_piece_xg_against", "sp_xg_against"]), diagnostics)
-            _assign(row, f"{prefix}_set_piece_xg_ratio", _first_value(team_row, ["set_piece_xg_ratio", "sp_xg_ratio"]), diagnostics)
-            _assign(row, f"{prefix}_rest_days", _first_value(team_row, ["rest_days", f"{prefix}_rest_days"]), diagnostics)
-            _assign(row, f"{prefix}_travel_fatigue_note", _first_value(team_row, ["travel_fatigue_note", "fatigue_note"]), diagnostics)
-            _assign(row, f"{prefix}_missing_players", _first_value(team_row, ["missing_players", "injuries", "absences"]), diagnostics)
-            _assign(row, f"{prefix}_key_absences", _first_value(team_row, ["key_absences", "key_absence_count"]), diagnostics)
-            _assign(row, f"{prefix}_goalkeeper_status", _first_value(team_row, ["goalkeeper_status", "gk_status"]), diagnostics)
+            if not inferred_from_order:
+                _assign(row, f"{prefix}_team_xg_for", _first_value(team_row, ["xg_for", "xg", "expected_goals_for", "team_xg_for"]), diagnostics)
+                _assign(row, f"{prefix}_team_xg_against", _first_value(team_row, ["xg_against", "xga", "expected_goals_against", "team_xg_against"]), diagnostics)
+                _assign(row, f"{prefix}_venue_xg_for", _first_value(team_row, ["venue_xg_for", "home_xg_for", "away_xg_for"]), diagnostics)
+                _assign(row, f"{prefix}_venue_xg_against", _first_value(team_row, ["venue_xg_against", "home_xg_against", "away_xg_against"]), diagnostics)
+                _assign(row, f"{prefix}_recent_xg_for", _first_value(team_row, ["recent_xg_for", "last5_xg_for", "last_5_xg_for"]), diagnostics)
+                _assign(row, f"{prefix}_recent_xg_against", _first_value(team_row, ["recent_xg_against", "recent_xga", "last5_xga"]), diagnostics)
+                _assign(row, f"{prefix}_formation", _first_value(team_row, ["formation", "default_formation"]), diagnostics)
+                _assign(row, f"{prefix}_tactical_profile", _first_value(team_row, ["tactical_profile", "team_style", "style"]), diagnostics)
+                _assign(row, f"{prefix}_set_piece_xg_for", _first_value(team_row, ["set_piece_xg_for", "sp_xg_for"]), diagnostics)
+                _assign(row, f"{prefix}_set_piece_xg_against", _first_value(team_row, ["set_piece_xg_against", "sp_xg_against"]), diagnostics)
+                _assign(row, f"{prefix}_set_piece_xg_ratio", _first_value(team_row, ["set_piece_xg_ratio", "sp_xg_ratio"]), diagnostics)
+                _assign(row, f"{prefix}_rest_days", _first_value(team_row, ["rest_days", f"{prefix}_rest_days"]), diagnostics)
+                _assign(row, f"{prefix}_travel_fatigue_note", _first_value(team_row, ["travel_fatigue_note", "fatigue_note"]), diagnostics)
+                _assign(row, f"{prefix}_missing_players", _first_value(team_row, ["missing_players", "injuries", "absences"]), diagnostics)
+                _assign(row, f"{prefix}_key_absences", _first_value(team_row, ["key_absences", "key_absence_count"]), diagnostics)
+                _assign(row, f"{prefix}_goalkeeper_status", _first_value(team_row, ["goalkeeper_status", "gk_status"]), diagnostics)
+            _map_structured_team_stats(row, prefix, frame, diagnostics)
         for target, aliases in {
             "venue_name": ["venue", "venue_name", "stadium"],
             "country": ["country"],
@@ -237,20 +262,28 @@ def _map_team_statistics(row: dict[str, object], frames: Iterable[pd.DataFrame],
         }.items():
             value = _first_nonblank(frame, aliases)
             _assign(row, target, value, diagnostics)
+        _add_statistics_note(row, frame, item.path.name, diagnostics)
 
 
-def _map_team_players(row: dict[str, object], frames: Iterable[pd.DataFrame], diagnostics: dict[str, object]) -> None:
-    for frame in frames:
+def _map_team_players(row: dict[str, object], item: ExcelEvidence, diagnostics: dict[str, object], inferred_prefix: str = "") -> None:
+    for frame in item.sheets.values():
         if frame.empty:
             continue
         team_col = _find_column(frame, ["team", "squad", "club"])
-        if team_col is None:
-            continue
-        for prefix, team in [("home", str(row.get("home_team", ""))), ("away", str(row.get("away_team", "")))]:
+        prefixes = []
+        if team_col is None and inferred_prefix:
+            diagnostics["ambiguous_fields"].add(f"{item.path.name}:team_identity_inferred_from_export_order")
+            prefixes = [(inferred_prefix, frame)]
+        elif team_col is not None:
+            for prefix, team in [("home", str(row.get("home_team", ""))), ("away", str(row.get("away_team", "")))]:
+                if not team:
+                    continue
+                subset = frame[frame[team_col].astype(str).str.lower() == team.lower()]
+                if not subset.empty:
+                    prefixes.append((prefix, subset))
+        for prefix, subset in prefixes:
+            team = str(row.get(f"{prefix}_team", ""))
             if not team:
-                continue
-            subset = frame[frame[team_col].astype(str).str.lower() == team.lower()]
-            if subset.empty:
                 continue
             _assign(row, f"{prefix}_player_xg_total", _sum_column(subset, ["xg", "player_xg", "npxg"]), diagnostics)
             _assign(row, f"{prefix}_player_xa_total", _sum_column(subset, ["xa", "xag", "player_xa"]), diagnostics)
@@ -259,6 +292,86 @@ def _map_team_players(row: dict[str, object], frames: Iterable[pd.DataFrame], di
             creator = _top_player(subset, ["assists", "a", "xa", "xag"], ["player", "player_name", "name"])
             _assign(row, f"{prefix}_main_scorer", scorer, diagnostics)
             _assign(row, f"{prefix}_main_creator", creator, diagnostics)
+            _add_player_note(row, prefix, subset, item.path.name, diagnostics)
+
+
+def _map_structured_team_stats(row: dict[str, object], prefix: str, frame: pd.DataFrame, diagnostics: dict[str, object]) -> None:
+    statistic_col = _find_column(frame, ["statistic", "category", "type"])
+    if statistic_col is None:
+        return
+    set_piece = _statistic_row(frame, statistic_col, ["set piece"])
+    if set_piece is not None:
+        _assign(row, f"{prefix}_set_piece_xg_for", _first_value(set_piece, ["xg"]), diagnostics)
+        _assign(row, f"{prefix}_set_piece_xg_against", _first_value(set_piece, ["xga"]), diagnostics)
+        ratio = _ratio(_first_value(set_piece, ["xg"]), _first_value(set_piece, ["xga"]))
+        _assign(row, f"{prefix}_set_piece_xg_ratio", ratio, diagnostics)
+    formation = _best_formation(frame, statistic_col)
+    _assign(row, f"{prefix}_formation", formation, diagnostics)
+    totals = _team_totals_from_breakdown(frame)
+    if totals:
+        _assign(row, f"{prefix}_team_xg_for", totals.get("xg", ""), diagnostics)
+        _assign(row, f"{prefix}_team_xg_against", totals.get("xga", ""), diagnostics)
+
+
+def _statistic_row(frame: pd.DataFrame, statistic_col: str, needles: list[str]) -> pd.Series | None:
+    lowered = frame[statistic_col].astype(str).str.lower()
+    for needle in needles:
+        matches = frame[lowered == needle.lower()]
+        if not matches.empty:
+            return matches.iloc[0]
+    return None
+
+
+def _best_formation(frame: pd.DataFrame, statistic_col: str) -> str:
+    if "min" not in frame.columns:
+        return ""
+    candidates = frame[frame[statistic_col].astype(str).str.match(r"^\d-\d-\d", na=False)].copy()
+    if candidates.empty:
+        return ""
+    candidates["_min"] = pd.to_numeric(candidates["min"], errors="coerce").fillna(0)
+    return str(candidates.sort_values("_min", ascending=False).iloc[0][statistic_col])
+
+
+def _team_totals_from_breakdown(frame: pd.DataFrame) -> dict[str, float]:
+    statistic_col = _find_column(frame, ["statistic"])
+    xg_col = _find_column(frame, ["xg"])
+    xga_col = _find_column(frame, ["xga"])
+    if statistic_col is None or xg_col is None or xga_col is None:
+        return {}
+    stats = frame[statistic_col].astype(str).str.lower()
+    if stats.str.contains("open play|from corner|set piece|direct freekick|penalty", regex=True).any():
+        use = frame[stats.str.contains("open play|from corner|set piece|direct freekick|penalty", regex=True)]
+        return {
+            "xg": round(float(pd.to_numeric(use[xg_col], errors="coerce").fillna(0).sum()), 2),
+            "xga": round(float(pd.to_numeric(use[xga_col], errors="coerce").fillna(0).sum()), 2),
+        }
+    return {}
+
+
+def _add_statistics_note(row: dict[str, object], frame: pd.DataFrame, file_name: str, diagnostics: dict[str, object]) -> None:
+    statistic_col = _find_column(frame, ["statistic"])
+    if statistic_col is None:
+        return
+    stats = ", ".join(str(value) for value in frame[statistic_col].head(6).tolist())
+    note = f"{file_name}: statistic groups observed: {stats}"
+    diagnostics["evidence_notes"].append(note)
+
+
+def _add_player_note(row: dict[str, object], prefix: str, frame: pd.DataFrame, file_name: str, diagnostics: dict[str, object]) -> None:
+    player_col = _find_column(frame, ["player", "player_name", "name"])
+    if player_col is None:
+        return
+    names = ", ".join(str(value) for value in frame[player_col].head(5).tolist())
+    team = row.get(f"{prefix}_team", prefix)
+    diagnostics["evidence_notes"].append(f"{file_name}: top {team} players observed: {names}")
+
+
+def _ratio(numerator: object, denominator: object) -> object:
+    top = pd.to_numeric(pd.Series([numerator]), errors="coerce").iloc[0]
+    bottom = pd.to_numeric(pd.Series([denominator]), errors="coerce").iloc[0]
+    if pd.isna(top) or pd.isna(bottom) or float(bottom) == 0:
+        return ""
+    return round(float(top) / float(bottom), 2)
 
 
 def _apply_context_defaults(row: dict[str, object], home: str | None, away: str | None, competition: str | None, season: str | None, date: str | None, country: str, venue: str, timezone: str, neutral: str) -> None:
@@ -320,6 +433,8 @@ def _write_summary(
         "input_files_detected": len(evidence),
         "sheets_detected": len(diagnostics["sheets"]),
         "fields_mapped_count": len(diagnostics["mapped_fields"]),
+        "ambiguous_fields_count": len(diagnostics["ambiguous_fields"]),
+        "evidence_notes_count": len(diagnostics["evidence_notes"]),
         "missing_required_fields_count": len(missing_required),
         "missing_optional_fields_count": len(missing_optional),
         "manual_review_required": bool(row.get("manual_review_required", True)),
@@ -340,6 +455,15 @@ def _write_summary(
         columns_lines.append(f"- {Path(file_path).name}")
         for sheet, columns in sheets.items():
             columns_lines.append(f"  - {sheet}: {', '.join(map(str, columns))}")
+    sample_lines = []
+    for file_path, sheets in diagnostics["samples_by_file"].items():
+        sample_lines.append(f"- {Path(file_path).name}")
+        for sheet, rows in sheets.items():
+            sample_lines.append(f"  - {sheet}:")
+            if not rows:
+                sample_lines.append("    - no rows sampled")
+            for row_sample in rows:
+                sample_lines.append(f"    - {row_sample}")
     md_path.write_text("\n".join([
         "# Real Match Intake Builder From Excel",
         "",
@@ -348,33 +472,39 @@ def _write_summary(
         f"- existing_output_protected: {str(existing_output_protected).lower()}",
         f"- write_block_reason: {write_block_reason or 'none'}",
         "",
-        "## A. Input Files Detected",
+        "## A. Input Files",
         f"- count: {len(evidence)}",
         *[f"- {Path(item.path).name} ({item.role})" for item in evidence],
         "",
-        "## B. Sheets Detected",
+        "## B. Sheets Found",
         *[f"- {sheet}" for sheet in diagnostics["sheets"]],
         "",
-        "## C. Columns Detected Per File",
+        "## C. Columns Found Per File",
         *columns_lines,
         "",
-        "## D. Fields Successfully Mapped",
+        "## D. Rows Sampled",
+        *sample_lines,
+        "",
+        "## E. Fields Mapped",
         *[f"- {field}" for field in sorted(diagnostics["mapped_fields"])],
         "",
-        "## E. Fields Missing",
+        "## F. Fields Missing",
         f"- required: {', '.join(missing_required) if missing_required else 'none'}",
         f"- optional_count: {len(missing_optional)}",
         "",
-        "## F. Ambiguous Fields",
+        "## G. Ambiguous Fields",
         *[f"- {field}" for field in sorted(diagnostics["ambiguous_fields"])],
         "",
-        "## G. Manual Review Required",
+        "## H. Evidence Notes Created",
+        *[f"- {note}" for note in diagnostics["evidence_notes"]],
+        "",
+        "## I. Manual Review Decision",
         f"- {'yes' if row.get('manual_review_required') else 'no'}",
         "",
-        "## H. Generated Output Path",
+        "## Generated Output Path",
         f"- {output_path if output_written else 'not written'}",
         "",
-        "## I. Recommended Next Command",
+        "## J. Recommended Next Command",
         "$PY scripts/run_match_analysis_preview.py --real-match-intake data/manual/real_match_intake.csv" if output_written else "Place team-statistics*.xlsx and team-players*.xlsx into data/manual/evidence and rerun the builder.",
         "",
         "Preview-only: no prediction, betting, staking, ROI, market-tier, or recommendation logic changed.",
@@ -392,6 +522,19 @@ def _normalize_frame(frame: pd.DataFrame) -> pd.DataFrame:
     normalized = frame.copy()
     normalized.columns = [_normalize_name(column) for column in normalized.columns]
     return normalized
+
+
+def _sample_rows(frame: pd.DataFrame, limit: int = 5) -> list[str]:
+    if frame.empty:
+        return []
+    samples = []
+    for record in frame.head(limit).to_dict(orient="records"):
+        parts = []
+        for key, value in record.items():
+            if not _blank(value):
+                parts.append(f"{key}={value}")
+        samples.append("; ".join(parts) if parts else "blank row")
+    return samples
 
 
 def _normalize_name(value: object) -> str:
