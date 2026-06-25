@@ -59,6 +59,7 @@ def test_validation_blocks_missing_empty_duplicate_and_unsafe(tmp_path: Path) ->
 def test_overlay_builds_split_files_and_surfaces_missing_optional(tmp_path: Path) -> None:
     schema = RealMatchIntakeSchemaBuilder(RealMatchIntakeSchemaConfig()).run()
     frame = pd.read_csv(schema.output_path)
+    frame["away_closing_odds"] = frame["away_closing_odds"].astype(object)
     frame.loc[0, "away_closing_odds"] = ""
     intake = tmp_path / "intake.csv"
     frame.to_csv(intake, index=False)
