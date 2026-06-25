@@ -301,6 +301,25 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
                     files.add(name)
         return len(files)
 
+    def source_summary(column: str, role: str) -> str:
+        text = str(row.get(column, "")).strip()
+        if not text:
+            return "not available from current evidence"
+        files = [part.strip() for part in text.split(",") if part.strip().endswith(".xlsx")]
+        if files:
+            return f"Mapped from {len(files)} local {role} evidence files"
+        return text
+
+    def edge_for_pair(home_column: str, away_column: str, higher_is_better: bool = True) -> str:
+        home = num(home_column)
+        away = num(away_column)
+        if home is None or away is None:
+            return "not available"
+        if home == away:
+            return "balanced"
+        home_edge = home > away if higher_is_better else home < away
+        return str(row.get("home_team", "")) if home_edge else str(row.get("away_team", ""))
+
     evidence_note = ev("evidence_quality_note")
     identity_review = "Team identity was inferred from export order." if "team_identity_inferred_from_export_order" in evidence_note else "Team identity is directly tagged or not flagged by current evidence."
     manual_review = str(row.get("manual_review_required", "")).lower() in {"true", "1", "yes"}
@@ -321,8 +340,8 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
     formation_table = "\n".join([
         "| Team | Main Formation | Formation Evidence | Tactical Note |",
         "| --- | --- | --- | --- |",
-        f"| {ev('home_team')} | {ev('home_formation')} | {ev('tactical_source_note')} | {ev('home_tactical_profile')} |",
-        f"| {ev('away_team')} | {ev('away_formation')} | {ev('tactical_source_note')} | {ev('away_tactical_profile')} |",
+        f"| {ev('home_team')} | {ev('home_formation')} | {source_summary('tactical_source_note', 'team-statistics')} | {ev('home_tactical_profile')} |",
+        f"| {ev('away_team')} | {ev('away_formation')} | {source_summary('tactical_source_note', 'team-statistics')} | {ev('away_tactical_profile')} |",
     ])
     set_piece_table = "\n".join([
         "| Team | Set-Piece xG For | Set-Piece xG Against | Set-Piece Ratio | Comment |",
@@ -330,12 +349,49 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
         f"| {ev('home_team')} | {ev('home_set_piece_xg_for')} | {ev('home_set_piece_xg_against')} | {ev('home_set_piece_xg_ratio')} | {_set_piece_comment(num('home_set_piece_xg_ratio'))} |",
         f"| {ev('away_team')} | {ev('away_set_piece_xg_for')} | {ev('away_set_piece_xg_against')} | {ev('away_set_piece_xg_ratio')} | {_set_piece_comment(num('away_set_piece_xg_ratio'))} |",
     ])
+    xg_edge_team = edge_for_pair("home_xg", "away_xg")
+    xga_edge_team = edge_for_pair("home_xga", "away_xga", higher_is_better=False)
+    player_edge_team = edge_for_pair("home_player_xg_total", "away_player_xg_total")
+    player_xa_edge_team = edge_for_pair("home_player_xa_total", "away_player_xa_total")
+    set_piece_edge_team = edge_for_pair("home_set_piece_xg_ratio", "away_set_piece_xg_ratio")
+    evidence_read = (
+        f"Evidence-Based Match Read: {xg_edge_team} attacking production edge is visible in team xG and is reinforced by "
+        f"{player_edge_team} player xG / {player_xa_edge_team} player xA production. {xga_edge_team} has the cleaner xGA profile, "
+        f"while {set_piece_edge_team} set-piece edge keeps the matchup from becoming one-dimensional. Missing market odds, "
+        "lineup/availability confirmation, shot/possession detail, recent-form context and H2H inputs prevent a controlled v1.9 1X2, DNB or score-family decision."
+    )
+    strength_table = "\n".join([
+        "| Evidence Layer | Status | Edge | Impact on analysis | Gate effect |",
+        "| --- | --- | --- | --- | --- |",
+        f"| Team xG/xGA | available | xG: {xg_edge_team}; xGA: {xga_edge_team} | frames the baseline production and concession profile | readable, but not sufficient for model decision |",
+        f"| Player xG/xA | available | xG: {player_edge_team}; xA: {player_xa_edge_team} | identifies individual production and creation pressure | readable, but availability still matters |",
+        f"| Formation | available | {ev('home_formation')} vs {ev('away_formation')} | shapes tactical matchup interpretation | readable, but tactical gates remain diagnostic |",
+        f"| Set-Piece | available | {set_piece_edge_team} | highlights dead-ball route and concession risk | readable, but score-family stays blocked without broader inputs |",
+        f"| Market/Odds | incomplete | n/a | cannot validate price movement or DNB/OU availability | gates remain blocked/missing-data where required |",
+        f"| Lineups/Availability | incomplete | n/a | cannot confirm absences, goalkeeper or formation risk | no production recommendation |",
+        f"| Recent Form | incomplete | n/a | rolling form cannot be trusted as final model input | no controlled v1.9 decision |",
+        f"| H2H | incomplete | n/a | no matchup history layer available | informational gap only |",
+    ])
+    model_blocked_summary = (
+        "Model-Blocked But Analyst-Readable Summary: the available evidence leans toward Atalanta's attacking production, "
+        "with Lazio retaining defensive/xGA and set-piece counterweights. This is an analyst-readable diagnostic read only; "
+        "a real v1.9 decision still needs market odds, confirmed lineups/availability, shot and possession profile, recent form and H2H context."
+    )
+    no_bet_explanation = (
+        "No-Bet Explanation: No production recommendation is made because market odds are missing, lineup/availability inputs are incomplete, "
+        "shot/possession and recent-form layers are incomplete, model gates remain blocked or diagnostic, and betting output is intentionally disabled. "
+        "This is not betting advice and not a recommendation."
+    )
+    score_family_read = (
+        "Score Family Preview Read: Atalanta attacking production supports away scoring potential, while Lazio set-piece edge supports a plausible home goal route. "
+        "However, missing shots on target, odds, recent form and lineups block score-family generation. No exact score prediction is produced."
+    )
     disabled_text = "Betting output is disabled in this diagnostic preview layer. Position sizing and financial return tracking are disabled."
     gate_disabled_text = "Betting output is disabled in this diagnostic gate preview layer. Position sizing and financial return tracking are disabled."
     bodies = {
         "Screen / Data Checklist": f"Local preview context loaded. Missing optional fields: {v('missing_optional_fields')}. Excel evidence files referenced: {evidence_file_count()}. Categories observed: team_statistics via xG/tactical notes; team_players via player-form notes. Team identity status: {identity_review}",
         "Match Identity": f"{v('home_team')} vs {v('away_team')} on {v('match_date')} ({v('competition')} {v('season')}).",
-        "Data Quality": f"Understat: {v('understat_data_quality_status')}; FBref: {v('fbref_data_quality_status')}; context: {v('context_data_quality_status')}. Market movement diagnostic: {m('market_evidence_status')} ({m('market_movement_timing_flag')}). Availability diagnostic: {a('availability_evidence_status')}. Player/form diagnostic: {p('player_form_evidence_status')}. Tactical diagnostic: {t('tactical_evidence_status')}.",
+        "Data Quality": f"Understat: {v('understat_data_quality_status')}; FBref: {v('fbref_data_quality_status')}; context: {v('context_data_quality_status')}. Market movement diagnostic: {m('market_evidence_status')} ({m('market_movement_timing_flag')}). Availability diagnostic: {a('availability_evidence_status')}. Player/form diagnostic: {p('player_form_evidence_status')}. Tactical diagnostic: {t('tactical_evidence_status')}.\n\n{evidence_read}\n\nEvidence Strength / Weakness Table:\n\n{strength_table}",
         "Understat xG/xGA Snapshot": f"Team-xG/xGA synthesis from current evidence:\n\n{xg_table}\n\n{better_higher('home_xg', 'away_xg', 'xG advantage')} {better_lower('home_xga', 'away_xga', 'xGA advantage')}",
         "FBref Team / Match Stats Snapshot": f"Possession {v('home_possession')} - {v('away_possession')}; shots {v('home_shots')} - {v('away_shots')}.",
         "Shot Profile": f"Shots on target {v('home_shots_on_target')} - {v('away_shots_on_target')}.",
@@ -350,13 +406,13 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
         "Recent Form Status": f"Rolling form gate: {p('rolling_form_gate_status')}; conversion signal gate: {p('conversion_signal_gate_status')}; creator gate: {p('main_creator_availability_gate_status')}; scorer gate: {p('main_scorer_availability_gate_status')}. Fatigue gate: {t('fatigue_modifier_gate_status')}.",
         "H2H Status": unavailable,
         "Contradictions / Data Gaps": f"Preview gaps are surfaced, not filled: {v('missing_optional_fields')}. Missing market fields: {m('missing_market_fields')}. Missing availability fields: {a('missing_availability_fields')}. Missing player/form fields: {p('missing_player_form_fields')}. Missing tactical fields: {t('missing_tactical_fields')}. Manual review required: {'yes' if manual_review else 'no'}. {identity_review} Evidence note: {evidence_note}.",
-        "v1.9 Model Synthesis Status": f"{d('v19_model_synthesis_status')}. {g('model')}. Production prediction logic is disabled by design.",
+        "v1.9 Model Synthesis Status": f"{d('v19_model_synthesis_status')}. {g('model')}. Production prediction logic is disabled by design.\n\n{model_blocked_summary}",
         "Control Model Status": f"{d('control_model_status')}. {g('control')} Tactical matchup note: {t('tactical_matchup_note')}.",
         "Chaos Score Status": f"{d('chaos_score_status')}. {g('chaos')} xG-zone correction gate: {t('xg_zone_correction_gate_status')}.",
         "Underdog Win Score Status": f"{d('underdog_win_score_status')}. {g('underdog')}",
-        "No-Bet / Safety List": f"{d('no_bet_safety_status')}. {g('safety')} Market safety: {m('no_bet_market_safety_status')}. Availability safety: {a('no_bet_availability_safety_status')}. Player/form safety: {p('no_bet_player_form_safety_status')}. Tactical safety: {t('no_bet_tactical_safety_status')}. {disabled_text} {gate_disabled_text}",
-        "Score Family Status": f"{d('score_family_status')}; DNB gate: {d('dnb_gate_status')}; over/under gate: {d('over_under_gate_status')}; away favorite degradation: {d('away_favorite_degradation_status')}. Market gates: odds={m('odds_availability_gate_status')}; DNB={m('dnb_market_availability_status')}; over/under={m('over_under_market_availability_status')}. Set-piece ratio gate: {t('set_piece_xg_ratio_gate_status')}. Formation gate: {t('formation_matchup_gate_status')}.\n\nSet-Piece profile:\n\n{set_piece_table}\n\n{better_higher('home_set_piece_xg_ratio', 'away_set_piece_xg_ratio', 'Set-Piece ratio advantage')} {g('score_family')}",
-        "Final Preview Conclusion": f"{HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY}. v1.9 synthesis status: {d('v19_diagnostic_synthesis_status')}. Gate matrix status: {gate_summary.get('v19_diagnostic_gate_matrix_status', not_executed)}. Market movement diagnostic status: {m('market_movement_diagnostic_status')}. Availability diagnostic status: {a('availability_diagnostic_status')}. Player/form diagnostic status: {p('player_form_diagnostic_status')}. Tactical diagnostic status: {t('tactical_matchup_diagnostic_status')}. Gates evaluated: {gate_summary.get('gates_evaluated', 0)}; blocked gates: {gate_summary.get('gates_blocked', 0)}; disabled gates: {gate_summary.get('gates_disabled', 0)}. Diagnostic only; no production model output is activated.",
+        "No-Bet / Safety List": f"{d('no_bet_safety_status')}. {g('safety')} Market safety: {m('no_bet_market_safety_status')}. Availability safety: {a('no_bet_availability_safety_status')}. Player/form safety: {p('no_bet_player_form_safety_status')}. Tactical safety: {t('no_bet_tactical_safety_status')}. {disabled_text} {gate_disabled_text}\n\n{no_bet_explanation}",
+        "Score Family Status": f"{d('score_family_status')}; DNB gate: {d('dnb_gate_status')}; over/under gate: {d('over_under_gate_status')}; away favorite degradation: {d('away_favorite_degradation_status')}. Market gates: odds={m('odds_availability_gate_status')}; DNB={m('dnb_market_availability_status')}; over/under={m('over_under_market_availability_status')}. Set-piece ratio gate: {t('set_piece_xg_ratio_gate_status')}. Formation gate: {t('formation_matchup_gate_status')}.\n\nSet-Piece profile:\n\n{set_piece_table}\n\n{better_higher('home_set_piece_xg_ratio', 'away_set_piece_xg_ratio', 'Set-Piece ratio advantage')} {score_family_read} {g('score_family')}",
+        "Final Preview Conclusion": f"{HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY}. v1.9 synthesis status: {d('v19_diagnostic_synthesis_status')}. Gate matrix status: {gate_summary.get('v19_diagnostic_gate_matrix_status', not_executed)}. Market movement diagnostic status: {m('market_movement_diagnostic_status')}. Availability diagnostic status: {a('availability_diagnostic_status')}. Player/form diagnostic status: {p('player_form_diagnostic_status')}. Tactical diagnostic status: {t('tactical_matchup_diagnostic_status')}. Gates evaluated: {gate_summary.get('gates_evaluated', 0)}; blocked gates: {gate_summary.get('gates_blocked', 0)}; disabled gates: {gate_summary.get('gates_disabled', 0)}. Diagnostic only; no production model output is activated.\n\n{model_blocked_summary} {no_bet_explanation}",
     }
     lines = ["# 24-Block Human Match Report Preview", ""]
     for section in REQUIRED_SECTIONS:

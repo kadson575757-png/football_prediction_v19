@@ -290,6 +290,10 @@ def test_generated_human_report_surfaces_excel_evidence_mapping(tmp_path: Path) 
     assert result["human_24_block_report_status"] == "HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY"
     assert int(result["sections_rendered"]) == 24
     assert int(result["required_sections_rendered"]) == 24
+    assert str(result["prediction_logic_enabled"]).lower() == "false"
+    assert str(result["betting_logic_enabled"]).lower() == "false"
+    assert str(result["staking_logic_enabled"]).lower() == "false"
+    assert str(result["roi_logic_enabled"]).lower() == "false"
     report = (tmp_path / "outputs" / "analysis_preview" / "human_24_block_report" / "human_24_block_match_report_preview.md").read_text(encoding="utf-8")
     assert "Lazio" in report
     assert "Atalanta" in report
@@ -302,6 +306,16 @@ def test_generated_human_report_surfaces_excel_evidence_mapping(tmp_path: Path) 
     assert "Team identity was inferred from export order." in report
     assert "Player xG Total" in report
     assert "Player xA Total" in report
+    assert "Evidence-Based Match Read" in report
+    assert "Atalanta attacking production edge" in report
+    assert "Lazio set-piece edge" in report
+    assert "Evidence Strength / Weakness Table" in report
+    assert "Model-Blocked But Analyst-Readable Summary" in report
+    assert "No-Bet Explanation" in report
+    assert "No production recommendation" in report
+    assert "Score Family Preview Read" in report
+    assert "No exact score prediction" in report
+    assert "Mapped from 8 local team-statistics evidence files" in report
 
 
 def test_no_evidence_does_not_overwrite_existing_valid_intake_and_runner_still_works(tmp_path: Path) -> None:
