@@ -228,6 +228,41 @@ def test_generated_intake_runs_preview_report_with_real_teams(tmp_path: Path) ->
     assert "Bundesliga 2024" not in report
 
 
+def test_generated_human_report_surfaces_excel_evidence_mapping(tmp_path: Path) -> None:
+    evidence = tmp_path / "data" / "manual" / "evidence"
+    _write_untagged_evidence(evidence)
+    output = tmp_path / "data" / "manual" / "real_match_intake.csv"
+    build_result = build_real_match_intake_from_excel(
+        input_dir=evidence,
+        output=output,
+        home_team="Lazio",
+        away_team="Atalanta",
+        competition="Serie A",
+        season="2025/26",
+        match_date="2026-02-14",
+        base_dir=tmp_path,
+    )
+    assert int(build_result["fields_mapped_count"]) >= 21
+
+    result = run_match_analysis_preview(real_match_intake=output, base_dir=tmp_path)
+
+    assert result["human_24_block_report_status"] == "HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY"
+    assert int(result["sections_rendered"]) == 24
+    assert int(result["required_sections_rendered"]) == 24
+    report = (tmp_path / "outputs" / "analysis_preview" / "human_24_block_report" / "human_24_block_match_report_preview.md").read_text(encoding="utf-8")
+    assert "Lazio" in report
+    assert "Atalanta" in report
+    assert "xG" in report
+    assert "xGA" in report
+    assert any(name in report for name in ["Gianluca Scamacca", "Nikola Krstovic", "Pedro", "Gustav Isaksen"])
+    assert "3-4-2-1" in report
+    assert "4-3-3" in report
+    assert "Set-Piece" in report
+    assert "Team identity was inferred from export order." in report
+    assert "Player xG Total" in report
+    assert "Player xA Total" in report
+
+
 def test_no_evidence_does_not_overwrite_existing_valid_intake_and_runner_still_works(tmp_path: Path) -> None:
     evidence = tmp_path / "data" / "manual" / "evidence"
     _write_evidence(evidence)
