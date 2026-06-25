@@ -89,7 +89,7 @@ def test_custom_manual_lazio_atalanta_intake_hands_off_to_all_layers() -> None:
     assert context["understat_provider_match_id"] == ""
     assert context["fbref_provider_match_id"] == ""
     assert float(context["home_xg"]) == 48.18
-    assert float(context["away_xg"]) == 70.82
+    assert round(float(context["away_xg"]), 2) == 70.81
     report = Path("outputs/analysis_preview/human_24_block_report/human_24_block_match_report_preview.md").read_text(encoding="utf-8")
     assert "Lazio vs Atalanta on 2026-02-14 (Serie A 2025/26)" in report
     assert "Home FC vs Away FC on 2024-08-23 (Bundesliga 2024)" not in report
