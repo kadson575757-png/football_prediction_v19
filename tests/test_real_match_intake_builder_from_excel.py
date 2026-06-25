@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -8,6 +9,14 @@ import pandas as pd
 from football_prediction_v19.analysis.real_match_intake_schema_preview import INTAKE_COLUMNS
 from scripts.build_real_match_intake_from_excel import build_real_match_intake_from_excel
 from scripts.run_match_analysis_preview import run_match_analysis_preview
+
+REAL_EXCEL_FIXTURE_DIR = Path(__file__).parent / "fixtures" / "excel_evidence" / "lazio_atalanta_2026_02_14"
+
+
+def _copy_real_excel_fixtures(input_dir: Path) -> None:
+    input_dir.mkdir(parents=True, exist_ok=True)
+    for path in REAL_EXCEL_FIXTURE_DIR.glob("*.xlsx"):
+        shutil.copy2(path, input_dir / path.name)
 
 
 def _write_evidence(input_dir: Path, *, partial: bool = False) -> None:
@@ -179,6 +188,38 @@ def test_untagged_excel_exports_map_multiple_fields_and_diagnose_columns(tmp_pat
     assert "## H. Evidence Notes Created" in summary_md
 
 
+def test_real_lazio_atalanta_excel_fixtures_map_at_least_21_fields(tmp_path: Path) -> None:
+    evidence = tmp_path / "evidence"
+    _copy_real_excel_fixtures(evidence)
+    output = tmp_path / "real_match_intake.csv"
+
+    result = build_real_match_intake_from_excel(
+        input_dir=evidence,
+        output=output,
+        home_team="Lazio",
+        away_team="Atalanta",
+        competition="Serie A",
+        season="2025/26",
+        match_date="2026-02-14",
+        base_dir=tmp_path,
+    )
+
+    assert result["real_match_intake_excel_builder_status"] == "REAL_MATCH_INTAKE_EXCEL_BUILDER_READY"
+    assert int(result["input_files_detected"]) == 10
+    assert int(result["fields_mapped_count"]) >= 21
+    row = pd.read_csv(output, keep_default_na=False).iloc[0]
+    assert float(row["home_team_xg_for"]) == 48.18
+    assert float(row["away_team_xg_for"]) == 70.81
+    assert "Pedro" in row["home_main_scorer"]
+    assert "Gianluca Scamacca" in row["away_main_scorer"]
+    assert row["home_formation"] == "4-3-3"
+    assert row["away_formation"] == "3-4-2-1"
+    summary_md = Path(str(result["summary_md_path"])).read_text(encoding="utf-8")
+    assert "team-players - 2026-06-24T192906.764.xlsx" in summary_md
+    assert "team-statistics - 2026-06-24T192903.623.xlsx" in summary_md
+    assert "team_identity_inferred_from_export_order" in summary_md
+
+
 def test_missing_optional_excel_columns_do_not_crash_and_require_review(tmp_path: Path) -> None:
     evidence = tmp_path / "data" / "manual" / "evidence"
     _write_evidence(evidence, partial=True)
@@ -229,8 +270,8 @@ def test_generated_intake_runs_preview_report_with_real_teams(tmp_path: Path) ->
 
 
 def test_generated_human_report_surfaces_excel_evidence_mapping(tmp_path: Path) -> None:
-    evidence = tmp_path / "data" / "manual" / "evidence"
-    _write_untagged_evidence(evidence)
+    evidence = tmp_path / "evidence"
+    _copy_real_excel_fixtures(evidence)
     output = tmp_path / "data" / "manual" / "real_match_intake.csv"
     build_result = build_real_match_intake_from_excel(
         input_dir=evidence,
