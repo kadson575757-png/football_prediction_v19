@@ -247,13 +247,96 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
             return not_executed
         return str(value)
 
+    def ev(column: str) -> str:
+        value = row.get(column, "")
+        if pd.isna(value) or str(value).strip() == "":
+            return "n/a"
+        return str(value)
+
+    def num(column: str) -> float | None:
+        value = pd.to_numeric(pd.Series([row.get(column, "")]), errors="coerce").iloc[0]
+        if pd.isna(value):
+            return None
+        return float(value)
+
+    def fmt(value: float | None) -> str:
+        return "n/a" if value is None else f"{value:.2f}"
+
+    def diff(for_column: str, against_column: str) -> float | None:
+        left = num(for_column)
+        right = num(against_column)
+        return None if left is None or right is None else left - right
+
+    def better_lower(home_column: str, away_column: str, label: str) -> str:
+        home = num(home_column)
+        away = num(away_column)
+        if home is None or away is None:
+            return f"{label}: not available from current evidence."
+        if home < away:
+            return f"{label}: {ev('home_team')} has the cleaner defensive xGA profile."
+        if away < home:
+            return f"{label}: {ev('away_team')} has the cleaner defensive xGA profile."
+        return f"{label}: both teams are level on this evidence."
+
+    def better_higher(home_column: str, away_column: str, label: str) -> str:
+        home = num(home_column)
+        away = num(away_column)
+        if home is None or away is None:
+            return f"{label}: not available from current evidence."
+        if home > away:
+            return f"{label}: {ev('home_team')} leads."
+        if away > home:
+            return f"{label}: {ev('away_team')} leads."
+        return f"{label}: both teams are level."
+
+    def evidence_file_count() -> int:
+        files = set()
+        for column in ["xg_source_note", "player_form_source_note", "tactical_source_note", "availability_source_note"]:
+            text = str(row.get(column, ""))
+            if ":" in text:
+                text = text.split(":", 1)[1]
+            for part in text.split(","):
+                name = part.strip()
+                if name.endswith(".xlsx"):
+                    files.add(name)
+        return len(files)
+
+    evidence_note = ev("evidence_quality_note")
+    identity_review = "Team identity was inferred from export order." if "team_identity_inferred_from_export_order" in evidence_note else "Team identity is directly tagged or not flagged by current evidence."
+    manual_review = str(row.get("manual_review_required", "")).lower() in {"true", "1", "yes"}
+    xg_home_diff = diff("home_xg", "home_xga")
+    xg_away_diff = diff("away_xg", "away_xga")
+    xg_table = "\n".join([
+        "| Team | xG For | xG Against | xG Diff | Assessment |",
+        "| --- | ---: | ---: | ---: | --- |",
+        f"| {ev('home_team')} | {ev('home_xg')} | {ev('home_xga')} | {fmt(xg_home_diff)} | {_xg_assessment(xg_home_diff)} |",
+        f"| {ev('away_team')} | {ev('away_xg')} | {ev('away_xga')} | {fmt(xg_away_diff)} | {_xg_assessment(xg_away_diff)} |",
+    ])
+    player_table = "\n".join([
+        "| Team | Main Scorer | Main Creator | Player xG Total | Player xA Total |",
+        "| --- | --- | --- | ---: | ---: |",
+        f"| {ev('home_team')} | {ev('home_main_scorer')} | {ev('home_main_creator')} | {ev('home_player_xg_total')} | {ev('home_player_xa_total')} |",
+        f"| {ev('away_team')} | {ev('away_main_scorer')} | {ev('away_main_creator')} | {ev('away_player_xg_total')} | {ev('away_player_xa_total')} |",
+    ])
+    formation_table = "\n".join([
+        "| Team | Main Formation | Formation Evidence | Tactical Note |",
+        "| --- | --- | --- | --- |",
+        f"| {ev('home_team')} | {ev('home_formation')} | {ev('tactical_source_note')} | {ev('home_tactical_profile')} |",
+        f"| {ev('away_team')} | {ev('away_formation')} | {ev('tactical_source_note')} | {ev('away_tactical_profile')} |",
+    ])
+    set_piece_table = "\n".join([
+        "| Team | Set-Piece xG For | Set-Piece xG Against | Set-Piece Ratio | Comment |",
+        "| --- | ---: | ---: | ---: | --- |",
+        f"| {ev('home_team')} | {ev('home_set_piece_xg_for')} | {ev('home_set_piece_xg_against')} | {ev('home_set_piece_xg_ratio')} | {_set_piece_comment(num('home_set_piece_xg_ratio'))} |",
+        f"| {ev('away_team')} | {ev('away_set_piece_xg_for')} | {ev('away_set_piece_xg_against')} | {ev('away_set_piece_xg_ratio')} | {_set_piece_comment(num('away_set_piece_xg_ratio'))} |",
+    ])
     disabled_text = "Betting output is disabled in this diagnostic preview layer. Position sizing and financial return tracking are disabled."
     gate_disabled_text = "Betting output is disabled in this diagnostic gate preview layer. Position sizing and financial return tracking are disabled."
     bodies = {
-        "Screen / Data Checklist": f"Local preview context loaded. Missing optional fields: {v('missing_optional_fields')}.",
+        "Screen / Data Checklist": f"Local preview context loaded. Missing optional fields: {v('missing_optional_fields')}. Excel evidence files referenced: {evidence_file_count()}. Categories observed: team_statistics via xG/tactical notes; team_players via player-form notes. Team identity status: {identity_review}",
         "Match Identity": f"{v('home_team')} vs {v('away_team')} on {v('match_date')} ({v('competition')} {v('season')}).",
         "Data Quality": f"Understat: {v('understat_data_quality_status')}; FBref: {v('fbref_data_quality_status')}; context: {v('context_data_quality_status')}. Market movement diagnostic: {m('market_evidence_status')} ({m('market_movement_timing_flag')}). Availability diagnostic: {a('availability_evidence_status')}. Player/form diagnostic: {p('player_form_evidence_status')}. Tactical diagnostic: {t('tactical_evidence_status')}.",
-        "Understat xG/xGA Snapshot": f"Home xG {v('home_xg')} / Away xG {v('away_xg')}; Home xGA {v('home_xga')} / Away xGA {v('away_xga')}.",
+        "Understat xG/xGA Snapshot": f"Team-xG/xGA synthesis from current evidence:\n\n{xg_table}\n\n{better_higher('home_xg', 'away_xg', 'xG advantage')} {better_lower('home_xga', 'away_xga', 'xGA advantage')}",
         "FBref Team / Match Stats Snapshot": f"Possession {v('home_possession')} - {v('away_possession')}; shots {v('home_shots')} - {v('away_shots')}.",
         "Shot Profile": f"Shots on target {v('home_shots_on_target')} - {v('away_shots_on_target')}.",
         "Possession Profile": f"Possession split {v('home_possession')} - {v('away_possession')}. Tactical matchup status: {t('tactical_matchup_diagnostic_status')}; score gate: {t('tactical_matchup_score_gate_status')}.",
@@ -261,24 +344,48 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
         "Progression Profile": f"Progressive passes {v('home_progressive_passes')} - {v('away_progressive_passes')}; carries {v('home_progressive_carries')} - {v('away_progressive_carries')}.",
         "Defensive Actions Profile": f"Tackles {v('home_tackles')} - {v('away_tackles')}; interceptions {v('home_interceptions')} - {v('away_interceptions')}; blocks {v('home_blocks')} - {v('away_blocks')}. Transition gate: {t('transition_matchup_gate_status')}.",
         "Home / Away Split Status": unavailable,
-        "Player xG / xA Status": f"Player/form diagnostic status: {p('player_form_diagnostic_status')}. xG/xA gate: {p('player_xg_xa_gate_status')}; big chance gate: {p('big_chance_gate_status')}. Home note: {p('home_player_form_note')}. Away note: {p('away_player_form_note')}.",
-        "Lineups Status": f"Availability diagnostic status: {a('availability_diagnostic_status')}. Lineup gate: {a('lineup_confirmation_gate_status')}; formation gate: {a('formation_availability_gate_status')}. Home note: {a('home_availability_note')}. Away note: {a('away_availability_note')}.",
+        "Player xG / xA Status": f"Player/form diagnostic status: {p('player_form_diagnostic_status')}. xG/xA gate: {p('player_xg_xa_gate_status')}; big chance gate: {p('big_chance_gate_status')}.\n\n{player_table}\n\n{better_higher('home_player_xg_total', 'away_player_xg_total', 'Individual xG production')} {better_higher('home_player_xa_total', 'away_player_xa_total', 'Individual xA creation')}",
+        "Lineups Status": f"Availability diagnostic status: {a('availability_diagnostic_status')}. Lineup gate: {a('lineup_confirmation_gate_status')}; formation gate: {a('formation_availability_gate_status')}.\n\n{formation_table}",
         "Injuries / Suspensions Status": f"Injuries and suspensions gate: {a('injuries_suspensions_gate_status')}; goalkeeper gate: {a('goalkeeper_availability_gate_status')}; key absence gate: {a('key_absence_gate_status')}.",
         "Recent Form Status": f"Rolling form gate: {p('rolling_form_gate_status')}; conversion signal gate: {p('conversion_signal_gate_status')}; creator gate: {p('main_creator_availability_gate_status')}; scorer gate: {p('main_scorer_availability_gate_status')}. Fatigue gate: {t('fatigue_modifier_gate_status')}.",
         "H2H Status": unavailable,
-        "Contradictions / Data Gaps": f"Preview gaps are surfaced, not filled: {v('missing_optional_fields')}. Missing market fields: {m('missing_market_fields')}. Missing availability fields: {a('missing_availability_fields')}. Missing player/form fields: {p('missing_player_form_fields')}. Missing tactical fields: {t('missing_tactical_fields')}.",
+        "Contradictions / Data Gaps": f"Preview gaps are surfaced, not filled: {v('missing_optional_fields')}. Missing market fields: {m('missing_market_fields')}. Missing availability fields: {a('missing_availability_fields')}. Missing player/form fields: {p('missing_player_form_fields')}. Missing tactical fields: {t('missing_tactical_fields')}. Manual review required: {'yes' if manual_review else 'no'}. {identity_review} Evidence note: {evidence_note}.",
         "v1.9 Model Synthesis Status": f"{d('v19_model_synthesis_status')}. {g('model')}. Production prediction logic is disabled by design.",
         "Control Model Status": f"{d('control_model_status')}. {g('control')} Tactical matchup note: {t('tactical_matchup_note')}.",
         "Chaos Score Status": f"{d('chaos_score_status')}. {g('chaos')} xG-zone correction gate: {t('xg_zone_correction_gate_status')}.",
         "Underdog Win Score Status": f"{d('underdog_win_score_status')}. {g('underdog')}",
         "No-Bet / Safety List": f"{d('no_bet_safety_status')}. {g('safety')} Market safety: {m('no_bet_market_safety_status')}. Availability safety: {a('no_bet_availability_safety_status')}. Player/form safety: {p('no_bet_player_form_safety_status')}. Tactical safety: {t('no_bet_tactical_safety_status')}. {disabled_text} {gate_disabled_text}",
-        "Score Family Status": f"{d('score_family_status')}; DNB gate: {d('dnb_gate_status')}; over/under gate: {d('over_under_gate_status')}; away favorite degradation: {d('away_favorite_degradation_status')}. Market gates: odds={m('odds_availability_gate_status')}; DNB={m('dnb_market_availability_status')}; over/under={m('over_under_market_availability_status')}. Set-piece ratio gate: {t('set_piece_xg_ratio_gate_status')}. Formation gate: {t('formation_matchup_gate_status')}. {g('score_family')}",
+        "Score Family Status": f"{d('score_family_status')}; DNB gate: {d('dnb_gate_status')}; over/under gate: {d('over_under_gate_status')}; away favorite degradation: {d('away_favorite_degradation_status')}. Market gates: odds={m('odds_availability_gate_status')}; DNB={m('dnb_market_availability_status')}; over/under={m('over_under_market_availability_status')}. Set-piece ratio gate: {t('set_piece_xg_ratio_gate_status')}. Formation gate: {t('formation_matchup_gate_status')}.\n\nSet-Piece profile:\n\n{set_piece_table}\n\n{better_higher('home_set_piece_xg_ratio', 'away_set_piece_xg_ratio', 'Set-Piece ratio advantage')} {g('score_family')}",
         "Final Preview Conclusion": f"{HUMAN_24_BLOCK_MATCH_REPORT_PREVIEW_READY}. v1.9 synthesis status: {d('v19_diagnostic_synthesis_status')}. Gate matrix status: {gate_summary.get('v19_diagnostic_gate_matrix_status', not_executed)}. Market movement diagnostic status: {m('market_movement_diagnostic_status')}. Availability diagnostic status: {a('availability_diagnostic_status')}. Player/form diagnostic status: {p('player_form_diagnostic_status')}. Tactical diagnostic status: {t('tactical_matchup_diagnostic_status')}. Gates evaluated: {gate_summary.get('gates_evaluated', 0)}; blocked gates: {gate_summary.get('gates_blocked', 0)}; disabled gates: {gate_summary.get('gates_disabled', 0)}. Diagnostic only; no production model output is activated.",
     }
     lines = ["# 24-Block Human Match Report Preview", ""]
     for section in REQUIRED_SECTIONS:
         lines.extend([f"## {section}", "", bodies[section], ""])
     return "\n".join(lines)
+
+
+def _xg_assessment(delta: float | None) -> str:
+    if delta is None:
+        return "not available from current evidence"
+    if delta >= 5:
+        return "strong positive xG differential"
+    if delta > 0:
+        return "positive xG differential"
+    if delta <= -5:
+        return "negative xG differential to review"
+    if delta < 0:
+        return "slightly negative xG differential"
+    return "balanced xG differential"
+
+
+def _set_piece_comment(ratio: float | None) -> str:
+    if ratio is None:
+        return "not available from current evidence"
+    if ratio >= 1.5:
+        return "clear set-piece edge"
+    if ratio >= 1.0:
+        return "set-piece profile above defensive concessions"
+    return "set-piece concessions outweigh creation"
 
 
 def _safe_output(output_dir: str | Path, base: Path) -> Path | None:
