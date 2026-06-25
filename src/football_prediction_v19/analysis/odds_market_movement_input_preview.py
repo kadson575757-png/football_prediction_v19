@@ -29,6 +29,11 @@ OPTIONAL_MARKET_COLUMNS = [
     "dnb_home_odds", "dnb_away_odds", "handicap_line", "handicap_home_odds",
     "handicap_away_odds",
 ]
+MANUAL_OVERLAY_SOFT_REQUIRED_COLUMNS = [
+    "understat_provider_match_id", "fbref_provider_match_id",
+    "home_open_odds", "draw_open_odds", "away_open_odds",
+    "home_current_odds", "draw_current_odds", "away_current_odds",
+]
 OUTPUT_COLUMNS = REQUIRED_COLUMNS + OPTIONAL_MARKET_COLUMNS + [
     "odds_data_quality_status", "missing_market_fields_count", "missing_market_fields",
     "network_calls_enabled", "prediction_logic_enabled", "betting_logic_enabled",
@@ -102,7 +107,10 @@ class OddsMarketMovementInputRunner:
         row = selected.iloc[[0]].copy()
         if _empty_required(row):
             return self._blocked(ODDS_MARKET_MOVEMENT_INPUT_BLOCKED_EMPTY_REQUIRED_VALUES, candidates=1)
-        missing_fields = [c for c in OPTIONAL_MARKET_COLUMNS if _blank(row.iloc[0].get(c, ""))]
+        missing_fields = [
+            c for c in MANUAL_OVERLAY_SOFT_REQUIRED_COLUMNS + OPTIONAL_MARKET_COLUMNS
+            if _blank(row.iloc[0].get(c, ""))
+        ]
         row["odds_data_quality_status"] = "ODDS_PREVIEW_READY" if not missing_fields else "ODDS_PREVIEW_READY_WITH_MISSING_OPTIONAL_FIELDS"
         row["missing_market_fields_count"] = len(missing_fields)
         row["missing_market_fields"] = " | ".join(missing_fields)
@@ -188,7 +196,8 @@ def _select(frame: pd.DataFrame, config: OddsMarketMovementInputConfig) -> pd.Da
 
 
 def _empty_required(frame: pd.DataFrame) -> bool:
-    return any(_blank(frame.iloc[0].get(c, "")) for c in REQUIRED_COLUMNS)
+    hard_required = [c for c in REQUIRED_COLUMNS if c not in MANUAL_OVERLAY_SOFT_REQUIRED_COLUMNS]
+    return any(_blank(frame.iloc[0].get(c, "")) for c in hard_required)
 
 
 def _safe_output(output_dir: str | Path, base: Path) -> Path | None:

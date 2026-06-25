@@ -33,6 +33,7 @@ PLAYER_FORM_COLUMNS = [
     "home_main_scorer_status", "away_main_scorer_status", "home_player_impact_note",
     "away_player_impact_note",
 ]
+MANUAL_OVERLAY_SOFT_REQUIRED_COLUMNS = ["understat_provider_match_id", "fbref_provider_match_id"]
 OUTPUT_COLUMNS = REQUIRED_COLUMNS + PLAYER_FORM_COLUMNS + [
     "player_form_data_quality_status", "missing_player_form_fields_count",
     "missing_player_form_fields", "network_calls_enabled", "prediction_logic_enabled",
@@ -104,7 +105,8 @@ class PlayerImpactRollingFormInputRunner:
         if len(selected) > 1:
             return self._blocked(PLAYER_IMPACT_ROLLING_FORM_INPUT_BLOCKED_AMBIGUOUS_MATCH, candidates=len(selected))
         row = selected.iloc[[0]].copy()
-        if any(_blank(row.iloc[0].get(c, "")) for c in REQUIRED_COLUMNS):
+        hard_required = [c for c in REQUIRED_COLUMNS if c not in MANUAL_OVERLAY_SOFT_REQUIRED_COLUMNS]
+        if any(_blank(row.iloc[0].get(c, "")) for c in hard_required):
             return self._blocked(PLAYER_IMPACT_ROLLING_FORM_INPUT_BLOCKED_EMPTY_REQUIRED_VALUES, candidates=1)
         missing_fields = [c for c in PLAYER_FORM_COLUMNS if _blank(row.iloc[0].get(c, ""))]
         row["player_form_data_quality_status"] = "PLAYER_FORM_PREVIEW_READY" if not missing_fields else "PLAYER_FORM_PREVIEW_READY_WITH_MISSING_OPTIONAL_FIELDS"

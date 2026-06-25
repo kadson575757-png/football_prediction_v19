@@ -29,6 +29,7 @@ AVAILABILITY_COLUMNS = [
     "away_suspended_players", "home_doubtful_players", "away_doubtful_players",
     "home_key_absence_count", "away_key_absence_count",
 ]
+MANUAL_OVERLAY_SOFT_REQUIRED_COLUMNS = ["understat_provider_match_id", "fbref_provider_match_id"]
 OUTPUT_COLUMNS = REQUIRED_COLUMNS + AVAILABILITY_COLUMNS + [
     "availability_data_quality_status", "missing_availability_fields_count",
     "missing_availability_fields", "network_calls_enabled", "prediction_logic_enabled",
@@ -100,7 +101,8 @@ class LineupsAvailabilityInputRunner:
         if len(selected) > 1:
             return self._blocked(LINEUPS_AVAILABILITY_INPUT_BLOCKED_AMBIGUOUS_MATCH, candidates=len(selected))
         row = selected.iloc[[0]].copy()
-        if any(_blank(row.iloc[0].get(c, "")) for c in REQUIRED_COLUMNS):
+        hard_required = [c for c in REQUIRED_COLUMNS if c not in MANUAL_OVERLAY_SOFT_REQUIRED_COLUMNS]
+        if any(_blank(row.iloc[0].get(c, "")) for c in hard_required):
             return self._blocked(LINEUPS_AVAILABILITY_INPUT_BLOCKED_EMPTY_REQUIRED_VALUES, candidates=1)
         missing_fields = [c for c in AVAILABILITY_COLUMNS if _blank(row.iloc[0].get(c, ""))]
         row["availability_data_quality_status"] = "AVAILABILITY_PREVIEW_READY" if not missing_fields else "AVAILABILITY_PREVIEW_READY_WITH_MISSING_OPTIONAL_FIELDS"

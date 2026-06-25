@@ -28,9 +28,13 @@ class RealMatchAnalysisRunnerResult:
     real_match_input_pack_status: str
     real_match_intake_validation_status: str
     manual_evidence_overlay_status: str
+    odds_market_movement_input_status: str
     market_movement_diagnostic_status: str
+    lineups_availability_input_status: str
     availability_diagnostic_status: str
+    player_impact_rolling_form_input_status: str
     player_form_diagnostic_status: str
+    tactical_set_piece_fatigue_input_status: str
     tactical_matchup_diagnostic_status: str
     v19_diagnostic_synthesis_status: str
     v19_diagnostic_gate_matrix_status: str
@@ -42,6 +46,9 @@ class RealMatchAnalysisRunnerResult:
     sheets_written: int
     exported_files_count: int
     workbook_file_exists: bool
+    home_team: str
+    away_team: str
+    match_date: str
     artifact_index_path: str
     manifest_path: str
     summary_path: str
@@ -81,9 +88,13 @@ class RealMatchAnalysisRunner:
             str(pack.get("real_match_input_pack_status", "")),
             str(pack.get("real_match_intake_validation_status", "")),
             str(pack.get("manual_evidence_overlay_status", "")),
+            str(pack.get("odds_market_movement_input_status", "")),
             str(pack.get("market_movement_diagnostic_status", "")),
+            str(pack.get("lineups_availability_input_status", "")),
             str(pack.get("availability_diagnostic_status", "")),
+            str(pack.get("player_impact_rolling_form_input_status", "")),
             str(pack.get("player_form_diagnostic_status", "")),
+            str(pack.get("tactical_set_piece_fatigue_input_status", "")),
             str(pack.get("tactical_matchup_diagnostic_status", "")),
             "V19_DIAGNOSTIC_SYNTHESIS_PREVIEW_READY",
             "V19_DIAGNOSTIC_GATE_MATRIX_PREVIEW_READY",
@@ -95,6 +106,9 @@ class RealMatchAnalysisRunner:
             int(pack.get("sheets_written", 0) or 0),
             int(pack.get("exported_files_count", 0) or 0),
             (self.base / "outputs" / "analysis_preview" / "match_analysis_excel_export" / "match_analysis_preview_workbook.xlsx").exists(),
+            str(pack.get("home_team", "")),
+            str(pack.get("away_team", "")),
+            str(pack.get("match_date", "")),
             str(artifact_index.resolve()),
             str(manifest.resolve()),
             str(summary.resolve()),
@@ -115,7 +129,7 @@ class RealMatchAnalysisRunner:
 
     def _blocked(self, status: str, pack: dict[str, object] | None = None) -> RealMatchAnalysisRunnerResult:
         pack = pack or {}
-        return RealMatchAnalysisRunnerResult(status, str(pack.get("real_match_input_pack_status", "")), str(pack.get("real_match_intake_validation_status", "")), str(pack.get("manual_evidence_overlay_status", "")), str(pack.get("market_movement_diagnostic_status", "")), str(pack.get("availability_diagnostic_status", "")), str(pack.get("player_form_diagnostic_status", "")), str(pack.get("tactical_matchup_diagnostic_status", "")), "", "", str(pack.get("human_24_block_report_status", "")), str(pack.get("export_bundle_status", "")), str(pack.get("excel_export_status", "")), 0, 0, 0, 0, False, "", "", "", status, False, False, False, False, False)
+        return RealMatchAnalysisRunnerResult(status, str(pack.get("real_match_input_pack_status", "")), str(pack.get("real_match_intake_validation_status", "")), str(pack.get("manual_evidence_overlay_status", "")), str(pack.get("odds_market_movement_input_status", "")), str(pack.get("market_movement_diagnostic_status", "")), str(pack.get("lineups_availability_input_status", "")), str(pack.get("availability_diagnostic_status", "")), str(pack.get("player_impact_rolling_form_input_status", "")), str(pack.get("player_form_diagnostic_status", "")), str(pack.get("tactical_set_piece_fatigue_input_status", "")), str(pack.get("tactical_matchup_diagnostic_status", "")), "", "", str(pack.get("human_24_block_report_status", "")), str(pack.get("export_bundle_status", "")), str(pack.get("excel_export_status", "")), 0, 0, 0, 0, False, str(pack.get("home_team", "")), str(pack.get("away_team", "")), str(pack.get("match_date", "")), "", "", "", status, False, False, False, False, False)
 
 
 def _safe_output(output_dir: str | Path, base: Path) -> Path:

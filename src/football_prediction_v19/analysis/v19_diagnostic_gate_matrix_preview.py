@@ -49,7 +49,7 @@ MANIFEST_COLUMNS = [
 ]
 REQUIRED_COLUMNS = [
     "analysis_input_id", "match_date", "competition", "season", "home_team",
-    "away_team", "understat_provider_match_id", "fbref_provider_match_id",
+    "away_team",
 ]
 PROTECTED = ["data/processed", "trusted_xg_sources/accepted", "trusted_xg_sources/raw", "manual_xg_manifest"]
 GATE_DEFINITIONS = [
@@ -130,7 +130,7 @@ class V19DiagnosticGateMatrixRunner:
         if out is None or any(_unsafe(p) for p in [self.config.v19_diagnostic_synthesis_path, self.config.context_human_input_path] if p):
             return self._blocked(V19_DIAGNOSTIC_GATE_MATRIX_BLOCKED_UNSAFE_PATH), pd.DataFrame(columns=GATE_MATRIX_COLUMNS)
         source = _resolve(self.config.v19_diagnostic_synthesis_path, self.base) or self.base / "outputs" / "analysis_preview" / "v19_diagnostic_synthesis" / "v19_diagnostic_synthesis.csv"
-        if not source.exists():
+        if source is None or not source.exists() or source.is_dir():
             return self._blocked(V19_DIAGNOSTIC_GATE_MATRIX_BLOCKED_MISSING_INPUT, source=source), pd.DataFrame(columns=GATE_MATRIX_COLUMNS)
         frame = pd.read_csv(source, low_memory=False)
         missing_columns = [c for c in REQUIRED_COLUMNS if c not in frame.columns]
@@ -251,6 +251,8 @@ def _safe_output(output_dir: str | Path, base: Path) -> Path | None:
 
 def _resolve(path: str | Path | None, base: Path) -> Path | None:
     if path is None:
+        return None
+    if str(path).strip() == "":
         return None
     p = Path(path)
     return (base / p).resolve() if not p.is_absolute() else p.resolve()

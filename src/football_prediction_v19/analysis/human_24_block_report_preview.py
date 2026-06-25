@@ -46,7 +46,7 @@ MANIFEST_COLUMNS = [
     "human_24_block_report_status", "recommendation", "notes", "network_calls_enabled",
     "prediction_logic_enabled", "betting_logic_enabled", "staking_logic_enabled", "roi_logic_enabled",
 ]
-REQUIRED_COLUMNS = ["analysis_input_id", "match_date", "competition", "season", "home_team", "away_team", "understat_provider_match_id", "fbref_provider_match_id"]
+REQUIRED_COLUMNS = ["analysis_input_id", "match_date", "competition", "season", "home_team", "away_team"]
 PROTECTED = ["data/processed", "trusted_xg_sources/accepted", "trusted_xg_sources/raw", "manual_xg_manifest"]
 
 
@@ -293,12 +293,23 @@ def _safe_output(output_dir: str | Path, base: Path) -> Path | None:
 def _resolve(path: str | Path | None, base: Path) -> Path | None:
     if path is None:
         return None
+    if str(path).strip() == "":
+        return None
     p = Path(path)
     return (base / p).resolve() if not p.is_absolute() else p.resolve()
 
 
+def _valid_csv_file(path: Path | None) -> bool:
+    if path is None:
+        return False
+    try:
+        return path.exists() and path.is_file() and path.suffix.lower() == ".csv"
+    except OSError:
+        return False
+
+
 def _load_diagnostic(path: Path | None, row: pd.Series) -> dict[str, object]:
-    if path is None or not path.exists():
+    if not _valid_csv_file(path):
         return {}
     try:
         frame = pd.read_csv(path, low_memory=False)
@@ -319,7 +330,7 @@ def _load_diagnostic(path: Path | None, row: pd.Series) -> dict[str, object]:
 
 
 def _load_gate_matrix(path: Path | None, row: pd.Series) -> dict[str, object]:
-    if path is None or not path.exists():
+    if not _valid_csv_file(path):
         return {}
     try:
         frame = pd.read_csv(path, low_memory=False)
@@ -360,7 +371,7 @@ def _load_gate_matrix(path: Path | None, row: pd.Series) -> dict[str, object]:
 
 
 def _load_market_movement(path: Path | None, row: pd.Series) -> dict[str, object]:
-    if path is None or not path.exists():
+    if not _valid_csv_file(path):
         return {}
     try:
         frame = pd.read_csv(path, low_memory=False)
@@ -384,7 +395,7 @@ def _load_market_movement(path: Path | None, row: pd.Series) -> dict[str, object
 
 
 def _load_availability(path: Path | None, row: pd.Series) -> dict[str, object]:
-    if path is None or not path.exists():
+    if not _valid_csv_file(path):
         return {}
     try:
         frame = pd.read_csv(path, low_memory=False)
@@ -406,7 +417,7 @@ def _load_availability(path: Path | None, row: pd.Series) -> dict[str, object]:
 
 
 def _load_player_form(path: Path | None, row: pd.Series) -> dict[str, object]:
-    if path is None or not path.exists():
+    if not _valid_csv_file(path):
         return {}
     try:
         frame = pd.read_csv(path, low_memory=False)
@@ -428,7 +439,7 @@ def _load_player_form(path: Path | None, row: pd.Series) -> dict[str, object]:
 
 
 def _load_tactical(path: Path | None, row: pd.Series) -> dict[str, object]:
-    if path is None or not path.exists():
+    if not _valid_csv_file(path):
         return {}
     try:
         frame = pd.read_csv(path, low_memory=False)

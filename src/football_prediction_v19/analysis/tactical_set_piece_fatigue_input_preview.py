@@ -31,6 +31,7 @@ TACTICAL_COLUMNS = [
     "home_travel_fatigue_note", "away_travel_fatigue_note",
     "do_so_fatigue_modifier", "xg_zone_correction_flag", "xg_zone_correction_note",
 ]
+MANUAL_OVERLAY_SOFT_REQUIRED_COLUMNS = ["understat_provider_match_id", "fbref_provider_match_id"]
 OUTPUT_COLUMNS = REQUIRED_COLUMNS + TACTICAL_COLUMNS + [
     "tactical_data_quality_status", "missing_tactical_fields_count",
     "missing_tactical_fields", "network_calls_enabled", "prediction_logic_enabled",
@@ -102,7 +103,8 @@ class TacticalSetPieceFatigueInputRunner:
         if len(selected) > 1:
             return self._blocked(TACTICAL_SET_PIECE_FATIGUE_INPUT_BLOCKED_AMBIGUOUS_MATCH, candidates=len(selected))
         row = selected.iloc[[0]].copy()
-        if any(_blank(row.iloc[0].get(c, "")) for c in REQUIRED_COLUMNS):
+        hard_required = [c for c in REQUIRED_COLUMNS if c not in MANUAL_OVERLAY_SOFT_REQUIRED_COLUMNS]
+        if any(_blank(row.iloc[0].get(c, "")) for c in hard_required):
             return self._blocked(TACTICAL_SET_PIECE_FATIGUE_INPUT_BLOCKED_EMPTY_REQUIRED_VALUES, candidates=1)
         missing_fields = [c for c in TACTICAL_COLUMNS if _blank(row.iloc[0].get(c, ""))]
         row["tactical_data_quality_status"] = "TACTICAL_PREVIEW_READY" if not missing_fields else "TACTICAL_PREVIEW_READY_WITH_MISSING_OPTIONAL_FIELDS"
