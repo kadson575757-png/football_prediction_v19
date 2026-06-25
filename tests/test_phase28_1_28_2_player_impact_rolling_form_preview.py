@@ -64,6 +64,7 @@ def test_player_form_diagnostic_sets_gate_statuses_and_leaves_missing_values_mis
     assert row["main_scorer_availability_gate_status"] == "DIAGNOSTIC_READY"
     assert row["no_bet_player_form_safety_status"] == "BETTING_OUTPUT_DISABLED_BY_DESIGN"
     frame = pd.read_csv(input_result.output_path)
+    frame["home_recent_xg_for"] = frame["home_recent_xg_for"].astype(object)
     frame.loc[0, "home_recent_xg_for"] = ""
     missing_path = tmp_path / "missing_rolling.csv"
     frame.to_csv(missing_path, index=False)

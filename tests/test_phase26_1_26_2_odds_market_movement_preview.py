@@ -42,6 +42,8 @@ def test_odds_input_blocks_unsafe_and_surfaces_missing_optional(tmp_path: Path) 
     unsafe = OddsMarketMovementInputRunner(OddsMarketMovementInputConfig(odds_input_path="https://example.test/odds.csv")).run()
     assert unsafe.odds_market_movement_input_status == "ODDS_MARKET_MOVEMENT_INPUT_BLOCKED_UNSAFE_PATH"
     frame = pd.read_csv(OddsMarketMovementInputRunner(OddsMarketMovementInputConfig()).run().output_path)
+    for column in ["dnb_home_odds", "dnb_away_odds"]:
+        frame[column] = frame[column].astype(object)
     frame.loc[0, "dnb_home_odds"] = ""
     frame.loc[0, "dnb_away_odds"] = ""
     path = tmp_path / "missing_optional.csv"
@@ -66,6 +68,7 @@ def test_market_movement_diagnostic_computes_explicit_movements_only() -> None:
 def test_market_movement_diagnostic_leaves_missing_values_missing(tmp_path: Path) -> None:
     odds = OddsMarketMovementInputRunner(OddsMarketMovementInputConfig()).run()
     frame = pd.read_csv(odds.output_path)
+    frame["away_current_odds"] = frame["away_current_odds"].astype(object)
     frame.loc[0, "away_current_odds"] = ""
     path = tmp_path / "missing_current.csv"
     frame.to_csv(path, index=False)

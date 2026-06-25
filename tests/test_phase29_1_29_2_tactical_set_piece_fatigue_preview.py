@@ -65,6 +65,7 @@ def test_tactical_diagnostic_sets_gate_statuses_and_leaves_missing_values_missin
     assert row["transition_matchup_gate_status"] == "DIAGNOSTIC_READY"
     assert row["no_bet_tactical_safety_status"] == "BETTING_OUTPUT_DISABLED_BY_DESIGN"
     frame = pd.read_csv(input_result.output_path)
+    frame["home_set_piece_xg_ratio"] = frame["home_set_piece_xg_ratio"].astype(object)
     frame.loc[0, "home_set_piece_xg_ratio"] = ""
     missing_path = tmp_path / "missing_set_piece.csv"
     frame.to_csv(missing_path, index=False)

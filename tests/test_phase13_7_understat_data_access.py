@@ -293,12 +293,14 @@ def test_local_mode_blocks_output_exists_without_overwrite(tmp_path):
 
 def test_xg_validation_rejects_missing_xg():
     df = _normalized()
+    df["home_xg"] = df["home_xg"].astype(object)
     df.loc[0, "home_xg"] = ""
     assert "MISSING_XG_VALUES" in validate_understat_normalized_xg(df)
 
 
 def test_xg_validation_rejects_non_numeric_xg():
     df = _normalized()
+    df["home_xg"] = df["home_xg"].astype(object)
     df.loc[0, "home_xg"] = "bad"
     assert "NON_NUMERIC_XG_VALUES" in validate_understat_normalized_xg(df)
 
