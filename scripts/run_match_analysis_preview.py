@@ -24,6 +24,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--emit-v19-final-analysis-report", action="store_true", default=False)
     parser.add_argument("--emit-v19-decision-report", action="store_true", default=False)
     parser.add_argument("--emit-v19-recommendation-preview", action="store_true", default=False)
+    parser.add_argument("--emit-v19-analysis-suite", action="store_true", default=False)
     parser.add_argument("--output-dir", default=str(ROOT / "outputs" / "analysis_preview" / "real_match_analysis_command"))
     parser.add_argument("--workbook-filename", default="match_analysis_preview_workbook.xlsx")
     parser.add_argument("--base-dir", default=str(ROOT))
@@ -36,31 +37,43 @@ def run_match_analysis_preview(**kwargs: object) -> dict[str, object]:
     emit_v19_final_analysis_report = bool(kwargs.pop("emit_v19_final_analysis_report", False))
     emit_v19_decision_report = bool(kwargs.pop("emit_v19_decision_report", False))
     emit_v19_recommendation_preview = bool(kwargs.pop("emit_v19_recommendation_preview", False))
+    emit_v19_analysis_suite = bool(kwargs.pop("emit_v19_analysis_suite", False))
+    base_dir = kwargs.get("base_dir", ROOT)
+    if emit_v19_analysis_suite:
+        from scripts.run_v19_analysis_suite_preview import run_v19_analysis_suite_preview
+
+        suite = run_v19_analysis_suite_preview(
+            real_match_intake_path=real_match_intake,
+            manual_evidence_completion_path=manual_evidence_completion,
+            emit_all=True,
+            base_dir=base_dir,
+        )
+        return suite
     if real_match_intake:
         from scripts.build_real_match_analysis_runner_preview import build_real_match_analysis_runner_preview
 
         summary = build_real_match_analysis_runner_preview(
             real_match_intake_path=real_match_intake,
             manual_evidence_completion_path=manual_evidence_completion,
-            base_dir=kwargs.get("base_dir", ROOT),
+            base_dir=base_dir,
         )
         if emit_v19_final_analysis_report and summary.get("real_match_analysis_runner_status") == "REAL_MATCH_ANALYSIS_RUNNER_PREVIEW_READY":
             from scripts.build_v19_final_analysis_report_preview import build_v19_final_analysis_report_preview
 
-            final_report = build_v19_final_analysis_report_preview(base_dir=kwargs.get("base_dir", ROOT))
+            final_report = build_v19_final_analysis_report_preview(base_dir=base_dir)
             summary.update(final_report)
         if (emit_v19_decision_report or emit_v19_recommendation_preview) and summary.get("real_match_analysis_runner_status") == "REAL_MATCH_ANALYSIS_RUNNER_PREVIEW_READY":
-            _append_decision_preview(summary, kwargs.get("base_dir", ROOT), emit_v19_decision_report)
+            _append_decision_preview(summary, base_dir, emit_v19_decision_report)
         return summary
     result = RealMatchAnalysisCommandRunner(RealMatchAnalysisCommandConfig(**kwargs)).run()
     summary = result.__dict__
     if emit_v19_final_analysis_report and summary.get("command_status") == "REAL_MATCH_ANALYSIS_COMMAND_PREVIEW_READY":
         from scripts.build_v19_final_analysis_report_preview import build_v19_final_analysis_report_preview
 
-        final_report = build_v19_final_analysis_report_preview(base_dir=kwargs.get("base_dir", ROOT))
+        final_report = build_v19_final_analysis_report_preview(base_dir=base_dir)
         summary.update(final_report)
     if (emit_v19_decision_report or emit_v19_recommendation_preview) and summary.get("command_status") == "REAL_MATCH_ANALYSIS_COMMAND_PREVIEW_READY":
-        _append_decision_preview(summary, kwargs.get("base_dir", ROOT), emit_v19_decision_report)
+        _append_decision_preview(summary, base_dir, emit_v19_decision_report)
     return summary
 
 
@@ -92,6 +105,7 @@ def main(argv: list[str] | None = None) -> int:
         emit_v19_final_analysis_report=args.emit_v19_final_analysis_report,
         emit_v19_decision_report=args.emit_v19_decision_report,
         emit_v19_recommendation_preview=args.emit_v19_recommendation_preview,
+        emit_v19_analysis_suite=args.emit_v19_analysis_suite,
         output_dir=args.output_dir,
         workbook_filename=args.workbook_filename,
         base_dir=args.base_dir,
@@ -113,6 +127,13 @@ def main(argv: list[str] | None = None) -> int:
         "v19_decision_engine_preview_status", "v19_decision_report_status",
         "v19_decision_report_path", "recommendation_preview_enabled",
         "final_decision_preview", "evidence_readiness_score", "strongest_analyst_lean",
+        "v19_analysis_suite_status", "analysis_suite_preview_enabled",
+        "analysis_suite_output_dir", "analysis_suite_summary_path",
+        "final_decision_card_path", "full_match_analysis_path", "decision_report_path",
+        "score_tree_detail_path", "market_family_matrix_path", "no_bet_matrix_path",
+        "evidence_audit_path", "missing_data_action_plan_path",
+        "machine_readable_decision_path", "analysis_suite_bundle_index_path",
+        "suite_artifacts_count",
         "home_team", "away_team", "match_date", "gates_evaluated", "gates_blocked",
         "gates_disabled", "sections_rendered", "required_sections_rendered",
         "exported_files_count", "sheets_written", "workbook_file_exists",
