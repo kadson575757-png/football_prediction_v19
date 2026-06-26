@@ -1,0 +1,2 @@
+match_id,input_dir,home_team,away_team,competition,season,match_date,manual_evidence_completion,run_transition_lab,notes
+lazio_atalanta_2026_02_14,tests/fixtures/excel_evidence/lazio_atalanta_2026_02_14,Lazio,Atalanta,Serie A,2025/26,2026-02-14,tests/fixtures/manual_evidence_completion/lazio_atalanta_completion.csv,false,single fixture batch preview
