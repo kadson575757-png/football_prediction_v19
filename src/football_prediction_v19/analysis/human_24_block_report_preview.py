@@ -320,9 +320,37 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
         home_edge = home > away if higher_is_better else home < away
         return str(row.get("home_team", "")) if home_edge else str(row.get("away_team", ""))
 
+    def ready(value: object) -> bool:
+        return str(value).strip().upper() == "DIAGNOSTIC_READY"
+
+    def any_present(columns: list[str]) -> bool:
+        return any(str(row.get(column, "")).strip() for column in columns)
+
     evidence_note = ev("evidence_quality_note")
     identity_review = "Team identity was inferred from export order." if "team_identity_inferred_from_export_order" in evidence_note else "Team identity is directly tagged or not flagged by current evidence."
     manual_review = str(row.get("manual_review_required", "")).lower() in {"true", "1", "yes"}
+    completion_groups = str(row.get("completed_evidence_groups", ""))
+    completion_applied = str(row.get("manual_evidence_completion_status", "")).strip() == "MANUAL_EVIDENCE_COMPLETION_APPLIED"
+    match_stats_completed = completion_applied and "Match Stats/Control" in completion_groups
+    market_completed = completion_applied and "Market/Odds" in completion_groups
+    lineups_completed = completion_applied and "Lineups/Availability" in completion_groups
+    h2h_completed = completion_applied and "H2H/Manual Notes" in completion_groups
+    market_fields_present = any_present([
+        "home_open_odds", "draw_open_odds", "away_open_odds", "home_current_odds",
+        "draw_current_odds", "away_current_odds", "home_closing_odds", "draw_closing_odds",
+        "away_closing_odds", "dnb_home_odds", "dnb_away_odds", "over_current_odds",
+        "under_current_odds",
+    ])
+    lineup_gate_ready = ready(a("lineup_confirmation_gate_status"))
+    score_family_ready = ready(d("score_family_status"))
+    readable_model_gates = [
+        label for label, status in [
+            ("v1.9 model", d("v19_model_synthesis_status")),
+            ("control", d("control_model_status")),
+            ("underdog", d("underdog_win_score_status")),
+        ]
+        if ready(status)
+    ]
     xg_home_diff = diff("home_xg", "home_xga")
     xg_away_diff = diff("away_xg", "away_xga")
     xg_table = "\n".join([
@@ -354,11 +382,21 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
     player_edge_team = edge_for_pair("home_player_xg_total", "away_player_xg_total")
     player_xa_edge_team = edge_for_pair("home_player_xa_total", "away_player_xa_total")
     set_piece_edge_team = edge_for_pair("home_set_piece_xg_ratio", "away_set_piece_xg_ratio")
+    if match_stats_completed:
+        evidence_gap_sentence = (
+            "Manual completion adds possession, shot volume and shots-on-target context; remaining gaps still include "
+            "recent form, availability detail, defensive actions and tactical notes where those fields are incomplete. "
+            "Production prediction, betting and recommendation layers remain disabled by design."
+        )
+    else:
+        evidence_gap_sentence = (
+            "Missing market odds, lineup/availability confirmation, shot/possession detail, recent-form context and H2H inputs "
+            "prevent a controlled v1.9 1X2, DNB or score-family decision."
+        )
     evidence_read = (
         f"Evidence-Based Match Read: {xg_edge_team} attacking production edge is visible in team xG and is reinforced by "
         f"{player_edge_team} player xG / {player_xa_edge_team} player xA production. {xga_edge_team} has the cleaner xGA profile, "
-        f"while {set_piece_edge_team} set-piece edge keeps the matchup from becoming one-dimensional. Missing market odds, "
-        "lineup/availability confirmation, shot/possession detail, recent-form context and H2H inputs prevent a controlled v1.9 1X2, DNB or score-family decision."
+        f"while {set_piece_edge_team} set-piece edge keeps the matchup from becoming one-dimensional. {evidence_gap_sentence}"
     )
     completion_summary = (
         f"Manual evidence completion status: {v('manual_evidence_completion_status')}; "
@@ -379,20 +417,51 @@ def _render(row: pd.Series, diagnostic: dict[str, object] | None = None, gate_su
         f"| Recent Form | incomplete | n/a | rolling form cannot be trusted as final model input | no controlled v1.9 decision |",
         f"| H2H | incomplete | n/a | no matchup history layer available | informational gap only |",
     ])
-    model_blocked_summary = (
-        "Model-Blocked But Analyst-Readable Summary: the available evidence leans toward Atalanta's attacking production, "
-        "with Lazio retaining defensive/xGA and set-piece counterweights. This is an analyst-readable diagnostic read only; "
-        "a real v1.9 decision still needs market odds, confirmed lineups/availability, shot and possession profile, recent form and H2H context."
-    )
+    if readable_model_gates:
+        model_blocked_summary = (
+            "Model-Blocked But Analyst-Readable Summary: several diagnostic gates are now readable after manual completion "
+            f"({', '.join(readable_model_gates)}). The available evidence leans toward Atalanta's attacking production, "
+            "with Lazio retaining defensive/xGA and set-piece counterweights. Production prediction remains disabled by design; "
+            "a final recommendation is still not produced because betting/recommendation layers are disabled and remaining evidence gaps require review."
+        )
+    else:
+        model_blocked_summary = (
+            "Model-Blocked But Analyst-Readable Summary: the available evidence leans toward Atalanta's attacking production, "
+            "with Lazio retaining defensive/xGA and set-piece counterweights. This is an analyst-readable diagnostic read only; "
+            "a real v1.9 decision still needs market odds, confirmed lineups/availability, shot and possession profile, recent form and H2H context."
+        )
+    if market_completed or market_fields_present:
+        market_gap_text = "some market fields are present, but closing/opening/DNB/OU fields remain incomplete"
+    else:
+        market_gap_text = "market odds are missing"
+    availability_gap_text = "lineup gate is readable" if (lineups_completed or lineup_gate_ready) else "lineup/availability inputs are incomplete"
     no_bet_explanation = (
-        "No-Bet Explanation: No production recommendation is made because market odds are missing, lineup/availability inputs are incomplete, "
-        "shot/possession and recent-form layers are incomplete, model gates remain blocked or diagnostic, and betting output is intentionally disabled. "
+        f"No-Bet Explanation: No production recommendation is made because {market_gap_text}, {availability_gap_text}, "
+        "recent-form and remaining detail layers are incomplete, model gates remain diagnostic, and betting output is intentionally disabled. "
         "This is not betting advice and not a recommendation."
     )
-    score_family_read = (
-        "Score Family Preview Read: Atalanta attacking production supports away scoring potential, while Lazio set-piece edge supports a plausible home goal route. "
-        "However, missing shots on target, odds, recent form and lineups block score-family generation. No exact score prediction is produced."
-    )
+    if score_family_ready:
+        score_family_read = (
+            "Score Family Preview Read: score-family diagnostics are readable, with Atalanta attacking production supporting away scoring potential "
+            "and Lazio set-piece edge supporting a plausible home goal route. Recent form, big chances, defensive actions and tactical notes remain incomplete. "
+            "No production score prediction is produced because prediction and betting output are disabled."
+        )
+    else:
+        missing_score_groups = []
+        if not any_present(["home_shots_on_target", "away_shots_on_target"]):
+            missing_score_groups.append("shots on target")
+        if not market_fields_present:
+            missing_score_groups.append("odds")
+        if not any_present(["home_recent_matches", "away_recent_matches", "home_recent_xg_for", "away_recent_xg_for"]):
+            missing_score_groups.append("recent form")
+        if not lineup_gate_ready and not lineups_completed:
+            missing_score_groups.append("lineups")
+        if not missing_score_groups:
+            missing_score_groups.append("remaining required diagnostic inputs")
+        score_family_read = (
+            "Score Family Preview Read: Atalanta attacking production supports away scoring potential, while Lazio set-piece edge supports a plausible home goal route. "
+            f"However, missing {', '.join(missing_score_groups)} block score-family generation. No exact score prediction is produced."
+        )
     disabled_text = "Betting output is disabled in this diagnostic preview layer. Position sizing and financial return tracking are disabled."
     gate_disabled_text = "Betting output is disabled in this diagnostic gate preview layer. Position sizing and financial return tracking are disabled."
     bodies = {

@@ -105,4 +105,7 @@ def test_runner_accepts_completion_and_report_surfaces_counts(tmp_path: Path) ->
     assert "Manual evidence completion status: MANUAL_EVIDENCE_COMPLETION_APPLIED" in report
     assert "fields_completed_count:" in report
     assert "Market/Odds" in report
+    assert "missing shots on target, odds, recent form and lineups block score-family generation" not in report
+    assert "Manual completion adds possession, shot volume and shots-on-target context" in report
+    assert "score-family diagnostics are readable" in report
     assert "No production recommendation" in report
