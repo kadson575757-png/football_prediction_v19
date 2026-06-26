@@ -22,6 +22,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--real-match-intake", default=None)
     parser.add_argument("--manual-evidence-completion", default=None)
     parser.add_argument("--emit-v19-final-analysis-report", action="store_true", default=False)
+    parser.add_argument("--emit-v19-decision-report", action="store_true", default=False)
+    parser.add_argument("--emit-v19-recommendation-preview", action="store_true", default=False)
     parser.add_argument("--output-dir", default=str(ROOT / "outputs" / "analysis_preview" / "real_match_analysis_command"))
     parser.add_argument("--workbook-filename", default="match_analysis_preview_workbook.xlsx")
     parser.add_argument("--base-dir", default=str(ROOT))
@@ -32,6 +34,8 @@ def run_match_analysis_preview(**kwargs: object) -> dict[str, object]:
     real_match_intake = kwargs.pop("real_match_intake", None)
     manual_evidence_completion = kwargs.pop("manual_evidence_completion", None)
     emit_v19_final_analysis_report = bool(kwargs.pop("emit_v19_final_analysis_report", False))
+    emit_v19_decision_report = bool(kwargs.pop("emit_v19_decision_report", False))
+    emit_v19_recommendation_preview = bool(kwargs.pop("emit_v19_recommendation_preview", False))
     if real_match_intake:
         from scripts.build_real_match_analysis_runner_preview import build_real_match_analysis_runner_preview
 
@@ -45,6 +49,8 @@ def run_match_analysis_preview(**kwargs: object) -> dict[str, object]:
 
             final_report = build_v19_final_analysis_report_preview(base_dir=kwargs.get("base_dir", ROOT))
             summary.update(final_report)
+        if (emit_v19_decision_report or emit_v19_recommendation_preview) and summary.get("real_match_analysis_runner_status") == "REAL_MATCH_ANALYSIS_RUNNER_PREVIEW_READY":
+            _append_decision_preview(summary, kwargs.get("base_dir", ROOT), emit_v19_decision_report)
         return summary
     result = RealMatchAnalysisCommandRunner(RealMatchAnalysisCommandConfig(**kwargs)).run()
     summary = result.__dict__
@@ -53,7 +59,21 @@ def run_match_analysis_preview(**kwargs: object) -> dict[str, object]:
 
         final_report = build_v19_final_analysis_report_preview(base_dir=kwargs.get("base_dir", ROOT))
         summary.update(final_report)
+    if (emit_v19_decision_report or emit_v19_recommendation_preview) and summary.get("command_status") == "REAL_MATCH_ANALYSIS_COMMAND_PREVIEW_READY":
+        _append_decision_preview(summary, kwargs.get("base_dir", ROOT), emit_v19_decision_report)
     return summary
+
+
+def _append_decision_preview(summary: dict[str, object], base_dir: object, emit_report: bool) -> None:
+    from scripts.build_v19_decision_engine_preview import build_v19_decision_engine_preview
+
+    engine = build_v19_decision_engine_preview(base_dir=base_dir)
+    summary.update(engine)
+    if emit_report:
+        from scripts.build_v19_decision_report_preview import build_v19_decision_report_preview
+
+        report = build_v19_decision_report_preview(base_dir=base_dir)
+        summary.update(report)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -70,6 +90,8 @@ def main(argv: list[str] | None = None) -> int:
         real_match_intake=args.real_match_intake,
         manual_evidence_completion=args.manual_evidence_completion,
         emit_v19_final_analysis_report=args.emit_v19_final_analysis_report,
+        emit_v19_decision_report=args.emit_v19_decision_report,
+        emit_v19_recommendation_preview=args.emit_v19_recommendation_preview,
         output_dir=args.output_dir,
         workbook_filename=args.workbook_filename,
         base_dir=args.base_dir,
@@ -88,6 +110,9 @@ def main(argv: list[str] | None = None) -> int:
         "tactical_set_piece_fatigue_input_status", "tactical_matchup_diagnostic_status",
         "human_24_block_report_status", "export_bundle_status", "excel_export_status",
         "v19_final_analysis_report_status", "report_output_path",
+        "v19_decision_engine_preview_status", "v19_decision_report_status",
+        "v19_decision_report_path", "recommendation_preview_enabled",
+        "final_decision_preview", "evidence_readiness_score", "strongest_analyst_lean",
         "home_team", "away_team", "match_date", "gates_evaluated", "gates_blocked",
         "gates_disabled", "sections_rendered", "required_sections_rendered",
         "exported_files_count", "sheets_written", "workbook_file_exists",
