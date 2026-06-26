@@ -5,3 +5,7 @@ Synthetic fixtures are not real match data. Demo packs are marked with `syntheti
 Exact score remains blocked unless sufficient evidence exists.
 
 Production betting remains disabled. Staking and ROI logic remain disabled. Automatic betting remains disabled.
+
+Safety phrases for release checks:
+- no automatic betting
+- no external network calls

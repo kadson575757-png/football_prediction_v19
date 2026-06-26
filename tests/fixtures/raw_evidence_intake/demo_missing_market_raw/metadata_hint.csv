@@ -1,0 +1,2 @@
+raw_group_id,match_id_hint,home_team_hint,away_team_hint,competition_hint,season_hint,match_date_hint,notes,synthetic_demo_pack,not_real_match_data,not_for_prediction
+demo_missing_market_raw,demo_match_pack_missing_market_01,Missing Market Home,Missing Market Away,Demo League,2025/26,2026-02-16,synthetic incomplete raw pack,true,true,true
