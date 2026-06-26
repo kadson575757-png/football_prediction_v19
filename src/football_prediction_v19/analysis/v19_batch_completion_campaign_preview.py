@@ -61,7 +61,8 @@ class V19BatchCompletionCampaignBuilder:
         out = _resolve(self.config.output_dir, self.base)
         out.mkdir(parents=True, exist_ok=True)
         rows = _master_rows(batch)
-        frame = pd.DataFrame(rows)
+        columns = ["match_id", "home_team", "away_team", "competition", "match_date", "field_group", "field_name", "current_status", "priority", "required_for", "affected_market_families", "current_value", "user_value", "example_format", "notes"]
+        frame = pd.DataFrame(rows, columns=columns)
         paths = {
             "campaign_dashboard": out / "campaign_dashboard.md",
             "master_completion_template": out / "master_completion_template.csv",

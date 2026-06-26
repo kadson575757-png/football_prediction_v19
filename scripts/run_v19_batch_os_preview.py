@@ -22,6 +22,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--batch-config", required=True)
     parser.add_argument("--output-dir", default=str(ROOT / "outputs" / "analysis_preview" / "v19_batch_os"))
+    parser.add_argument("--preflight-validation-json")
     parser.add_argument("--emit-all", action="store_true", default=False)
     parser.add_argument("--skip-scenario-batch-lab", action="store_true", default=False)
     parser.add_argument("--skip-empty-rerun", action="store_true", default=False)
@@ -31,6 +32,7 @@ def main(argv: list[str] | None = None) -> int:
     result = run_v19_batch_os_preview(
         batch_config=args.batch_config,
         output_dir=args.output_dir,
+        preflight_validation_json=args.preflight_validation_json,
         emit_all=args.emit_all,
         skip_scenario_batch_lab=args.skip_scenario_batch_lab,
         skip_empty_rerun=args.skip_empty_rerun,

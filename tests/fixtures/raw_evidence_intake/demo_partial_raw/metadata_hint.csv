@@ -1,0 +1,2 @@
+raw_group_id,match_id_hint,home_team_hint,away_team_hint,competition_hint,season_hint,match_date_hint,notes,synthetic_demo_pack,not_real_match_data,not_for_prediction
+demo_partial_raw,demo_match_pack_partial_01,Lazio,Atalanta,Serie A,2025/26,2026-02-14,synthetic demo raw pack reusing Lazio context,true,true,true

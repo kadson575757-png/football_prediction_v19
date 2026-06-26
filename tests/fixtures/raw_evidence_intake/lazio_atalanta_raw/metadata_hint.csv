@@ -1,0 +1,2 @@
+raw_group_id,match_id_hint,home_team_hint,away_team_hint,competition_hint,season_hint,match_date_hint,notes,synthetic_demo_pack,not_real_match_data,not_for_prediction
+lazio_atalanta_raw,lazio_atalanta_2026_02_14,Lazio,Atalanta,Serie A,2025/26,2026-02-14,real Lazio Atalanta fixture evidence,false,false,false

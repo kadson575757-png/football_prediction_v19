@@ -149,8 +149,10 @@ def _summary(workbench: object, campaign: object, rerun: object | None, scenario
 
 
 def _copy(source: str | Path, target: Path) -> None:
+    if not str(source).strip():
+        return
     src = Path(str(source))
-    if src.exists():
+    if src.exists() and src.is_file():
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(src, target)
 
