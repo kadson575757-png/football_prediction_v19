@@ -21,6 +21,7 @@ def build_parser() -> argparse.ArgumentParser:
         parser.add_argument(f"--{arg}", default=None)
     parser.add_argument("--real-match-intake", default=None)
     parser.add_argument("--manual-evidence-completion", default=None)
+    parser.add_argument("--emit-v19-final-analysis-report", action="store_true", default=False)
     parser.add_argument("--output-dir", default=str(ROOT / "outputs" / "analysis_preview" / "real_match_analysis_command"))
     parser.add_argument("--workbook-filename", default="match_analysis_preview_workbook.xlsx")
     parser.add_argument("--base-dir", default=str(ROOT))
@@ -30,16 +31,29 @@ def build_parser() -> argparse.ArgumentParser:
 def run_match_analysis_preview(**kwargs: object) -> dict[str, object]:
     real_match_intake = kwargs.pop("real_match_intake", None)
     manual_evidence_completion = kwargs.pop("manual_evidence_completion", None)
+    emit_v19_final_analysis_report = bool(kwargs.pop("emit_v19_final_analysis_report", False))
     if real_match_intake:
         from scripts.build_real_match_analysis_runner_preview import build_real_match_analysis_runner_preview
 
-        return build_real_match_analysis_runner_preview(
+        summary = build_real_match_analysis_runner_preview(
             real_match_intake_path=real_match_intake,
             manual_evidence_completion_path=manual_evidence_completion,
             base_dir=kwargs.get("base_dir", ROOT),
         )
+        if emit_v19_final_analysis_report and summary.get("real_match_analysis_runner_status") == "REAL_MATCH_ANALYSIS_RUNNER_PREVIEW_READY":
+            from scripts.build_v19_final_analysis_report_preview import build_v19_final_analysis_report_preview
+
+            final_report = build_v19_final_analysis_report_preview(base_dir=kwargs.get("base_dir", ROOT))
+            summary.update(final_report)
+        return summary
     result = RealMatchAnalysisCommandRunner(RealMatchAnalysisCommandConfig(**kwargs)).run()
-    return result.__dict__
+    summary = result.__dict__
+    if emit_v19_final_analysis_report and summary.get("command_status") == "REAL_MATCH_ANALYSIS_COMMAND_PREVIEW_READY":
+        from scripts.build_v19_final_analysis_report_preview import build_v19_final_analysis_report_preview
+
+        final_report = build_v19_final_analysis_report_preview(base_dir=kwargs.get("base_dir", ROOT))
+        summary.update(final_report)
+    return summary
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -55,6 +69,7 @@ def main(argv: list[str] | None = None) -> int:
         season=args.season,
         real_match_intake=args.real_match_intake,
         manual_evidence_completion=args.manual_evidence_completion,
+        emit_v19_final_analysis_report=args.emit_v19_final_analysis_report,
         output_dir=args.output_dir,
         workbook_filename=args.workbook_filename,
         base_dir=args.base_dir,
@@ -72,6 +87,7 @@ def main(argv: list[str] | None = None) -> int:
         "player_impact_rolling_form_input_status", "player_form_diagnostic_status",
         "tactical_set_piece_fatigue_input_status", "tactical_matchup_diagnostic_status",
         "human_24_block_report_status", "export_bundle_status", "excel_export_status",
+        "v19_final_analysis_report_status", "report_output_path",
         "home_team", "away_team", "match_date", "gates_evaluated", "gates_blocked",
         "gates_disabled", "sections_rendered", "required_sections_rendered",
         "exported_files_count", "sheets_written", "workbook_file_exists",
