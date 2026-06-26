@@ -1,0 +1,28 @@
+scenario_id,test_scenario_mode,synthetic_completion_values,not_real_match_data,not_for_prediction,field_name,user_value
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,home_recent_xg_for,1.10
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,away_recent_xg_for,1.85
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,home_recent_xg_against,1.45
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,away_recent_xg_against,1.05
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,home_big_chances_for,6
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,away_big_chances_for,11
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,home_big_chances_against,9
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,away_big_chances_against,5
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,home_goalkeeper_status,AVAILABLE
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,away_goalkeeper_status,AVAILABLE
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,home_missing_players,verified scenario none
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,away_missing_players,verified scenario none
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,home_suspended_players,verified scenario none
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,away_suspended_players,verified scenario none
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,home_doubtful_players,verified scenario none
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,away_doubtful_players,verified scenario none
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,home_open_odds,3.40
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,draw_open_odds,3.30
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,away_open_odds,2.20
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,home_closing_odds,3.55
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,draw_closing_odds,3.25
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,away_closing_odds,2.05
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,dnb_home_odds,2.40
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,dnb_away_odds,1.65
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,over_line,2.5
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,over_current_odds,1.92
+POSITIVE_ALIGNMENT_CANDIDATE,true,true,true,true,under_current_odds,1.90
