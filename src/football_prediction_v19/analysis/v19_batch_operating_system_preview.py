@@ -24,6 +24,7 @@ V19_BATCH_OS_PREVIEW_READY = "V19_BATCH_OS_PREVIEW_READY"
 class V19BatchOSConfig:
     batch_config: str | Path
     output_dir: str | Path = "outputs/analysis_preview/v19_batch_os"
+    preflight_validation_json: str | Path | None = None
     emit_all: bool = False
     skip_scenario_batch_lab: bool = False
     skip_empty_rerun: bool = False
@@ -85,6 +86,9 @@ class V19BatchOSRunner:
     def run(self) -> V19BatchOSResult:
         out = _resolve(self.config.output_dir, self.base)
         out.mkdir(parents=True, exist_ok=True)
+        preflight = _read_json(_resolve(self.config.preflight_validation_json, self.base)) if self.config.preflight_validation_json else {}
+        if self.config.strict and preflight.get("batch_health_status") == "INVALID":
+            raise ValueError("Batch OS preflight blocked: batch_health_status=INVALID")
         workbench = V19BatchWorkbenchRunner(V19BatchWorkbenchConfig(self.config.batch_config, output_dir=out / "batch_workbench", emit_all=True, base_dir=self.base)).run()
         campaign = V19BatchCompletionCampaignBuilder(V19BatchCompletionCampaignConfig(workbench.batch_results_json_path, output_dir=out / "completion_campaign", emit_all=True, base_dir=self.base)).run()
         rerun = V19BatchCompletionRerunRunner(V19BatchCompletionRerunConfig(workbench.batch_results_json_path, campaign.master_completion_template_path, self.config.batch_config, output_dir=out / "completion_rerun", emit_all=True, base_dir=self.base)).run() if not self.config.skip_empty_rerun else None
@@ -118,6 +122,8 @@ class V19BatchOSRunner:
             _copy(scenario.scenario_batch_lab_dashboard_path, paths["scenario_batch_lab_dashboard"])
         final_action = write_final_action_plan(paths["final_action_plan"], master_template_path=str(paths["master_completion_template"]), batch_config=str(self.config.batch_config))
         exec_path = write_executive_dashboard(paths["executive_dashboard"], matches_total=workbench.matches_total, matches_succeeded=workbench.matches_succeeded, matches_failed=workbench.matches_failed, fillable_fields_total=campaign.fillable_fields_total, critical_fields_total=campaign.critical_fields_total, candidate_count_delta=rerun.candidate_count_delta if rerun else 0, average_readiness_delta=rerun.average_readiness_delta if rerun else 0, scenario_status=scenario.scenario_batch_lab_status if scenario else "SKIPPED")
+        if preflight.get("batch_health_status") == "PARTIAL_READY":
+            Path(exec_path).write_text(Path(exec_path).read_text(encoding="utf-8") + "\n## Preflight Warning\n\n- batch_health_status: PARTIAL_READY\n- Batch OS continued for runnable packs only.\n", encoding="utf-8")
         paths["batch_os_summary"].write_text(_summary(workbench, campaign, rerun, scenario), encoding="utf-8")
         payload = {
             "batch_os_status": V19_BATCH_OS_PREVIEW_READY,
@@ -127,6 +133,7 @@ class V19BatchOSRunner:
             "completion_rerun": rerun.__dict__ if rerun else {},
             "portfolio_delta": _read_json(rerun.portfolio_delta_json_path) if rerun else {},
             "scenario_batch_lab": scenario.__dict__ if scenario else {},
+            "preflight": preflight,
             "executive_dashboard": {"path": exec_path},
             "final_action_plan": {"path": final_action},
             "artifact_paths": {name: str(path.resolve()) for name, path in paths.items()},

@@ -1,0 +1,4 @@
+match_id,input_dir,home_team,away_team,competition,season,match_date,manual_evidence_completion,notes,synthetic_demo_pack,not_real_match_data,not_for_prediction
+lazio_atalanta_2026_02_14,tests/fixtures/excel_evidence/lazio_atalanta_2026_02_14,Lazio,Atalanta,Serie A,2025/26,2026-02-14,tests/fixtures/manual_evidence_completion/lazio_atalanta_completion.csv,real fixture evidence pack,false,false,false
+demo_match_pack_partial_01,tests/fixtures/excel_evidence/lazio_atalanta_2026_02_14,Lazio,Atalanta,Serie A,2025/26,2026-02-14,tests/fixtures/manual_evidence_completion/lazio_atalanta_completion.csv,synthetic demo pack reusing Lazio evidence for multi-match plumbing,true,true,true
+demo_match_pack_missing_market_01,tests/fixtures/match_packs/demo_match_pack_missing_market_01,Missing Market Home,Missing Market Away,Demo League,2025/26,2026-02-16,,synthetic incomplete pack for health gate coverage,true,true,true
