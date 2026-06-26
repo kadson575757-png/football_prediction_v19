@@ -1,0 +1,2 @@
+scenario_id,test_scenario_mode,synthetic_completion_values,not_real_match_data,not_for_prediction,field_name,user_value
+EMPTY_COMPLETION_CONTROL,true,true,true,true,,
