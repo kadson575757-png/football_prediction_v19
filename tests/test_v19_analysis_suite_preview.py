@@ -33,6 +33,7 @@ def test_v19_analysis_suite_creates_full_output_bundle(tmp_path: Path) -> None:
         "no_bet_matrix.md",
         "evidence_audit.md",
         "missing_data_action_plan.md",
+        "production_readiness_report.md",
         "machine_readable_decision.json",
         "analysis_suite_bundle_index.csv",
     ]
@@ -45,9 +46,11 @@ def test_v19_analysis_suite_creates_full_output_bundle(tmp_path: Path) -> None:
     assert "Lazio has real counterweights" in summary
     assert "Final status" in summary
     assert "No production bet" in summary
+    assert "Production Readiness" in summary
+    assert "promotion_allowed=false" in summary
 
     card = (out / "final_decision_card.md").read_text(encoding="utf-8")
-    for phrase in ["Final Decision Preview", "Strongest Lean", "Counterweights", "Recommendation Preview only", "No stake", "No ROI"]:
+    for phrase in ["Final Decision Preview", "final_decision_class", "promotion_allowed: false", "Strongest Lean", "Counterweights", "Recommendation Preview only", "No stake", "No ROI"]:
         assert phrase in card
 
     score_tree = (out / "score_tree_detail.md").read_text(encoding="utf-8")
@@ -74,5 +77,17 @@ def test_v19_analysis_suite_creates_full_output_bundle(tmp_path: Path) -> None:
     assert machine["safety"]["staking_logic_enabled"] is False
     assert machine["safety"]["roi_logic_enabled"] is False
     assert machine["safety"]["recommendation_preview_enabled"] is True
+    assert machine["safety"]["production_readiness_gate_enabled"] is True
+    assert machine["production_readiness"]["final_decision_class"] == "ANALYST_LEAN_ONLY"
+    assert machine["production_readiness"]["promotion_allowed"] is False
+    assert machine["production_readiness"]["strong_promotion_allowed"] is False
     assert machine["score_tree"]
     assert machine["market_family_read"]
+    assert int(result["suite_artifacts_count"]) >= 12
+    assert result["v19_production_readiness_gate_status"] == "V19_PRODUCTION_READINESS_GATE_PREVIEW_READY"
+    assert result["production_readiness_gate_enabled"] is True
+    assert result["decision_promotion_preview_enabled"] is True
+    assert result["final_decision_class"] == "ANALYST_LEAN_ONLY"
+    assert result["promotion_allowed"] is False
+    assert result["strong_promotion_allowed"] is False
+    assert result["conflict_score"] in {"HIGH", "MEDIUM_HIGH"}

@@ -9,6 +9,15 @@ from pathlib import Path
 
 import pandas as pd
 
+from football_prediction_v19.analysis.v19_production_readiness_gate_preview import (
+    V19ProductionReadinessGateConfig,
+    V19ProductionReadinessGateRunner,
+)
+from football_prediction_v19.analysis.v19_production_readiness_report_preview import (
+    V19ProductionReadinessReportConfig,
+    V19ProductionReadinessReportRenderer,
+)
+
 V19_ANALYSIS_SUITE_PREVIEW_READY = "V19_ANALYSIS_SUITE_PREVIEW_READY"
 V19_ANALYSIS_SUITE_BLOCKED_PIPELINE_FAILED = "V19_ANALYSIS_SUITE_BLOCKED_PIPELINE_FAILED"
 V19_ANALYSIS_SUITE_BLOCKED_UNSAFE_PATH = "V19_ANALYSIS_SUITE_BLOCKED_UNSAFE_PATH"
@@ -39,12 +48,20 @@ class V19AnalysisSuiteResult:
     no_bet_matrix_path: str
     evidence_audit_path: str
     missing_data_action_plan_path: str
+    production_readiness_report_path: str
     machine_readable_decision_path: str
     analysis_suite_bundle_index_path: str
     suite_artifacts_count: int
     evidence_readiness_score: int
     final_decision_preview: str
     strongest_analyst_lean: str
+    v19_production_readiness_gate_status: str
+    production_readiness_gate_enabled: bool
+    decision_promotion_preview_enabled: bool
+    final_decision_class: str
+    promotion_allowed: bool
+    strong_promotion_allowed: bool
+    conflict_score: str
     recommendation_preview_enabled: bool
     decision_preview_enabled: bool
     network_calls_enabled: bool
@@ -86,6 +103,23 @@ class V19AnalysisSuiteRunner:
         families = _read_frame(pipeline.get("market_family_output_path"))
         no_bet = _read_frame(pipeline.get("no_bet_matrix_output_path"))
         score_tree = _read_frame(pipeline.get("score_tree_output_path"))
+        gate = V19ProductionReadinessGateRunner(
+            V19ProductionReadinessGateConfig(
+                decision_engine_summary_path=pipeline.get("summary_output_path"),
+                structural_edges_path=pipeline.get("structural_edges_output_path"),
+                market_family_path=pipeline.get("market_family_output_path"),
+                no_bet_matrix_path=pipeline.get("no_bet_matrix_output_path"),
+                base_dir=self.base,
+            )
+        ).run()
+        report, _ = V19ProductionReadinessReportRenderer(
+            V19ProductionReadinessReportConfig(
+                production_readiness_gate_path=gate.production_readiness_output_path,
+                output_dir=out,
+                base_dir=self.base,
+            )
+        ).run()
+        production_readiness = _read_first(gate.production_readiness_output_path)
 
         paths = {
             "analysis_suite_summary": out / "analysis_suite_summary.md",
@@ -97,21 +131,24 @@ class V19AnalysisSuiteRunner:
             "no_bet_matrix": out / "no_bet_matrix.md",
             "evidence_audit": out / "evidence_audit.md",
             "missing_data_action_plan": out / "missing_data_action_plan.md",
+            "production_readiness_report": out / "production_readiness_report.md",
             "machine_readable_decision": out / "machine_readable_decision.json",
             "bundle_index": out / "analysis_suite_bundle_index.csv",
         }
 
         _copy_or_write(pipeline.get("report_output_path"), paths["full_match_analysis"], "# v1.9 Full Match Analysis\n\nNot available.\n")
         _copy_or_write(pipeline.get("v19_decision_report_path"), paths["decision_report"], "# v1.9 Decision Report\n\nNot available.\n")
-        paths["final_decision_card"].write_text(_final_decision_card(decision_summary, families), encoding="utf-8")
+        paths["final_decision_card"].write_text(_final_decision_card(decision_summary, families, production_readiness), encoding="utf-8")
         paths["score_tree_detail"].write_text(_score_tree_detail(score_tree), encoding="utf-8")
         paths["market_family_matrix"].write_text(_market_family_matrix(families), encoding="utf-8")
         paths["no_bet_matrix"].write_text(_no_bet_matrix(no_bet), encoding="utf-8")
         paths["evidence_audit"].write_text(_evidence_audit(decision_summary, edges), encoding="utf-8")
         paths["missing_data_action_plan"].write_text(_missing_data_action_plan(), encoding="utf-8")
-        machine = _machine_readable(decision_summary, edges, families, no_bet, score_tree, paths)
+        if report.production_readiness_report_path and Path(report.production_readiness_report_path).exists():
+            paths["production_readiness_report"] = Path(report.production_readiness_report_path)
+        machine = _machine_readable(decision_summary, edges, families, no_bet, score_tree, paths, production_readiness)
         paths["machine_readable_decision"].write_text(json.dumps(machine, indent=2), encoding="utf-8")
-        paths["analysis_suite_summary"].write_text(_suite_summary(decision_summary, edges, families, score_tree, no_bet, paths), encoding="utf-8")
+        paths["analysis_suite_summary"].write_text(_suite_summary(decision_summary, edges, families, score_tree, no_bet, paths, production_readiness), encoding="utf-8")
         index = _bundle_index(paths)
         pd.DataFrame(index).to_csv(paths["bundle_index"], index=False)
 
@@ -128,12 +165,20 @@ class V19AnalysisSuiteRunner:
             str(paths["no_bet_matrix"].resolve()),
             str(paths["evidence_audit"].resolve()),
             str(paths["missing_data_action_plan"].resolve()),
+            str(paths["production_readiness_report"].resolve()),
             str(paths["machine_readable_decision"].resolve()),
             str(paths["bundle_index"].resolve()),
             len(index),
             int(decision_summary.get("evidence_readiness_score", 0) or 0),
             str(decision_summary.get("final_decision_preview", "")),
             str(decision_summary.get("strongest_analyst_lean", "")),
+            gate.v19_production_readiness_gate_status,
+            gate.production_readiness_gate_enabled,
+            gate.decision_promotion_preview_enabled,
+            gate.final_decision_class,
+            gate.promotion_allowed,
+            gate.strong_promotion_allowed,
+            gate.conflict_score,
             True,
             True,
             False,
@@ -146,10 +191,10 @@ class V19AnalysisSuiteRunner:
         return result
 
     def _blocked(self, status: str) -> V19AnalysisSuiteResult:
-        return V19AnalysisSuiteResult(status, False, "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, "", "", False, False, False, False, False, False, False, status)
+        return V19AnalysisSuiteResult(status, False, "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, "", "", "", False, False, "", False, False, "", False, False, False, False, False, False, False, status)
 
 
-def _final_decision_card(summary: dict[str, object], families: pd.DataFrame) -> str:
+def _final_decision_card(summary: dict[str, object], families: pd.DataFrame, production_readiness: dict[str, object]) -> str:
     return "\n".join([
         "# v1.9 Final Decision Card Preview",
         "",
@@ -163,6 +208,10 @@ def _final_decision_card(summary: dict[str, object], families: pd.DataFrame) -> 
         "## 2. Final Decision Preview",
         "",
         f"{summary.get('final_decision_preview', '')}",
+        f"- final_decision_class: {production_readiness.get('final_decision_class', '')}",
+        f"- promotion_allowed: {str(production_readiness.get('promotion_allowed', False)).lower()}",
+        f"- strong_promotion_allowed: {str(production_readiness.get('strong_promotion_allowed', False)).lower()}",
+        f"- conflict_score: {production_readiness.get('conflict_score', '')}",
         "",
         "## 3. Strongest Lean",
         "",
@@ -185,6 +234,7 @@ def _final_decision_card(summary: dict[str, object], families: pd.DataFrame) -> 
         "## 6. Confidence / Readiness",
         "",
         f"evidence_readiness_score: {summary.get('evidence_readiness_score', 0)}. Confidence is capped by recent form, big chances, availability detail and full market gaps.",
+        "Production readiness gate: high evidence readiness but critical blockers prevent promotion beyond analyst lean.",
         "Upgrade with recent form, big chances, confirmed absences and opening/closing/DNB/OU odds. Downgrade if those layers contradict the current Atalanta edge.",
         "",
         "## 7. Final Analyst Sentence",
@@ -334,13 +384,26 @@ def _missing_data_action_plan() -> str:
     ])
 
 
-def _machine_readable(summary: dict[str, object], edges: pd.DataFrame, families: pd.DataFrame, no_bet: pd.DataFrame, score_tree: pd.DataFrame, paths: dict[str, Path]) -> dict[str, object]:
+def _machine_readable(summary: dict[str, object], edges: pd.DataFrame, families: pd.DataFrame, no_bet: pd.DataFrame, score_tree: pd.DataFrame, paths: dict[str, Path], production_readiness: dict[str, object]) -> dict[str, object]:
     return {
         "match": {"home_team": summary.get("home_team", ""), "away_team": summary.get("away_team", ""), "match_date": summary.get("match_date", ""), "competition": summary.get("competition", "")},
-        "safety": {"network_calls_enabled": False, "betting_logic_enabled": False, "staking_logic_enabled": False, "roi_logic_enabled": False, "recommendation_preview_enabled": True},
+        "safety": {"network_calls_enabled": False, "betting_logic_enabled": False, "staking_logic_enabled": False, "roi_logic_enabled": False, "recommendation_preview_enabled": True, "production_readiness_gate_enabled": True},
         "evidence_readiness_score": int(summary.get("evidence_readiness_score", 0) or 0),
         "final_decision_preview": summary.get("final_decision_preview", ""),
         "strongest_analyst_lean": summary.get("strongest_analyst_lean", ""),
+        "production_readiness": {
+            "status": production_readiness.get("v19_production_readiness_gate_status", ""),
+            "final_decision_class": production_readiness.get("final_decision_class", ""),
+            "promotion_allowed": _bool(production_readiness.get("promotion_allowed", False)),
+            "strong_promotion_allowed": _bool(production_readiness.get("strong_promotion_allowed", False)),
+            "readiness_score": int(production_readiness.get("readiness_score", 0) or 0),
+            "critical_blockers": _split(production_readiness.get("critical_blockers", "")),
+            "edge_score": int(production_readiness.get("edge_score", 0) or 0),
+            "counterweight_score": int(production_readiness.get("counterweight_score", 0) or 0),
+            "conflict_score": production_readiness.get("conflict_score", ""),
+            "upgrade_conditions": _split(production_readiness.get("upgrade_conditions", "")),
+            "downgrade_conditions": _split(production_readiness.get("downgrade_conditions", "")),
+        },
         "counterweights": ["Lazio xGA counterweight", "Lazio set-piece edge", "Lazio shot-volume response", "SOT balanced"],
         "remaining_blockers": str(summary.get("remaining_blockers", "")).split(" | "),
         "market_family_read": families.to_dict(orient="records"),
@@ -352,7 +415,7 @@ def _machine_readable(summary: dict[str, object], edges: pd.DataFrame, families:
     }
 
 
-def _suite_summary(summary: dict[str, object], edges: pd.DataFrame, families: pd.DataFrame, score_tree: pd.DataFrame, no_bet: pd.DataFrame, paths: dict[str, Path]) -> str:
+def _suite_summary(summary: dict[str, object], edges: pd.DataFrame, families: pd.DataFrame, score_tree: pd.DataFrame, no_bet: pd.DataFrame, paths: dict[str, Path], production_readiness: dict[str, object]) -> str:
     return "\n".join([
         "# v1.9 Analysis Suite Preview",
         "",
@@ -367,6 +430,11 @@ def _suite_summary(summary: dict[str, object], edges: pd.DataFrame, families: pd
         "## 3. Evidence Readiness",
         "",
         f"Evidence readiness score: {summary.get('evidence_readiness_score', 0)}/100.",
+        "",
+        "## 3b. Production Readiness",
+        "",
+        f"Gate status: {production_readiness.get('v19_production_readiness_gate_status', '')}. Final decision class: {production_readiness.get('final_decision_class', '')}. promotion_allowed={str(production_readiness.get('promotion_allowed', False)).lower()}; strong_promotion_allowed={str(production_readiness.get('strong_promotion_allowed', False)).lower()}; conflict_score={production_readiness.get('conflict_score', '')}.",
+        "Evidence readiness is high but not production-ready. Critical blockers prevent promotion beyond analyst lean.",
         "",
         "## 4. Structural Edge Map",
         "",
@@ -414,6 +482,7 @@ def _bundle_index(paths: dict[str, Path]) -> list[dict[str, object]]:
         "no_bet_matrix": "No-bet blocker matrix",
         "evidence_audit": "Evidence availability and trace audit",
         "missing_data_action_plan": "Next data actions for confidence upgrade",
+        "production_readiness_report": "Production readiness gate and promotion/downgrade preview",
         "machine_readable_decision": "Machine-readable JSON decision preview",
         "bundle_index": "Suite bundle index",
     }
@@ -452,6 +521,14 @@ def _read_frame(path: object) -> pd.DataFrame:
 def _read_first(path: object) -> dict[str, object]:
     frame = _read_frame(path)
     return {} if frame.empty else frame.iloc[0].to_dict()
+
+
+def _split(value: object) -> list[str]:
+    return [part for part in str(value).split(" | ") if part]
+
+
+def _bool(value: object) -> bool:
+    return str(value).strip().lower() in {"true", "1", "yes"}
 
 
 def _safe_output(output_dir: str | Path, base: Path) -> Path | None:
