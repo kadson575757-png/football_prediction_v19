@@ -1,38 +1,70 @@
-source_profile: v20_historical_internet_preview
+source_profile: v20_live_source_adapter_preview
 network:
   enabled_by_default: false
   require_enable_network_flag: true
   cache_enabled: true
+  cache_dir: outputs/cache/v20_live_sources
   cache_ttl_hours: 24
   rate_limit_seconds: 2
+  timeout_seconds: 20
+  max_retries: 2
 api_keys:
   football_data_api_key_env: FOOTBALL_DATA_API_KEY
   api_football_key_env: APIFOOTBALL_KEY
   odds_api_key_env: THE_ODDS_API_KEY
 sources:
-  football_data:
+  football_data_co_uk:
     enabled: true
     requires_network: true
     requires_api_key: false
-    adapter: existing_or_http_csv
+    source_type: csv_download
+    provides:
+      - historical_results
+      - historical_1x2_odds
+      - historical_totals_odds_if_available
+    adapter: v20_football_data_live_adapter
   understat:
     enabled: true
     requires_network: true
     requires_api_key: false
-    adapter: existing_understat_provider_or_cache
+    source_type: public_html_json
+    provides:
+      - match_level_xg
+      - team_xg
+      - player_xg
+      - player_xa
+      - shots
+    adapter: v20_understat_live_adapter
     rules:
       - cache_required
       - rate_limit_required
       - no_login
       - no_paywall
       - no_captcha_bypass
+  odds_api:
+    enabled: true
+    requires_network: true
+    requires_api_key: true
+    source_type: api
+    provides:
+      - historical_1x2_odds
+      - historical_totals
+      - historical_btts_if_available
+    adapter: v20_odds_api_historical_adapter
   api_football:
     enabled: false
     requires_network: true
     requires_api_key: true
-    adapter: api_football_future
-  odds_api:
-    enabled: false
-    requires_network: true
-    requires_api_key: true
-    adapter: odds_api_future
+    source_type: api
+    provides:
+      - fixtures
+      - lineups
+      - injuries
+      - standings
+      - team_statistics
+    adapter: v20_api_football_optional_adapter
+fallback:
+  missing_api_key: mark_source_disabled_missing_key
+  source_failure: continue_with_warning
+  critical_low_coverage: no_bet_or_data_blocked
+  never_invent_values: true
