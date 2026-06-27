@@ -21,3 +21,5 @@ outputs/repair_preview/*
 # Generated test/preview outputs
 outputs/provider_pull_preview/
 outputs/pytest_phase13_11/
+
+outputs/cache/
