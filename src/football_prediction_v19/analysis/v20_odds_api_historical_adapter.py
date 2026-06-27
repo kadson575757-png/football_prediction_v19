@@ -112,6 +112,8 @@ def _empty_odds(path: Path) -> None:
 def _finish(out: Path, status: str, raw_path: Path, normalized_path: Path, totals_path: Path, asof: dict[str, object] | None, cache: dict[str, object], key_present: bool, cache_diagnostics: dict[str, object]) -> dict[str, object]:
     result = {
         "odds_api_status": status,
+        "status": status,
+        "reason": _status_reason(status),
         "api_key_present": bool(key_present),
         "cache_used": status == "CACHE_HIT",
         "odds_api_raw_path": str(raw_path.resolve()),
@@ -119,6 +121,11 @@ def _finish(out: Path, status: str, raw_path: Path, normalized_path: Path, total
         "odds_api_totals_normalized_path": str(totals_path.resolve()),
         "cache_status": cache,
         "cache_diagnostics": cache_diagnostics,
+        "cache_written": bool(cache_diagnostics.get("cache_write_success")),
+        "fetch_attempted": bool(cache_diagnostics.get("network_attempted")),
+        "fetch_success": bool(cache_diagnostics.get("fetch_success")),
+        "records_count": 0,
+        "candidate_matches": [],
     }
     if asof:
         result.update(asof)
@@ -149,3 +156,16 @@ def _cache_diag(cache: dict[str, object], network_attempted: bool, request_block
         "cache_write_success": cache_write_success,
         "cache_error": cache_error,
     }
+
+
+def _status_reason(status: str) -> str:
+    return {
+        "SUCCESS": "source normalized successfully",
+        "CACHE_HIT": "cache hit",
+        "DISABLED_MISSING_KEY": "THE_ODDS_API_KEY is missing",
+        "DISABLED_NETWORK": "network disabled and cache unavailable",
+        "UNSUPPORTED_SPORT_KEY": "odds sport key unavailable",
+        "MATCH_NOT_FOUND": "match not found in odds snapshot",
+        "MARKET_NOT_AVAILABLE": "requested market not available",
+        "FAILED": "odds API fetch failed",
+    }.get(status, status.lower())

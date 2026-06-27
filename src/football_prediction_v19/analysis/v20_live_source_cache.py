@@ -48,6 +48,25 @@ def write_cache(cache_dir: str | Path, cache_key: str, payload: str) -> CacheRes
     return CacheResult(cache_key, str(target.resolve()), True, True, 0.0, ())
 
 
+def write_cache_text(cache_dir: str | Path, cache_key: str, payload: str) -> CacheResult:
+    return write_cache(cache_dir, cache_key, payload)
+
+
+def read_cache_text(cache_dir: str | Path, cache_key: str, ttl_hours: float = 24) -> tuple[CacheResult, str]:
+    return read_cache(cache_dir, cache_key, ttl_hours)
+
+
+def write_cache_json(cache_dir: str | Path, cache_key: str, payload: Any) -> CacheResult:
+    return write_cache(cache_dir, cache_key, json.dumps(payload, indent=2, default=str))
+
+
+def read_cache_json(cache_dir: str | Path, cache_key: str, ttl_hours: float = 24) -> tuple[CacheResult, Any | None]:
+    result, text = read_cache(cache_dir, cache_key, ttl_hours)
+    if not text:
+        return result, None
+    return result, json.loads(text)
+
+
 def is_cache_fresh(cache_path: str | Path, ttl_hours: float = 24) -> bool:
     path = Path(cache_path)
     return path.exists() and _age_hours(path) <= ttl_hours

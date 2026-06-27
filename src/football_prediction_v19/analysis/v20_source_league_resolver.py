@@ -29,6 +29,7 @@ class SourceLeagueMapping:
 
 _LEAGUES = {
     "premier league": ("Premier League", "E0", "EPL", "soccer_epl", ""),
+    "championship": ("Championship", "E1", "", "soccer_efl_champ", ""),
     "english premier league": ("Premier League", "E0", "EPL", "soccer_epl", ""),
     "bundesliga": ("Bundesliga", "D1", "Bundesliga", "soccer_germany_bundesliga", ""),
     "serie a": ("Serie A", "I1", "Serie_A", "soccer_italy_serie_a", ""),
