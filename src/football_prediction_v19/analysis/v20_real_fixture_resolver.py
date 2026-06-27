@@ -87,7 +87,9 @@ def resolve_real_fixture(context: HistoricalMatchContext, source_paths: dict[str
             matched.append(source_name)
     if ambiguous:
         status = "AMBIGUOUS"
-    elif len(matched) >= 2:
+    elif exact_found and matched:
+        status = "RESOLVED"
+    elif len(matched) >= 2 and not tolerance_found:
         status = "RESOLVED"
     elif len(matched) == 1:
         status = "PARTIAL"
@@ -103,7 +105,7 @@ def resolve_real_fixture(context: HistoricalMatchContext, source_paths: dict[str
 
 
 def _norm(value: object) -> str:
-    aliases = {"man united": "manchester united", "man utd": "manchester united", "spurs": "tottenham", "inter": "internazionale"}
+    aliases = {"man united": "manchester united", "man utd": "manchester united", "spurs": "tottenham", "inter": "internazionale", "leeds": "leeds united", "leeds utd": "leeds united"}
     text = " ".join(str(value).strip().lower().replace("-", " ").split())
     return aliases.get(text, text)
 

@@ -95,7 +95,7 @@ def _block_reasons(result: dict[str, object], source_status: dict[str, dict[str,
         reasons.append("missing_table_form")
     if missing_data["xg"]:
         reasons.append("missing_xg")
-    if missing_data["odds"]:
+    if missing_data["odds"] and missing_data["xg"]:
         reasons.append("missing_odds")
     if result.get("source_quality_band") == "LOW":
         reasons.append("low_source_quality")
@@ -107,7 +107,7 @@ def _block_reasons(result: dict[str, object], source_status: dict[str, dict[str,
         reasons.append("no_cache")
     if not result.get("network_calls_enabled") and any(s["status"] == "DISABLED_NETWORK" for s in source_status.values()):
         reasons.append("network_disabled")
-    if any(s["status"] == "DISABLED_MISSING_KEY" for s in source_status.values()):
+    if missing_data["xg"] and any(s["status"] == "DISABLED_MISSING_KEY" for s in source_status.values()):
         reasons.append("api_key_missing")
     return list(dict.fromkeys(reasons))
 

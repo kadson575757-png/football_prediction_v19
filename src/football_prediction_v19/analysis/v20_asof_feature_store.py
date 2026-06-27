@@ -13,8 +13,8 @@ def build_asof_feature_store(context: HistoricalMatchContext, football: dict[str
     form = pd.read_csv(football["football_data_asof_form_path"], keep_default_na=False)
     xgf = pd.read_csv(xg["understat_xg_asof_team_path"], keep_default_na=False)
     oddsf = pd.read_csv(odds["odds_asof_clean_path"], keep_default_na=False)
-    def row(df, col, val): 
-        hit = df[df[col].eq(val)]
+    def row(df, col, val):
+        hit = df[df[col].map(_norm_team).eq(_norm_team(val))]
         return hit.iloc[0].to_dict() if not hit.empty else {}
     ht, at = row(table, "team", context.home_team), row(table, "team", context.away_team)
     hf, af = row(form, "team", context.home_team), row(form, "team", context.away_team)
@@ -27,3 +27,15 @@ def build_asof_feature_store(context: HistoricalMatchContext, football: dict[str
     pd.DataFrame([feat]).to_csv(csv_path, index=False); json_path.write_text(json.dumps(feat, indent=2), encoding="utf-8")
     report.write_text("# v2.0 As-Of Feature Store Report\n\n" + pd.DataFrame([feat]).to_csv(index=False) + "\n", encoding="utf-8")
     return {"asof_feature_store_status": "READY", "features": feat, "asof_feature_store_csv_path": str(csv_path.resolve()), "asof_feature_store_json_path": str(json_path.resolve()), "asof_feature_store_report_path": str(report.resolve())}
+
+
+def _norm_team(value: object) -> str:
+    aliases = {
+        "leeds": "leeds united",
+        "leeds utd": "leeds united",
+        "man united": "manchester united",
+        "man utd": "manchester united",
+        "spurs": "tottenham",
+    }
+    text = " ".join(str(value).strip().lower().replace("-", " ").split())
+    return aliases.get(text, text)
