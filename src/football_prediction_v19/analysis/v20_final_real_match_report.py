@@ -9,6 +9,17 @@ def write_v20_final_real_match_report(result: dict[str, object], output_dir: str
     context = result.get("match_context", {})
     path = out / "v20_final_real_match_report.md"
     lines = [
+        _top_heading(result),
+        "",
+        "Block Reason:",
+        *[f"- {reason}" for reason in result.get("block_reasons", [])],
+        "",
+        "Source Status:",
+        *_source_lines(result),
+        "",
+        "Next Fix:",
+        f"- {result.get('recommended_fix', 'Inspect source status and missing data.')}",
+        "",
         "# v2.0 Final Real Match Report",
         "",
         "## 1. Match Input",
@@ -33,9 +44,23 @@ def write_v20_final_real_match_report(result: dict[str, object], output_dir: str
         "## 19. Safety Footer", "No automatic betting. No stake. No ROI. No guaranteed prediction.",
         "",
     ]
-    if result.get("decision_class") == "DATA_BLOCKED":
-        lines.insert(2, "**DATA_BLOCKED: no pseudo-analysis is produced because a required gate failed.**")
-    elif result.get("decision_class") == "NO_BET":
-        lines.insert(2, "**NO_BET: source coverage or confidence is not strong enough for a model tip.**")
     path.write_text("\n".join(lines), encoding="utf-8")
     return str(path.resolve())
+
+
+def _top_heading(result: dict[str, object]) -> str:
+    decision = result.get("decision_class")
+    if decision == "DATA_BLOCKED":
+        return "# DATA_BLOCKED"
+    if decision == "NO_BET":
+        return "# NO_BET"
+    if decision == "ANALYST_LEAN":
+        return "# ANALYST_LEAN"
+    return "# MODEL_TIP"
+
+
+def _source_lines(result: dict[str, object]) -> list[str]:
+    rows = []
+    for provider, data in (result.get("source_status", {}) or {}).items():
+        rows.append(f"- {provider}: {data.get('status')} - {data.get('reason')} cache_used={str(data.get('cache_used')).lower()} records={data.get('records_count')}")
+    return rows or ["- source status unavailable"]

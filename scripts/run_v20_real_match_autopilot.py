@@ -13,6 +13,7 @@ sys.path[:0] = [str(ROOT), str(ROOT / "src")]
 
 from scripts.run_v20_historical_internet_prediction import run_v20_historical_internet_prediction  # noqa: E402
 from football_prediction_v19.analysis.v20_final_real_match_report import write_v20_final_real_match_report  # noqa: E402
+from football_prediction_v19.analysis.v20_real_match_diagnostics import build_real_match_diagnostics  # noqa: E402
 from football_prediction_v19.analysis.v20_real_fixture_resolver import resolve_real_fixture  # noqa: E402
 from football_prediction_v19.analysis.v20_real_match_autopilot_dashboard import write_v20_real_match_autopilot_dashboard  # noqa: E402
 from football_prediction_v19.analysis.v20_real_source_quality_score import compute_real_source_quality  # noqa: E402
@@ -35,6 +36,13 @@ def run_v20_real_match_autopilot(**kwargs: object) -> dict[str, object]:
     readiness = evaluate_source_readiness(fixture.fixture_resolution_status, str(engine.get("asof_status")), str(engine.get("leakage_status")), coverage, out)
     quality = compute_real_source_quality(fixture.fixture_resolution_status, coverage, str(engine.get("leakage_status")), bool(engine.get("cache_used")), output_dir=out)
     status = "READY" if readiness["source_readiness"] == "READY_FOR_MODEL" else ("PARTIAL" if readiness["source_readiness"] in {"READY_FOR_ANALYST_LEAN", "NO_BET_REQUIRED"} else "BLOCKED")
+    if readiness["source_readiness"] == "DATA_BLOCKED":
+        engine["decision_class"] = "DATA_BLOCKED"
+        engine["primary_tip"] = "NO_BET"
+        engine["confidence"] = 0.0
+    elif readiness["source_readiness"] == "NO_BET_REQUIRED" and engine.get("decision_class") == "DATA_BLOCKED":
+        engine["decision_class"] = "NO_BET"
+        engine["primary_tip"] = "NO_BET"
     result = {
         **engine,
         **fixture.to_dict(),
@@ -45,6 +53,9 @@ def run_v20_real_match_autopilot(**kwargs: object) -> dict[str, object]:
         "missing_data": ", ".join(readiness.get("readiness_reasons", [])),
         "no_bet_reasons": ", ".join(readiness.get("readiness_reasons", [])) if engine.get("decision_class") in {"NO_BET", "DATA_BLOCKED"} else "",
     }
+    result.update(build_real_match_diagnostics(result))
+    result["missing_data_text"] = ", ".join(k for k, v in result["missing_data"].items() if v)
+    result["no_bet_reasons"] = ", ".join(result["block_reasons"]) if result.get("decision_class") in {"NO_BET", "DATA_BLOCKED"} else result.get("no_bet_reasons", "")
     report = write_v20_final_real_match_report(result, out)
     dashboard = write_v20_real_match_autopilot_dashboard(result, out)
     result["v20_final_real_match_report_path"] = report

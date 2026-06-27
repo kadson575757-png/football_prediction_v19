@@ -28,25 +28,36 @@ def run_understat_live_adapter(
     cache_key = build_cache_key("understat", mapping.canonical_competition, mapping.season_input, "league_json", {"league": mapping.understat_league_code})
     status = "SUCCESS"
     cache_result, cached = read_cache(cache_root, cache_key, cache_ttl_hours)
+    cache_write_success = False
+    network_attempted = False
+    request_blocked = False
+    fetch_success = False
+    cache_error = ""
     raw_text = cached
     if raw_text:
         status = "CACHE_HIT"
     elif mock_json_path:
         raw_text = Path(mock_json_path).read_text(encoding="utf-8")
-        write_cache(cache_root, cache_key, raw_text)
+        try:
+            write_cache(cache_root, cache_key, raw_text)
+            cache_write_success = True
+        except Exception as exc:
+            cache_error = str(exc)
     elif not mapping.understat_league_code:
         status = "UNSUPPORTED_LEAGUE"
     elif not enable_network:
-        status = "DISABLED_NETWORK"
+        status = "DISABLED_NETWORK"; request_blocked = True
     else:
-        status = "FAILED_FETCH"
+        status = "FAILED_FETCH"; network_attempted = True
+    fetch_success = bool(raw_text)
+    diag = _cache_diag(cache_result.to_dict(), network_attempted, request_blocked, fetch_success, bool(cached), cache_write_success, cache_error)
     raw_path = out / "understat_live_raw.json"
     matches_path = out / "understat_live_matches_normalized.csv"
     players_path = out / "understat_live_players_normalized.csv"
     if not raw_text:
         pd.DataFrame(columns=["date", "home_team", "away_team", "home_xg", "away_xg"]).to_csv(matches_path, index=False)
         pd.DataFrame(columns=["date", "player", "team", "minutes", "goals", "assists", "xg", "xa", "npxg"]).to_csv(players_path, index=False)
-        return _finish(out, status, raw_path, matches_path, players_path, None, cache_result.to_dict(), 0)
+        return _finish(out, status, raw_path, matches_path, players_path, None, cache_result.to_dict(), 0, diag)
     raw_path.write_text(raw_text, encoding="utf-8")
     try:
         payload = json.loads(raw_text)
@@ -59,7 +70,7 @@ def run_understat_live_adapter(
     matches.to_csv(matches_path, index=False)
     players.to_csv(players_path, index=False)
     asof = build_understat_xg_asof(matches_path, players_path, context, out) if not matches.empty else None
-    return _finish(out, status, raw_path, matches_path, players_path, asof, cache_result.to_dict(), len(matches))
+    return _finish(out, status, raw_path, matches_path, players_path, asof, cache_result.to_dict(), len(matches), diag)
 
 
 def normalize_understat_matches(payload: dict[str, object] | list[object]) -> pd.DataFrame:
@@ -97,7 +108,7 @@ def normalize_understat_players(payload: dict[str, object] | list[object]) -> pd
     return pd.DataFrame(records, columns=["date", "player", "team", "minutes", "goals", "assists", "xg", "xa", "npxg"])
 
 
-def _finish(out: Path, status: str, raw_path: Path, matches_path: Path, players_path: Path, asof: dict[str, object] | None, cache: dict[str, object], rows: int) -> dict[str, object]:
+def _finish(out: Path, status: str, raw_path: Path, matches_path: Path, players_path: Path, asof: dict[str, object] | None, cache: dict[str, object], rows: int, cache_diagnostics: dict[str, object]) -> dict[str, object]:
     result = {
         "understat_live_status": status,
         "records_count": rows,
@@ -106,6 +117,7 @@ def _finish(out: Path, status: str, raw_path: Path, matches_path: Path, players_
         "understat_live_matches_normalized_path": str(matches_path.resolve()),
         "understat_live_players_normalized_path": str(players_path.resolve()),
         "cache_status": cache,
+        "cache_diagnostics": cache_diagnostics,
     }
     if asof:
         result.update(asof)
@@ -123,3 +135,17 @@ def _finish(out: Path, status: str, raw_path: Path, matches_path: Path, players_
     result["understat_live_result_json_path"] = str((out / "understat_live_result.json").resolve())
     result["understat_live_adapter_report_path"] = str(report.resolve())
     return result
+
+
+def _cache_diag(cache: dict[str, object], network_attempted: bool, request_blocked: bool, fetch_success: bool, cache_hit: bool, cache_write_success: bool, cache_error: str) -> dict[str, object]:
+    return {
+        "cache_lookup_attempted": True,
+        "cache_hit": cache_hit,
+        "expected_cache_path": cache.get("cache_path", ""),
+        "network_attempted": network_attempted,
+        "request_blocked": request_blocked,
+        "fetch_success": fetch_success,
+        "cache_write_attempted": fetch_success and not cache_hit,
+        "cache_write_success": cache_write_success,
+        "cache_error": cache_error,
+    }

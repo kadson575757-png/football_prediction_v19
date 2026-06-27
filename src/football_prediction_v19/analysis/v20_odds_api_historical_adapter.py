@@ -28,27 +28,38 @@ def run_odds_api_historical_adapter(
     cache_root = Path(cache_dir or out / "cache")
     cache_key = build_cache_key("odds_api", mapping.canonical_competition, mapping.season_input, "historical_snapshot", {"sport": mapping.odds_api_sport_key, "match": context.match_id})
     cache_result, cached = read_cache(cache_root, cache_key, cache_ttl_hours)
+    cache_write_success = False
+    network_attempted = False
+    request_blocked = False
+    fetch_success = False
+    cache_error = ""
     status = "SUCCESS"
     raw_text = cached
     if raw_text:
         status = "CACHE_HIT"
     elif mock_json_path:
         raw_text = Path(mock_json_path).read_text(encoding="utf-8")
-        write_cache(cache_root, cache_key, raw_text)
+        try:
+            write_cache(cache_root, cache_key, raw_text)
+            cache_write_success = True
+        except Exception as exc:
+            cache_error = str(exc)
     elif not mapping.odds_api_sport_key:
         status = "UNSUPPORTED_SPORT_KEY"
     elif not key_status:
         status = "DISABLED_MISSING_KEY"
     elif not enable_network:
-        status = "DISABLED_NETWORK"
+        status = "DISABLED_NETWORK"; request_blocked = True
     else:
-        status = "FAILED"
+        status = "FAILED"; network_attempted = True
+    fetch_success = bool(raw_text)
+    diag = _cache_diag(cache_result.to_dict(), network_attempted, request_blocked, fetch_success, bool(cached), cache_write_success, cache_error)
     raw_path = out / "odds_api_raw.json"
     normalized_path = out / "odds_api_normalized.csv"
     totals_path = out / "odds_api_totals_normalized.csv"
     if not raw_text:
         _empty_odds(normalized_path); _empty_odds(totals_path)
-        return _finish(out, status, raw_path, normalized_path, totals_path, None, cache_result.to_dict(), key_status)
+        return _finish(out, status, raw_path, normalized_path, totals_path, None, cache_result.to_dict(), key_status, diag)
     raw_path.write_text(raw_text, encoding="utf-8")
     frame = normalize_odds_api_payload(json.loads(raw_text), context)
     one_x_two = frame[frame["market"].eq("1X2")].copy()
@@ -60,7 +71,7 @@ def run_odds_api_historical_adapter(
         status = "MATCH_NOT_FOUND"
     elif one_x_two.empty:
         status = "MARKET_NOT_AVAILABLE"
-    return _finish(out, status, raw_path, normalized_path, totals_path, asof, cache_result.to_dict(), key_status)
+    return _finish(out, status, raw_path, normalized_path, totals_path, asof, cache_result.to_dict(), key_status, diag)
 
 
 def normalize_odds_api_payload(payload: dict[str, object] | list[object], context: HistoricalMatchContext) -> pd.DataFrame:
@@ -98,7 +109,7 @@ def _empty_odds(path: Path) -> None:
     pd.DataFrame(columns=["match_date", "home_team", "away_team", "snapshot_time", "market", "selection", "odds", "bookmaker"]).to_csv(path, index=False)
 
 
-def _finish(out: Path, status: str, raw_path: Path, normalized_path: Path, totals_path: Path, asof: dict[str, object] | None, cache: dict[str, object], key_present: bool) -> dict[str, object]:
+def _finish(out: Path, status: str, raw_path: Path, normalized_path: Path, totals_path: Path, asof: dict[str, object] | None, cache: dict[str, object], key_present: bool, cache_diagnostics: dict[str, object]) -> dict[str, object]:
     result = {
         "odds_api_status": status,
         "api_key_present": bool(key_present),
@@ -107,6 +118,7 @@ def _finish(out: Path, status: str, raw_path: Path, normalized_path: Path, total
         "odds_api_normalized_path": str(normalized_path.resolve()),
         "odds_api_totals_normalized_path": str(totals_path.resolve()),
         "cache_status": cache,
+        "cache_diagnostics": cache_diagnostics,
     }
     if asof:
         result.update(asof)
@@ -123,3 +135,17 @@ def _finish(out: Path, status: str, raw_path: Path, normalized_path: Path, total
     result["odds_api_result_json_path"] = str((out / "odds_api_result.json").resolve())
     result["odds_api_adapter_report_path"] = str(report.resolve())
     return result
+
+
+def _cache_diag(cache: dict[str, object], network_attempted: bool, request_blocked: bool, fetch_success: bool, cache_hit: bool, cache_write_success: bool, cache_error: str) -> dict[str, object]:
+    return {
+        "cache_lookup_attempted": True,
+        "cache_hit": cache_hit,
+        "expected_cache_path": cache.get("cache_path", ""),
+        "network_attempted": network_attempted,
+        "request_blocked": request_blocked,
+        "fetch_success": fetch_success,
+        "cache_write_attempted": fetch_success and not cache_hit,
+        "cache_write_success": cache_write_success,
+        "cache_error": cache_error,
+    }
