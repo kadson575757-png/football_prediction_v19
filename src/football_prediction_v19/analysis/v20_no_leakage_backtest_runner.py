@@ -20,10 +20,12 @@ def run_no_leakage_backtest(matches_csv: str | Path, output_dir: str | Path, *, 
     rows = []
     for i, match in matches.iterrows():
         result = run_v20_historical_internet_prediction(home_team=match["home_team"], away_team=match["away_team"], competition=match["competition"], season=match["season"], match_date=match["match_date"], cutoff_policy="MATCH_DATE_START", mock_data_dir=mock_data_dir, source_profile=source_profile, output_dir=out / f"match_{i+1}", base_dir=Path.cwd())
-        rows.append({"match_id": result["match_context"]["match_id"], "decision_class": result["decision_class"], "confidence": result["confidence"], "home_probability": result["probabilities"]["home"], "draw_probability": result["probabilities"]["draw"], "away_probability": result["probabilities"]["away"], "actual_result": match.get("actual_result", ""), "leakage_status": result["leakage_status"], "analysis_cutoff": result["analysis_cutoff"]})
+        rows.append({"match_id": result["match_context"]["match_id"], "decision_class": result["decision_class"], "confidence": result["confidence"], "home_probability": result["probabilities"]["home"], "draw_probability": result["probabilities"]["draw"], "away_probability": result["probabilities"]["away"], "actual_result": match.get("actual_result", ""), "leakage_status": result["leakage_status"], "analysis_cutoff": result["analysis_cutoff"], "odds_available": result.get("odds_available", False), "xg_available": result.get("xg_available", False), "table_available": result.get("table_available", False)})
     metrics = compute_backtest_metrics(rows)
     leakage = write_backtest_leakage_audit(rows, out)
     metrics.update(leakage)
+    metrics["odds_missing_key_count"] = int(sum(1 for row in rows if not row.get("odds_available")))
+    metrics["source_coverage_without_odds"] = True
     pd.DataFrame(rows).to_csv(out / "v20_no_leakage_backtest_results.csv", index=False)
     pd.DataFrame(calibration_bins(rows)).to_csv(out / "v20_backtest_calibration_bins.csv", index=False)
     (out / "v20_no_leakage_backtest_metrics.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")

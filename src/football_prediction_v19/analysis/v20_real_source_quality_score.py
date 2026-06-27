@@ -12,13 +12,14 @@ def compute_real_source_quality(fixture_status: str, coverage: dict[str, object]
         "form": 0.08 if coverage.get("form_available", coverage.get("table_available")) else 0.0,
         "xg": 0.16 if coverage.get("xg_available") else 0.0,
         "player_xg": 0.06 if coverage.get("player_xg_available") else 0.0,
-        "odds": 0.16 if coverage.get("odds_available") else 0.0,
+        "odds": 0.10 if coverage.get("odds_available") else 0.0,
+        "no_odds_policy_credit": 0.06 if (coverage.get("xg_available") and not coverage.get("odds_available")) else 0.0,
         "cache": 0.06 if cache_used else 0.03,
         "agreement": 0.06 if coverage.get("table_available") and coverage.get("xg_available") else 0.0,
         "leakage": 0.06 if leakage_status == "CLEAN" else 0.0,
     }
     score = max(0.0, min(1.0, sum(weights.values()) - source_errors * 0.08))
-    band = "HIGH" if score >= 0.85 else ("MEDIUM" if score >= 0.65 else ("LOW" if score >= 0.45 else "BLOCKED"))
+    band = "HIGH" if score >= 0.85 else ("MEDIUM" if score >= 0.60 else ("LOW" if score >= 0.45 else "BLOCKED"))
     result = {"source_quality_score": round(score, 3), "source_quality_band": band, "quality_components": weights}
     if output_dir is not None:
         out = Path(output_dir); out.mkdir(parents=True, exist_ok=True)

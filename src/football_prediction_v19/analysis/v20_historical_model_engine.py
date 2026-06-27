@@ -28,7 +28,7 @@ def run_v20_model_engine(features: dict[str, object], output_dir: str | Path) ->
             quality = min(quality, 0.66)
         if features.get("odds_available") is False:
             missing_inputs.append("odds")
-            quality = min(quality, 0.66)
+            quality = min(quality, 0.74 if features.get("xg_available") else 0.66)
         if not features.get("lineups_available", True):
             quality = max(0, quality - 0.05)
         if features.get("source_reliability_low"):
