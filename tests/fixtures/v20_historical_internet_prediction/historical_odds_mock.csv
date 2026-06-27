@@ -1,0 +1,5 @@
+match_date,home_team,away_team,market,selection,odds,bookmaker,snapshot_time
+2026-02-14,Demo Home,Demo Away,1X2,HOME,2.05,DemoBook,2026-02-13 12:00:00
+2026-02-14,Demo Home,Demo Away,1X2,DRAW,3.40,DemoBook,2026-02-13 12:00:00
+2026-02-14,Demo Home,Demo Away,1X2,AWAY,3.70,DemoBook,2026-02-13 12:00:00
+2026-02-14,Demo Home,Demo Away,1X2,HOME,1.10,FutureBook,2026-02-14 12:00:00
