@@ -1,0 +1,111 @@
+leagues:
+  - canonical_name: Premier League
+    football_data_code: E0
+    football_data_supported: true
+    understat_league_code: EPL
+    understat_supported: true
+    odds_api_sport_key: soccer_epl
+    api_football_league_id: ""
+    season_format: YYYY/YY
+    team_alias_source: built_in
+    prediction_tier: TIER_1_FULL_XG
+  - canonical_name: Bundesliga
+    football_data_code: D1
+    football_data_supported: true
+    understat_league_code: Bundesliga
+    understat_supported: true
+    odds_api_sport_key: soccer_germany_bundesliga
+    api_football_league_id: ""
+    season_format: YYYY/YY
+    team_alias_source: built_in
+    prediction_tier: TIER_1_FULL_XG
+  - canonical_name: Serie A
+    football_data_code: I1
+    football_data_supported: true
+    understat_league_code: Serie_A
+    understat_supported: true
+    odds_api_sport_key: soccer_italy_serie_a
+    api_football_league_id: ""
+    season_format: YYYY/YY
+    team_alias_source: built_in
+    prediction_tier: TIER_1_FULL_XG
+  - canonical_name: La Liga
+    football_data_code: SP1
+    football_data_supported: true
+    understat_league_code: La_liga
+    understat_supported: true
+    odds_api_sport_key: soccer_spain_la_liga
+    api_football_league_id: ""
+    season_format: YYYY/YY
+    team_alias_source: built_in
+    prediction_tier: TIER_1_FULL_XG
+  - canonical_name: Ligue 1
+    football_data_code: F1
+    football_data_supported: true
+    understat_league_code: Ligue_1
+    understat_supported: true
+    odds_api_sport_key: soccer_france_ligue_one
+    api_football_league_id: ""
+    season_format: YYYY/YY
+    team_alias_source: built_in
+    prediction_tier: TIER_1_FULL_XG
+  - canonical_name: Championship
+    football_data_code: E1
+    football_data_supported: true
+    understat_league_code: ""
+    understat_supported: false
+    odds_api_sport_key: soccer_efl_champ
+    api_football_league_id: ""
+    season_format: YYYY/YY
+    team_alias_source: built_in
+    prediction_tier: TIER_2_RESULTS_ONLY
+  - canonical_name: 2. Bundesliga
+    football_data_code: D2
+    football_data_supported: true
+    understat_league_code: ""
+    understat_supported: false
+    odds_api_sport_key: ""
+    api_football_league_id: ""
+    season_format: YYYY/YY
+    team_alias_source: built_in
+    prediction_tier: TIER_2_RESULTS_ONLY
+  - canonical_name: Eredivisie
+    football_data_code: N1
+    football_data_supported: true
+    understat_league_code: ""
+    understat_supported: false
+    odds_api_sport_key: ""
+    api_football_league_id: ""
+    season_format: YYYY/YY
+    team_alias_source: built_in
+    prediction_tier: TIER_2_RESULTS_ONLY
+  - canonical_name: Primeira Liga
+    football_data_code: P1
+    football_data_supported: false
+    understat_league_code: ""
+    understat_supported: false
+    odds_api_sport_key: ""
+    api_football_league_id: ""
+    season_format: YYYY/YY
+    team_alias_source: built_in
+    prediction_tier: TIER_3_LIMITED
+  - canonical_name: MLS
+    football_data_code: ""
+    football_data_supported: false
+    understat_league_code: ""
+    understat_supported: false
+    odds_api_sport_key: soccer_usa_mls
+    api_football_league_id: ""
+    season_format: YYYY
+    team_alias_source: built_in
+    prediction_tier: TIER_3_LIMITED
+  - canonical_name: Super Lig
+    football_data_code: ""
+    football_data_supported: false
+    understat_league_code: ""
+    understat_supported: false
+    odds_api_sport_key: ""
+    api_football_league_id: ""
+    season_format: YYYY/YY
+    team_alias_source: built_in
+    prediction_tier: TIER_3_LIMITED
