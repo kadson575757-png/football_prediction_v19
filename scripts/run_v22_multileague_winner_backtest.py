@@ -25,7 +25,9 @@ def run_v22_multileague_winner_backtest(**kwargs: object) -> dict[str, object]:
         rows.append({"competition": league, **result})
     frame = pd.DataFrame(rows)
     evaluated = int(frame["matches_evaluated"].sum()) if not frame.empty else 0
-    status = "READY" if evaluated >= 10 else ("INSUFFICIENT_SAMPLE" if evaluated > 0 else "FAILED")
+    all_blocked = bool(evaluated and int(frame["data_blocked_count"].sum()) >= evaluated)
+    invalid_blocks = int(frame["invalid_data_blocked_count"].sum()) if "invalid_data_blocked_count" in frame.columns else 0
+    status = "BLOCKING_BUG_DETECTED" if all_blocked else ("FAILED" if invalid_blocks > 0 else ("READY" if evaluated >= 10 else ("INSUFFICIENT_SAMPLE" if evaluated > 0 else "FAILED")))
     result = {
         "v22_multileague_backtest_status": status,
         "v22_multileague_winner_backtest_status": status,
@@ -42,6 +44,17 @@ def run_v22_multileague_winner_backtest(**kwargs: object) -> dict[str, object]:
         "no_clear_winner_count": int(frame["no_clear_winner_count"].sum()) if not frame.empty else 0,
         "no_decision_count": int(frame["no_decision_count"].sum()) if not frame.empty else 0,
         "data_blocked_count": int(frame["data_blocked_count"].sum()) if not frame.empty else 0,
+        "hard_data_blocked_count": int(frame["hard_data_blocked_count"].sum()) if "hard_data_blocked_count" in frame.columns else 0,
+        "non_hard_data_blocked_count": int(frame["non_hard_data_blocked_count"].sum()) if "non_hard_data_blocked_count" in frame.columns else 0,
+        "invalid_data_blocked_count": invalid_blocks,
+        "decision_attempt_count": int(frame["decision_attempt_count"].sum()) if "decision_attempt_count" in frame.columns else 0,
+        "model_ran_count": int(frame["model_ran_count"].sum()) if "model_ran_count" in frame.columns else 0,
+        "probabilities_created_count": int(frame["probabilities_created_count"].sum()) if "probabilities_created_count" in frame.columns else 0,
+        "no_xg_partial_model_count": int(frame["no_xg_partial_model_count"].sum()) if "no_xg_partial_model_count" in frame.columns else 0,
+        "odds_missing_non_block_count": int(frame["odds_missing_non_block_count"].sum()) if "odds_missing_non_block_count" in frame.columns else 0,
+        "understat_failed_non_block_count": int(frame["understat_failed_non_block_count"].sum()) if "understat_failed_non_block_count" in frame.columns else 0,
+        "data_block_rate": round(float(frame["data_blocked_count"].sum()) / evaluated, 4) if evaluated else 0.0,
+        "invalid_block_rate": round(invalid_blocks / evaluated, 4) if evaluated else 0.0,
         "top1_accuracy": round(float(frame["top1_accuracy"].mean()), 4) if not frame.empty else 0.0,
         "brier_score_1x2": round(float(frame["brier_score_1x2"].mean()), 4) if not frame.empty else 0.0,
         "statistical_validity": "HIGH" if evaluated >= 100 else ("MEDIUM" if evaluated >= 30 else "LOW"),
@@ -65,7 +78,7 @@ def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--season", required=True); p.add_argument("--competitions", default=""); p.add_argument("--source-profile", default="config/v20_internet_sources.yaml"); p.add_argument("--output-dir", default=""); p.add_argument("--mock-data-dir", default=""); p.add_argument("--max-matches-per-league", type=int, default=50); p.add_argument("--enable-network", action="store_true"); p.add_argument("--cache-only", action="store_true"); p.add_argument("--emit-all", action="store_true")
     result = run_v22_multileague_winner_backtest(**vars(p.parse_args(argv)))
-    for key in ["v22_multileague_backtest_status", "leagues_total", "leagues_ready", "leagues_insufficient_sample", "matches_requested_total", "matches_available_total", "matches_evaluated_total", "winner_pick_count", "winner_lean_count", "no_clear_winner_count", "no_decision_count", "data_blocked_count", "top1_accuracy", "brier_score_1x2", "statistical_validity", "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled"]:
+    for key in ["v22_multileague_backtest_status", "leagues_total", "leagues_ready", "leagues_insufficient_sample", "matches_requested_total", "matches_available_total", "matches_evaluated_total", "winner_pick_count", "winner_lean_count", "no_clear_winner_count", "no_decision_count", "data_blocked_count", "hard_data_blocked_count", "invalid_data_blocked_count", "model_ran_count", "probabilities_created_count", "decision_attempt_count", "top1_accuracy", "brier_score_1x2", "statistical_validity", "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled"]:
         value = result.get(key)
         print(f"{key}={str(value).lower() if isinstance(value, bool) else value}")
     return 0

@@ -36,6 +36,8 @@ def build_winner_feature_store(selected_match: dict[str, object], asof_features:
         "draw_implied_probability_asof": _num(asof_features.get("draw_odds_implied_probability_asof")),
         "away_implied_probability_asof": _num(asof_features.get("away_odds_implied_probability_asof")),
         "market_available": bool(asof_features.get("odds_available", False)),
+        "odds_available": bool(asof_features.get("odds_available", False)),
+        "xg_available": bool(asof_features.get("xg_available", False)),
         "source_quality_score": _num(source_quality.get("source_quality_score")),
         "source_quality_band": source_quality.get("source_quality_band", "LOW"),
         "early_season_risk": bool(asof_features.get("early_season_risk", False)),
