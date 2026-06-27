@@ -36,10 +36,12 @@ def run_search_v20_real_fixtures(**kwargs: object) -> dict[str, object]:
     if Path(understat.get("understat_live_matches_normalized_path", "")).exists():
         df = pd.read_csv(understat["understat_live_matches_normalized_path"], keep_default_na=False)
         rows.extend(_filter_candidates(understat_candidate_matches(df, team, opponent or "", match_date), kwargs))
+    rows = [_with_recommended_command(row, kwargs) for row in rows]
     status = "READY" if rows else ("PARTIAL" if football.get("records_count") or understat.get("records_count") else "BLOCKED")
     pd.DataFrame(rows).to_csv(out / "fixture_search_results.csv", index=False)
     (out / "fixture_search_results.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")
-    (out / "fixture_search_report.md").write_text(f"# v2.0 Fixture Search\n\n- status: {status}\n- matches_found: {len(rows)}\n- football_data_status: {football.get('football_data_live_status')}\n- understat_status: {understat.get('understat_live_status')}\n", encoding="utf-8")
+    report_rows = "\n".join(f"- {r.get('date')}: {r.get('home_team')} vs {r.get('away_team')} ({r.get('source')}) confidence={r.get('confidence')} command=`{r.get('recommended_run_command')}`" for r in rows[:20])
+    (out / "fixture_search_report.md").write_text(f"# v2.0 Fixture Search\n\n- status: {status}\n- matches_found: {len(rows)}\n- football_data_status: {football.get('football_data_live_status')}\n- understat_status: {understat.get('understat_live_status')}\n\n## Candidates\n{report_rows or 'No candidates found.'}\n", encoding="utf-8")
     return {"fixture_search_status": status, "matches_found": len(rows), "football_data_status": football.get("football_data_live_status"), "understat_status": understat.get("understat_live_status"), "cache_used": bool(football.get("cache_used") or understat.get("cache_used")), "network_calls_enabled": bool(kwargs.get("enable_network"))}
 
 
@@ -68,6 +70,19 @@ def _filter_candidates(rows: list[dict[str, object]], kwargs: dict[str, object])
             continue
         filtered.append(row)
     return filtered
+
+
+def _with_recommended_command(row: dict[str, object], kwargs: dict[str, object]) -> dict[str, object]:
+    date = row.get("date") or row.get("match_date") or kwargs.get("date_from") or ""
+    home = row.get("home_team", kwargs.get("team", ""))
+    away = row.get("away_team", kwargs.get("opponent", ""))
+    command = (
+        "python scripts/run_v20_match.py "
+        f"--home-team \"{home}\" --away-team \"{away}\" "
+        f"--competition \"{kwargs.get('competition')}\" --season \"{kwargs.get('season')}\" "
+        f"--match-date \"{date}\" --source-profile \"{kwargs.get('source_profile')}\""
+    )
+    return {**row, "match_date": date, "competition": kwargs.get("competition", ""), "season": kwargs.get("season", ""), "recommended_run_command": command}
 
 
 if __name__ == "__main__":

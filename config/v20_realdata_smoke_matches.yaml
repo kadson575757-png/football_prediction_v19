@@ -1,0 +1,26 @@
+matches:
+  - home_team: Arsenal
+    away_team: Chelsea
+    competition: Premier League
+    season: 2025/26
+    match_date: 2026-02-14
+  - home_team: Bayern Munich
+    away_team: Borussia Dortmund
+    competition: Bundesliga
+    season: 2025/26
+    match_date: 2026-02-14
+  - home_team: Lazio
+    away_team: Atalanta
+    competition: Serie A
+    season: 2025/26
+    match_date: 2026-02-14
+  - home_team: Barcelona
+    away_team: Real Madrid
+    competition: La Liga
+    season: 2025/26
+    match_date: 2026-02-14
+  - home_team: Paris Saint Germain
+    away_team: Marseille
+    competition: Ligue 1
+    season: 2025/26
+    match_date: 2026-02-14
