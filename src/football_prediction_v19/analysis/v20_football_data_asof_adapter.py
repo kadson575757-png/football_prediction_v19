@@ -10,7 +10,9 @@ from football_prediction_v19.analysis.v20_historical_match_context import Histor
 def build_football_data_asof(csv_path: str | Path, context: HistoricalMatchContext, output_dir: str | Path) -> dict[str, object]:
     out = Path(output_dir); out.mkdir(parents=True, exist_ok=True)
     df = pd.read_csv(csv_path, keep_default_na=False)
-    df["_date"] = pd.to_datetime(df["Date"])
+    df["_date"] = pd.to_datetime(df["Date"], errors="coerce", format="%Y-%m-%d")
+    if df["_date"].isna().all():
+        df["_date"] = pd.to_datetime(df["Date"], errors="coerce", dayfirst=True)
     prior = df[df["_date"] < pd.to_datetime(context.analysis_cutoff)].copy()
     table = _table(prior)
     form = _form(prior)

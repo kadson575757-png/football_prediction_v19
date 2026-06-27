@@ -48,7 +48,7 @@ def write_debug_reports(result: dict[str, object], output_dir: str | Path) -> di
     summary_json.write_text(json.dumps(diagnostics, indent=2), encoding="utf-8")
     summary_md.write_text(_source_status_markdown(diagnostics), encoding="utf-8")
     cache_md.write_text(_cache_markdown(diagnostics), encoding="utf-8")
-    fixture_md.write_text(f"# Fixture Resolution\n\n- status: {result.get('fixture_resolution_status')}\n- matched_sources: {result.get('matched_sources', [])}\n", encoding="utf-8")
+    fixture_md.write_text(f"# Fixture Resolution\n\n- status: {result.get('fixture_resolution_status')}\n- reason: {result.get('reason', '')}\n- matched_sources: {result.get('matched_sources', [])}\n- candidate_matches: {len(result.get('candidate_matches', []))}\n- suggested_team_names: {', '.join(result.get('suggested_team_names', [])) if result.get('suggested_team_names') else 'none'}\n", encoding="utf-8")
     block_md.write_text(f"# Block Reason\n\n- main_block_reason: {diagnostics['main_block_reason'] or 'none'}\n- recommended_fix: {diagnostics['recommended_fix']}\n", encoding="utf-8")
     return {
         "debug_source_summary_json_path": str(summary_json.resolve()),
@@ -75,6 +75,10 @@ def _provider_status(payload: dict[str, object], status_key: str) -> dict[str, o
         "cache_lookup_attempted": bool(cache_diag.get("cache_lookup_attempted", True)),
         "expected_cache_path": cache_diag.get("expected_cache_path") or cache_status.get("cache_path", ""),
         "cache_error": cache_diag.get("cache_error", ""),
+        "url": payload.get("url", ""),
+        "candidate_matches": payload.get("candidate_matches", []),
+        "suggested_team_names": payload.get("suggested_team_names", []),
+        "api_key_present": payload.get("api_key_present", None),
     }
 
 
@@ -148,7 +152,7 @@ def _recommended_fix(reason: str, source_status: dict[str, dict[str, object]]) -
 def _source_status_markdown(diagnostics: dict[str, object]) -> str:
     lines = ["# Source Status", ""]
     for provider, data in diagnostics["source_status"].items():
-        lines.append(f"- {provider}: {data['status']} ({data['reason']}); cache_used={str(data['cache_used']).lower()}; records={data['records_count']}")
+        lines.append(f"- {provider}: {data['status']} ({data['reason']}); url={data.get('url') or 'n/a'}; cache_used={str(data['cache_used']).lower()}; cache_written={str(data['cache_written']).lower()}; records={data['records_count']}; candidates={len(data.get('candidate_matches', []))}")
     lines.extend(["", f"main_block_reason: {diagnostics['main_block_reason'] or 'none'}", f"recommended_fix: {diagnostics['recommended_fix']}", ""])
     return "\n".join(lines)
 

@@ -20,6 +20,15 @@ def run_debug_v20_real_match_sources(**kwargs: object) -> dict[str, object]:
     source_status = result.get("source_status", {})
     result["v20_real_source_debug_status"] = status
     result["cache_write_status"] = "WRITTEN" if any(v.get("cache_written") for v in source_status.values()) else "NOT_WRITTEN"
+    result["football_data_url"] = source_status.get("football_data", {}).get("url", "")
+    result["understat_url"] = source_status.get("understat", {}).get("url", "")
+    result["odds_api_key_present"] = source_status.get("odds_api", {}).get("api_key_present")
+    result["candidate_matches_count"] = len(result.get("candidate_matches", []))
+    result["candidate_matches_preview"] = result.get("candidate_matches", [])[:5]
+    result["expected_cache_paths"] = {k: v.get("expected_cache_path", "") for k, v in source_status.items()}
+    result["cache_written_sources"] = [k for k, v in source_status.items() if v.get("cache_written")]
+    result["cache_missing_sources"] = [k for k, v in source_status.items() if not v.get("cache_used")]
+    result["recommended_next_command"] = "Run scripts/search_v20_real_fixtures.py with the same competition/season/team to inspect source fixtures."
     return result
 
 
@@ -34,7 +43,11 @@ def main(argv: list[str] | None = None) -> int:
         ("v20_real_source_debug_status", result.get("v20_real_source_debug_status")),
         ("fixture_resolution_status", result.get("fixture_resolution_status")),
         ("football_data_status", sources.get("football_data", {}).get("status")),
+        ("football_data_rows", sources.get("football_data", {}).get("records_count")),
+        ("football_data_candidates", len(sources.get("football_data", {}).get("candidate_matches", []))),
         ("understat_status", sources.get("understat", {}).get("status")),
+        ("understat_rows", sources.get("understat", {}).get("records_count")),
+        ("understat_candidates", len(sources.get("understat", {}).get("candidate_matches", []))),
         ("odds_api_status", sources.get("odds_api", {}).get("status")),
         ("cache_write_status", result.get("cache_write_status")),
         ("main_block_reason", result.get("main_block_reason")),
