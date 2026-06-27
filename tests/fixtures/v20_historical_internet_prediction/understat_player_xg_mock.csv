@@ -1,0 +1,6 @@
+date,team,player,minutes,goals,assists,xg,xa,npxg
+2026-01-10,Demo Home,Home Striker,90,1,0,1.1,0.2,1.0
+2026-01-20,Demo Home,Home Creator,85,0,1,0.4,0.8,0.4
+2026-01-11,Demo Away,Away Striker,90,1,0,0.9,0.1,0.8
+2026-01-21,Demo Away,Away Creator,88,0,1,0.5,0.7,0.5
+2026-02-20,Demo Home,Future Player,90,4,0,3.5,0.2,3.4
