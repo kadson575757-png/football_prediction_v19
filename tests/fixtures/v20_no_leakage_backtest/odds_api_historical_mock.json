@@ -1,0 +1,1 @@
+{"events":[{"home_team":"Demo Home","away_team":"Demo Away","commence_time":"2026-02-14T15:00:00","snapshot_time":"2026-02-13T23:59:00","bookmakers":[{"key":"demo_book","markets":[{"key":"h2h","outcomes":[{"name":"Demo Home","price":2.2},{"name":"Draw","price":3.3},{"name":"Demo Away","price":3.4}]}]}]}]}
