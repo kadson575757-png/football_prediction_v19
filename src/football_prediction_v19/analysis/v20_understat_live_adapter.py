@@ -78,8 +78,13 @@ def run_understat_live_adapter(
     raw_path.write_text(raw_text, encoding="utf-8")
     parse_attempted = True
     parse_error = ""
+    supported_payload_pattern = ""
     try:
-        payload = extract_understat_json_from_html(raw_text) if raw_suffix == ".html" else json.loads(raw_text)
+        if raw_suffix == ".html":
+            payload, supported_payload_pattern = parse_understat_dates_data(raw_text)
+        else:
+            payload = json.loads(raw_text)
+            supported_payload_pattern = "plain_json"
         matches = normalize_understat_matches(payload)
         players = normalize_understat_players(json.loads(Path(mock_players_json_path).read_text(encoding="utf-8")) if mock_players_json_path else payload)
         if matches.empty:
@@ -92,7 +97,7 @@ def run_understat_live_adapter(
     matches.to_csv(matches_path, index=False)
     players.to_csv(players_path, index=False)
     asof = build_understat_xg_asof(matches_path, players_path, context, out) if not matches.empty else None
-    return _finish(out, status, raw_path, matches_path, players_path, asof, cache_result.to_dict(), len(matches), diag, url, mapping, reason or parse_error, candidate_matches=understat_candidate_matches(matches, context.home_team, context.away_team, context.match_date), parse_attempted=parse_attempted)
+    return _finish(out, status, raw_path, matches_path, players_path, asof, cache_result.to_dict(), len(matches), diag, url, mapping, reason or parse_error, candidate_matches=understat_candidate_matches(matches, context.home_team, context.away_team, context.match_date), parse_attempted=parse_attempted, supported_payload_pattern=supported_payload_pattern)
 
 
 def build_understat_league_url(league_code: str, season_start_year: str | int) -> str:
@@ -112,29 +117,35 @@ def fetch_or_cache_understat_league(url: str, timeout_seconds: int = 20) -> str:
 
 
 def extract_understat_json_from_html(text: str) -> dict[str, object] | list[object]:
+    payload, _ = parse_understat_dates_data(text)
+    return payload
+
+
+def parse_understat_dates_data(text: str) -> tuple[dict[str, object] | list[object], str]:
     """Extract Understat's embedded datesData JSON from a league page."""
     if not text:
         raise ValueError("empty Understat payload")
     stripped = text.strip()
     if stripped.startswith("{") or stripped.startswith("["):
-        return json.loads(stripped)
+        return json.loads(stripped), "plain_json"
     patterns = [
-        r"datesData\s*=\s*JSON\.parse\('(?P<payload>.*?)'\)",
-        r"datesData\s*=\s*(?P<payload>\[.*?\]);",
-        r"datesData\s*=\s*(?P<payload>\{.*?\});",
+        ("datesdata_json_parse_single_quoted", r"datesData\s*=\s*JSON\.parse\('(?P<payload>.*?)'\)"),
+        ("datesdata_json_parse_double_quoted", r"datesData\s*=\s*JSON\.parse\(\"(?P<payload>.*?)\"\)"),
+        ("datesdata_inline_array", r"datesData\s*=\s*(?P<payload>\[.*?\]);"),
+        ("datesdata_inline_object", r"datesData\s*=\s*(?P<payload>\{.*?\});"),
     ]
-    for pattern in patterns:
+    for name, pattern in patterns:
         match = re.search(pattern, text, flags=re.DOTALL)
         if not match:
             continue
         payload = match.group("payload")
-        if "JSON.parse" in pattern:
+        if "json_parse" in name:
             payload = payload.encode("utf-8").decode("unicode_escape")
             payload = unquote(payload)
         try:
-            return json.loads(payload)
+            return json.loads(payload), name
         except json.JSONDecodeError:
-            return json.loads(payload.replace('\\"', '"'))
+            return json.loads(payload.replace('\\"', '"')), name
     raise ValueError("supported Understat datesData payload pattern not found")
 
 
@@ -146,9 +157,16 @@ def parse_understat_dates(values: object) -> pd.Series:
 
 
 def normalize_understat_team_names(value: object) -> str:
-    aliases = {"Manchester United": "Man United", "Newcastle United": "Newcastle"}
+    aliases = {"Manchester United": "Man United", "Newcastle United": "Newcastle", "Leeds": "Leeds United"}
     text = str(value or "").strip()
     return aliases.get(text, text)
+
+
+def normalize_understat_xg_values(value: object) -> float | None:
+    numeric = pd.to_numeric(pd.Series([value]), errors="coerce").iloc[0]
+    if pd.isna(numeric) or float(numeric) < 0:
+        return None
+    return float(numeric)
 
 
 def normalize_understat_matches(payload: dict[str, object] | list[object]) -> pd.DataFrame:
@@ -164,16 +182,14 @@ def normalize_understat_matches(payload: dict[str, object] | list[object]) -> pd
             "date": row.get("date") or row.get("datetime") or row.get("match_date"),
             "home_team": normalize_understat_team_names(home),
             "away_team": normalize_understat_team_names(away),
-            "home_xg": row.get("home_xg", xg.get("h", "")),
-            "away_xg": row.get("away_xg", xg.get("a", "")),
+            "home_xg": normalize_understat_xg_values(row.get("home_xg", xg.get("h", ""))),
+            "away_xg": normalize_understat_xg_values(row.get("away_xg", xg.get("a", ""))),
             "home_goals": goals.get("h", row.get("home_goals", "")),
             "away_goals": goals.get("a", row.get("away_goals", "")),
         })
     df = pd.DataFrame(records, columns=["id", "date", "home_team", "away_team", "home_xg", "away_xg", "home_goals", "away_goals"])
     if not df.empty:
         df["date"] = parse_understat_dates(df["date"])
-        for col in ["home_xg", "away_xg"]:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
         df = df.dropna(subset=["date", "home_team", "away_team", "home_xg", "away_xg"])
     return df
 
@@ -223,7 +239,8 @@ def read_understat_cache(cache_dir: str | Path, cache_key: str, ttl_hours: float
     return result.to_dict(), payload
 
 
-def _finish(out: Path, status: str, raw_path: Path, matches_path: Path, players_path: Path, asof: dict[str, object] | None, cache: dict[str, object], rows: int, cache_diagnostics: dict[str, object], url: str, mapping: SourceLeagueMapping, reason: str = "", candidate_matches: list[dict[str, object]] | None = None, parse_attempted: bool = True) -> dict[str, object]:
+def _finish(out: Path, status: str, raw_path: Path, matches_path: Path, players_path: Path, asof: dict[str, object] | None, cache: dict[str, object], rows: int, cache_diagnostics: dict[str, object], url: str, mapping: SourceLeagueMapping, reason: str = "", candidate_matches: list[dict[str, object]] | None = None, parse_attempted: bool = True, supported_payload_pattern: str = "") -> dict[str, object]:
+    parse_error_type = reason.split(":", 1)[0] if status == "FAILED_PARSE" and reason else ""
     result = {
         "understat_live_status": status,
         "status": status,
@@ -241,7 +258,10 @@ def _finish(out: Path, status: str, raw_path: Path, matches_path: Path, players_
         "rows_count": rows,
         "parse_success": status not in {"FAILED_PARSE", "FAILED_FETCH", "DISABLED_NETWORK", "UNSUPPORTED_LEAGUE"},
         "supported_payload_patterns": ["datesData JSON.parse escaped string", "datesData inline array", "plain JSON matches list"],
+        "supported_payload_pattern": supported_payload_pattern,
         "error_type": status if status.startswith("FAILED") else "",
+        "parse_error_type": parse_error_type,
+        "parse_error_preview": reason[:240] if status == "FAILED_PARSE" else "",
         "recommended_fix": _recommended_fix(status),
         "xg_available": rows > 0 and status in {"SUCCESS", "CACHE_HIT"},
         "cache_used": status == "CACHE_HIT",
@@ -305,4 +325,6 @@ def _recommended_fix(status: str) -> str:
 
 
 def _norm(value: object) -> str:
-    return " ".join(str(value).strip().lower().replace("-", " ").split())
+    aliases = {"leeds": "leeds united", "leeds utd": "leeds united", "man utd": "manchester united", "man united": "manchester united"}
+    text = " ".join(str(value).strip().lower().replace("-", " ").split())
+    return aliases.get(text, text)

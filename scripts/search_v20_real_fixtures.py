@@ -13,7 +13,7 @@ sys.path[:0] = [str(ROOT), str(ROOT / "src")]
 
 from football_prediction_v19.analysis.v20_cutoff_resolver import resolve_analysis_cutoff  # noqa: E402
 from football_prediction_v19.analysis.v20_football_data_live_adapter import football_data_candidate_matches, run_football_data_live_adapter  # noqa: E402
-from football_prediction_v19.analysis.v20_historical_match_context import build_match_context  # noqa: E402
+from football_prediction_v19.analysis.v20_historical_match_context import build_match_context, normalize_match_date  # noqa: E402
 from football_prediction_v19.analysis.v20_source_league_resolver import resolve_source_league  # noqa: E402
 from football_prediction_v19.analysis.v20_understat_live_adapter import run_understat_live_adapter, understat_candidate_matches  # noqa: E402
 
@@ -22,7 +22,7 @@ def run_search_v20_real_fixtures(**kwargs: object) -> dict[str, object]:
     out = Path(str(kwargs["output_dir"])); out.mkdir(parents=True, exist_ok=True)
     team = str(kwargs["team"])
     opponent = str(kwargs.get("opponent", ""))
-    match_date = str(kwargs.get("date_from") or "2026-02-14")
+    match_date = normalize_match_date(str(kwargs.get("date_from") or "2026-02-14"))
     context = resolve_analysis_cutoff(build_match_context(team, opponent or team, str(kwargs["competition"]), str(kwargs["season"]), match_date))
     mapping = resolve_source_league(str(kwargs["competition"]), str(kwargs["season"]), out)
     fallback = Path(str(kwargs.get("mock_data_dir") or "")) if kwargs.get("mock_data_dir") else None
@@ -30,19 +30,25 @@ def run_search_v20_real_fixtures(**kwargs: object) -> dict[str, object]:
     football = run_football_data_live_adapter(mapping, context, out, enable_network=bool(kwargs.get("enable_network")), cache_dir=cache_root, mock_csv_path=(fallback / "football_data_live_mock.csv") if fallback and (fallback / "football_data_live_mock.csv").exists() else None)
     understat = run_understat_live_adapter(mapping, context, out, enable_network=bool(kwargs.get("enable_network")), cache_dir=cache_root, mock_json_path=(fallback / "understat_league_mock.json") if fallback and (fallback / "understat_league_mock.json").exists() else None)
     rows = []
+    related = []
     if Path(football.get("football_data_live_normalized_path", "")).exists():
         df = pd.read_csv(football["football_data_live_normalized_path"], keep_default_na=False)
-        rows.extend(_filter_candidates(football_data_candidate_matches(df, team, opponent or "", match_date), kwargs))
+        main, rel = _split_main_related(_filter_candidates(football_data_candidate_matches(df, team, opponent or "", match_date), kwargs), team, opponent)
+        rows.extend(main); related.extend(rel)
     if Path(understat.get("understat_live_matches_normalized_path", "")).exists():
         df = pd.read_csv(understat["understat_live_matches_normalized_path"], keep_default_na=False)
-        rows.extend(_filter_candidates(understat_candidate_matches(df, team, opponent or "", match_date), kwargs))
+        main, rel = _split_main_related(_filter_candidates(understat_candidate_matches(df, team, opponent or "", match_date), kwargs), team, opponent)
+        rows.extend(main); related.extend(rel)
     rows = [_with_recommended_command(row, kwargs) for row in rows]
     status = "READY" if rows else ("PARTIAL" if football.get("records_count") or understat.get("records_count") else "BLOCKED")
     pd.DataFrame(rows).to_csv(out / "fixture_search_results.csv", index=False)
     (out / "fixture_search_results.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    pd.DataFrame(related).to_csv(out / "fixture_search_related_suggestions.csv", index=False)
+    (out / "fixture_search_related_suggestions.json").write_text(json.dumps(related, indent=2), encoding="utf-8")
     report_rows = "\n".join(f"- {r.get('date')}: {r.get('home_team')} vs {r.get('away_team')} ({r.get('source')}) confidence={r.get('confidence')} command=`{r.get('recommended_run_command')}`" for r in rows[:20])
-    (out / "fixture_search_report.md").write_text(f"# v2.0 Fixture Search\n\n- status: {status}\n- matches_found: {len(rows)}\n- football_data_status: {football.get('football_data_live_status')}\n- understat_status: {understat.get('understat_live_status')}\n\n## Candidates\n{report_rows or 'No candidates found.'}\n", encoding="utf-8")
-    return {"fixture_search_status": status, "matches_found": len(rows), "football_data_status": football.get("football_data_live_status"), "understat_status": understat.get("understat_live_status"), "cache_used": bool(football.get("cache_used") or understat.get("cache_used")), "network_calls_enabled": bool(kwargs.get("enable_network"))}
+    related_rows = "\n".join(f"- {r.get('date')}: {r.get('home_team')} vs {r.get('away_team')} ({r.get('source')})" for r in related[:20])
+    (out / "fixture_search_report.md").write_text(f"# v2.0 Fixture Search\n\n- status: {status}\n- matches_found: {len(rows)}\n- related_suggestions: {len(related)}\n- football_data_status: {football.get('football_data_live_status')}\n- understat_status: {understat.get('understat_live_status')}\n\n## Candidates\n{report_rows or 'No candidates found.'}\n\n## Related Suggestions\n{related_rows or 'No related suggestions.'}\n", encoding="utf-8")
+    return {"fixture_search_status": status, "matches_found": len(rows), "related_suggestions_count": len(related), "football_data_status": football.get("football_data_live_status"), "understat_status": understat.get("understat_live_status"), "cache_used": bool(football.get("cache_used") or understat.get("cache_used")), "network_calls_enabled": bool(kwargs.get("enable_network"))}
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -57,8 +63,8 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _filter_candidates(rows: list[dict[str, object]], kwargs: dict[str, object]) -> list[dict[str, object]]:
-    date_from = pd.to_datetime(kwargs.get("date_from"), errors="coerce") if kwargs.get("date_from") else None
-    date_to = pd.to_datetime(kwargs.get("date_to"), errors="coerce") if kwargs.get("date_to") else None
+    date_from = pd.to_datetime(normalize_match_date(str(kwargs.get("date_from"))), errors="coerce") if kwargs.get("date_from") else None
+    date_to = pd.to_datetime(normalize_match_date(str(kwargs.get("date_to"))), errors="coerce") if kwargs.get("date_to") else None
     filtered = []
     for row in rows:
         dt = pd.to_datetime(row.get("date"), errors="coerce", format="%Y-%m-%d")
@@ -73,7 +79,7 @@ def _filter_candidates(rows: list[dict[str, object]], kwargs: dict[str, object])
 
 
 def _with_recommended_command(row: dict[str, object], kwargs: dict[str, object]) -> dict[str, object]:
-    date = row.get("date") or row.get("match_date") or kwargs.get("date_from") or ""
+    date = normalize_match_date(str(row.get("date") or row.get("match_date") or kwargs.get("date_from") or ""))
     home = row.get("home_team", kwargs.get("team", ""))
     away = row.get("away_team", kwargs.get("opponent", ""))
     command = (
@@ -83,6 +89,30 @@ def _with_recommended_command(row: dict[str, object], kwargs: dict[str, object])
         f"--match-date \"{date}\" --source-profile \"{kwargs.get('source_profile')}\""
     )
     return {**row, "match_date": date, "competition": kwargs.get("competition", ""), "season": kwargs.get("season", ""), "recommended_run_command": command}
+
+
+def _split_main_related(rows: list[dict[str, object]], team: str, opponent: str) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    if not opponent:
+        return rows, []
+    main, related = [], []
+    team_norm = _norm(team)
+    opp_norm = _norm(opponent)
+    for row in rows:
+        home = _norm(row.get("home_team", ""))
+        away = _norm(row.get("away_team", ""))
+        has_team = team_norm in {home, away}
+        has_opp = opp_norm in {home, away}
+        if has_team and has_opp:
+            main.append(row)
+        else:
+            related.append({**row, "related_reason": "same team but not requested opponent pairing"})
+    return main, related
+
+
+def _norm(value: object) -> str:
+    aliases = {"leeds": "leeds united", "man utd": "manchester united", "man united": "manchester united"}
+    text = " ".join(str(value).strip().lower().replace("-", " ").split())
+    return aliases.get(text, text)
 
 
 if __name__ == "__main__":

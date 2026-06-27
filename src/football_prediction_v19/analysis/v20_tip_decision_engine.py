@@ -8,6 +8,8 @@ def run_tip_decision_engine(model: dict[str, object], asof_status: str, features
     out = Path(output_dir); out.mkdir(parents=True, exist_ok=True)
     if model.get("model_status") == "MODEL_BLOCKED" or asof_status == "ASOF_BLOCKED":
         decision, tip = "DATA_BLOCKED", "NO_BET"
+    elif features.get("source_quality_band") == "LOW":
+        decision, tip = "NO_BET", "NO_BET"
     elif float(features.get("data_quality_score", 0)) < 0.6:
         decision, tip = "NO_BET", "NO_BET"
     elif model.get("model_status") == "MODEL_PARTIAL" and not features.get("xg_available"):
@@ -19,8 +21,9 @@ def run_tip_decision_engine(model: dict[str, object], asof_status: str, features
     else:
         probs = {"1X2_HOME": model.get("home_win_probability", 0), "DOUBLE_CHANCE_HOME_DRAW": float(model.get("home_win_probability", 0)) + float(model.get("draw_probability", 0)), "1X2_AWAY": model.get("away_win_probability", 0), "DOUBLE_CHANCE_AWAY_DRAW": float(model.get("away_win_probability", 0)) + float(model.get("draw_probability", 0))}
         tip, best = max(probs.items(), key=lambda kv: kv[1])
-        decision = "MODEL_TIP" if float(model.get("model_confidence", 0)) >= 0.7 and best >= 0.55 else "ANALYST_LEAN"
-        if not features.get("odds_available") and decision == "MODEL_TIP" and float(model.get("model_confidence", 0)) < 0.78:
+        model_tip_threshold = 0.68 if not features.get("odds_available") and features.get("source_quality_band", "MEDIUM") in {"MEDIUM", "HIGH"} else 0.7
+        decision = "MODEL_TIP" if float(model.get("model_confidence", 0)) >= model_tip_threshold and best >= 0.55 else "ANALYST_LEAN"
+        if not features.get("odds_available") and decision == "MODEL_TIP" and features.get("source_quality_band", "MEDIUM") not in {"MEDIUM", "HIGH"}:
             decision = "ANALYST_LEAN"
     missing = ", ".join(str(x) for x in model.get("missing_inputs", []))
     why = "As-of fixture, table/form and xG support this preview decision." if tip != "NO_BET" else "Coverage, confidence or leakage policy prevents a production recommendation."
