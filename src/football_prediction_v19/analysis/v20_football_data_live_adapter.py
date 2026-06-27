@@ -30,23 +30,34 @@ def run_football_data_live_adapter(
     status = "SUCCESS"
     raw_text = ""
     cache_result, cached = read_cache(cache_root, cache_key, cache_ttl_hours)
+    cache_write_success = False
+    network_attempted = False
+    request_blocked = False
+    fetch_success = False
+    cache_error = ""
     if cached:
         raw_text = cached
         status = "CACHE_HIT"
     elif mock_csv_path:
         raw_text = Path(mock_csv_path).read_text(encoding="utf-8")
-        write_cache(cache_root, cache_key, raw_text)
+        try:
+            write_cache(cache_root, cache_key, raw_text)
+            cache_write_success = True
+        except Exception as exc:
+            cache_error = str(exc)
     elif not mapping.football_data_code:
         status = "UNSUPPORTED_LEAGUE"
     elif not enable_network:
-        status = "DISABLED_NETWORK"
+        status = "DISABLED_NETWORK"; request_blocked = True
     else:
-        status = "FAILED"
+        status = "FAILED"; network_attempted = True
+    fetch_success = bool(raw_text)
+    diag = _cache_diag(cache_result.to_dict(), network_attempted, request_blocked, fetch_success, bool(cached), cache_write_success, cache_error)
     raw_path = out / "football_data_live_raw.csv"
     normalized_path = out / "football_data_live_normalized.csv"
     if not raw_text:
         _empty_football_csv(normalized_path)
-        result = _result(status, out, raw_path, normalized_path, None, None, cache_result.to_dict(), 0)
+        result = _result(status, out, raw_path, normalized_path, None, None, cache_result.to_dict(), 0, diag)
         _write_report(out, result)
         return result
     raw_path.write_text(raw_text, encoding="utf-8")
@@ -54,7 +65,7 @@ def run_football_data_live_adapter(
     normalized = normalize_football_data_live_frame(df)
     normalized.to_csv(normalized_path, index=False)
     asof = build_football_data_asof(normalized_path, context, out)
-    result = _result(status, out, raw_path, normalized_path, asof, None, cache_result.to_dict(), len(normalized))
+    result = _result(status, out, raw_path, normalized_path, asof, None, cache_result.to_dict(), len(normalized), diag)
     _write_report(out, result)
     return result
 
@@ -76,7 +87,7 @@ def _empty_football_csv(path: Path) -> None:
     pd.DataFrame(columns=["Date", "HomeTeam", "AwayTeam", "FTHG", "FTAG", "FTR", "B365H", "B365D", "B365A"]).to_csv(path, index=False)
 
 
-def _result(status: str, out: Path, raw_path: Path, normalized_path: Path, asof: dict[str, object] | None, warnings: str | None, cache: dict[str, object], rows: int) -> dict[str, object]:
+def _result(status: str, out: Path, raw_path: Path, normalized_path: Path, asof: dict[str, object] | None, warnings: str | None, cache: dict[str, object], rows: int, cache_diagnostics: dict[str, object]) -> dict[str, object]:
     payload = {
         "football_data_live_status": status,
         "records_count": rows,
@@ -84,6 +95,7 @@ def _result(status: str, out: Path, raw_path: Path, normalized_path: Path, asof:
         "football_data_live_raw_path": str(raw_path.resolve()),
         "football_data_live_normalized_path": str(normalized_path.resolve()),
         "cache_status": cache,
+        "cache_diagnostics": cache_diagnostics,
         "warnings": warnings or "",
     }
     if asof:
@@ -118,3 +130,17 @@ def _write_report(out: Path, result: dict[str, object]) -> None:
         encoding="utf-8",
     )
     result["football_data_live_adapter_report_path"] = str(path.resolve())
+
+
+def _cache_diag(cache: dict[str, object], network_attempted: bool, request_blocked: bool, fetch_success: bool, cache_hit: bool, cache_write_success: bool, cache_error: str) -> dict[str, object]:
+    return {
+        "cache_lookup_attempted": True,
+        "cache_hit": cache_hit,
+        "expected_cache_path": cache.get("cache_path", ""),
+        "network_attempted": network_attempted,
+        "request_blocked": request_blocked,
+        "fetch_success": fetch_success,
+        "cache_write_attempted": fetch_success and not cache_hit,
+        "cache_write_success": cache_write_success,
+        "cache_error": cache_error,
+    }

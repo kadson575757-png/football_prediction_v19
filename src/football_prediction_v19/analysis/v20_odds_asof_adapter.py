@@ -9,9 +9,8 @@ from football_prediction_v19.analysis.v20_historical_match_context import Histor
 
 def build_odds_asof(odds_csv: str | Path, totals_csv: str | Path | None, context: HistoricalMatchContext, output_dir: str | Path) -> dict[str, object]:
     out = Path(output_dir); out.mkdir(parents=True, exist_ok=True)
-    frames = [pd.read_csv(odds_csv, keep_default_na=False)]
-    if totals_csv: frames.append(pd.read_csv(totals_csv, keep_default_na=False))
-    df = pd.concat(frames, ignore_index=True)
+    frames = [frame for frame in [pd.read_csv(odds_csv, keep_default_na=False), pd.read_csv(totals_csv, keep_default_na=False) if totals_csv else pd.DataFrame()] if not frame.empty]
+    df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame(columns=["match_date", "home_team", "away_team", "snapshot_time", "market", "selection", "odds"])
     df["snapshot_dt"] = pd.to_datetime(df["snapshot_time"])
     cutoff = pd.to_datetime(context.analysis_cutoff)
     target = df[df["home_team"].eq(context.home_team) & df["away_team"].eq(context.away_team) & df["match_date"].eq(context.match_date)].copy()

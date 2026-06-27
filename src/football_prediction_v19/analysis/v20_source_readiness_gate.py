@@ -13,6 +13,10 @@ def evaluate_source_readiness(fixture_status: str, asof_status: str, leakage_sta
         readiness = "DATA_BLOCKED"; reasons.append("leakage or as-of gate blocked")
     elif not coverage.get("table_available"):
         readiness = "DATA_BLOCKED"; reasons.append("table/form missing")
+    elif not coverage.get("xg_available") and not coverage.get("odds_available"):
+        readiness = "NO_BET_REQUIRED"
+        reasons.append("xG missing")
+        reasons.append("odds missing")
     elif not coverage.get("xg_available") or not coverage.get("odds_available"):
         readiness = "READY_FOR_ANALYST_LEAN" if fixture_status in {"RESOLVED", "PARTIAL"} else "NO_BET_REQUIRED"
         if not coverage.get("xg_available"):
