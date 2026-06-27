@@ -1,0 +1,14 @@
+source_profile: v20_live_source_adapter_mock
+network:
+  enabled_by_default: false
+  cache_enabled: true
+  cache_dir: outputs/cache/v20_live_sources
+sources:
+  football_data_co_uk:
+    enabled: true
+  understat:
+    enabled: true
+  odds_api:
+    enabled: true
+  api_football:
+    enabled: false

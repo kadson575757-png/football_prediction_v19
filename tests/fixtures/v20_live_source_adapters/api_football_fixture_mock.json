@@ -1,0 +1,4 @@
+{
+  "lineups": [{"team": "Demo Home", "formation": "4-3-3"}, {"team": "Demo Away", "formation": "3-4-2-1"}],
+  "injuries": [{"team": "Demo Away", "player": "Demo Away Midfielder"}]
+}
