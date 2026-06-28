@@ -28,12 +28,16 @@ def run_match_winner_batch(**kwargs: object) -> dict[str, object]:
             home=row.get("home_team", ""),
             away=row.get("away_team", ""),
             match_date=row.get("match_date", ""),
+            as_of_date=row.get("as_of_date", ""),
             source_profile=kwargs.get("source_profile") or "config/v20_internet_sources.yaml",
             cache_only=bool(kwargs.get("cache_only", False)),
             enable_network=bool(kwargs.get("enable_network", False)),
             output_dir=out / f"match_{idx+1}",
         )
-        rows.append({k: v for k, v in result.items() if not str(k).endswith("_path")})
+        cleaned = {k: v for k, v in result.items() if not str(k).endswith("_path")}
+        cleaned["input_match_date"] = row.get("match_date", "")
+        cleaned["resolved_match_date"] = result.get("resolved_match_date", result.get("match_date", ""))
+        rows.append(cleaned)
     result_frame = pd.DataFrame(rows)
     result_frame.to_csv(out / "winner_batch_results.csv", index=False)
     (out / "winner_batch_results.json").write_text(json.dumps(rows, indent=2, default=str), encoding="utf-8")

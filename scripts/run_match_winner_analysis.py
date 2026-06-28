@@ -12,6 +12,8 @@ sys.path[:0] = [str(ROOT), str(ROOT / "src")]
 
 from football_prediction_v19.analysis.v25_practical_decision_summary import build_practical_decision_summary  # noqa: E402
 from football_prediction_v19.analysis.v25_winner_report import write_winner_report  # noqa: E402
+from football_prediction_v19.analysis.v26_asof_guard import evaluate_asof_guard  # noqa: E402
+from football_prediction_v19.analysis.v26_fixture_date_resolver import resolve_fixture_date  # noqa: E402
 from scripts.run_v21_predict_winner import run_v21_predict_winner  # noqa: E402
 
 
@@ -22,8 +24,21 @@ def run_match_winner_analysis(**kwargs: object) -> dict[str, object]:
     season = str(kwargs.get("season") or "")
     match_date = str(kwargs.get("match_date") or "")
     out = _output_dir(kwargs.get("output_dir"), home, away)
+    resolver = {"resolver_status": "SKIPPED", "source_used": "explicit_match_date", "candidates_count": 0, "reason": "explicit match_date provided", "reversed_fixture_found": False, "alias_matched": False, "match_date": match_date}
     if not match_date:
-        result = _blocked_result(competition, season, home, away, match_date, "fixture_missing_or_ambiguous", "Match date was not provided and no fixture lookup was requested.")
+        resolver = resolve_fixture_date(competition, season, home, away, source_profile=str(kwargs.get("source_profile") or "config/v20_internet_sources.yaml"), cache_only=bool(kwargs.get("cache_only", False)), enable_network=bool(kwargs.get("enable_network", False)), corpus_path=kwargs.get("corpus_path") or None)
+        if resolver["resolver_status"] == "RESOLVED":
+            match_date = str(resolver["match_date"])
+        else:
+            result = _blocked_result(competition, season, home, away, match_date, "fixture_missing_or_ambiguous", str(resolver["reason"]))
+            result.update(_resolver_fields(resolver))
+            paths = write_winner_report(result, out)
+            return {**result, **paths}
+    guard = evaluate_asof_guard(match_date, str(kwargs.get("as_of_date") or "") or None, bool(kwargs.get("allow_post_match_analysis", False)))
+    if guard["asof_guard_status"] == "BLOCKED":
+        result = _blocked_result(competition, season, home, away, match_date, "asof_guard_blocked", str(guard["asof_guard_reason"]))
+        result.update(_resolver_fields(resolver))
+        result.update(guard)
     else:
         try:
             raw = run_v21_predict_winner(
@@ -39,10 +54,29 @@ def run_match_winner_analysis(**kwargs: object) -> dict[str, object]:
                 output_dir=out / "core",
             )
             result = _practical_result(raw, competition, season, home, away, match_date)
+            result.update(_resolver_fields(resolver))
+            result.update(guard)
+            if guard["post_match_analysis"]:
+                result["recommendation_summary"] = f"{result['recommendation_summary']} Post-match analysis, not pre-match prediction."
         except Exception as exc:  # noqa: BLE001 - practical runner should report readable hard blocks.
             result = _blocked_result(competition, season, home, away, match_date, "fixture_missing_or_ambiguous", f"Winner core could not complete analysis: {type(exc).__name__}.")
+            result.update(_resolver_fields(resolver))
+            result.update(guard)
     paths = write_winner_report(result, out)
     return {**result, **paths}
+
+
+def _resolver_fields(resolver: dict[str, object]) -> dict[str, object]:
+    return {
+        "fixture_resolver_status": resolver.get("resolver_status", ""),
+        "fixture_resolver_source": resolver.get("source_used", ""),
+        "fixture_candidates_count": resolver.get("candidates_count", 0),
+        "resolved_match_date": resolver.get("match_date", ""),
+        "resolver_reason": resolver.get("reason", ""),
+        "reversed_fixture_found": resolver.get("reversed_fixture_found", False),
+        "alias_matched": resolver.get("alias_matched", False),
+        "fixture_candidates": resolver.get("candidates", []),
+    }
 
 
 def _practical_result(raw: dict[str, object], competition: str, season: str, home: str, away: str, match_date: str) -> dict[str, object]:
@@ -151,6 +185,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--home", required=True)
     parser.add_argument("--away", required=True)
     parser.add_argument("--match-date", default="")
+    parser.add_argument("--as-of-date", default="")
+    parser.add_argument("--allow-post-match-analysis", action="store_true")
     parser.add_argument("--source-profile", default="config/v20_internet_sources.yaml")
     parser.add_argument("--cache-only", action="store_true")
     parser.add_argument("--enable-network", action="store_true")
@@ -160,7 +196,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--markdown", action="store_true")
     parser.add_argument("--emit-all", action="store_true")
     result = run_match_winner_analysis(**vars(parser.parse_args(argv)))
-    for key in ["winner_analysis_status", "competition", "season", "home_team", "away_team", "match_date", "decision_class", "predicted_winner", "home_win_probability", "draw_probability", "away_win_probability", "confidence", "risk_level", "source_quality_band", "prediction_tier", "xg_available", "odds_available", "model_status", "primary_reasons", "risk_notes", "recommendation_summary", "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled"]:
+    for key in ["winner_analysis_status", "competition", "season", "home_team", "away_team", "match_date", "fixture_resolver_status", "fixture_resolver_source", "fixture_candidates_count", "resolved_match_date", "resolver_reason", "reversed_fixture_found", "alias_matched", "as_of_date", "post_match_analysis", "leakage_warning", "asof_guard_status", "asof_guard_reason", "decision_class", "predicted_winner", "home_win_probability", "draw_probability", "away_win_probability", "confidence", "risk_level", "source_quality_band", "prediction_tier", "xg_available", "odds_available", "model_status", "primary_reasons", "risk_notes", "recommendation_summary", "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled"]:
         value = result.get(key)
         print(f"{key}={str(value).lower() if isinstance(value, bool) else value}")
     return 0
