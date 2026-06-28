@@ -1,0 +1,41 @@
+competition,season,home_team,away_team,match_date,expected_result_source
+Premier League,2025/26,Arsenal,Chelsea,,football_data
+Premier League,2025/26,Chelsea,Arsenal,,football_data
+Premier League,2025/26,Liverpool,Manchester United,,football_data
+Premier League,2025/26,Manchester City,Tottenham Hotspur,,football_data
+Premier League,2025/26,Newcastle United,Aston Villa,,football_data
+Premier League,2025/26,Brighton,Everton,,football_data
+Premier League,2025/26,West Ham United,Fulham,,football_data
+Premier League,2025/26,Brentford,Crystal Palace,,football_data
+Bundesliga,2025/26,Bayern Munich,Borussia Dortmund,,football_data
+Bundesliga,2025/26,Borussia Dortmund,Bayern Munich,,football_data
+Bundesliga,2025/26,Bayer Leverkusen,RB Leipzig,,football_data
+Bundesliga,2025/26,RB Leipzig,Bayer Leverkusen,,football_data
+Bundesliga,2025/26,Eintracht Frankfurt,VfB Stuttgart,,football_data
+Bundesliga,2025/26,Werder Bremen,Wolfsburg,,football_data
+Bundesliga,2025/26,Freiburg,Mainz,,football_data
+Bundesliga,2025/26,Union Berlin,Augsburg,,football_data
+La Liga,2025/26,Barcelona,Real Madrid,,football_data
+La Liga,2025/26,Real Madrid,Barcelona,,football_data
+La Liga,2025/26,Atletico Madrid,Sevilla,,football_data
+La Liga,2025/26,Real Sociedad,Villarreal,,football_data
+La Liga,2025/26,Athletic Club,Valencia,,football_data
+La Liga,2025/26,Real Betis,Getafe,,football_data
+La Liga,2025/26,Celta Vigo,Osasuna,,football_data
+La Liga,2025/26,Espanyol,Mallorca,,football_data
+Serie A,2025/26,Inter,Milan,,football_data
+Serie A,2025/26,Milan,Inter,,football_data
+Serie A,2025/26,Juventus,Napoli,,football_data
+Serie A,2025/26,Roma,Lazio,,football_data
+Serie A,2025/26,Atalanta,Fiorentina,,football_data
+Serie A,2025/26,Bologna,Torino,,football_data
+Serie A,2025/26,Genoa,Udinese,,football_data
+Serie A,2025/26,Lecce,Cagliari,,football_data
+Ligue 1,2025/26,Paris Saint Germain,Marseille,,football_data
+Ligue 1,2025/26,Marseille,Lyon,,football_data
+Ligue 1,2025/26,Lille,Monaco,,football_data
+Ligue 1,2025/26,Rennes,Nice,,football_data
+Ligue 1,2025/26,Lens,Nantes,,football_data
+Ligue 1,2025/26,Toulouse,Strasbourg,,football_data
+Ligue 1,2025/26,Montpellier,Brest,,football_data
+Ligue 1,2025/26,Reims,Le Havre,,football_data
