@@ -1,0 +1,41 @@
+competition,season,home_team,away_team,match_date,expected_result_source
+Premier League,2025/26,Liverpool,Bournemouth,2025-08-15,football_data
+Premier League,2025/26,Aston Villa,Newcastle,2025-08-16,football_data
+Premier League,2025/26,Brighton,Fulham,2025-08-16,football_data
+Premier League,2025/26,Sunderland,West Ham,2025-08-16,football_data
+Premier League,2025/26,Tottenham,Burnley,2025-08-16,football_data
+Premier League,2025/26,Wolves,Man City,2025-08-16,football_data
+Premier League,2025/26,Chelsea,Crystal Palace,2025-08-17,football_data
+Premier League,2025/26,Nott'm Forest,Brentford,2025-08-17,football_data
+Premier League,2025/26,Man United,Arsenal,2025-08-17,football_data
+Premier League,2025/26,Leeds,Everton,2025-08-18,football_data
+Premier League,2025/26,West Ham,Chelsea,2025-08-22,football_data
+Premier League,2025/26,Man City,Tottenham,2025-08-23,football_data
+Premier League,2025/26,Bournemouth,Wolves,2025-08-23,football_data
+Premier League,2025/26,Brentford,Aston Villa,2025-08-23,football_data
+Premier League,2025/26,Burnley,Sunderland,2025-08-23,football_data
+Premier League,2025/26,Arsenal,Leeds,2025-08-23,football_data
+Premier League,2025/26,Crystal Palace,Nott'm Forest,2025-08-24,football_data
+Premier League,2025/26,Everton,Brighton,2025-08-24,football_data
+Premier League,2025/26,Fulham,Man United,2025-08-24,football_data
+Premier League,2025/26,Newcastle,Liverpool,2025-08-25,football_data
+Premier League,2025/26,Chelsea,Fulham,2025-08-30,football_data
+Premier League,2025/26,Man United,Burnley,2025-08-30,football_data
+Premier League,2025/26,Sunderland,Brentford,2025-08-30,football_data
+Premier League,2025/26,Tottenham,Bournemouth,2025-08-30,football_data
+Premier League,2025/26,Wolves,Everton,2025-08-30,football_data
+Premier League,2025/26,Leeds,Newcastle,2025-08-30,football_data
+Premier League,2025/26,Brighton,Man City,2025-08-31,football_data
+Premier League,2025/26,Nott'm Forest,West Ham,2025-08-31,football_data
+Premier League,2025/26,Liverpool,Arsenal,2025-08-31,football_data
+Premier League,2025/26,Aston Villa,Crystal Palace,2025-08-31,football_data
+Premier League,2025/26,Arsenal,Nott'm Forest,2025-09-13,football_data
+Premier League,2025/26,Bournemouth,Brighton,2025-09-13,football_data
+Premier League,2025/26,Crystal Palace,Sunderland,2025-09-13,football_data
+Premier League,2025/26,Everton,Aston Villa,2025-09-13,football_data
+Premier League,2025/26,Fulham,Leeds,2025-09-13,football_data
+Premier League,2025/26,Newcastle,Wolves,2025-09-13,football_data
+Premier League,2025/26,West Ham,Tottenham,2025-09-13,football_data
+Premier League,2025/26,Brentford,Chelsea,2025-09-13,football_data
+Premier League,2025/26,Burnley,Liverpool,2025-09-14,football_data
+Premier League,2025/26,Man City,Man United,2025-09-14,football_data
