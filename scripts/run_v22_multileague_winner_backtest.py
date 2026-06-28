@@ -21,7 +21,7 @@ def run_v22_multileague_winner_backtest(**kwargs: object) -> dict[str, object]:
     leagues = [c.strip() for c in str(kwargs.get("competitions") or ",".join(DEFAULT_LEAGUES)).split(",") if c.strip()]
     rows = []
     for league in leagues:
-        result = run_v21_winner_backtest(None, out / league.replace(" ", "_"), competition=league, season=str(kwargs["season"]), max_matches=int(kwargs.get("max_matches_per_league") or 50), mock_data_dir=str(kwargs.get("mock_data_dir") or ""), cache_only=bool(kwargs.get("cache_only")), enable_network=bool(kwargs.get("enable_network")), source_profile=str(kwargs.get("source_profile", "")))
+        result = run_v21_winner_backtest(None, out / league.replace(" ", "_"), competition=league, season=str(kwargs["season"]), max_matches=int(kwargs.get("max_matches_per_league") or 50), mock_data_dir=str(kwargs.get("mock_data_dir") or ""), cache_only=bool(kwargs.get("cache_only")), enable_network=bool(kwargs.get("enable_network")), source_profile=str(kwargs.get("source_profile", "")), decision_policy_config=str(kwargs.get("decision_policy_config") or "") or None, emit_calibration_diagnostics=bool(kwargs.get("emit_calibration_diagnostics")), emit_threshold_simulation=bool(kwargs.get("emit_threshold_simulation")))
         rows.append({"competition": league, **result})
     frame = pd.DataFrame(rows)
     evaluated = int(frame["matches_evaluated"].sum()) if not frame.empty else 0
@@ -55,6 +55,9 @@ def run_v22_multileague_winner_backtest(**kwargs: object) -> dict[str, object]:
         "understat_failed_non_block_count": int(frame["understat_failed_non_block_count"].sum()) if "understat_failed_non_block_count" in frame.columns else 0,
         "data_block_rate": round(float(frame["data_blocked_count"].sum()) / evaluated, 4) if evaluated else 0.0,
         "invalid_block_rate": round(invalid_blocks / evaluated, 4) if evaluated else 0.0,
+        "decision_coverage_rate": round(float((frame["winner_pick_count"].sum() + frame["winner_lean_count"].sum()) / evaluated), 4) if evaluated else 0.0,
+        "calibration_diagnostics_status": "PASSED" if bool(kwargs.get("emit_calibration_diagnostics")) else "",
+        "threshold_simulation_status": "PASSED" if bool(kwargs.get("emit_threshold_simulation")) else "",
         "top1_accuracy": round(float(frame["top1_accuracy"].mean()), 4) if not frame.empty else 0.0,
         "brier_score_1x2": round(float(frame["brier_score_1x2"].mean()), 4) if not frame.empty else 0.0,
         "statistical_validity": "HIGH" if evaluated >= 100 else ("MEDIUM" if evaluated >= 30 else "LOW"),
@@ -76,9 +79,9 @@ def run_v22_multileague_winner_backtest(**kwargs: object) -> dict[str, object]:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--season", required=True); p.add_argument("--competitions", default=""); p.add_argument("--source-profile", default="config/v20_internet_sources.yaml"); p.add_argument("--output-dir", default=""); p.add_argument("--mock-data-dir", default=""); p.add_argument("--max-matches-per-league", type=int, default=50); p.add_argument("--enable-network", action="store_true"); p.add_argument("--cache-only", action="store_true"); p.add_argument("--emit-all", action="store_true")
+    p.add_argument("--season", required=True); p.add_argument("--competitions", default=""); p.add_argument("--source-profile", default="config/v20_internet_sources.yaml"); p.add_argument("--output-dir", default=""); p.add_argument("--mock-data-dir", default=""); p.add_argument("--max-matches-per-league", type=int, default=50); p.add_argument("--enable-network", action="store_true"); p.add_argument("--cache-only", action="store_true"); p.add_argument("--decision-policy-config", default=""); p.add_argument("--emit-calibration-diagnostics", action="store_true"); p.add_argument("--emit-threshold-simulation", action="store_true"); p.add_argument("--emit-all", action="store_true")
     result = run_v22_multileague_winner_backtest(**vars(p.parse_args(argv)))
-    for key in ["v22_multileague_backtest_status", "leagues_total", "leagues_ready", "leagues_insufficient_sample", "matches_requested_total", "matches_available_total", "matches_evaluated_total", "winner_pick_count", "winner_lean_count", "no_clear_winner_count", "no_decision_count", "data_blocked_count", "hard_data_blocked_count", "invalid_data_blocked_count", "model_ran_count", "probabilities_created_count", "decision_attempt_count", "top1_accuracy", "brier_score_1x2", "statistical_validity", "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled"]:
+    for key in ["v22_multileague_backtest_status", "leagues_total", "leagues_ready", "leagues_insufficient_sample", "matches_requested_total", "matches_available_total", "matches_evaluated_total", "calibration_diagnostics_status", "threshold_simulation_status", "winner_pick_count", "winner_lean_count", "no_clear_winner_count", "no_decision_count", "decision_coverage_rate", "data_blocked_count", "hard_data_blocked_count", "invalid_data_blocked_count", "model_ran_count", "probabilities_created_count", "decision_attempt_count", "top1_accuracy", "brier_score_1x2", "statistical_validity", "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled"]:
         value = result.get(key)
         print(f"{key}={str(value).lower() if isinstance(value, bool) else value}")
     return 0
