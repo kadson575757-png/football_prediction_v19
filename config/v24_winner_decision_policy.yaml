@@ -1,0 +1,15 @@
+active_policy: balanced_results_only_safe
+allow_winner_pick_without_xg: false
+allow_winner_lean_without_xg: true
+results_only_confidence_cap: 0.62
+missing_xg_confidence_penalty: 0.08
+missing_odds_confidence_penalty: 0.02
+winner_lean_min_top_edge_results_only: 0.045
+winner_lean_min_confidence_results_only: 0.50
+winner_pick_min_top_edge_full_xg: 0.10
+winner_pick_min_confidence_full_xg: 0.64
+winner_lean_min_top_edge_full_xg: 0.055
+winner_lean_min_confidence_full_xg: 0.52
+max_decision_when_results_only: WINNER_LEAN
+max_decision_when_source_quality_low: NO_DECISION
+max_decision_when_early_season_high_risk: NO_DECISION
