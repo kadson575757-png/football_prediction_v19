@@ -10,7 +10,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / "src")]
 
-from football_prediction_v19.analysis.v25_practical_decision_summary import build_practical_decision_summary  # noqa: E402
 from football_prediction_v19.analysis.v25_winner_report import write_winner_report  # noqa: E402
 from football_prediction_v19.analysis.v26_asof_guard import evaluate_asof_guard  # noqa: E402
 from football_prediction_v19.analysis.v26_fixture_date_resolver import resolve_fixture_date  # noqa: E402
@@ -24,6 +23,7 @@ from football_prediction_v19.analysis.v296_goals_for_indicator import build_goal
 from football_prediction_v19.analysis.v296_goals_for_probability_adjustment import apply_goals_for_shadow_adjustment  # noqa: E402
 from football_prediction_v19.analysis.v297_goals_against_indicator import build_goals_against_indicator  # noqa: E402
 from football_prediction_v19.analysis.v297_goals_against_probability_adjustment import apply_goals_against_shadow_adjustment  # noqa: E402
+from football_prediction_v19.analysis.v2100_probability_only import build_probability_only_fields  # noqa: E402
 from scripts.run_v21_predict_winner import run_v21_predict_winner  # noqa: E402
 
 
@@ -47,6 +47,7 @@ def run_match_winner_analysis(**kwargs: object) -> dict[str, object]:
             result.update(_default_goals_for_fields(result))
             result.update(_default_goals_against_fields(result))
             result.update(_resolver_fields(resolver))
+            result = _finalize_probability_only_result(result)
             paths = write_winner_report(result, out)
             return {**result, **paths}
     guard = evaluate_asof_guard(match_date, str(kwargs.get("as_of_date") or "") or None, bool(kwargs.get("allow_post_match_analysis", False)))
@@ -59,6 +60,7 @@ def run_match_winner_analysis(**kwargs: object) -> dict[str, object]:
         result.update(_default_goals_against_fields(result))
         result.update(_resolver_fields(resolver))
         result.update(guard)
+        result = _finalize_probability_only_result(result)
     else:
         try:
             raw = run_v21_predict_winner(
@@ -83,6 +85,7 @@ def run_match_winner_analysis(**kwargs: object) -> dict[str, object]:
             result.update(guard)
             if guard["post_match_analysis"]:
                 result["recommendation_summary"] = f"{result['recommendation_summary']} Post-match analysis, not pre-match prediction."
+            result = _finalize_probability_only_result(result)
         except Exception as exc:  # noqa: BLE001 - practical runner should report readable hard blocks.
             result = _blocked_result(competition, season, home, away, match_date, "fixture_missing_or_ambiguous", f"Winner core could not complete analysis: {type(exc).__name__}.")
             result.update(_default_ppg_fields(result))
@@ -92,6 +95,7 @@ def run_match_winner_analysis(**kwargs: object) -> dict[str, object]:
             result.update(_default_goals_against_fields(result))
             result.update(_resolver_fields(resolver))
             result.update(guard)
+            result = _finalize_probability_only_result(result)
     paths = write_winner_report(result, out)
     return {**result, **paths}
 
@@ -131,9 +135,9 @@ def _ppg_adjustment_fields(result: dict[str, object], competition: str, season: 
         "ppg_adjusted_home_win_probability": adjusted["adjusted_home_win_probability"],
         "ppg_adjusted_draw_probability": adjusted["adjusted_draw_probability"],
         "ppg_adjusted_away_probability": adjusted["adjusted_away_win_probability"],
-        "home_win_probability": adjusted["adjusted_home_win_probability"] if bool(kwargs.get("apply_ppg_adjustment", False)) else adjusted["base_home_win_probability"],
-        "draw_probability": adjusted["adjusted_draw_probability"] if bool(kwargs.get("apply_ppg_adjustment", False)) else adjusted["base_draw_probability"],
-        "away_win_probability": adjusted["adjusted_away_win_probability"] if bool(kwargs.get("apply_ppg_adjustment", False)) else adjusted["base_away_probability"],
+        "home_win_probability": adjusted["base_home_win_probability"],
+        "draw_probability": adjusted["base_draw_probability"],
+        "away_win_probability": adjusted["base_away_probability"],
     }
 
 
@@ -269,81 +273,84 @@ def _default_goals_against_fields(result: dict[str, object]) -> dict[str, object
 
 def _practical_result(raw: dict[str, object], competition: str, season: str, home: str, away: str, match_date: str) -> dict[str, object]:
     model = raw.get("winner_model", {}) if isinstance(raw.get("winner_model"), dict) else {}
-    decision = raw.get("winner_decision", {}) if isinstance(raw.get("winner_decision"), dict) else {}
     missing = [str(x) for x in model.get("missing_inputs", [])] if isinstance(model, dict) else []
     xg_available = "xg" not in missing
     odds_available = "odds" not in missing
-    prediction_tier = "TIER_1_FULL" if xg_available else "TIER_2_RESULTS_ONLY"
-    risk_notes = []
+    data_quality_notes = []
     if not xg_available:
-        risk_notes.append("xG missing; this caps confidence but does not block analysis.")
+        data_quality_notes.append("xG unavailable; uncertainty remains high but probabilities are still produced.")
     if not odds_available:
-        risk_notes.append("Odds missing; market context is unavailable but optional.")
-    if raw.get("eligibility_class") == "LEAN_ONLY":
-        risk_notes.append("Lean-only eligibility limits decision strength.")
+        data_quality_notes.append("Odds unavailable; market context is not included.")
     confidence = _num(raw.get("confidence"))
     result = {
-        "winner_analysis_status": "READY" if raw.get("decision_class") != "DATA_BLOCKED" else "DATA_BLOCKED",
+        "winner_analysis_status": "READY",
         "competition": competition,
         "season": season,
         "home_team": home,
         "away_team": away,
         "match_date": match_date,
-        "decision_class": raw.get("decision_class", "NO_DECISION"),
-        "predicted_winner": raw.get("predicted_winner", "NO_CLEAR_WINNER"),
+        "decision_class": raw.get("decision_class", "PROBABILITY_ONLY"),
+        "predicted_winner": raw.get("predicted_winner", ""),
         "home_win_probability": raw.get("home_win_probability", 0),
         "draw_probability": raw.get("draw_probability", 0),
         "away_win_probability": raw.get("away_win_probability", 0),
         "confidence": confidence,
-        "risk_level": "HIGH" if confidence < 0.50 or len(risk_notes) >= 2 else ("MEDIUM" if confidence < 0.65 or risk_notes else "LOW"),
+        "legacy_risk_level": "HIGH" if confidence < 0.50 or len(data_quality_notes) >= 2 else ("MEDIUM" if confidence < 0.65 or data_quality_notes else "LOW"),
         "source_quality_band": raw.get("source_quality_band", "LOW"),
-        "prediction_tier": prediction_tier,
+        "legacy_prediction_tier": "TIER_1_FULL" if xg_available else "TIER_2_RESULTS_ONLY",
         "xg_available": xg_available,
         "odds_available": odds_available,
-        "model_status": raw.get("model_status", "WINNER_MODEL_PARTIAL").replace("READY", "FULL"),
-        "primary_reasons": model.get("main_edges", []) or ["Winner model evaluated as-of form and source-quality signals."],
-        "risk_notes": risk_notes or model.get("main_risks", []),
+        "legacy_model_status": raw.get("model_status", "WINNER_MODEL_PARTIAL").replace("READY", "FULL"),
+        "probability_input_signals": model.get("main_edges", []) or ["As-of form and source-quality signals evaluated."],
+        "data_quality_notes": data_quality_notes,
         "automatic_betting_enabled": False,
         "staking_logic_enabled": False,
         "roi_logic_enabled": False,
         "productive_betting_enabled": False,
     }
-    summary = build_practical_decision_summary(result)
-    result["recommendation_summary"] = f"{summary['final_label']}: {summary['short_reason']} {summary['main_risk']}"
-    result["final_label"] = summary["final_label"]
     return result
 
 
 def _blocked_result(competition: str, season: str, home: str, away: str, match_date: str, code: str, text: str) -> dict[str, object]:
     return {
-        "winner_analysis_status": "DATA_BLOCKED",
+        "winner_analysis_status": "READY",
         "competition": competition,
         "season": season,
         "home_team": home,
         "away_team": away,
         "match_date": match_date,
-        "decision_class": "DATA_BLOCKED",
-        "predicted_winner": "NO_CLEAR_WINNER",
-        "home_win_probability": 0.0,
-        "draw_probability": 0.0,
-        "away_win_probability": 0.0,
+        "decision_class": "PROBABILITY_ONLY_LIMITED",
+        "predicted_winner": "",
+        "home_win_probability": 0.34,
+        "draw_probability": 0.32,
+        "away_win_probability": 0.34,
         "confidence": 0.0,
-        "risk_level": "HIGH",
+        "legacy_risk_level": "HIGH",
         "source_quality_band": "LOW",
-        "prediction_tier": "TIER_3_LIMITED",
+        "legacy_prediction_tier": "TIER_3_LIMITED",
         "xg_available": False,
         "odds_available": False,
-        "model_status": "WINNER_MODEL_BLOCKED",
-        "primary_reasons": [],
-        "risk_notes": [text],
+        "legacy_model_status": "WINNER_MODEL_LIMITED",
+        "probability_input_signals": [],
+        "data_quality_notes": [text],
         "block_reason_code": code,
         "block_reason_text": text,
-        "recommendation_summary": f"Data Blocked: {text}",
+        "probability_summary": f"Probability-only limited source context: {text}",
         "automatic_betting_enabled": False,
         "staking_logic_enabled": False,
         "roi_logic_enabled": False,
         "productive_betting_enabled": False,
     }
+
+
+def _finalize_probability_only_result(result: dict[str, object]) -> dict[str, object]:
+    finalized = dict(result)
+    finalized.update(build_probability_only_fields(finalized))
+    finalized["decision_class"] = "PROBABILITY_ONLY"
+    finalized["predicted_winner"] = ""
+    finalized["probability_summary"] = str(finalized.get("probability_summary", finalized.get("probability_explanation", "Probability-only model output is ready.")))
+    finalized["recommendation_summary"] = finalized["probability_summary"]
+    return finalized
 
 
 def _output_dir(base: object, home: str, away: str) -> Path:
@@ -385,7 +392,48 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--markdown", action="store_true")
     parser.add_argument("--emit-all", action="store_true")
     result = run_match_winner_analysis(**vars(parser.parse_args(argv)))
-    for key in ["winner_analysis_status", "competition", "season", "home_team", "away_team", "match_date", "fixture_resolver_status", "fixture_resolver_source", "fixture_candidates_count", "resolved_match_date", "resolver_reason", "reversed_fixture_found", "alias_matched", "as_of_date", "post_match_analysis", "leakage_warning", "asof_guard_status", "asof_guard_reason", "decision_class", "predicted_winner", "base_home_win_probability", "base_draw_probability", "base_away_probability", "home_win_probability", "draw_probability", "away_win_probability", "ppg_adjusted_home_win_probability", "ppg_adjusted_draw_probability", "ppg_adjusted_away_probability", "ppg_adjustment_applied", "ppg_adjustment_strength", "ppg_adjustment_reason", "home_home_ppg_before_match", "away_away_ppg_before_match", "home_away_ppg_diff", "ppg_indicator_quality", "last5_adjusted_home_win_probability", "last5_adjusted_draw_probability", "last5_adjusted_away_probability", "last5_adjustment_applied", "last5_adjustment_strength", "last5_adjustment_reason", "home_last5_points", "away_last5_points", "home_last5_points_per_match", "away_last5_points_per_match", "last5_points_diff", "last5_indicator_quality", "gd_adjusted_home_win_probability", "gd_adjusted_draw_probability", "gd_adjusted_away_probability", "gd_adjustment_applied", "gd_adjustment_strength", "gd_adjustment_reason", "home_matches_before_match", "away_matches_before_match", "home_goals_for_before_match", "home_goals_against_before_match", "away_goals_for_before_match", "away_goals_against_before_match", "home_goal_difference_before_match", "away_goal_difference_before_match", "goal_difference_diff", "goal_difference_indicator_quality", "gf_adjusted_home_win_probability", "gf_adjusted_draw_probability", "gf_adjusted_away_probability", "gf_adjustment_applied", "gf_adjustment_strength", "gf_adjustment_reason", "home_goals_for_per_match_before_match", "away_goals_for_per_match_before_match", "goals_for_per_match_diff", "goals_for_indicator_quality", "ga_adjusted_home_win_probability", "ga_adjusted_draw_probability", "ga_adjusted_away_probability", "ga_adjustment_applied", "ga_adjustment_strength", "ga_adjustment_reason", "home_goals_against_per_match_before_match", "away_goals_against_per_match_before_match", "goals_against_advantage_diff", "goals_against_indicator_quality", "confidence", "risk_level", "source_quality_band", "prediction_tier", "xg_available", "odds_available", "model_status", "primary_reasons", "risk_notes", "recommendation_summary", "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled"]:
+    output_keys = [
+        "winner_analysis_status", "competition", "season", "home_team", "away_team", "match_date",
+        "fixture_resolver_status", "fixture_resolver_source", "fixture_candidates_count",
+        "resolved_match_date", "resolver_reason", "reversed_fixture_found", "alias_matched",
+        "as_of_date", "post_match_analysis", "leakage_warning", "asof_guard_status",
+        "asof_guard_reason", "probability_model_status", "top_probability_outcome",
+        "probability_edge", "probability_edge_band", "uncertainty_level", "data_quality_band",
+        "probability_explanation_status", "base_home_win_probability", "base_draw_probability",
+        "base_away_probability", "home_win_probability", "draw_probability", "away_win_probability",
+        "probability_summary", "data_quality_notes", "base_probability_explanation",
+        "probability_explanation", "data_quality_explanation", "final_probability_explanation",
+        "signal_alignment_summary", "signal_conflict_summary", "ppg_shadow_explanation",
+        "last5_shadow_explanation", "goal_difference_shadow_explanation",
+        "goals_for_shadow_explanation", "goals_against_shadow_explanation",
+        "ppg_adjusted_home_win_probability", "ppg_adjusted_draw_probability",
+        "ppg_adjusted_away_probability", "ppg_adjustment_applied", "ppg_adjustment_strength",
+        "ppg_adjustment_reason", "home_home_ppg_before_match", "away_away_ppg_before_match",
+        "home_away_ppg_diff", "ppg_indicator_quality", "last5_adjusted_home_win_probability",
+        "last5_adjusted_draw_probability", "last5_adjusted_away_probability",
+        "last5_adjustment_applied", "last5_adjustment_strength", "last5_adjustment_reason",
+        "home_last5_points", "away_last5_points", "home_last5_points_per_match",
+        "away_last5_points_per_match", "last5_points_diff", "last5_indicator_quality",
+        "gd_adjusted_home_win_probability", "gd_adjusted_draw_probability",
+        "gd_adjusted_away_probability", "gd_adjustment_applied", "gd_adjustment_strength",
+        "gd_adjustment_reason", "home_matches_before_match", "away_matches_before_match",
+        "home_goals_for_before_match", "home_goals_against_before_match",
+        "away_goals_for_before_match", "away_goals_against_before_match",
+        "home_goal_difference_before_match", "away_goal_difference_before_match",
+        "goal_difference_diff", "goal_difference_indicator_quality",
+        "gf_adjusted_home_win_probability", "gf_adjusted_draw_probability",
+        "gf_adjusted_away_probability", "gf_adjustment_applied", "gf_adjustment_strength",
+        "gf_adjustment_reason", "home_goals_for_per_match_before_match",
+        "away_goals_for_per_match_before_match", "goals_for_per_match_diff",
+        "goals_for_indicator_quality", "ga_adjusted_home_win_probability",
+        "ga_adjusted_draw_probability", "ga_adjusted_away_probability",
+        "ga_adjustment_applied", "ga_adjustment_strength", "ga_adjustment_reason",
+        "home_goals_against_per_match_before_match", "away_goals_against_per_match_before_match",
+        "goals_against_advantage_diff", "goals_against_indicator_quality",
+        "source_quality_band", "xg_available", "odds_available", "probability_input_signals",
+        "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled",
+    ]
+    for key in output_keys:
         value = result.get(key)
         print(f"{key}={str(value).lower() if isinstance(value, bool) else value}")
     return 0
