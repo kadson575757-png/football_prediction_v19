@@ -9,13 +9,16 @@ import pandas as pd
 
 from football_prediction_v19.analysis.v27_evaluation_metrics import compute_v27_metrics
 from football_prediction_v19.analysis.v27_result_resolver import resolve_match_result
+from football_prediction_v19.analysis.v2100_probability_only import top_probability_hit
 from scripts.run_match_winner_analysis import run_match_winner_analysis
 
 
 OUTPUT_COLUMNS = [
     "competition", "season", "home_team", "away_team", "input_match_date", "resolved_match_date",
     "as_of_date", "fixture_resolver_status", "fixture_resolver_source", "asof_guard_status",
-    "winner_analysis_status", "decision_class", "predicted_winner", "home_win_probability",
+    "winner_analysis_status", "decision_class", "predicted_winner", "probability_model_status",
+    "top_probability_outcome", "probability_edge", "probability_edge_band", "uncertainty_level",
+    "data_quality_band", "probability_explanation_status", "home_win_probability",
     "draw_probability", "away_win_probability", "confidence", "risk_level", "source_quality_band",
     "prediction_tier", "xg_available", "odds_available", "real_home_goals", "real_away_goals",
     "real_result", "result_status", "evaluation_result", "primary_reasons", "risk_notes",
@@ -43,7 +46,10 @@ OUTPUT_COLUMNS = [
     "ga_adjustment_applied", "ga_adjustment_strength", "ga_adjustment_reason",
     "home_goals_against_per_match_before_match", "away_goals_against_per_match_before_match",
     "goals_against_advantage_diff", "goals_against_indicator_quality",
-    "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled",
+    "base_probability_explanation", "ppg_shadow_explanation", "last5_shadow_explanation",
+    "goal_difference_shadow_explanation", "goals_for_shadow_explanation", "goals_against_shadow_explanation",
+    "signal_alignment_summary", "signal_conflict_summary", "data_quality_explanation",
+    "final_probability_explanation", "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled",
 ]
 
 
@@ -118,6 +124,13 @@ def _evaluation_row(input_row: pd.Series, prediction: dict[str, Any], result: di
         "winner_analysis_status": prediction.get("winner_analysis_status", ""),
         "decision_class": decision_class,
         "predicted_winner": predicted_winner,
+        "probability_model_status": prediction.get("probability_model_status", ""),
+        "top_probability_outcome": prediction.get("top_probability_outcome", ""),
+        "probability_edge": prediction.get("probability_edge", 0.0),
+        "probability_edge_band": prediction.get("probability_edge_band", ""),
+        "uncertainty_level": prediction.get("uncertainty_level", ""),
+        "data_quality_band": prediction.get("data_quality_band", prediction.get("source_quality_band", "")),
+        "probability_explanation_status": prediction.get("probability_explanation_status", ""),
         "home_win_probability": prediction.get("home_win_probability", 0.0),
         "draw_probability": prediction.get("draw_probability", 0.0),
         "away_win_probability": prediction.get("away_win_probability", 0.0),
@@ -195,6 +208,16 @@ def _evaluation_row(input_row: pd.Series, prediction: dict[str, Any], result: di
         "away_goals_against_per_match_before_match": prediction.get("away_goals_against_per_match_before_match", 0.0),
         "goals_against_advantage_diff": prediction.get("goals_against_advantage_diff", 0.0),
         "goals_against_indicator_quality": prediction.get("goals_against_indicator_quality", ""),
+        "base_probability_explanation": prediction.get("base_probability_explanation", ""),
+        "ppg_shadow_explanation": prediction.get("ppg_shadow_explanation", ""),
+        "last5_shadow_explanation": prediction.get("last5_shadow_explanation", ""),
+        "goal_difference_shadow_explanation": prediction.get("goal_difference_shadow_explanation", ""),
+        "goals_for_shadow_explanation": prediction.get("goals_for_shadow_explanation", ""),
+        "goals_against_shadow_explanation": prediction.get("goals_against_shadow_explanation", ""),
+        "signal_alignment_summary": prediction.get("signal_alignment_summary", ""),
+        "signal_conflict_summary": prediction.get("signal_conflict_summary", ""),
+        "data_quality_explanation": prediction.get("data_quality_explanation", ""),
+        "final_probability_explanation": prediction.get("final_probability_explanation", ""),
         "automatic_betting_enabled": False,
         "staking_logic_enabled": False,
         "roi_logic_enabled": False,
@@ -202,24 +225,17 @@ def _evaluation_row(input_row: pd.Series, prediction: dict[str, Any], result: di
 
 
 def _evaluation_result(prediction: dict[str, Any], real_result: str, result_status: str) -> str:
-    if str(prediction.get("winner_analysis_status")) == "DATA_BLOCKED" or str(prediction.get("decision_class")) == "DATA_BLOCKED":
-        return "DATA_BLOCKED"
     if result_status != "RESOLVED" or real_result == "RESULT_UNKNOWN":
         return "RESULT_UNKNOWN"
-    decision_class = str(prediction.get("decision_class", ""))
-    predicted = str(prediction.get("predicted_winner", ""))
-    if decision_class not in {"WINNER_LEAN", "WINNER_PICK"} or predicted not in {"HOME", "AWAY"}:
-        return "NO_DECISION"
-    expected = "HOME_WIN" if predicted == "HOME" else "AWAY_WIN"
-    return "HIT" if real_result == expected else "MISS"
+    return top_probability_hit(prediction.get("top_probability_outcome", ""), real_result)
 
 
 def _status(metrics: dict[str, object]) -> str:
-    if int(metrics.get("hit_count", 0)) + int(metrics.get("miss_count", 0)) > 0:
-        if int(metrics.get("data_blocked_count", 0)) or int(metrics.get("result_unknown_count", 0)):
+    if int(metrics.get("probability_rows_count", 0)) > 0:
+        if int(metrics.get("result_unknown_count", 0)):
             return "PARTIAL"
         return "READY"
-    return "DATA_BLOCKED"
+    return "PARTIAL" if int(metrics.get("insufficient_source_data_count", 0)) else "DATA_BLOCKED"
 
 
 def _markdown_report(summary: dict[str, object]) -> str:
@@ -230,23 +246,20 @@ def _markdown_report(summary: dict[str, object]) -> str:
         f"- v27_prematch_evaluation_status: {summary['v27_prematch_evaluation_status']}",
         f"- matches_requested: {summary['matches_requested']}",
         "",
-        "## Decision Coverage",
-        f"- decision_count: {summary['decision_count']}",
-        f"- winner_pick_count: {summary['winner_pick_count']}",
-        f"- winner_lean_count: {summary['winner_lean_count']}",
+        "## Probability Output",
+        f"- probability_rows_count: {summary['probability_rows_count']}",
+        f"- probability_output_rate: {summary['probability_output_rate']}",
+        f"- top_probability_home_count: {summary['top_probability_home_count']}",
+        f"- top_probability_draw_count: {summary['top_probability_draw_count']}",
+        f"- top_probability_away_count: {summary['top_probability_away_count']}",
         "",
-        "## Hit/Miss Summary",
-        f"- hit_count: {summary['hit_count']}",
-        f"- miss_count: {summary['miss_count']}",
-        f"- hit_rate: {summary['hit_rate']}",
+        "## Top Probability Hit/Miss Summary",
+        f"- top_probability_hit_count: {summary['top_probability_hit_count']}",
+        f"- top_probability_miss_count: {summary['top_probability_miss_count']}",
+        f"- top_probability_hit_rate: {summary['top_probability_hit_rate']}",
         "",
-        "## No-Decision Summary",
-        f"- no_decision_count: {summary['no_decision_count']}",
-        f"- no_decision_rate: {summary['no_decision_rate']}",
-        "",
-        "## Data-Blocked Summary",
-        f"- data_blocked_count: {summary['data_blocked_count']}",
-        f"- data_blocked_rate: {summary['data_blocked_rate']}",
+        "## Source Data Summary",
+        f"- insufficient_source_data_count: {summary['insufficient_source_data_count']}",
         "",
         "## Result-Unknown Summary",
         f"- result_unknown_count: {summary['result_unknown_count']}",
