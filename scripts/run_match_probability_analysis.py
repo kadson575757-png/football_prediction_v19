@@ -8,65 +8,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / "src")]
 
+from football_prediction_v19.analysis.v2102_probability_output_schema import PROBABILITY_RUNNER_OUTPUT_FIELDS  # noqa: E402
 from scripts.run_match_winner_analysis import run_match_winner_analysis  # noqa: E402
 
 
-PROBABILITY_OUTPUT_KEYS = [
-    "probability_analysis_status",
-    "probability_model_status",
-    "competition",
-    "season",
-    "home_team",
-    "away_team",
-    "match_date",
-    "top_probability_outcome",
-    "probability_edge",
-    "probability_edge_band",
-    "uncertainty_level",
-    "data_quality_band",
-    "probability_explanation_status",
-    "probability_summary",
-    "data_quality_notes",
-    "probability_input_signals",
-    "home_win_probability",
-    "draw_probability",
-    "away_win_probability",
-    "base_home_win_probability",
-    "base_draw_probability",
-    "base_away_probability",
-    "base_probability_explanation",
-    "probability_explanation",
-    "data_quality_explanation",
-    "final_probability_explanation",
-    "signal_alignment_summary",
-    "signal_conflict_summary",
-    "ppg_shadow_explanation",
-    "last5_shadow_explanation",
-    "goal_difference_shadow_explanation",
-    "goals_for_shadow_explanation",
-    "goals_against_shadow_explanation",
-    "ppg_adjusted_home_win_probability",
-    "ppg_adjusted_draw_probability",
-    "ppg_adjusted_away_probability",
-    "last5_adjusted_home_win_probability",
-    "last5_adjusted_draw_probability",
-    "last5_adjusted_away_probability",
-    "gd_adjusted_home_win_probability",
-    "gd_adjusted_draw_probability",
-    "gd_adjusted_away_probability",
-    "gf_adjusted_home_win_probability",
-    "gf_adjusted_draw_probability",
-    "gf_adjusted_away_probability",
-    "ga_adjusted_home_win_probability",
-    "ga_adjusted_draw_probability",
-    "ga_adjusted_away_probability",
-    "source_quality_band",
-    "xg_available",
-    "odds_available",
-    "automatic_betting_enabled",
-    "staking_logic_enabled",
-    "roi_logic_enabled",
-]
+PROBABILITY_OUTPUT_KEYS = PROBABILITY_RUNNER_OUTPUT_FIELDS
 
 
 def run_match_probability_analysis(**kwargs: object) -> dict[str, object]:
