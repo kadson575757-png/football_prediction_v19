@@ -17,9 +17,22 @@ def compute_v27_metrics(rows: pd.DataFrame | list[dict[str, Any]]) -> dict[str, 
     known = frame["result_status"].astype(str).eq("RESOLVED") if "result_status" in frame else pd.Series([False] * requested)
     decision_mask = decisions.isin(["WINNER_PICK", "WINNER_LEAN"])
     confidence = pd.to_numeric(frame.get("confidence", pd.Series(dtype=float)), errors="coerce")
+    probability_mask = _probability_mask(frame)
+    top = frame["top_probability_outcome"].astype(str) if "top_probability_outcome" in frame else pd.Series([], dtype=str)
+    probability_hits = int(evals.eq("HIT").sum())
+    probability_misses = int(evals.eq("MISS").sum())
     metrics = {
         "matches_requested": requested,
         "matches_evaluated": requested,
+        "probability_rows_count": int(probability_mask.sum()),
+        "top_probability_home_count": int(top.eq("HOME").sum()),
+        "top_probability_draw_count": int(top.eq("DRAW").sum()),
+        "top_probability_away_count": int(top.eq("AWAY").sum()),
+        "top_probability_hit_count": probability_hits,
+        "top_probability_miss_count": probability_misses,
+        "top_probability_hit_rate": _rate(probability_hits, probability_hits + probability_misses),
+        "probability_output_rate": _rate(int(probability_mask.sum()), requested),
+        "insufficient_source_data_count": int(frame.get("probability_model_status", pd.Series(dtype=str)).astype(str).eq("INSUFFICIENT_SOURCE_DATA").sum()) if "probability_model_status" in frame else 0,
         "result_known_count": int(known.sum()),
         "decision_count": int(decision_mask.sum()),
         "winner_pick_count": int(decisions.eq("WINNER_PICK").sum()),
@@ -51,6 +64,15 @@ def _empty_metrics(requested: int) -> dict[str, object]:
     return {
         "matches_requested": requested,
         "matches_evaluated": 0,
+        "probability_rows_count": 0,
+        "top_probability_home_count": 0,
+        "top_probability_draw_count": 0,
+        "top_probability_away_count": 0,
+        "top_probability_hit_count": 0,
+        "top_probability_miss_count": 0,
+        "top_probability_hit_rate": 0.0,
+        "probability_output_rate": 0.0,
+        "insufficient_source_data_count": 0,
         "result_known_count": 0,
         "decision_count": 0,
         "winner_pick_count": 0,
@@ -79,6 +101,14 @@ def _empty_metrics(requested: int) -> dict[str, object]:
 
 def _rate(numerator: int, denominator: int) -> float:
     return round(float(numerator / denominator), 4) if denominator else 0.0
+
+
+def _probability_mask(frame: pd.DataFrame) -> pd.Series:
+    required = ["home_win_probability", "draw_probability", "away_win_probability"]
+    if frame.empty or any(column not in frame.columns for column in required):
+        return pd.Series([False] * len(frame))
+    numeric = frame[required].apply(pd.to_numeric, errors="coerce")
+    return numeric.notna().all(axis=1) & numeric.sum(axis=1).gt(0)
 
 
 def _group_hit_rate(frame: pd.DataFrame, group_cols: list[str]) -> dict[str, dict[str, object]]:
