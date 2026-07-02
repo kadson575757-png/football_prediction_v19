@@ -10,7 +10,16 @@ import pandas as pd
 from football_prediction_v19.analysis.v27_evaluation_metrics import compute_v27_metrics
 from football_prediction_v19.analysis.v27_result_resolver import resolve_match_result
 from football_prediction_v19.analysis.v2100_probability_only import top_probability_hit
-from scripts.run_match_winner_analysis import run_match_winner_analysis
+from football_prediction_v19.analysis.v2102_probability_output_schema import OPTIONAL_PROBABILITY_RUNNER_FIELDS
+from scripts.run_match_probability_analysis import run_match_probability_analysis
+
+run_match_winner_analysis = run_match_probability_analysis
+
+
+V2104_EVALUATION_FIELDS = [
+    field for field in OPTIONAL_PROBABILITY_RUNNER_FIELDS
+    if field.startswith(("dt_", "vr_", "gm_", "vsb_", "mix_"))
+]
 
 
 OUTPUT_COLUMNS = [
@@ -50,7 +59,7 @@ OUTPUT_COLUMNS = [
     "goal_difference_shadow_explanation", "goals_for_shadow_explanation", "goals_against_shadow_explanation",
     "signal_alignment_summary", "signal_conflict_summary", "data_quality_explanation",
     "final_probability_explanation", "automatic_betting_enabled", "staking_logic_enabled", "roi_logic_enabled",
-]
+] + V2104_EVALUATION_FIELDS
 
 
 def run_prematch_evaluation(
@@ -110,7 +119,7 @@ def _evaluation_row(input_row: pd.Series, prediction: dict[str, Any], result: di
     real_result = str(result.get("result", "RESULT_UNKNOWN"))
     decision_class = str(prediction.get("decision_class", ""))
     predicted_winner = str(prediction.get("predicted_winner", ""))
-    return {
+    row = {
         "competition": input_row.get("competition", ""),
         "season": input_row.get("season", ""),
         "home_team": input_row.get("home_team", ""),
@@ -222,6 +231,9 @@ def _evaluation_row(input_row: pd.Series, prediction: dict[str, Any], result: di
         "staking_logic_enabled": False,
         "roi_logic_enabled": False,
     }
+    for field in V2104_EVALUATION_FIELDS:
+        row[field] = prediction.get(field, "")
+    return row
 
 
 def _evaluation_result(prediction: dict[str, Any], real_result: str, result_status: str) -> str:
