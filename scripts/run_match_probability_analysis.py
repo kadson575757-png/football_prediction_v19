@@ -9,6 +9,11 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT), str(ROOT / "src")]
 
 from football_prediction_v19.analysis.v2102_probability_output_schema import PROBABILITY_RUNNER_OUTPUT_FIELDS  # noqa: E402
+from football_prediction_v19.analysis.v2104_draw_tendency_indicator import build_draw_tendency_indicator  # noqa: E402
+from football_prediction_v19.analysis.v2104_goal_margin_profile_indicator import build_goal_margin_profile_indicator  # noqa: E402
+from football_prediction_v19.analysis.v2104_indicator_shadow_mix import build_indicator_shadow_mix  # noqa: E402
+from football_prediction_v19.analysis.v2104_venue_result_rate_indicator import build_venue_result_rate_indicator  # noqa: E402
+from football_prediction_v19.analysis.v2104_venue_scoring_balance_indicator import build_venue_scoring_balance_indicator  # noqa: E402
 from scripts.run_match_winner_analysis import run_match_winner_analysis  # noqa: E402
 
 
@@ -18,12 +23,43 @@ PROBABILITY_OUTPUT_KEYS = PROBABILITY_RUNNER_OUTPUT_FIELDS
 def run_match_probability_analysis(**kwargs: object) -> dict[str, object]:
     output_dir = kwargs.get("output_dir") or ROOT / "outputs" / "probability_analysis"
     result = run_match_winner_analysis(**{**kwargs, "output_dir": output_dir})
+    result.update(_v2104_indicator_fields(result, kwargs))
     probability = {key: result.get(key) for key in PROBABILITY_OUTPUT_KEYS if key != "probability_analysis_status"}
     probability["probability_analysis_status"] = "READY"
     probability["automatic_betting_enabled"] = False
     probability["staking_logic_enabled"] = False
     probability["roi_logic_enabled"] = False
     return probability
+
+
+def _v2104_indicator_fields(result: dict[str, object], kwargs: dict[str, object]) -> dict[str, object]:
+    base_home = float(result.get("base_home_win_probability", result.get("home_win_probability", 0.0)) or 0.0)
+    base_draw = float(result.get("base_draw_probability", result.get("draw_probability", 0.0)) or 0.0)
+    base_away = float(result.get("base_away_probability", result.get("away_win_probability", 0.0)) or 0.0)
+    common = {
+        "competition": str(result.get("competition", kwargs.get("competition", ""))),
+        "season": str(result.get("season", kwargs.get("season", ""))),
+        "home_team": str(result.get("home_team", kwargs.get("home", ""))),
+        "away_team": str(result.get("away_team", kwargs.get("away", ""))),
+        "match_date": str(result.get("match_date", kwargs.get("match_date", ""))),
+        "base_home_probability": base_home,
+        "base_draw_probability": base_draw,
+        "base_away_probability": base_away,
+        "source_profile": str(kwargs.get("source_profile") or "config/v20_internet_sources.yaml"),
+        "cache_only": bool(kwargs.get("cache_only", False)),
+        "enable_network": bool(kwargs.get("enable_network", False)),
+    }
+    indicator_results = [
+        build_draw_tendency_indicator(**common),
+        build_venue_result_rate_indicator(**common),
+        build_goal_margin_profile_indicator(**common),
+        build_venue_scoring_balance_indicator(**common),
+    ]
+    fields: dict[str, object] = {}
+    for indicator in indicator_results:
+        fields.update(indicator)
+    fields.update(build_indicator_shadow_mix(base_home, base_draw, base_away, indicator_results))
+    return fields
 
 
 def main(argv: list[str] | None = None) -> int:
