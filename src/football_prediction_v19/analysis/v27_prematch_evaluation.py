@@ -18,7 +18,7 @@ run_match_winner_analysis = run_match_probability_analysis
 
 V2104_EVALUATION_FIELDS = [
     field for field in OPTIONAL_PROBABILITY_RUNNER_FIELDS
-    if field.startswith(("dt_", "vr_", "gm_", "vsb_", "mix_"))
+    if field.startswith(("dt_", "vr_", "gm_", "vsb_", "mix_", "csfts_", "rdc_", "tsg_", "cbl_", "v2105_mix_", "combined_mix_", "oarf_", "rgt_", "vrm_", "rvc_", "v2106_mix_", "v2106_combined_mix_"))
 ]
 
 
