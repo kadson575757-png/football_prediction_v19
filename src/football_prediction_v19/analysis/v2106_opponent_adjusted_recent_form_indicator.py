@@ -41,6 +41,7 @@ def build_opponent_adjusted_recent_form_indicator(
     adjusted = apply_home_away_shift(base_home_probability, base_draw_probability, base_away_probability, strength if diff > 0 else -strength) if strength else None
     reason = "LOW quality opponent-adjusted recent form; no adjustment" if quality == "LOW" else ("Opponent-adjusted recent form near neutral; no adjustment" if not strength else "Opponent-adjusted recent form shifted diagnostic probability")
     result = build_shadow_result_dict("oarf", "OPPONENT_ADJUSTED_RECENT_FORM", quality, reason, base_home_probability, base_draw_probability, base_away_probability, adjusted, strength, bool(strength), reason)
+    result["shadow_explanation"] = str(result["oarf_shadow_explanation"])
     result.update({"oarf_home_recent_points": home_points, "oarf_away_recent_points": away_points, "oarf_home_recent_points_per_match": home_ppm, "oarf_away_recent_points_per_match": away_ppm, "oarf_home_recent_opponent_avg_ppg": home_opp, "oarf_away_recent_opponent_avg_ppg": away_opp, "oarf_home_quality_adjusted_form": home_adj, "oarf_away_quality_adjusted_form": away_adj, "oarf_quality_adjusted_form_diff": diff})
     return result
 
@@ -95,5 +96,6 @@ def _recent_opponent_avg_ppg(frame: pd.DataFrame, team: str, ppg: dict[str, floa
 
 def _empty(base_home: float, base_draw: float, base_away: float, reason: str) -> dict[str, object]:
     result = build_shadow_result_dict("oarf", "OPPONENT_ADJUSTED_RECENT_FORM", "LOW", reason, base_home, base_draw, base_away, None, 0.0, False, reason)
+    result["shadow_explanation"] = str(result["oarf_shadow_explanation"])
     result.update({"oarf_home_recent_points": 0, "oarf_away_recent_points": 0, "oarf_home_recent_points_per_match": 0.0, "oarf_away_recent_points_per_match": 0.0, "oarf_home_recent_opponent_avg_ppg": 0.0, "oarf_away_recent_opponent_avg_ppg": 0.0, "oarf_home_quality_adjusted_form": 0.0, "oarf_away_quality_adjusted_form": 0.0, "oarf_quality_adjusted_form_diff": 0.0})
     return result

@@ -34,6 +34,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--enable-network", action="store_true", help="Permit future optional network adapters (unused in v2.16.0).")
     parser.add_argument("--strict-asof", action="store_true", help="Fail on any as-of violation.")
     parser.add_argument("--max-scoreline-goals", type=int, default=10)
+    parser.add_argument("--include-shadow-challenger", action="store_true")
     return parser
 
 
@@ -49,6 +50,7 @@ def main(argv: list[str] | None = None) -> int:
             enable_network=args.enable_network,
             strict_asof=args.strict_asof,
             max_scoreline_goals=args.max_scoreline_goals,
+            include_shadow_challenger=args.include_shadow_challenger,
         )
         print("unified_batch_analysis_status=" + result["status"])
         print("rows_loaded=" + str(result["successful_count"] + result["failed_count"]))
@@ -71,6 +73,7 @@ def main(argv: list[str] | None = None) -> int:
             enable_network=args.enable_network,
             strict_asof=args.strict_asof,
             max_scoreline_goals=args.max_scoreline_goals,
+            include_shadow_challenger=args.include_shadow_challenger,
         )
         primary = result["winner_prediction"]
         print("unified_prematch_analysis_status=READY")
@@ -95,10 +98,25 @@ def main(argv: list[str] | None = None) -> int:
         print("conflict_level=" + result["model_comparison"]["conflict_level"])
         print("data_quality_grade=" + result["data_quality"]["quality_grade"])
         print("post_match_rows_used_count=" + str(result["asof_audit"]["post_match_rows_used_count"]))
+        if args.include_shadow_challenger:
+            shadow = result["shadow_winner_prediction"]
+            comparison = result["shadow_comparison"]
+            print("shadow_challenger_enabled=true")
+            print("shadow_challenger_model=" + shadow["model_name"])
+            print("shadow_home_probability=" + f"{shadow['home_probability']:.6f}")
+            print("shadow_draw_probability=" + f"{shadow['draw_probability']:.6f}")
+            print("shadow_away_probability=" + f"{shadow['away_probability']:.6f}")
+            print("shadow_top_outcome=" + shadow["top_outcome"])
+            print("shadow_primary_agreement=" + str(comparison["top_outcome_agreement"]).lower())
+            print("shadow_probability_difference=" + f"{comparison['maximum_probability_difference']:.6f}")
+            print("shadow_authoritative=false")
+            print("probability_blending_applied=false")
         if args.emit_json:
             print(json.dumps(result, indent=2, ensure_ascii=False))
         if args.emit_markdown:
             print((Path(result["output_dir"]) / "report.md").read_text(encoding="utf-8"))
+    if not args.include_shadow_challenger:
+        print("shadow_challenger_enabled=false")
     print("output_dir=" + result["output_dir"])
     print("automatic_betting_enabled=false")
     print("staking_logic_enabled=false")

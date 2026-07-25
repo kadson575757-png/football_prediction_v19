@@ -8,5 +8,12 @@ def test_v26_batch_does_not_guess_ambiguous_dates_generic(monkeypatch, tmp_path)
     pd.DataFrame([{"competition": "Premier League", "season": "2025/26", "match_date": "", "home_team": "Arsenal", "away_team": "Chelsea"}]).to_csv(path, index=False)
     result = run_match_winner_batch(input=str(path), output_dir=str(tmp_path / "out"))
     frame = pd.read_csv(result["winner_batch_results_csv_path"])
-    assert frame.loc[0, "decision_class"] == "DATA_BLOCKED"
+    row = frame.loc[0]
+    assert row["decision_class"] == "PROBABILITY_ONLY"
+    assert row["fixture_resolver_status"] == "AMBIGUOUS"
+    assert pd.isna(row["match_date"])
+    assert pd.isna(row["resolved_match_date"])
+    assert row["resolver_reason"] == "ambiguous"
+    assert row["probability_model_status"] == "READY_WITH_LIMITATIONS"
+    assert abs(row[["home_win_probability", "draw_probability", "away_win_probability"]].sum() - 1.0) <= 1e-12
 

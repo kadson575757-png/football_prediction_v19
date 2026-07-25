@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import json
 import tempfile
+import unicodedata
 from datetime import datetime, timezone
 from difflib import get_close_matches
 from pathlib import Path
@@ -29,6 +30,7 @@ from football_prediction_v19.prematch.output_schema import (
     normalized_probabilities,
     validate_probability_distribution,
 )
+from football_prediction_v19.prematch.shadow_winner_adapter import compare_primary_shadow, predict_shadow
 
 
 DEFAULT_OUTPUT_DIR = "outputs/unified_prematch_analysis"
@@ -63,6 +65,7 @@ def analyze_match(
     enable_network: bool = False,
     strict_asof: bool = False,
     max_scoreline_goals: int = 10,
+    include_shadow_challenger: bool = False,
     write_outputs: bool = True,
 ) -> dict:
     if max_scoreline_goals < 8:
@@ -71,7 +74,7 @@ def analyze_match(
     base = Path(output_base) if output_base else project / DEFAULT_OUTPUT_DIR
     out = base / match_slug(match)
     raw_history = load_local_goal_results(project) if history is None else prepare_matches(history)
-    feature, source_audit = _asof_feature(raw_history, match)
+    feature, source_audit, team_resolution_audit = _asof_feature(raw_history, match, project)
     if strict_asof and not bool(feature["asof_clean"]):
         raise RuntimeError("strict as-of validation failed")
 
@@ -242,9 +245,24 @@ def analyze_match(
             "strict_asof_enabled": strict_asof,
         },
         "source_audit": source_audit,
+        "team_resolution_audit": team_resolution_audit,
         "model_registry": get_model_registry(),
         "safety": {**SAFETY, "network_enabled": bool(enable_network)},
     }
+    if include_shadow_challenger:
+        shadow = predict_shadow(
+            project_root=project,
+            match=match,
+            history=raw_history,
+            primary_probabilities=primary_probs,
+            data_quality=quality,
+            canonical_home_team=str(feature["home_team"]),
+            canonical_away_team=str(feature["away_team"]),
+            canonical_competition=str(feature["competition"]),
+            team_resolution_audit=team_resolution_audit,
+        )
+        payload["shadow_winner_prediction"] = shadow
+        payload["shadow_comparison"] = compare_primary_shadow(primary_output, shadow)
     if write_outputs:
         _write_single_outputs(out, payload, matrix, feature_snapshot)
     payload["output_dir"] = str(out.resolve())
@@ -260,6 +278,7 @@ def run_batch(
     enable_network: bool = False,
     strict_asof: bool = False,
     max_scoreline_goals: int = 10,
+    include_shadow_challenger: bool = False,
 ) -> dict:
     project = Path(project_root).resolve()
     base = Path(output_base) if output_base else project / DEFAULT_OUTPUT_DIR
@@ -280,6 +299,7 @@ def run_batch(
                 enable_network=enable_network,
                 strict_asof=strict_asof,
                 max_scoreline_goals=max_scoreline_goals,
+                include_shadow_challenger=include_shadow_challenger,
             ))
         except Exception as exc:
             failures.append({"row_number": position, **item.as_dict(), "error": str(exc)})
@@ -310,19 +330,21 @@ def run_batch(
     }
 
 
-def _asof_feature(history: pd.DataFrame, match: MatchInput) -> tuple[dict, list[dict]]:
+def _asof_feature(history: pd.DataFrame, match: MatchInput, project_root: Path) -> tuple[dict, list[dict], list[dict]]:
     frame = prepare_matches(history) if len(history) else history.copy()
     target_date = pd.Timestamp(match.match_date)
+    resolved_competition = _resolve_competition(match.competition, frame)
     if len(frame):
         frame = frame[
-            (frame["competition"].astype(str).str.casefold() == match.competition.casefold())
+            (frame["competition"].astype(str).str.casefold() == resolved_competition.casefold())
             & (frame["match_date"] < target_date)
         ].copy()
-    home = _canonical_team(match.home_team, frame)
-    away = _canonical_team(match.away_team, frame)
+    home_audit = _resolve_team(match.home_team, frame, project_root)
+    away_audit = _resolve_team(match.away_team, frame, project_root)
+    home, away = home_audit["matched_history_team_name"] or match.home_team, away_audit["matched_history_team_name"] or match.away_team
     target = pd.DataFrame([{
         "match_date": target_date,
-        "competition": match.competition,
+        "competition": resolved_competition,
         "season": match.season,
         "home_team": home,
         "away_team": away,
@@ -348,7 +370,7 @@ def _asof_feature(history: pd.DataFrame, match: MatchInput) -> tuple[dict, list[
         "rows_used": int(len(frame)),
         "asof_clean": bool(selected["asof_clean"]),
     }]
-    return selected, source_audit
+    return selected, source_audit, [home_audit, away_audit]
 
 
 def _canonical_team(requested: str, history: pd.DataFrame) -> str:
@@ -361,6 +383,63 @@ def _canonical_team(requested: str, history: pd.DataFrame) -> str:
         return lookup[key]
     candidates = get_close_matches(key, list(lookup), n=1, cutoff=0.86)
     return lookup[candidates[0]] if candidates else requested
+
+
+def _resolve_competition(requested: str, history: pd.DataFrame) -> str:
+    if not len(history):
+        return requested
+    values = sorted(history["competition"].astype(str).unique())
+    requested_key = normalize_team_key(requested)
+    exact = {normalize_team_key(value): value for value in values}
+    if requested_key in exact:
+        return exact[requested_key]
+    contained = [value for key, value in exact.items() if key in requested_key or requested_key in key]
+    return contained[0] if len(contained) == 1 else requested
+
+
+def _resolve_team(requested: str, history: pd.DataFrame, project_root: Path) -> dict:
+    teams = sorted(set(history["home_team"].astype(str)) | set(history["away_team"].astype(str))) if len(history) else []
+    normalized = _accent_key(requested)
+    exact = {_accent_key(team): team for team in teams}
+    matched, method, alias_used = "", "UNRESOLVED", False
+    if normalized in exact:
+        matched = exact[normalized]
+        method = "EXACT" if requested == matched else "NORMALIZED_EXACT"
+    else:
+        alias_path = project_root / "config/team_aliases.json"
+        aliases = json.loads(alias_path.read_text(encoding="utf-8")) if alias_path.exists() else {}
+        for canonical, alternatives in aliases.items():
+            keys = {_accent_key(canonical), *(_accent_key(value) for value in alternatives)}
+            if normalized in keys:
+                candidates = [team for team in teams if _accent_key(team) in keys]
+                if len(candidates) == 1:
+                    matched, method, alias_used = candidates[0], "ALIAS", True
+                break
+        if not matched:
+            contained = [team for team in teams if normalized.endswith(_accent_key(team)) or _accent_key(team).endswith(normalized)]
+            if len(contained) == 1 and min(len(normalized), len(_accent_key(contained[0]))) >= 5:
+                matched, method, alias_used = contained[0], "ALIAS", True
+    count = int(
+        (history["home_team"].astype(str).eq(matched) | history["away_team"].astype(str).eq(matched)).sum()
+    ) if matched and len(history) else 0
+    return {
+        "requested_team_name": requested,
+        "normalized_team_name": normalized,
+        "matched_history_team_name": matched,
+        "match_method": method,
+        "alias_used": alias_used,
+        "history_count": count,
+        "rating_source": "PRIOR_COMPETITION_HISTORY" if count else "LEAGUE_AVERAGE_FALLBACK",
+        "initial_rating": 1500.0,
+        "final_prematch_rating": None,
+        "fallback_used": count == 0,
+        "fallback_reason": "" if count else ("TEAM_NAME_UNRESOLVED" if not matched else "NO_PRIOR_MATCHES"),
+    }
+
+
+def _accent_key(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value.casefold())
+    return "".join(character for character in normalized if character.isascii() and character.isalnum())
 
 
 def _winner_features(feature: dict, match: MatchInput, quality: dict) -> dict:
@@ -457,6 +536,28 @@ def _markdown_report(payload: dict) -> str:
     lines = ["# Unified Prematch Analysis", ""]
     for heading, body in sections:
         lines.extend([f"## {heading}", "", body, ""])
+    if "shadow_winner_prediction" in payload:
+        shadow = payload["shadow_winner_prediction"]
+        comparison = payload["shadow_comparison"]
+        lines.extend([
+            "## Shadow Challenger", "",
+            "Primary Winner:",
+            f"- HOME {probs['HOME']:.2%}",
+            f"- DRAW {probs['DRAW']:.2%}",
+            f"- AWAY {probs['AWAY']:.2%}", "",
+            "Shadow Challenger:",
+            f"- HOME {shadow['home_probability']:.2%}",
+            f"- DRAW {shadow['draw_probability']:.2%}",
+            f"- AWAY {shadow['away_probability']:.2%}", "",
+            (
+                "The models agree on the top outcome."
+                if comparison["top_outcome_agreement"]
+                else "The Shadow Challenger differs from the Primary Winner."
+            ),
+            "",
+            "The Shadow Challenger is in prospective validation and does not overwrite the primary prediction.",
+            "",
+        ])
     return "\n".join(lines)
 
 

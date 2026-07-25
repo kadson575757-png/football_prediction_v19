@@ -53,12 +53,16 @@ def run_match_winner_batch(**kwargs: object) -> dict[str, object]:
 def _summary(frame: pd.DataFrame, requested: int) -> dict[str, object]:
     if frame.empty:
         return {"v25_winner_batch_status": "READY", "matches_requested": requested, "matches_analyzed": 0, "winner_pick_count": 0, "winner_lean_count": 0, "no_clear_winner_count": 0, "no_decision_count": 0, "data_blocked_count": 0, "automatic_betting_enabled": False, "staking_logic_enabled": False, "roi_logic_enabled": False}
+    decision_signal = frame["decision_class"].astype(str)
+    if "legacy_decision_class" in frame:
+        legacy_signal = frame["legacy_decision_class"].fillna("").astype(str)
+        decision_signal = legacy_signal.where(legacy_signal.ne(""), decision_signal)
     return {
         "v25_winner_batch_status": "READY",
         "matches_requested": requested,
         "matches_analyzed": int(len(frame)),
-        "winner_pick_count": int(frame["decision_class"].eq("WINNER_PICK").sum()),
-        "winner_lean_count": int(frame["decision_class"].eq("WINNER_LEAN").sum()),
+        "winner_pick_count": int(decision_signal.eq("WINNER_PICK").sum()),
+        "winner_lean_count": int(decision_signal.eq("WINNER_LEAN").sum()),
         "no_clear_winner_count": int(frame["decision_class"].eq("NO_CLEAR_WINNER").sum()),
         "no_decision_count": int(frame["decision_class"].eq("NO_DECISION").sum()),
         "data_blocked_count": int(frame["decision_class"].eq("DATA_BLOCKED").sum()),

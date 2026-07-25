@@ -1,0 +1,33 @@
+{
+  "feature_columns": [
+    "primary_home",
+    "primary_draw",
+    "primary_away",
+    "rating_home",
+    "rating_draw",
+    "rating_away",
+    "rating_difference",
+    "base_probability_edge",
+    "season_phase",
+    "history_quality_numeric"
+  ],
+  "model_name": "PRIMARY_PLUS_RATING_META_V2182",
+  "model_version": "v2.18.2",
+  "rating_config": {
+    "rating_model": "ELO_GOAL_DIFFERENCE",
+    "k_factor": 30,
+    "home_advantage": 60,
+    "season_shrinkage": 0.2,
+    "config_name": "ELO_GOAL_DIFFERENCE_K30_HA60_S20"
+  },
+  "meta_c": 1.0,
+  "training_rows": 4338,
+  "training_max_date": "2026-05-24",
+  "known_limitations": [
+    "DRAW_RECALL_LOW",
+    "DRAW_TOP_PREDICTIONS_REQUIRE_MONITORING"
+  ],
+  "authoritative_for_1x2": false,
+  "probability_blending_enabled": false,
+  "artifact_sha256": "6b1334fa2a09c7de57d7febc9ebdb9b9984e1de8d5191d24cf0aa7cdf68e1eb7"
+}
