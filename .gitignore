@@ -23,3 +23,7 @@ outputs/provider_pull_preview/
 outputs/pytest_phase13_11/
 
 outputs/cache/
+
+# Generated analysis outputs
+outputs/
+tmp_v2160_batch.csv
